@@ -586,10 +586,23 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 
   @Override public ReturnVal finalizeSetValue(DBField field, Object value)
   {
-    // if any of our values are changed, tell the client to rescan the
-    // field that contains us in our parent, to refresh the label
+    // if either of our displayed values are changed, tell the client
+    // to rescan the field that contains us in our parent, to refresh
+    // the label
 
-    return ReturnVal.success().addRescanField(this.getParentInvid(), userSchema.VOLUMES);
+    switch (field.getID())
+      {
+      case mapEntrySchema.MAP:
+      case mapEntrySchema.VOLUME:
+        return ReturnVal.success().addRescanField(this.getParentInvid(), userSchema.VOLUMES);
+
+      default:
+        // we may be setting the containing invid, in which case we
+        // can't call getParentInvid() because the containing invid
+        // hasn't been set yet. ;-)
+
+        return null;
+      }
   }
 
   String getMapName()
