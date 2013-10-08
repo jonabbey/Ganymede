@@ -61,6 +61,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.rmi.RemoteException;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -834,15 +835,15 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
         if (my_field instanceof invid_field)
           {
             Invid invid = null;
-            Hashtable serverInvids = new Hashtable();
-            Hashtable localInvids = new Hashtable();
+            Hashtable<Invid, Integer> serverInvids = new Hashtable<Invid, Integer>();
+            HashSet<Invid> localInvids = new HashSet<Invid>();
             containerPanel cp = null;
 
             // figure out what invids are currently in my_field
             // on the server, save them so we can scratch them off
             // as we sync this vector panel
 
-            Vector serverValues = my_field.getValues();
+            Vector<Invid> serverValues = (Vector<Invid>) my_field.getValues();
 
             if (debug)
               {
@@ -851,7 +852,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
             for (int i = 0; i < serverValues.size(); i++)
               {
-                invid = (Invid) serverValues.elementAt(i);
+                invid = serverValues.get(i);
 
                 serverInvids.put(invid, Integer.valueOf(i));
               }
@@ -860,13 +861,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
             for (int i = 0; i < compVector.size(); i++)
               {
-                cp = (containerPanel) compVector.elementAt(i);
+                cp = (containerPanel) compVector.get(i);
 
                 if (cp != null)
                   {
                     invid = cp.getObjectInvid();
 
-                    localInvids.put(invid, invid);
+                    localInvids.add(invid);
                   }
               }
 
@@ -877,7 +878,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
             while (localInvids.size() > 0)
               {
-                cp = (containerPanel) compVector.elementAt(localIndex);
+                cp = (containerPanel) compVector.get(localIndex);
                 invid = cp.getObjectInvid();
 
                 if (serverInvids.containsKey(invid))
@@ -983,7 +984,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
               {
                 if (i < compVector.size())
                   {
-                    JIPField ipf = (JIPField) compVector.elementAt(i);
+                    JIPField ipf = (JIPField) compVector.get(i);
 
                     ipf.setValue((IPAddress)my_field.getElement(i));
 
@@ -1019,7 +1020,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
             for (int i = fieldCount; i >= size; i--)
               {
-                removeElement(ewHash.get(compVector.elementAt(i)));
+                removeElement(ewHash.get(compVector.get(i)));
               }
           }
         else

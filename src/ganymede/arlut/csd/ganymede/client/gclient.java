@@ -2804,7 +2804,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
         System.err.println("gclient.handleReturnVal(): rescan dump: " + retVal.dumpRescanInfo());
       }
 
-    Vector objects = retVal.getRescanObjectsList();
+    Vector<Invid> objects = retVal.getRescanObjectsList();
 
     if (objects == null)
       {
@@ -2821,15 +2821,8 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
         System.err.println("gclient.handleReturnVal(): Rescanning " + objects.size() + " objects.");
       }
 
-    Enumeration invids = objects.elements();
-
-    // Loop over all the invids, and try to find
-    // containerPanels for them.
-
-    while (invids.hasMoreElements())
+    for (Invid invid: objects)
       {
-        Invid invid = (Invid) invids.nextElement();
-
         if (debug)
           {
             System.err.println("gclient.handleReturnVal(): updating invid: " + invid);
