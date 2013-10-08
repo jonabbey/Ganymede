@@ -547,6 +547,9 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
           }
       }
 
+    // make the client refresh the displayed label for this embedded
+    // dhcpEntry if the TYPE or VALUE has been changed
+
     if (field.getID() == TYPE || field.getID() == VALUE)
       {
         if (result == null)
