@@ -174,7 +174,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     if (ReturnVal.didSucceed(retVal))
       {
-        return retVal.merge(ReturnVal.success().requestRefresh(getParentSysObj().getInvid(), systemSchema.INTERFACES));
+        return ReturnVal.success().requestRefresh(getParentSysObj().getInvid(), systemSchema.INTERFACES);
       }
 
     return retVal;
