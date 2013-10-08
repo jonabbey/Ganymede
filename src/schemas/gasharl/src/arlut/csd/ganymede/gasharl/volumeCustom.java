@@ -315,8 +315,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
             mapName = tmpInvid.toString();
           }
 
-        iField = (InvidDBField) object.getField(mapEntrySchema.CONTAININGUSER); // containing object, the user
-        tmpInvid = iField.value();
+        tmpInvid = object.getParentInvid();
 
         if (editset != null)
           {
@@ -523,7 +522,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 
                 // we need to get the user
 
-                Invid user = (Invid) vObj.getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
+                Invid user = vObj.getParentInvid();
 
                 // and we need to edit the user.. we'll want to check permissions
                 // for this, so we'll use edit_db_object()

@@ -533,17 +533,13 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 
   private Vector<Invid> getSiblingInvids()
   {
-    Vector<Invid> result;
-    Invid userInvid = (Invid) getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
-    DBObject user = getDBSession().viewDBObject(userInvid);
-
-    result = (Vector<Invid>) user.getFieldValuesLocal(userSchema.VOLUMES);
-
-    // we are not our own sibling.
-
-    result.remove(getInvid());
+    Vector<Invid> result = (Vector<Invid>) getParentObj().getFieldValuesLocal(userSchema.VOLUMES);
+    result.remove(getInvid());  // we are not our own sibling.
 
     return result;
+
+
+
   }
 
   String getMapName()

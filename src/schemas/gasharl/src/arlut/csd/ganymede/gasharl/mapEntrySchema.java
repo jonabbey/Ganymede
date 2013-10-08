@@ -3,17 +3,19 @@
    mapEntrySchema.java
 
    An interface defining constants to be used by the automounter map code.
-   
+
    Created: 15 April 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -54,9 +56,7 @@ package arlut.csd.ganymede.gasharl;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * An interface defining constants to be used by the user code.
- *
  */
 
 public interface mapEntrySchema {
@@ -68,7 +68,6 @@ public interface mapEntrySchema {
 
   final static short BASE=278;
 
-  final static short CONTAININGUSER=0;
   final static short MAP=256;
   final static short VOLUME=257;
   final static short XMLLABEL=258;
