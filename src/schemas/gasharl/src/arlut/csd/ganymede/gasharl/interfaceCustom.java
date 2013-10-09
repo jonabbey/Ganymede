@@ -115,59 +115,6 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   * <p>This method provides a pre-commit hook that runs after the
-   * user has hit commit but before the system has established write
-   * locks for the commit.</p>
-   *
-   * <p>The intended purpose of this hook is to allow objects that
-   * dynamically maintain hidden label fields to update those fields
-   * from the contents of the object's other fields at commit
-   * time.</p>
-   *
-   * <p>This method runs in a checkpointed context.  If this method
-   * fails in any operation, you should return a ReturnVal with a
-   * failure dialog encoded, and the transaction's commit will be
-   * blocked and a dialog explaining the problem will be presented to
-   * the user.</p>
-   *
-   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
-   *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
-   */
-
-  @Override public ReturnVal preCommitHook()
-  {
-    if (this.getStatus() == ObjectStatus.DELETING ||
-        this.getStatus() == ObjectStatus.DROPPING)
-      {
-        return null;
-      }
-
-    // if we changed networks so as not to require a MAC address for
-    // this interface, go ahead and null it out as part of our
-    // pre-commit activities.
-
-    if (this.isDefined(interfaceSchema.IPNET) && !fieldRequired(this, interfaceSchema.ETHERNETINFO))
-      {
-        ReturnVal retVal = this.setFieldValueLocal(interfaceSchema.ETHERNETINFO, null);
-
-        if (!ReturnVal.didSucceed(retVal))
-          {
-            return retVal;      // in case we failed for some reason
-          }
-
-        // change the hidden label to reflect the now empty MAC
-        // address
-
-        return updateHiddenLabelMACADDR(null);
-      }
-
-    return null;
-  }
-
-  /**
    * Update the hidden label with a proposed new interface name.
    *
    * @param interfaceName The new name being given to this interface.
