@@ -355,18 +355,18 @@ final public class DBLog implements java.io.Closeable {
           }
         finally
           {
-            if (mailController != null)
+            try
               {
-                try
+                if (mailController != null)
                   {
                     mailController.close();
                   }
-                finally
+              }
+            finally
+              {
+                if (mailer != null)
                   {
-                    if (mailer != null)
-                      {
-                        mailer.close(); // we'll block here while the mailer's email thread drains
-                      }
+                    mailer.close(); // we'll block here while the mailer's email thread drains
                   }
               }
           }
