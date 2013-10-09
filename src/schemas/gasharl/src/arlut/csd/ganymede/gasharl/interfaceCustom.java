@@ -157,20 +157,55 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
           {
             return retVal;      // in case we failed for some reason
           }
+
+        // change the hidden label to reflect the now empty MAC
+        // address
+
+        return updateHiddenLabelMACADDR(null);
       }
 
     return null;
   }
 
   /**
-   * This method patches up the hidden label field in this object.
+   * Update the hidden label with a proposed new interface name.
+   *
+   * @param interfaceName The new name being given to this interface.
+   * May safely be null.
+   *
+   * @return A ReturnVal indicating success or failure in setting the
+   * label.  If the label was changed successfully, a directive is
+   * encoded into the ReturnVal to cause the system containing this
+   * interface to refresh the label of this interface.
    */
 
-  private ReturnVal updateHiddenLabel()
+  private ReturnVal updateHiddenLabelNAME(String interfaceName)
   {
-    String newLabel = calcLabel(this);
+    IPDBField ipfield = (IPDBField) this.getField(interfaceSchema.ADDRESS);
+    String IPAddress = null;
 
-    ReturnVal retVal = setFieldValueLocal(interfaceSchema.HIDDENLABEL, newLabel);
+    if (ipfield != null)
+      {
+        IPAddress = ipfield.getValueString();
+      }
+
+    // we'll only include our MAC address if the network we're
+    // associated with requires it.
+
+    String MACAddress = null;
+
+    Invid netInvid = (Invid) this.getFieldValueLocal(interfaceSchema.IPNET);
+    DBObject networkObj = this.lookupInvid(netInvid);
+
+    if (networkObj == null || networkObj.isSet(networkSchema.MACREQUIRED))
+      {
+        MACAddress = (String) this.getFieldValueLocal(interfaceSchema.ETHERNETINFO);
+      }
+
+    ReturnVal retVal = this.setFieldValueLocal(interfaceSchema.HIDDENLABEL,
+                                               genLabel(interfaceName,
+                                                        IPAddress,
+                                                        MACAddress));
 
     if (ReturnVal.didSucceed(retVal))
       {
@@ -180,19 +215,95 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     return retVal;
   }
 
-  private final String calcLabel(interfaceCustom object)
+  /**
+   * Update the hidden label with a proposed new IP Address.
+   *
+   * @param addr The new IP Address being given to this interface.
+   * May safely be null.
+   *
+   * @return A ReturnVal indicating success or failure in setting the
+   * label.  If the label was changed successfully, a directive is
+   * encoded into the ReturnVal to cause the system containing this
+   * interface to refresh the label of this interface.
+   */
+
+  private ReturnVal updateHiddenLabelIPADDR(IPAddress addr)
   {
-    String name = (String) object.getFieldValueLocal(interfaceSchema.NAME);
-    String macAddress = (String) object.getFieldValueLocal(interfaceSchema.ETHERNETINFO);
-    IPDBField ipfield = (IPDBField) object.getField(interfaceSchema.ADDRESS);
-    String ipString = null;
+    String interfaceName = (String) this.getFieldValueLocal(interfaceSchema.NAME);
+    String IPAddress = null;
+
+    if (addr != null)
+      {
+        IPAddress = addr.toString();
+      }
+
+    String MACAddress = null;
+
+    Invid netInvid = getParentSysObj().findMatchingNet(addr);
+    DBObject networkObj = this.lookupInvid(netInvid);
+
+    if (networkObj == null || networkObj.isSet(networkSchema.MACREQUIRED))
+      {
+        MACAddress = (String) this.getFieldValueLocal(interfaceSchema.ETHERNETINFO);
+      }
+
+    ReturnVal retVal = this.setFieldValueLocal(interfaceSchema.HIDDENLABEL, genLabel(interfaceName,
+                                                                                     IPAddress,
+                                                                                     MACAddress));
+
+    if (ReturnVal.didSucceed(retVal))
+      {
+        return ReturnVal.success().requestRefresh(getParentSysObj().getInvid(), systemSchema.INTERFACES);
+      }
+
+    return retVal;
+  }
+
+  /**
+   * Update the hidden label with a proposed new MAC Address
+   *
+   * @param MACAddress The new MAC Address being given to this
+   * interface.  May safely be null.
+   *
+   * @return A ReturnVal indicating success or failure in setting the
+   * label.  If the label was changed successfully, a directive is
+   * encoded into the ReturnVal to cause the system containing this
+   * interface to refresh the label of this interface.
+   */
+
+  private ReturnVal updateHiddenLabelMACADDR(String MACAddress)
+  {
+    String interfaceName = (String) this.getFieldValueLocal(interfaceSchema.NAME);
+    IPDBField ipfield = (IPDBField) this.getField(interfaceSchema.ADDRESS);
+    String IPAddress = null;
 
     if (ipfield != null)
       {
-        ipString = ipfield.getValueString();
+        IPAddress = ipfield.getValueString();
       }
 
-    return genLabel(name, ipString, macAddress);
+    // we'll only include our MAC address if the network we're
+    // associated with requires it.
+
+    Invid netInvid = (Invid) this.getFieldValueLocal(interfaceSchema.IPNET);
+    DBObject networkObj = this.lookupInvid(netInvid);
+
+    if (networkObj != null && !networkObj.isSet(networkSchema.MACREQUIRED))
+      {
+        MACAddress = null;
+      }
+
+    ReturnVal retVal = this.setFieldValueLocal(interfaceSchema.HIDDENLABEL,
+                                               genLabel(interfaceName,
+                                                        IPAddress,
+                                                        MACAddress));
+
+    if (ReturnVal.didSucceed(retVal))
+      {
+        return ReturnVal.success().requestRefresh(getParentSysObj().getInvid(), systemSchema.INTERFACES);
+      }
+
+    return retVal;
   }
 
   private final String genLabel(String interfaceName, String ipString, String macAddress)
@@ -220,20 +331,20 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
         openIP = true;
       }
 
-    if (macAddress != null && macAddress.length() != 0)
+    if (macAddress != null && !macAddress.trim().equals(""))
       {
         if (result.length() != 0)
           {
             result.append(" ");
           }
 
-        if (openIP)
+        if (!openIP)
           {
-            result.append("- ");
+            result.append("[");
           }
         else
           {
-            result.append("[");
+            result.append("- ");
           }
 
         result.append(macAddress);
@@ -593,10 +704,10 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
         if (inFinalizeAddrChange)
           {
-            ReturnVal retVal = new ReturnVal(true, true);
+            ReturnVal retVal = ReturnVal.success();
             retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
-            return retVal.merge(updateHiddenLabel());
+            return retVal;
           }
 
         // if the net is being set to a net that matches what's already
@@ -611,10 +722,12 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
                 System.err.println("interfaceCustom.finalizeSetValue(): approving ipnet change");
               }
 
-            ReturnVal retVal = new ReturnVal(true, true);
+            // some IPNETs don't require MAC addresses
+
+            ReturnVal retVal = ReturnVal.success();
             retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
-            return retVal.merge(updateHiddenLabel());
+            return retVal;
           }
 
         // okay, we didn't match, tell the system object to remember the
@@ -633,11 +746,11 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
             ipfield.setValueLocal(null);
             inFinalizeNetChange = false;
 
-            ReturnVal retVal = new ReturnVal(true, true);
+            ReturnVal retVal = ReturnVal.success();
             retVal.addRescanField(this.getInvid(), interfaceSchema.ADDRESS);
             retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
-            return retVal.merge(updateHiddenLabel());
+            return retVal.merge(updateHiddenLabelIPADDR(null));
           }
 
         // now find a new address for this object based on the network we
@@ -670,7 +783,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
         // and tell the client to rescan the address field to update
         // the display
 
-        ReturnVal retVal = new ReturnVal(true, true);
+        ReturnVal retVal = ReturnVal.success();
         retVal.addRescanField(this.getInvid(), interfaceSchema.ADDRESS);
 
         // and tell the client to rescan the ethernet info field as
@@ -678,7 +791,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
         retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
-        return retVal.merge(updateHiddenLabel());
+        return retVal.merge(updateHiddenLabelIPADDR(address));
       }
 
     if (field.getID() == interfaceSchema.ADDRESS)
@@ -698,7 +811,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
           {
             // fine, no change to the network required
 
-            return null;
+            return updateHiddenLabelIPADDR(address);
           }
 
         // we need to find a new network to match, and to set that
@@ -724,7 +837,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
         try
           {
             inFinalizeAddrChange = true;
-            ReturnVal retVal = setFieldValue(interfaceSchema.IPNET, netInvid);
+            ReturnVal retVal = this.setFieldValue(interfaceSchema.IPNET, netInvid);
             inFinalizeAddrChange = false;
 
             if (retVal != null && !retVal.didSucceed())
@@ -734,10 +847,10 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
                                                   "interfaceCustom.finalizeSetValue(): failed to set ip net");
               }
 
-            retVal = new ReturnVal(true, true);
+            retVal = ReturnVal.success();
             retVal.addRescanField(this.getInvid(), interfaceSchema.IPNET);
 
-            return retVal.merge(updateHiddenLabel());
+            return retVal.merge(updateHiddenLabelIPADDR(address));
           }
         catch (GanyPermissionsException ex)
           {
@@ -751,9 +864,11 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     switch (field.getID())
       {
-      case interfaceSchema.ETHERNETINFO: // deliberate fall-through
+      case interfaceSchema.ETHERNETINFO:
+        return updateHiddenLabelMACADDR((String) value);
+
       case interfaceSchema.NAME:
-        return updateHiddenLabel();
+        return updateHiddenLabelNAME((String) value);
       }
 
     return null;
