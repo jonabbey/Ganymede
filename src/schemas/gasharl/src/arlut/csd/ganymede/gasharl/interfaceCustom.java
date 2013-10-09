@@ -1114,35 +1114,6 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     return null;
   }
-
-  /**
-   *
-   * This method maps an int value between 0 and 255 inclusive
-   * to a legal signed byte value.
-   *
-   */
-
-  public final static byte u2s(int x)
-  {
-    if ((x < 0) || (x > 255))
-      {
-        throw new IllegalArgumentException("Out of range: " + x);
-      }
-
-    return (byte) (x - 128);
-  }
-
-  /**
-   *
-   * This method maps a u2s-encoded signed byte value to an
-   * int value between 0 and 255 inclusive.
-   *
-   */
-
-  public final static short s2u(byte b)
-  {
-    return (short) (b + 128);
-  }
 }
 
 /**
