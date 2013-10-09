@@ -589,15 +589,14 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
    * and/or transform any values to be set in any field in this
    * object.</p>
    *
-   * <p>In addition, verifyNewValue can be used to canonicalize a
-   * submitted value.  The verifyNewValue method is explicitly
-   * permitted to call
+   * <p>verifyNewValue can be used to canonicalize a
+   * submitted value.  The verifyNewValue method may call
    * {@link arlut.csd.ganymede.common.ReturnVal#setTransformedValueObject(java.lang.Object, arlut.csd.ganymede.common.Invid, short) setTransformedValue()}
    * on the ReturnVal returned in order to substitute a new value for
    * the provided value prior to any other processing on the server.</p>
    *
-   * <p>In particular, this method is called before any NameSpace checking is done, before the
-   * {@link arlut.csd.ganymede.server.DBEditObject#wizardHook(arlut.csd.ganymede.server.DBField,int,java.lang.Object,java.lang.Object) wizardHook()},
+   * <p>This method is called before any NameSpace checking is done, before the
+   * {@link arlut.csd.ganymede.server.DBEditObject#wizardHook(arlut.csd.ganymede.server.DBField,int,java.lang.Object,java.lang.Object) wizardHook()}
    * method, and before the appropriate
    * {@link arlut.csd.ganymede.server.DBEditObject#finalizeSetValue(arlut.csd.ganymede.server.DBField, Object) finalizeSetValue()},
    * {@link arlut.csd.ganymede.server.DBEditObject#finalizeSetElement(arlut.csd.ganymede.server.DBField, int, Object) finalizeSetElement()},
