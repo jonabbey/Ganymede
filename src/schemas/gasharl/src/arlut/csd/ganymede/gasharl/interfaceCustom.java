@@ -247,9 +247,10 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
         MACAddress = (String) this.getFieldValueLocal(interfaceSchema.ETHERNETINFO);
       }
 
-    ReturnVal retVal = this.setFieldValueLocal(interfaceSchema.HIDDENLABEL, genLabel(interfaceName,
-                                                                                     IPAddress,
-                                                                                     MACAddress));
+    ReturnVal retVal = this.setFieldValueLocal(interfaceSchema.HIDDENLABEL,
+                                               genLabel(interfaceName,
+                                                        IPAddress,
+                                                        MACAddress));
 
     if (ReturnVal.didSucceed(retVal))
       {
