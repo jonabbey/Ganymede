@@ -543,10 +543,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
   public Invid findMatchingNet(IPAddress address)
   {
-    for (int i = 0; i < netsToChooseFrom.size(); i++)
+    for (ObjectHandle handle: netsToChooseFrom)
       {
-        ObjectHandle handle = netsToChooseFrom.get(i);
-
         Invid netInvid = handle.getInvid();
 
         if (checkMatchingNet(getDBSession(), netInvid, address))
