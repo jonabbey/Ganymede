@@ -3520,6 +3520,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * as the value that verifyNewValue wants to be put into this field.
    * This usage of transformedValue is for canonicalizing input data.</p>
    *
+   * @param o The object to be tested and/or transformed
+   *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.

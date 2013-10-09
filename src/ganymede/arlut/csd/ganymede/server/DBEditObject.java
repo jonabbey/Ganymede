@@ -1851,20 +1851,36 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * <p>This method provides a hook that can be used to check any values
-   * to be set in any field in this object.  Subclasses of
-   * DBEditObject should override this method, implementing basically
-   * a large switch statement to check for any given field whether the
-   * submitted value is acceptable given the current state of the
+   * <p>Provides a hook that can be used to approve, disapprove,
+   * and/or transform any values to be set in any field in this
    * object.</p>
    *
-   * <p>Question: what synchronization issues are going to be needed
-   * between DBEditObject and DBField to insure that we can have
-   * a reliable verifyNewValue method here?</p>
+   * <p>In addition, verifyNewValue can be used to canonicalize a
+   * submitted value.  The verifyNewValue method is explicitly
+   * permitted to call {@link
+   * arlut.csd.ganymede.common.ReturnVal#setTransformedValueObject(java.lang.Object)}
+   * on the ReturnVal returned in order to substitute a new value for
+   * the provided value prior to any other processing on the server.</p>
    *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
+   * <p>In particular, this method is called before any NameSpace checking is done, before the
+   * {@link arlut.csd.ganymede.server.DBEditObject#wizardHook(arlut.csd.ganymede.server.DBField,int,java.lang.Object,java.lang.Object)},
+   * method, and before the appropriate
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeSetValue(arlut.csd.ganymede.server.DBField, Object)},
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeSetElement(arlut.csd.ganymede.server.DBField, int, Object)},
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeAddElement(arlut.csd.ganymede.server.DBField, java.lang.Object)},
+   * or {@link arlut.csd.ganymede.server.DBEditObject#finalizeAddElements(arlut.csd.ganymede.server.DBField, java.util.Vector)}
+   * method is called.</p>
+   *
+   * @param field The DBField contained within this object whose value
+   * is being changed
+   * @param value The value that is being proposed to go into field.
+   *
+   * @return A ReturnVal indicating success or failure.  May be simply
+   * 'null' to indicate success if no feedback need be provided.  If
+   * {@link arlut.csd.ganymede.common.ReturnVal#hasTransformedValue()}
+   * returns true when callled on the returned ReturnVal, that value
+   * will be used for all further processing in the server, and will
+   * be the value actually saved in the DBStore.
    */
 
   public ReturnVal verifyNewValue(DBField field, Object value)
