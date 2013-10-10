@@ -151,17 +151,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     if (this.isDefined(interfaceSchema.IPNET) && !fieldRequired(this, interfaceSchema.ETHERNETINFO))
       {
-        ReturnVal retVal = this.setFieldValueLocal(interfaceSchema.ETHERNETINFO, null);
-
-        if (!ReturnVal.didSucceed(retVal))
-          {
-            return retVal;      // in case we failed for some reason
-          }
-
-        // change the hidden label to reflect the now empty MAC
-        // address
-
-        return updateHiddenLabelMACADDR(null);
+        return this.setFieldValueLocal(interfaceSchema.ETHERNETINFO, null);
       }
 
     return null;
