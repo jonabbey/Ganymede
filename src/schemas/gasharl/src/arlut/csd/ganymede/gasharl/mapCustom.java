@@ -428,7 +428,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 
                 // we need to get the user
 
-                Invid user = (Invid) vObj.getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
+                Invid user =  vObj.getParentInvid();
 
                 // and we need to edit the user.. we'll want to check permissions
                 // for this, so we'll use edit_db_object().

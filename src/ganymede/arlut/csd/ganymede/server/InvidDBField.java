@@ -54,7 +54,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.Enumeration;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
@@ -553,7 +552,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * <p>This method avoids checking permissions because it is used on
    * the server side only and because it is involved in the {@link
    * arlut.csd.ganymede.server.DBObject#getLabel() getLabel()} logic
-   * for {@link arlut.csd.ganymede.server.DBObject DBObject}<./p>
+   * for {@link arlut.csd.ganymede.server.DBObject DBObject}</p>
    *
    * <p>If this method checked permissions and the getPerm() method
    * failed for some reason and tried to report the failure using

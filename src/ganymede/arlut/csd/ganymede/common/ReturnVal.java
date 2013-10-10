@@ -1399,8 +1399,9 @@ public final class ReturnVal implements java.io.Serializable {
   /**
    * <p>This method is intended to be used by {@link
    * arlut.csd.ganymede.server.DBEditObject#verifyNewValue(arlut.csd.ganymede.server.DBField,
-   * java.lang.Object)}, when the verifyNewValue() method wants to
-   * take the submitted input and canonicalize it.</p>
+   * java.lang.Object) DBEditObject.verifyNewValue()}, when the
+   * verifyNewValue() method wants to take the submitted input and
+   * canonicalize it.</p>
    *
    * <p>Code in the Ganymede server (mostly the base logic in DBField)
    * which calls the verifyNewValue() method should respond to a
@@ -1424,8 +1425,9 @@ public final class ReturnVal implements java.io.Serializable {
   /**
    * <p>This method is intended to be used by {@link
    * arlut.csd.ganymede.server.DBEditObject#verifyNewValue(arlut.csd.ganymede.server.DBField,
-   * java.lang.Object)}, when the verifyNewValue() method wants to
-   * take the submitted input and canonicalize it.</p>
+   * java.lang.Object) DBEditObject.verifyNewValue()}, when the
+   * verifyNewValue() method wants to take the submitted input and
+   * canonicalize it.</p>
    *
    * <p>Code in the Ganymede server (mostly the base logic in DBField)
    * which calls the verifyNewValue() method should respond to a

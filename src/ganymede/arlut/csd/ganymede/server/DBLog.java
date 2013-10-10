@@ -355,18 +355,18 @@ final public class DBLog implements java.io.Closeable {
           }
         finally
           {
-            if (mailController != null)
+            try
               {
-                try
+                if (mailController != null)
                   {
                     mailController.close();
                   }
-                finally
+              }
+            finally
+              {
+                if (mailer != null)
                   {
-                    if (mailer != null)
-                      {
-                        mailer.close(); // we'll block here while the mailer's email thread drains
-                      }
+                    mailer.close(); // we'll block here while the mailer's email thread drains
                   }
               }
           }
@@ -587,25 +587,13 @@ final public class DBLog implements java.io.Closeable {
               }
           }
 
-        // and now..
+        // bombs away!
 
-        try
-          {
-            // bombs away!
-
-            mailer.sendmsg(Ganymede.returnaddrProperty,
-                           emailList,
-                           Ganymede.returnaddrdescProperty,
-                           titleString,
-                           message);
-          }
-        catch (IOException ex)
-          {
-            // "DBLog.mailNotify(): mailer error:\n{0}\n\nwhile processing: {1}"
-            Ganymede.debug(ts.l("mailNotify.mailer_error",
-                                Ganymede.stackTrace(ex),
-                                event));
-          }
+        mailer.sendmsg(Ganymede.returnaddrProperty,
+                       emailList,
+                       Ganymede.returnaddrdescProperty,
+                       titleString,
+                       message);
       }
 
     if (debug)
@@ -847,38 +835,28 @@ final public class DBLog implements java.io.Closeable {
                 returnAddrDesc = Ganymede.returnaddrdescProperty;
               }
 
-            try
+            String message = event.description;
+
+            message = arlut.csd.Util.WordWrap.wrap(message, 78);
+
+            if (this.transactionComment != null)
               {
-                String message = event.description;
-
-                message = arlut.csd.Util.WordWrap.wrap(message, 78);
-
-                if (this.transactionComment != null)
-                  {
-                    // "{0}\n----\n\n{1}\n\n{2}"
-                    message = ts.l("streamEvent.comment_template", message, this.transactionComment, signature);
-                  }
-                else
-                  {
-                    // "{0}\n{1}"
-                    message = ts.l("streamEvent.no_comment_template", message, signature);
-                  }
-
-                // bombs away!
-
-                mailer.sendmsg(returnAddr,
-                               event.getMailTargets(),
-                               returnAddrDesc,
-                               Ganymede.subjectPrefixProperty + event.subject,
-                               message);
+                // "{0}\n----\n\n{1}\n\n{2}"
+                message = ts.l("streamEvent.comment_template", message, this.transactionComment, signature);
               }
-            catch (IOException ex)
+            else
               {
-                // "DBLog.streamEvent(): mailer error:\n{0}\n\nwhile processing: {1}"
-                Ganymede.debug(ts.l("streamEvent.mailer_error",
-                                    Ganymede.stackTrace(ex),
-                                    event));
+                // "{0}\n{1}"
+                message = ts.l("streamEvent.no_comment_template", message, signature);
               }
+
+            // bombs away!
+
+            mailer.sendmsg(returnAddr,
+                           event.getMailTargets(),
+                           returnAddrDesc,
+                           Ganymede.subjectPrefixProperty + event.subject,
+                           message);
           }
       }
 
@@ -995,21 +973,11 @@ final public class DBLog implements java.io.Closeable {
                 System.err.println("Sending mail to " + mailout.addresses.get(0));
               }
 
-            try
-              {
-                mailer.sendmsg(returnAddr,
-                               mailout.addresses,
-                               returnAddrDesc,
-                               Ganymede.subjectPrefixProperty + describeTransaction(mailout, transaction),
-                               description);
-              }
-            catch (IOException ex)
-              {
-                // "DBLog.endTransactionLog(): mailer error:\n{0}\n\nwhile processing: {1}"
-                Ganymede.debug(ts.l("endTransactionLog.mailer_error",
-                                    Ganymede.stackTrace(ex),
-                                    finish));
-              }
+            mailer.sendmsg(returnAddr,
+                           mailout.addresses,
+                           returnAddrDesc,
+                           Ganymede.subjectPrefixProperty + describeTransaction(mailout, transaction),
+                           description);
           }
       }
 
@@ -1221,23 +1189,13 @@ final public class DBLog implements java.io.Closeable {
 
     emailList.addAll(cleanupAddresses(addressSet));
 
-    try
-      {
-        // bombs away!
+    // bombs away!
 
-        mailer.sendmsg(returnAddr,
-                       emailList,
-                       returnAddrDesc,
-                       Ganymede.subjectPrefixProperty + type.name,
-                       message);
-      }
-    catch (IOException ex)
-      {
-        // "DBLog.sendSysEventMail(): mailer error:\n{0}\n\nwhile processing: {1}"
-        Ganymede.debug(ts.l("sendSysEventMail.mailer_error",
-                            Ganymede.stackTrace(ex),
-                            event));
-      }
+    mailer.sendmsg(returnAddr,
+                   emailList,
+                   returnAddrDesc,
+                   Ganymede.subjectPrefixProperty + type.name,
+                   message);
 
     if (debug)
       {
@@ -1449,21 +1407,11 @@ final public class DBLog implements java.io.Closeable {
                   }
               }
 
-            try
-              {
-                mailer.sendmsg(returnAddr,
-                               mailout.addresses,
-                               returnAddrDesc,
-                               title,
-                               description);
-              }
-            catch (IOException ex)
-              {
-                // "DBLog.sendObjectMail(): mailer error:\n{0}\n\nwhile processing: {1}"
-                Ganymede.debug(ts.l("sendObjectMail.mailer_error",
-                                    Ganymede.stackTrace(ex),
-                                    title));
-              }
+            mailer.sendmsg(returnAddr,
+                           mailout.addresses,
+                           returnAddrDesc,
+                           title,
+                           description);
           }
       }
   }

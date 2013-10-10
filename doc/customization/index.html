@@ -1553,13 +1553,14 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#verifyNewValue(arlut.csd.ganymede.server.DBField, java.lang.Object)">verifyNewValue()</a>
 	</td>
 	<td>
-	  This method provides a hook that can be used to check any
-	  values to be set in any field in this object.  InvidDBField,
-	  StringDBField, NumericDBField, IPDBField, and BooleanDBField
-	  call verifyNewValue to have a value checked for structural
-	  validity.  This method might be overridden to check that a
-	  social security numbered entered into a StringDBField really
-	  did fit the appropriate template.
+	  This method provides a hook that can be used to check and/or
+	  transform any values to be set in any field in this object.
+	  InvidDBField, StringDBField, NumericDBField, IPDBField,
+	  BooleanDBField and FloatDBFields call verifyNewValue() to
+	  have a value checked for structural validity.  This method
+	  might be overridden to check that a social security numbered
+	  entered into a StringDBField really did fit the appropriate
+	  template, or to canonicalize its representation.
 	</td>
       </tr>
       <tr>

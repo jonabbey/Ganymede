@@ -12,8 +12,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996 - 2011
+   Copyright (C) 1996 - 2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -60,14 +62,13 @@ import arlut.csd.ganymede.common.ReturnVal;
 /**
  * <p>Primary remote interface for Ganymede schema editing.  The
  * Ganymede admin console calls the
- * {@link arlut.csd.ganymede.server.GanymedeAdmin#editSchema editSchema()} method on
+ * {@link arlut.csd.ganymede.server.GanymedeAdmin#editSchema() editSchema()} method on
  * a server-side {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} object
  * to get access to
  * the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects which
  * hold the type definitions for the objects held in the Ganymede server.  The
  * DBObjectBase objects in turn provide access to the definitions for
  * the fields held in those object types.</p>
- *
  */
 
 public interface SchemaEdit extends Remote {

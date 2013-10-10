@@ -173,7 +173,7 @@ public final class DBBaseCategory implements Category, CategoryNode {
    * us by the schema editor on the client.
    */
 
-  private Hashtable baseHash;
+  private Hashtable<Short, DBObjectBase> baseHash;
 
   /**
    * A reference to the DBSchemaEdit object that is editing us
@@ -268,7 +268,8 @@ public final class DBBaseCategory implements Category, CategoryNode {
    */
 
   public DBBaseCategory(DBStore store, DBBaseCategory rootCategory,
-                        Hashtable baseHash, DBSchemaEdit editor) throws RemoteException
+                        Hashtable<Short, DBObjectBase> baseHash,
+                        DBSchemaEdit editor) throws RemoteException
   {
     this.editor = editor;
     this.store = store;
@@ -290,7 +291,8 @@ public final class DBBaseCategory implements Category, CategoryNode {
    * objects) and makes copies under this.</p>
    */
 
-  private void recurseDown(DBBaseCategory category, Hashtable baseHash,
+  private void recurseDown(DBBaseCategory category,
+                           Hashtable<Short, DBObjectBase> baseHash,
                            DBSchemaEdit editor) throws RemoteException
   {
     Vector<CategoryNode> children = category.getNodes();
@@ -1624,7 +1626,7 @@ public final class DBBaseCategory implements Category, CategoryNode {
   {
     if (editor != null)
       {
-        return (DBObjectBase) baseHash.get(Short.valueOf(id));
+        return baseHash.get(Short.valueOf(id));
       }
     else
       {

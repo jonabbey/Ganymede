@@ -5,17 +5,19 @@
    The GanymedeRMIManager class is responsible for publishing Ganymede
    server objects for accessibility through RMI.  All decisions
    regarding encryption and the like are handled in this class.
-   
+
    Created: 15 November 2004
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -55,10 +57,6 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
 
 import arlut.csd.ganymede.common.RMISSLClientSocketFactory;
 import arlut.csd.ganymede.common.RMISSLServerSocketFactory;
@@ -114,16 +112,19 @@ public class GanymedeRMIManager {
         this.ssf = new RMISSLServerSocketFactory();
       }
   }
-  
+
   /**
-   * <p>Creates and starts a remote object registry on the specified port.</p>
-   * 
-   * <p>This has the same effect as running the <pre>rmiregistry</pre> command
-   * that is bundled with the JDK.</p>
-   * 
+   * <p>Creates and starts a remote object registry on the specified
+   * port.</p>
+   *
+   * <p>This has the same effect as running the
+   * <code>rmiregistry</code> command that is bundled with the
+   * JDK.</p>
+   *
    * @param port
    * @throws RemoteException
    */
+
   public void startRMIRegistry(int port) throws RemoteException
   {
     LocateRegistry.createRegistry(port);

@@ -201,9 +201,9 @@ public class StringDBField extends DBField implements string_field {
 
         int count = 0;
 
-        for (int i = 0; i < values.size(); i++)
+        for (String item: values)
           {
-            if (!values.get(i).equals(""))
+            if (!item.equals(""))
               {
                 count++;
               }
@@ -211,13 +211,11 @@ public class StringDBField extends DBField implements string_field {
 
         out.writeInt(count);
 
-        for (int i = 0; i < values.size(); i++)
+        for (String item: values)
           {
-            String val = values.get(i);
-
-            if (!val.equals(""))
+            if (!item.equals(""))
               {
-                out.writeUTF(val);
+                out.writeUTF(item);
               }
           }
       }
@@ -276,12 +274,12 @@ public class StringDBField extends DBField implements string_field {
       {
         Vector<String> values = (Vector<String>) getVectVal();
 
-        for (int i = 0; i < values.size(); i++)
+        for (String item: values)
           {
             xmlOut.indentOut();
             xmlOut.indent();
             xmlOut.indentIn();
-            emitStringXML(xmlOut, values.get(i));
+            emitStringXML(xmlOut, item);
           }
 
         xmlOut.indent();

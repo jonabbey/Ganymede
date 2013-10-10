@@ -899,7 +899,7 @@ public interface Session extends Remote {
    * we want to apply to this dump.  May be null if the client wants
    * an unfiltered dump.
    * @param includeHistory If true, the historical fields (creation
-   * date & info, last modification date & info) will be included in
+   * date &amp; info, last modification date &amp; info) will be included in
    * the xml stream.
    * @param includeOid If true, the objects written out to the xml
    * stream will include an "oid" attribute which contains the precise
@@ -921,7 +921,7 @@ public interface Session extends Remote {
    * GanymedeSession.</p>
    *
    * @param includeHistory If true, the historical fields (creation
-   * date & info, last modification date & info) will be included in
+   * date *amp; info, last modification date &amp; info) will be included in
    * the xml stream.
    * @param includeOid If true, the objects written out to the xml
    * stream will include an "oid" attribute which contains the precise

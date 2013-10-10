@@ -1820,7 +1820,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 // the entry is embedded in the user's record.. get
                 // the user' id and label
 
-                Invid userRef = (Invid) obj.getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
+                Invid userRef = obj.getParentInvid();
 
                 if (userRef.getType() != SchemaConstants.UserBase)
                   {

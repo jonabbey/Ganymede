@@ -68,9 +68,9 @@ import arlut.csd.Util.VecSortInsert;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is a serializable object-list result object, which
+ * <p>This class is a serializable object-list result object, which
  * conveys results from a query/list operation along with methods that
- * can be used to extract the results out of the query/list.
+ * can be used to extract the results out of the query/list.</p>
  */
 
 public class QueryResult implements java.io.Serializable {
@@ -246,9 +246,9 @@ public class QueryResult implements java.io.Serializable {
         return;
       }
 
-    handles.addElement(new ObjectHandle(label, invid,
-                                        inactive, expirationSet,
-                                        removalSet, editable));
+    handles.add(new ObjectHandle(label, invid,
+                                 inactive, expirationSet,
+                                 removalSet, editable));
 
     if (forTransport)
       {
@@ -313,7 +313,7 @@ public class QueryResult implements java.io.Serializable {
 
         if (invidList != null)
           {
-            invidList.addElement(invid);
+            invidList.add(invid);
           }
       }
 
@@ -323,7 +323,7 @@ public class QueryResult implements java.io.Serializable {
 
         if (labelList != null)
           {
-            labelList.addElement(label);
+            labelList.add(label);
           }
       }
 
@@ -376,7 +376,7 @@ public class QueryResult implements java.io.Serializable {
         unpackBuffer();
       }
 
-    return ((ObjectHandle) handles.elementAt(row)).getInvid();
+    return handles.get(row).getInvid();
   }
 
   public Vector<Invid> getInvids()
@@ -390,9 +390,9 @@ public class QueryResult implements java.io.Serializable {
       {
         Vector<Invid> myInvidList = new Vector<Invid>();
 
-        for (int i = 0; i < handles.size(); i++)
+        for (ObjectHandle handle: handles)
           {
-            myInvidList.addElement(((ObjectHandle) handles.elementAt(i)).getInvid());
+            myInvidList.add(handle.getInvid());
           }
 
         return myInvidList;
@@ -403,9 +403,9 @@ public class QueryResult implements java.io.Serializable {
           {
             this.invidList = new Vector<Invid>();
 
-            for (int i = 0; i < handles.size(); i++)
+            for (ObjectHandle handle: handles)
               {
-                this.invidList.addElement(((ObjectHandle) handles.elementAt(i)).getInvid());
+                this.invidList.add(handle.getInvid());
               }
           }
 
@@ -424,9 +424,9 @@ public class QueryResult implements java.io.Serializable {
       {
         Vector<String> myLabelList = new Vector<String>();
 
-        for (int i = 0; i < handles.size(); i++)
+        for (ObjectHandle handle: handles)
           {
-            myLabelList.addElement(((ObjectHandle) handles.elementAt(i)).getLabel());
+            myLabelList.add(handle.getLabel());
           }
 
         return myLabelList;
@@ -437,9 +437,9 @@ public class QueryResult implements java.io.Serializable {
           {
             labelList = new Vector<String>();
 
-            for (int i = 0; i < handles.size(); i++)
+            for (ObjectHandle handle: handles)
               {
-                labelList.addElement(((ObjectHandle) handles.elementAt(i)).getLabel());
+                labelList.add(handle.getLabel());
               }
           }
 
@@ -454,7 +454,7 @@ public class QueryResult implements java.io.Serializable {
         unpackBuffer();
       }
 
-    return ((ObjectHandle) handles.elementAt(row)).getLabel();
+    return handles.get(row).getLabel();
   }
 
   public boolean isForTransport()
@@ -496,7 +496,6 @@ public class QueryResult implements java.io.Serializable {
                                                         boolean includeNonEditables)
   {
     Vector<listHandle> valueHandles = new Vector<listHandle>();
-    ObjectHandle handle;
 
     /* -- */
 
@@ -505,14 +504,12 @@ public class QueryResult implements java.io.Serializable {
         unpackBuffer();
       }
 
-    for (int i = 0; i < handles.size(); i++)
+    for (ObjectHandle handle: handles)
       {
-        handle = (ObjectHandle) handles.elementAt(i);
-
         if ((includeInactives || !handle.isInactive()) &&
             (includeNonEditables || handle.isEditable()))
           {
-            valueHandles.addElement(handle.getListHandle());
+            valueHandles.add(handle.getListHandle());
           }
       }
 
@@ -530,7 +527,7 @@ public class QueryResult implements java.io.Serializable {
         unpackBuffer();
       }
 
-    return handles.elementAt(row).getListHandle();
+    return handles.get(row).getListHandle();
   }
 
   /**
@@ -544,7 +541,7 @@ public class QueryResult implements java.io.Serializable {
         unpackBuffer();
       }
 
-    return handles.elementAt(row);
+    return handles.get(row);
   }
 
   // ***
@@ -554,11 +551,9 @@ public class QueryResult implements java.io.Serializable {
   // ***
 
   /**
-   *
-   * This method is provided for the server to optimize
-   * it's QueryResult loading operations, and is not
-   * intended for use post-serialization.
-   *
+   * <p>This method is provided for the server to optimize it's
+   * QueryResult loading operations, and is not intended for use
+   * post-serialization.</p>
    */
 
   public synchronized boolean containsInvid(Invid invid)
@@ -567,11 +562,9 @@ public class QueryResult implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method is provided for the server to optimize
-   * it's QueryResult loading operations, and is not
-   * intended for use post-serialization.
-   *
+   * <p>This method is provided for the server to optimize it's
+   * QueryResult loading operations, and is not intended for use
+   * post-serialization.</p>
    */
 
   public synchronized boolean containsLabel(String label)
@@ -580,10 +573,8 @@ public class QueryResult implements java.io.Serializable {
   }
 
   /**
-   *
-   * This is a pre-serialization method for concatenating
-   * another (for transport) QueryResult to ourself.
-   *
+   * <p>This is a pre-serialization method for concatenating another
+   * (for transport) QueryResult to ourself.</p>
    */
 
   public void append(QueryResult result)
@@ -601,11 +592,9 @@ public class QueryResult implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method returns a QueryResult which holds the intersection
+   * <p>This method returns a QueryResult which holds the intersection
    * of the contents of this QueryResult and the contents of
-   * operand.
-   *
+   * operand.</p>
    */
 
   public synchronized QueryResult intersection(QueryResult operand)
@@ -616,7 +605,6 @@ public class QueryResult implements java.io.Serializable {
       }
 
     QueryResult result = new QueryResult(forTransport);
-    ObjectHandle handle;
 
     /* -- */
 
@@ -625,10 +613,8 @@ public class QueryResult implements java.io.Serializable {
         return result;
       }
 
-    for (int i = 0; i < handles.size(); i++)
+    for (ObjectHandle handle: handles)
       {
-        handle = (ObjectHandle) handles.elementAt(i);
-
         if (handle.getInvid() != null)
           {
             if (operand.containsInvid(handle.getInvid()))
@@ -655,11 +641,9 @@ public class QueryResult implements java.io.Serializable {
   // ***
 
   /**
-   *
-   * Private method to handle building up our datastructure on the
+   * <p>Private method to handle building up our datastructure on the
    * post-serialization side.  Sorts the handles vector by label as it
-   * is extracted.
-   *
+   * is extracted.</p>
    */
 
   private synchronized void unpackBuffer()
@@ -788,9 +772,7 @@ public class QueryResult implements java.io.Serializable {
   }
 
   /**
-   *
    * For debug.
-   *
    */
 
   public String getBuffer()

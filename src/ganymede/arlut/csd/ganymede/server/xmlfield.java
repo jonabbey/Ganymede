@@ -57,7 +57,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -1532,7 +1533,7 @@ public final class xmlfield implements FieldType {
                       {
                         for (xOption fieldOption: option.fields.values())
                           {
-                            Hashtable<String, FieldTemplate> fieldHash = owner.xSession.getFieldHash(option.getName());
+                            Map<String, FieldTemplate> fieldHash = owner.xSession.getFieldHash(option.getName());
 
                             if (fieldHash == null)
                               {
@@ -1596,7 +1597,7 @@ public final class xmlfield implements FieldType {
                       {
                         for (xPerm fieldPerm: perm.fields.values())
                           {
-                            Hashtable<String, FieldTemplate> fieldHash = owner.xSession.getFieldHash(perm.getName());
+                            Map<String, FieldTemplate> fieldHash = owner.xSession.getFieldHash(perm.getName());
 
                             if (fieldHash == null)
                               {
@@ -1997,9 +1998,9 @@ class xInvid {
    * actual on-server Invid corresponding to this xInvid object.</p>
    *
    * <p>invidPtr will contain an actual {@link
-   * arlut.csd.ganymede.common.Invid} object if this <invid> element
-   * could be matched against a pre-existing Invid on the Ganymede
-   * server.</p>
+   * arlut.csd.ganymede.common.Invid} object if this &lt;invid&gt;
+   * element could be matched against a pre-existing Invid on the
+   * Ganymede server.</p>
    *
    * <p>If no server-side Invid can be found, invidPtr may instead
    * point to the {@link arlut.csd.ganymede.server.xmlobject} object
@@ -2396,7 +2397,7 @@ class xPerm {
    * will be null.</p>
    */
 
-  Hashtable<String, xPerm> fields = null;
+  Map<String, xPerm> fields = null;
 
   boolean view = false;
   boolean edit = false;
@@ -2449,7 +2450,7 @@ class xPerm {
 
     if (objectType && !item.isEmpty())
       {
-        fields = new Hashtable<String, xPerm>();
+        fields = new HashMap<String, xPerm>();
         item = getXSession().getNextItem();
 
         while (!item.matchesClose(label) && !(item instanceof XMLEndDocument))
@@ -2516,7 +2517,7 @@ class xOption {
    * will be null.</p>
    */
 
-  Hashtable<String, xOption> fields = null;
+  Map<String, xOption> fields = null;
 
   /**
    * <p>The option for this xOption.</p>
@@ -2567,7 +2568,7 @@ class xOption {
 
     if (objectType && !item.isEmpty())
       {
-        fields = new Hashtable<String, xOption>();
+        fields = new HashMap<String, xOption>();
         item = getXSession().getNextItem();
 
         while (!item.matchesClose(label) && !(item instanceof XMLEndDocument))

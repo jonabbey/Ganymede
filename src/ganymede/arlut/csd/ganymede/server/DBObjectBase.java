@@ -65,7 +65,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -170,7 +170,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   static final int GROWTHSPACE = 250;
 
-  private static Hashtable upgradeClassMap = null;
+  private static HashMap<String, String> upgradeClassMap = null;
 
   public static void setDebug(boolean val)
   {
@@ -214,7 +214,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (upgradeClassMap == null)
       {
-        upgradeClassMap = new Hashtable();
+        upgradeClassMap = new HashMap<String, String>();
         upgradeClassMap.put("arlut.csd.ganymede.eventCustom", "arlut.csd.ganymede.server.eventCustom");
         upgradeClassMap.put("arlut.csd.ganymede.objectEventCustom", "arlut.csd.ganymede.server.objectEventCustom");
         upgradeClassMap.put("arlut.csd.ganymede.ownerCustom", "arlut.csd.ganymede.server.ownerCustom");
@@ -827,7 +827,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
 
         if (upgradeClassMap.containsKey(classname))
           {
-            String newclassname = (String) upgradeClassMap.get(classname);
+            String newclassname = upgradeClassMap.get(classname);
 
             if (debug)
               {
@@ -1217,7 +1217,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
     Integer _idInt;
     DBObjectBaseField newField;
     GHashtable nameTable = new GHashtable(true); // case insensitive
-    Hashtable idTable = new Hashtable();
+    HashMap<Integer, XMLItem> idTable = new HashMap<Integer, XMLItem>();
     String _classStr = null;
     String _classOptionStr = null;
     Integer _labelInt = null;

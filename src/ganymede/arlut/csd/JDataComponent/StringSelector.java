@@ -2,7 +2,8 @@
 
    StringSelector.java
 
-   A two list box for adding strings to lists.
+   A two list box for adding strings to and/or removing strings from
+   lists.
 
    Created: 10 October 1997
 
@@ -334,6 +335,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     if (editable)
       {
         custom = new JstringField();
+        custom.transferFocusOnEntry = false;
         custom.addActionListener(new ActionListener()
                                  {
                                    public void actionPerformed(ActionEvent e)
@@ -504,8 +506,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   /**
    * <p>This method sets the width of the in and out rows.</p>
    *
-   * @param width How many columns wide should each box be?  If <= 0, the
-   * StringSelector will auto-size the columns
+   * @param width How many columns wide should each box be?  If &lt;=
+   * 0, the StringSelector will auto-size the columns
    */
 
   public void setCellWidth(int width)
@@ -765,11 +767,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    * <li>{@link arlut.csd.JDataComponent.JErrorValueObject} Something went wrong.  Value is the error message to be displayed to the user in whatever
    * fashion is appropriate.</li>
    * </ul>
-   * </p>
    *
    * @see JsetValueCallback
    * @see JValueObject
-   *
    */
 
   public void setCallback(JsetValueCallback parent)

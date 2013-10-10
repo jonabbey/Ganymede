@@ -4,17 +4,19 @@
 
    This interface provides support for an object to be managed
    in the server's objectbase category hierarchy.
-   
+
    Created: 12 August 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -58,44 +60,32 @@ import java.rmi.RemoteException;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * This interface provides support for an object to be managed
  * in the server's objectbase category hierarchy.
- *
  */
 
 public interface CategoryNode extends Remote {
 
   /**
-   *
-   * This method returns the category that this
-   * category node belongs to.
-   *
+   * Returns the category that this category node belongs to.
    */
 
   public Category getCategory() throws RemoteException;
 
   /**
-   *
-   * This method tells the CategoryNode what it's containing
-   * category is.
-   *
+   * Tells the CategoryNode what its containing category is.
    */
 
   public void setCategory(Category category) throws RemoteException;
 
   /**
-   *
-   * This method returns the name of this node.
-   *
+   * Returns the name of this node.
    */
 
   public String getName() throws RemoteException;
 
   /**
-   *
-   * This method returns the fully pathed name of this node.
-   *
+   * Returns the fully pathed name of this node.
    */
 
   public String getPath() throws RemoteException;

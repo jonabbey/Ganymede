@@ -72,7 +72,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.RemoteServer;
 import java.util.Date;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
@@ -150,7 +150,8 @@ import arlut.csd.ganymede.rmi.Server;
  * higher level {@link arlut.csd.ganymede.server.GanymedeSession}
  * class, all lower level data manipulation by the {@link
  * arlut.csd.ganymede.server.DBStore} object and its related classes
- * ({@link arlut.csd.ganymede.server.DBObject DBObject}, {@link
+ * ({@link arlut.csd.ganymede.server.DBSession DBSession}, {@link
+ * arlut.csd.ganymede.server.DBObject DBObject}, {@link
  * arlut.csd.ganymede.server.DBEditSet DBEditSet}, {@link
  * arlut.csd.ganymede.server.DBNameSpace DBNameSpace}, and {@link
  * arlut.csd.ganymede.server.DBJournal DBJournal}).</p>
@@ -430,7 +431,7 @@ public final class Ganymede {
    * ganymede.db file at task registration time.</p>
    */
 
-  static private Hashtable upgradeClassMap = null;
+  static private HashMap<String, String> upgradeClassMap = null;
 
   /**
    * <p>Uncaught exception handler in use on the Ganymede server.
@@ -1872,7 +1873,7 @@ public final class Ganymede {
 
   /**
    * <p>At DBStore version 2.7, we changed the package name for our
-   * built-in task classes.  This method creates a private Hashtable,
+   * built-in task classes.  This method creates a private HashMap,
    * {@link arlut.csd.ganymede.server.Ganymede#upgradeClassMap}, which holds
    * a mapping of old class names to new ones for the built-in classes.</p>
    */
@@ -1881,7 +1882,7 @@ public final class Ganymede {
   {
     if (upgradeClassMap == null)
       {
-        upgradeClassMap = new Hashtable();
+        upgradeClassMap = new HashMap<String,String>();
         upgradeClassMap.put("arlut.csd.ganymede.dumpAndArchiveTask", "arlut.csd.ganymede.server.dumpAndArchiveTask");
         upgradeClassMap.put("arlut.csd.ganymede.dumpTask", "arlut.csd.ganymede.server.dumpTask");
         upgradeClassMap.put("arlut.csd.ganymede.GanymedeExpirationTask", "arlut.csd.ganymede.server.GanymedeExpirationTask");
@@ -1928,7 +1929,7 @@ public final class Ganymede {
 
                     if (upgradeClassMap.containsKey(taskClassStr))
                       {
-                        String newClassName = (String) upgradeClassMap.get(taskClassStr);
+                        String newClassName = upgradeClassMap.get(taskClassStr);
 
                         // "Rewriting old system task class {0} as {1}"
                         System.err.println(ts.l("registerTasks.rewritingClass", taskClassStr, newClassName));

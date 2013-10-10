@@ -1355,21 +1355,10 @@ final public class GanymedeSession implements Session, Unreferenced {
         body.append(WordWrap.wrap(signature.toString(), 78, null));
         body.append("\n--------------------------------------------------------------------------------\n");
 
-        try
-          {
-            mailer.sendmsg(permManager.getIdentityReturnAddress(),
-                           addresses,
-                           "Ganymede: " + subject,
-                           body.toString());
-          }
-        catch (ProtocolException ex)
-          {
-            throw new RuntimeException("Couldn't figure address " + ex);
-          }
-        catch (IOException ex)
-          {
-            throw new RuntimeException("IO problem " + ex);
-          }
+        mailer.sendmsg(permManager.getIdentityReturnAddress(),
+                       addresses,
+                       "Ganymede: " + subject,
+                       body.toString());
       }
     finally
       {
@@ -1450,23 +1439,12 @@ final public class GanymedeSession implements Session, Unreferenced {
         asciiContent.append(WordWrap.wrap(signature.toString(), 78, null));
         asciiContent.append("\n--------------------------------------------------------------------------------\n");
 
-        try
-          {
-            mailer.sendHTMLmsg(permManager.getIdentityReturnAddress(),
-                               addresses,
-                               "Ganymede: " + subject,
-                               (HTMLbody != null) ? HTMLbody.toString(): null,
-                               "greport.html",
-                               asciiContent.toString());
-          }
-        catch (ProtocolException ex)
-          {
-            throw new RuntimeException("Couldn't figure address " + ex);
-          }
-        catch (IOException ex)
-          {
-            throw new RuntimeException("IO problem " + ex);
-          }
+        mailer.sendHTMLmsg(permManager.getIdentityReturnAddress(),
+                           addresses,
+                           "Ganymede: " + subject,
+                           (HTMLbody != null) ? HTMLbody.toString(): null,
+                           "greport.html",
+                           asciiContent.toString());
       }
     finally
       {
@@ -2816,8 +2794,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * we want to apply to this dump.  May be null if the client wants
    * an unfiltered dump.
    * @param includeHistory If true, the historical fields (creation
-   * date & info, last modification date & info) will be included in
-   * the xml stream.
+   * date &amp; info, last modification date &amp; info) will be
+   * included in the xml stream.
    * @param includeOid If true, the objects written out to the xml
    * stream will include an "oid" attribute which contains the precise
    * Invid of the object.
@@ -2845,8 +2823,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * GanymedeSession.</p>
    *
    * @param includeHistory If true, the historical fields (creation
-   * date & info, last modification date & info) will be included in
-   * the xml stream.
+   * date &amp; info, last modification date &amp; info) will be
+   * included in the xml stream.
    * @param includeOid If true, the objects written out to the xml
    * stream will include an "oid" attribute which contains the precise
    * Invid of the object.

@@ -87,9 +87,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   /* -- */
 
   /**
-   *
    * Customization Constructor
-   *
    */
 
   public interfaceCustom(DBObjectBase objectBase)
@@ -98,9 +96,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * Create new object constructor
-   *
    */
 
   public interfaceCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
@@ -109,10 +105,8 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * Check-out constructor, used by DBObject.createShadow()
    * to pull out an object for editing.
-   *
    */
 
   public interfaceCustom(DBObject original, DBEditSet editset)
@@ -157,41 +151,150 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     if (this.isDefined(interfaceSchema.IPNET) && !fieldRequired(this, interfaceSchema.ETHERNETINFO))
       {
-        ReturnVal retVal = this.setFieldValueLocal(interfaceSchema.ETHERNETINFO, null);
-
-        if (!ReturnVal.didSucceed(retVal))
-          {
-            return retVal;      // in case we failed for some reason
-          }
+        return this.setFieldValueLocal(interfaceSchema.ETHERNETINFO, null);
       }
 
-    return updateHiddenLabel();
+    return null;
   }
 
   /**
-   * This method patches up the hidden label field in this object.
+   * Update the hidden label with a proposed new interface name.
+   *
+   * @param interfaceName The new name being given to this interface.
+   * May safely be null.
+   *
+   * @return A ReturnVal indicating success or failure in setting the
+   * label.  If the label was changed successfully, a directive is
+   * encoded into the ReturnVal to cause the system containing this
+   * interface to refresh the label of this interface.
    */
 
-  public ReturnVal updateHiddenLabel()
+  private ReturnVal updateHiddenLabelNAME(String interfaceName)
   {
-    String newLabel = calcLabel(this);
-
-    return setFieldValueLocal(interfaceSchema.HIDDENLABEL, newLabel);
-  }
-
-  private final String calcLabel(interfaceCustom object)
-  {
-    String name = (String) object.getFieldValueLocal(interfaceSchema.NAME);
-    String macAddress = (String) object.getFieldValueLocal(interfaceSchema.ETHERNETINFO);
-    IPDBField ipfield = (IPDBField) object.getField(interfaceSchema.ADDRESS);
-    String ipString = null;
+    IPDBField ipfield = (IPDBField) this.getField(interfaceSchema.ADDRESS);
+    String IPAddress = null;
 
     if (ipfield != null)
       {
-        ipString = ipfield.getValueString();
+        IPAddress = ipfield.getValueString();
       }
 
-    return genLabel(name, ipString, macAddress);
+    // we'll only include our MAC address if the network we're
+    // associated with requires it.
+
+    String MACAddress = null;
+
+    Invid netInvid = (Invid) this.getFieldValueLocal(interfaceSchema.IPNET);
+    DBObject networkObj = this.lookupInvid(netInvid);
+
+    if (networkObj == null || networkObj.isSet(networkSchema.MACREQUIRED))
+      {
+        MACAddress = (String) this.getFieldValueLocal(interfaceSchema.ETHERNETINFO);
+      }
+
+    ReturnVal retVal = this.setFieldValueLocal(interfaceSchema.HIDDENLABEL,
+                                               genLabel(interfaceName,
+                                                        IPAddress,
+                                                        MACAddress));
+
+    if (ReturnVal.didSucceed(retVal))
+      {
+        return ReturnVal.success().requestRefresh(getParentSysObj().getInvid(), systemSchema.INTERFACES);
+      }
+
+    return retVal;
+  }
+
+  /**
+   * Update the hidden label with a proposed new IP Address.
+   *
+   * @param addr The new IP Address being given to this interface.
+   * May safely be null.
+   *
+   * @return A ReturnVal indicating success or failure in setting the
+   * label.  If the label was changed successfully, a directive is
+   * encoded into the ReturnVal to cause the system containing this
+   * interface to refresh the label of this interface.
+   */
+
+  private ReturnVal updateHiddenLabelIPADDR(IPAddress addr)
+  {
+    String interfaceName = (String) this.getFieldValueLocal(interfaceSchema.NAME);
+    String IPAddress = null;
+
+    if (addr != null)
+      {
+        IPAddress = addr.toString();
+      }
+
+    String MACAddress = null;
+
+    Invid netInvid = getParentSysObj().findMatchingNet(addr);
+    DBObject networkObj = this.lookupInvid(netInvid);
+
+    if (networkObj == null || networkObj.isSet(networkSchema.MACREQUIRED))
+      {
+        MACAddress = (String) this.getFieldValueLocal(interfaceSchema.ETHERNETINFO);
+      }
+
+    ReturnVal retVal = this.setFieldValueLocal(interfaceSchema.HIDDENLABEL,
+                                               genLabel(interfaceName,
+                                                        IPAddress,
+                                                        MACAddress));
+
+    if (ReturnVal.didSucceed(retVal))
+      {
+        return ReturnVal.success().requestRefresh(getParentSysObj().getInvid(), systemSchema.INTERFACES);
+      }
+
+    return retVal;
+  }
+
+  /**
+   * Update the hidden label with a proposed new MAC Address
+   *
+   * @param MACAddress The new MAC Address being given to this
+   * interface.  May safely be null.
+   *
+   * @return A ReturnVal indicating success or failure in setting the
+   * label.  If the label was changed successfully, a directive is
+   * encoded into the ReturnVal to cause the system containing this
+   * interface to refresh the label of this interface.
+   */
+
+  private ReturnVal updateHiddenLabelMACADDR(String MACAddress)
+  {
+    String interfaceName = (String) this.getFieldValueLocal(interfaceSchema.NAME);
+    IPDBField ipfield = (IPDBField) this.getField(interfaceSchema.ADDRESS);
+    String IPAddress = null;
+
+    if (ipfield != null)
+      {
+        IPAddress = ipfield.getValueString();
+      }
+
+    // we'll only include our MAC address if the network we're
+    // associated with requires it.
+
+    Invid netInvid = (Invid) this.getFieldValueLocal(interfaceSchema.IPNET);
+    DBObject networkObj = this.lookupInvid(netInvid);
+
+    if (networkObj != null && !networkObj.isSet(networkSchema.MACREQUIRED))
+      {
+        MACAddress = null;
+      }
+
+    ReturnVal retVal = this.setFieldValueLocal(interfaceSchema.HIDDENLABEL,
+                                               genLabel(interfaceName,
+                                                        IPAddress,
+                                                        MACAddress));
+
+    if (ReturnVal.didSucceed(retVal))
+      {
+        return ReturnVal.success().requestRefresh(getParentSysObj().getInvid(), systemSchema.INTERFACES);
+      }
+
+    return retVal;
   }
 
   private final String genLabel(String interfaceName, String ipString, String macAddress)
@@ -219,20 +322,20 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
         openIP = true;
       }
 
-    if (macAddress != null && macAddress.length() != 0)
+    if (macAddress != null && !macAddress.trim().equals(""))
       {
         if (result.length() != 0)
           {
             result.append(" ");
           }
 
-        if (openIP)
+        if (!openIP)
           {
-            result.append("- ");
+            result.append("[");
           }
         else
           {
-            result.append("[");
+            result.append("- ");
           }
 
         result.append(macAddress);
@@ -585,14 +688,6 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
         return null;
       }
 
-    // we don't want to mess with the available-network
-    // management code if we are doing bulk-loading.
-
-    //    if (!gSession.enableOversight || !gSession.enableWizards)
-    //      {
-    //  return null;
-    //      }
-
     if (field.getID() == interfaceSchema.IPNET)
       {
         // if this net change was initiated by an approved ADDRESS change,
@@ -600,7 +695,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
         if (inFinalizeAddrChange)
           {
-            ReturnVal retVal = new ReturnVal(true, true);
+            ReturnVal retVal = ReturnVal.success();
             retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
             return retVal;
@@ -618,7 +713,9 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
                 System.err.println("interfaceCustom.finalizeSetValue(): approving ipnet change");
               }
 
-            ReturnVal retVal = new ReturnVal(true, true);
+            // some IPNETs don't require MAC addresses
+
+            ReturnVal retVal = ReturnVal.success();
             retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
             return retVal;
@@ -640,11 +737,11 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
             ipfield.setValueLocal(null);
             inFinalizeNetChange = false;
 
-            ReturnVal retVal = new ReturnVal(true, true);
+            ReturnVal retVal = ReturnVal.success();
             retVal.addRescanField(this.getInvid(), interfaceSchema.ADDRESS);
             retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
-            return retVal;
+            return retVal.merge(updateHiddenLabelIPADDR(null));
           }
 
         // now find a new address for this object based on the network we
@@ -677,7 +774,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
         // and tell the client to rescan the address field to update
         // the display
 
-        ReturnVal retVal = new ReturnVal(true, true);
+        ReturnVal retVal = ReturnVal.success();
         retVal.addRescanField(this.getInvid(), interfaceSchema.ADDRESS);
 
         // and tell the client to rescan the ethernet info field as
@@ -685,7 +782,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
         retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
-        return retVal;
+        return retVal.merge(updateHiddenLabelIPADDR(address));
       }
 
     if (field.getID() == interfaceSchema.ADDRESS)
@@ -705,7 +802,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
           {
             // fine, no change to the network required
 
-            return null;
+            return updateHiddenLabelIPADDR(address);
           }
 
         // we need to find a new network to match, and to set that
@@ -731,7 +828,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
         try
           {
             inFinalizeAddrChange = true;
-            ReturnVal retVal = setFieldValue(interfaceSchema.IPNET, netInvid);
+            ReturnVal retVal = this.setFieldValue(interfaceSchema.IPNET, netInvid);
             inFinalizeAddrChange = false;
 
             if (retVal != null && !retVal.didSucceed())
@@ -741,16 +838,28 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
                                                   "interfaceCustom.finalizeSetValue(): failed to set ip net");
               }
 
-            retVal = new ReturnVal(true, true);
+            retVal = ReturnVal.success();
             retVal.addRescanField(this.getInvid(), interfaceSchema.IPNET);
 
-            return retVal;
+            return retVal.merge(updateHiddenLabelIPADDR(address));
           }
         catch (GanyPermissionsException ex)
           {
             return Ganymede.createErrorDialog(this.getGSession(),
                                               "permissions", "permissions error setting network " + ex);
           }
+      }
+
+    // we also need to update the hidden label if the MAC address or
+    // interface name was changed
+
+    switch (field.getID())
+      {
+      case interfaceSchema.ETHERNETINFO:
+        return updateHiddenLabelMACADDR((String) value);
+
+      case interfaceSchema.NAME:
+        return updateHiddenLabelNAME((String) value);
       }
 
     return null;
@@ -818,20 +927,36 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   * <p>This method provides a hook that can be used to check any values
-   * to be set in any field in this object.  Subclasses of
-   * DBEditObject should override this method, implementing basically
-   * a large switch statement to check for any given field whether the
-   * submitted value is acceptable given the current state of the
+   * <p>Provides a hook that can be used to approve, disapprove,
+   * and/or transform any values to be set in any field in this
    * object.</p>
    *
-   * <p>Question: what synchronization issues are going to be needed
-   * between DBEditObject and DBField to insure that we can have
-   * a reliable verifyNewValue method here?</p>
+   * <p>verifyNewValue can be used to canonicalize a
+   * submitted value.  The verifyNewValue method may call
+   * {@link arlut.csd.ganymede.common.ReturnVal#setTransformedValueObject(java.lang.Object, arlut.csd.ganymede.common.Invid, short) setTransformedValue()}
+   * on the ReturnVal returned in order to substitute a new value for
+   * the provided value prior to any other processing on the server.</p>
    *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
+   * <p>This method is called before any NameSpace checking is done, before the
+   * {@link arlut.csd.ganymede.server.DBEditObject#wizardHook(arlut.csd.ganymede.server.DBField,int,java.lang.Object,java.lang.Object) wizardHook()}
+   * method, and before the appropriate
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeSetValue(arlut.csd.ganymede.server.DBField, Object) finalizeSetValue()},
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeSetElement(arlut.csd.ganymede.server.DBField, int, Object) finalizeSetElement()},
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeAddElement(arlut.csd.ganymede.server.DBField, java.lang.Object) finalizeAddElement()},
+   * or {@link arlut.csd.ganymede.server.DBEditObject#finalizeAddElements(arlut.csd.ganymede.server.DBField, java.util.Vector) finalizeAddElements()}
+   * method is called.</p>
+   *
+   * @param field The DBField contained within this object whose value
+   * is being changed
+   * @param value The value that is being proposed to go into field.
+   *
+   * @return A ReturnVal indicating success or failure.  May be simply
+   * 'null' to indicate success if no feedback need be provided.  If
+   * {@link arlut.csd.ganymede.common.ReturnVal#hasTransformedValue() hasTransformedValue()}
+   * returns true when callled on the returned ReturnVal, the value
+   * returned by {@link arlut.csd.ganymede.common.ReturnVal#getTransformedValueObject() getTransformedValueObject()}
+   * will be used for all further processing in the server, and will
+   * be the value actually saved in the DBStore.
    */
 
   @Override public ReturnVal verifyNewValue(DBField field, Object value)
@@ -1047,35 +1172,6 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
       }
 
     return null;
-  }
-
-  /**
-   *
-   * This method maps an int value between 0 and 255 inclusive
-   * to a legal signed byte value.
-   *
-   */
-
-  public final static byte u2s(int x)
-  {
-    if ((x < 0) || (x > 255))
-      {
-        throw new IllegalArgumentException("Out of range: " + x);
-      }
-
-    return (byte) (x - 128);
-  }
-
-  /**
-   *
-   * This method maps a u2s-encoded signed byte value to an
-   * int value between 0 and 255 inclusive.
-   *
-   */
-
-  public final static short s2u(byte b)
-  {
-    return (short) (b + 128);
   }
 }
 

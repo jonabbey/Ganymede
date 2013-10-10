@@ -1244,6 +1244,10 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
     /* -- */
 
+    System.out.println("------------------------------------------------------------");
+    System.out.println("Testing IPAddress creation from byte arrays");
+    System.out.println();
+
     for (int i = 0; i < testOctets.length; i++)
       {
         IPAddress addr = new IPAddress(testOctets[i]);
@@ -1273,6 +1277,10 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
           }
       }
 
+    System.out.println("------------------------------------------------------------");
+    System.out.println("Testing IPAddress creation from strings");
+    System.out.println();
+
     for (int i = 0; i < testStrings.length; i++)
       {
         IPAddress addr = new IPAddress(testStrings[i]);
@@ -1280,11 +1288,13 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
         if (addr.isIPv4())
           {
+            System.out.println("IPv4 (orig string): " + testStrings[i]);
             System.out.println("IPv4 (from string): " + addr);
             System.out.println("IPv4 (roundtrip  ): " + readdr);
           }
         else
           {
+            System.out.println("IPv6 (orig string): " + testStrings[i]);
             System.out.println("IPv6 (from string): " + addr);
             System.out.println("IPv6 (roundtrip  ): " + readdr);
           }

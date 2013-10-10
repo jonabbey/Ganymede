@@ -151,7 +151,8 @@ public class Qsmtp implements Runnable, java.io.Closeable {
   static final private Random randomizer = new Random();
 
   /**
-   * This method returns a properly mail-formatted date string.
+   * @param date A Date to format
+   * @return A properly mail-formatted date String.
    */
 
   static public String formatDate(Date date)
@@ -380,7 +381,7 @@ public class Qsmtp implements Runnable, java.io.Closeable {
    */
 
   public synchronized boolean sendmsg(String from_address, List<String> to_addresses,
-                                      String subject, String message) throws IOException
+                                      String subject, String message)
   {
     return sendmsg(from_address, to_addresses, from_address, subject, message, null);
   }
@@ -390,7 +391,8 @@ public class Qsmtp implements Runnable, java.io.Closeable {
    *
    * @param from_address Who is sending this message?
    * @param to_addresses List of string addresses to send this message to
-   * @param from_address_desc A more elaborate version of the from address, with optional leading <Description> section
+   * @param from_address_desc A more elaborate version of the from
+   * address, with optional leading &lt;Description&gt; section
    * @param subject Subject for this message
    * @param message The text for the mail message
    *
@@ -401,7 +403,7 @@ public class Qsmtp implements Runnable, java.io.Closeable {
 
   public synchronized boolean sendmsg(String from_address, List<String> to_addresses,
                                       String from_address_desc,
-                                      String subject, String message) throws IOException
+                                      String subject, String message)
   {
     return sendmsg(from_address, to_addresses, from_address_desc, subject, message, null);
   }
@@ -427,7 +429,7 @@ public class Qsmtp implements Runnable, java.io.Closeable {
 
   public synchronized boolean sendHTMLmsg(String from_address, List<String> to_addresses,
                                           String subject, String htmlBody, String htmlFilename,
-                                          String textBody) throws IOException
+                                          String textBody)
   {
     return this.sendHTMLmsg(from_address, to_addresses, from_address, subject, htmlBody, htmlFilename, textBody);
   }
@@ -440,7 +442,8 @@ public class Qsmtp implements Runnable, java.io.Closeable {
    *
    * @param from_address Who is sending this message?
    * @param to_addresses List of string addresses to send this message to
-   * @param from_address_desc A more elaborate version of the from address, with optional leading <Description> section
+   * @param from_address_desc A more elaborate version of the from
+   * address, with optional leading &lt;Description&gt; section
    * @param subject Subject for this message
    * @param htmlBody A string containing the HTML document to be sent
    * @param htmlFilename The name to label the HTML document with, will
@@ -455,7 +458,7 @@ public class Qsmtp implements Runnable, java.io.Closeable {
   public synchronized boolean sendHTMLmsg(String from_address, List<String> to_addresses,
                                           String from_address_desc,
                                           String subject, String htmlBody, String htmlFilename,
-                                          String textBody) throws IOException
+                                          String textBody)
   {
     List<String> MIMEheaders = new ArrayList<String>();
     String separator = generateRandomBoundary();
@@ -508,8 +511,10 @@ public class Qsmtp implements Runnable, java.io.Closeable {
   }
 
   /**
-   * Convenience method to return a unique MIME separator for a given
-   * HTML attachment message
+   * <p>Convenience method to return a unique MIME separator for a
+   * given HTML attachment message</p>
+   *
+   * @return A random MIME separator String
    */
 
   private String generateRandomBoundary()
@@ -547,7 +552,8 @@ public class Qsmtp implements Runnable, java.io.Closeable {
    *
    * @param from_address Who is sending this message?
    * @param to_addresses List of string addresses to send this message to
-   * @param from_address_desc A more elaborate version of the from address, with optional leading <Description> section
+   * @param from_address_desc A more elaborate version of the from
+   * address, with optional leading &lt;Description&gt; section
    * @param subject Subject for this message
    * @param message The text for the mail message
    * @param extraHeaders List of string headers to include in the message's
@@ -696,6 +702,8 @@ public class Qsmtp implements Runnable, java.io.Closeable {
 
   /**
    * <p>This method handles the actual mail-out</p>
+   *
+   * @param msgObj The messageObject to be sent.
    *
    * @return false if any problems occurred during transmission which
    * should necessitate a retry of the message transmission, true
@@ -1036,7 +1044,16 @@ class messageObject {
   {
     this.from_address = from_address;
     this.to_addresses = to_addresses;
-    this.from_address_desc = from_address_desc;
+
+    if (from_address_desc == null || from_address_desc.trim().equals(""))
+      {
+        this.from_address_desc = from_address;
+      }
+    else
+      {
+        this.from_address_desc = from_address_desc;
+      }
+
     this.subject = subject;
     this.message = message;
     this.extraHeaders = extraHeaders;

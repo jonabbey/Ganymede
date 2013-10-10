@@ -55,9 +55,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
-import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.Invid;
 
 /*------------------------------------------------------------------------------

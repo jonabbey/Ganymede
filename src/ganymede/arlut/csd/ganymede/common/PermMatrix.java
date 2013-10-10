@@ -66,33 +66,34 @@ import arlut.csd.ganymede.server.PermissionMatrixDBField;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Serializable permissions matrix object, used to handle
- * permissions for a given user, admin, or role.</P>
+ * <p>Serializable permissions matrix object, used to handle
+ * permissions for a given user, admin, or role.</p>
  *
- * <P>This class stores a read-only Hashtable of
+ * <p>This class stores a read-only Hashtable of
  * {@link arlut.csd.ganymede.common.PermEntry PermEntry} objects, organized by
- * object type and field id's.</P>
+ * object type and field id's.</p>
  *
- * <P>The keys to the Hashtable are Strings that are encoded by the
+ * <p>The keys to the Hashtable are Strings that are encoded by the
  * static {@link
  * arlut.csd.ganymede.server.PermissionMatrixDBField#matrixEntry(short,
  * short) matrixEntry()} methods defined in this class.  I probably
  * could have used some sort of class object for the key, but then I
  * would have had to define a key() of similar complexity to the
  * matrixEntry() and decode methods anyway, as well as some sort of
- * on-disk representation for the Ganymede.db file.</P>
+ * on-disk representation for the Ganymede.db file.</p>
  *
- * <P>Here's some examples of the key encoding algorithm:</P>
+ * <p>Here's some examples of the key encoding algorithm:</p>
  *
- * <UL>
- * <LI><CODE>3::/CODE> - Object type 3, permission for object itself</LI>
- * <LI><CODE>3:10</CODE> - Object type 3, permission for field 10</LI>
- * </UL>
+ * <ul>
+ * <li><code>3::</code> - Object type 3, permission for object itself</li>
+ * <li><code>3:10</code> - Object type 3, permission for field 10</li>
+ * </ul>
  *
- * <P>PermMatrix is used on the client in the Permissions Editor dialog,
+ * <p>PermMatrix is used on the client in the Permissions Editor dialog,
  * and on the server in both
  * {@link arlut.csd.ganymede.server.PermissionMatrixDBField PermissionMatrixDBField}
- * and {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}.</P> */
+ * and {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}.</p>
+ */
 
 public class PermMatrix implements java.io.Serializable {
 

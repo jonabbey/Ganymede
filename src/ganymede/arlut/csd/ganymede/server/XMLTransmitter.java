@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -207,13 +207,9 @@ public final class XMLTransmitter implements FileTransmitter {
 
               DBSession dbSession = mySession.getDBSession();
 
-              Vector invids = myRows.getInvids();
-
-              for (int i = 0; i < invids.size(); i++)
+              for (Invid invid: myRows.getInvids())
                 {
-                  Invid invid = (Invid) invids.elementAt(i);
-                  DBObject vobj = dbSession.viewDBObject(invid);
-                  vobj.emitXML(xmlOut);
+                  dbSession.viewDBObject(invid).emitXML(xmlOut);
                 }
 
               xmlOut.indentIn();

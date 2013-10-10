@@ -393,15 +393,7 @@ public final class DBQueryEngine {
   public DumpResult dump(Query query)
   {
     DumpResultBuilder resultBuilder;
-
-    /**
-     *
-     * What base is the query being done on?
-     *
-     */
-
     DBObjectBase base = null;
-
     boolean embedded;
 
     /* -- */

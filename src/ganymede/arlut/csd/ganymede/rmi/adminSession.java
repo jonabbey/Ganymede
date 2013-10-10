@@ -69,7 +69,7 @@ import arlut.csd.ganymede.common.ReturnVal;
  * <p>adminSession is an RMI interface to the Ganymede server's
  * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} class.  adminSession
  * is the remote interface used by the admin console to send system commands
- * to the Ganymede server.</P>
+ * to the Ganymede server.</p>
  *
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */

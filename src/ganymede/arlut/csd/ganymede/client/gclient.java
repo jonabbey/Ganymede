@@ -675,24 +675,27 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     my_querybox = null;
 
   /**
-   * <p>This thread is used to clear the statusLabel after some interval after
-   * it is set.</p>
+   * <p>This thread is used to clear the statusLabel after some
+   * interval after it is set.</p>
    *
-   * <p>Whenever the gclient's
-   * {@link arlut.csd.ganymede.client.gclient#setStatus(java.lang.String,int) setStatus}
-   * method is called, this thread has a countdown timer started, which will
-   * clear the status label if it is not reset by another call to setStatus.</p>
+   * <p>Whenever the gclient's {@link
+   * arlut.csd.ganymede.client.gclient#setStatus(java.lang.String,int)
+   * setStatus} method is called, this thread has a countdown timer
+   * started, which will clear the status label if it is not reset by
+   * another call to setStatus.</p>
    */
 
   public StatusClearThread statusThread, loginStatusThread;
 
   /**
-   * <p>This thread is set up to launder RMI build status updates from the server./p>
+   * <p>This thread is set up to launder RMI build status updates from
+   * the server.</p>
    *
-   * <p>In some versions of Sun's JDK, RMI callbacks are not allowed to manipulate
-   * the GUI event queue.  To get around this, this securityThread is created
-   * to launder these RMI callbacks so that the Swing event queue is messed with
-   * by a client-local thread.</p>
+   * <p>In some versions of Sun's JDK, RMI callbacks are not allowed
+   * to manipulate the GUI event queue.  To get around this, this
+   * securityThread is created to launder these RMI callbacks so that
+   * the Swing event queue is messed with by a client-local
+   * thread.</p>
    */
 
   public SecurityLaunderThread securityThread;
@@ -2801,7 +2804,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
         System.err.println("gclient.handleReturnVal(): rescan dump: " + retVal.dumpRescanInfo());
       }
 
-    Vector objects = retVal.getRescanObjectsList();
+    Vector<Invid> objects = retVal.getRescanObjectsList();
 
     if (objects == null)
       {
@@ -2818,15 +2821,8 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
         System.err.println("gclient.handleReturnVal(): Rescanning " + objects.size() + " objects.");
       }
 
-    Enumeration invids = objects.elements();
-
-    // Loop over all the invids, and try to find
-    // containerPanels for them.
-
-    while (invids.hasMoreElements())
+    for (Invid invid: objects)
       {
-        Invid invid = (Invid) invids.nextElement();
-
         if (debug)
           {
             System.err.println("gclient.handleReturnVal(): updating invid: " + invid);
@@ -5844,13 +5840,10 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   // treeCallback methods
 
   /**
-   * Called when a node is expanded, to allow the
-   * user of the tree to dynamically load the information
-   * at that time.
+   * <p>Called when a node is expanded, to allow the user of the tree
+   * to dynamically load the information at that time.</p>
    *
    * @param node The node opened in the tree.
-   *
-   * @see arlut.csd.JTree.treeCanvas
    */
 
   public void treeNodeExpanded(treeNode node)
@@ -5880,9 +5873,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   }
 
   /**
-   * Called when a node is closed.
-   *
-   * @see arlut.csd.JTree.treeCanvas
+   * <p>Called when a node is closed.</p>
    */
 
   public void treeNodeContracted(treeNode node)
@@ -5890,11 +5881,9 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   }
 
   /**
-   * Called when an item in the tree is selected
+   * <p>Called when an item in the tree is selected</p>
    *
    * @param node The node selected in the tree.
-   *
-   * @see arlut.csd.JTree.treeCanvas
    */
 
   public void treeNodeSelected(treeNode node)
@@ -5912,26 +5901,22 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   }
 
   /**
-   * Called when an item in the tree is unselected
+   * <p>Called when an item in the tree is unselected</p>
    *
    * @param node The node selected in the tree.
    * @param otherNode If true, this node is being unselected by the selection
    *                         of another node.
-   *
-   * @see arlut.csd.JTree.treeCanvas
    */
+
   public void treeNodeUnSelected(treeNode node, boolean otherNode)
   {
     selectedNode = null;
   }
 
   /**
-   * Called when a popup menu item is selected
-   * on a treeNode
+   * <p>Called when a popup menu item is selected on a treeNode</p>
    *
    * @param node The node selected in the tree.
-   *
-   * @see arlut.csd.JTree.treeCanvas
    */
 
   public void treeNodeMenuPerformed(treeNode node,

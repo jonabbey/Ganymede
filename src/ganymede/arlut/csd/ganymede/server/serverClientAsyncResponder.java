@@ -13,17 +13,19 @@
    This makes it possible for the server to provide asynchronous
    notification to the client, even if the client is running behind a
    system-level firewall.
-   
+
    Created: 4 September 2003
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -122,9 +124,8 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
   private int ebSz = 0;
 
   /**
-   * <p>If true, we have been told to shut down, and our
-   * background commThread will exit as soon as it can
-   * clear its event queue.</p>.</p>
+   * <p>If true, we have been told to shut down, and our background
+   * commThread will exit as soon as it can clear its event queue.</p>
    */
 
   private volatile boolean done = false;
@@ -259,7 +260,7 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
         // clear the direct pointer to this event so that
         // replaceEvent() will know that we don't have an event of
         // this kind in our buffer anymore.
-        
+
         lookUp[event.getMethod()] = null;
       }
 
@@ -286,9 +287,9 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
           {
             throwOverflow();
           }
-        
+
         enqueue(newEvent);
-        
+
         eventBuffer.notify();   // wake up getNextMsg()
       }
   }
@@ -369,7 +370,7 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
               }
           }
       }
-    
+
     throw new RemoteException("serverClientAsyncResponder buffer overflow:" + buffer.toString());
   }
 
@@ -382,12 +383,12 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
     synchronized (eventBuffer)
       {
         eventBuffer[enqueuePtr] = item;
-        
+
         if (++enqueuePtr >= maxBufferSize)
           {
             enqueuePtr = 0;
           }
-        
+
         ebSz++;
       }
   }
@@ -403,14 +404,14 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
       {
         clientAsyncMessage result = eventBuffer[dequeuePtr];
         eventBuffer[dequeuePtr] = null;
-        
+
         if (++dequeuePtr >= maxBufferSize)
           {
             dequeuePtr = 0;
           }
-        
+
         ebSz--;
-        
+
         return result;
       }
   }
