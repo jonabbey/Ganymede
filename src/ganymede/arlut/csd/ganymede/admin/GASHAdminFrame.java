@@ -370,6 +370,42 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     this.loginPanel = loginPanel;
 
+    if (prefs != null)
+      {
+        try
+          {
+            this.userTableColWidths = baseTable.decodeColumnsPref(prefs.get(USERTABLE_COLS_PREF, null));
+          }
+        catch (RuntimeException ex)
+          {
+          }
+
+        try
+          {
+            this.syncTaskColWidths = baseTable.decodeColumnsPref(prefs.get(SYNCTABLE_COLS_PREF, null));
+          }
+        catch (RuntimeException ex)
+          {
+          }
+
+        try
+          {
+            this.taskColWidths = baseTable.decodeColumnsPref(prefs.get(SCHEDTABLE_COLS_PREF, null));
+          }
+        catch (RuntimeException ex)
+          {
+          }
+
+        try
+          {
+            this.manualTaskColWidths = baseTable.decodeColumnsPref(prefs.get(MANUALTABLE_COLS_PREF, null));
+          }
+        catch (RuntimeException ex)
+          {
+          }
+
+      }
+
     // If we're running on the Mac, let's try to fit in a bit better.
 
     if (GASHAdmin.isRunningOnMac())
@@ -1097,38 +1133,6 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
         syncSort = prefs.get(SYNCTABLE_SORT_PREF, null);
         schedSort = prefs.get(SCHEDTABLE_SORT_PREF, null);
         manualSort = prefs.get(MANUALTABLE_SORT_PREF, null);
-
-        try
-          {
-            userTableColWidths = baseTable.decodeColumnsPref(prefs.get(USERTABLE_COLS_PREF, null));
-          }
-        catch (RuntimeException ex)
-          {
-          }
-
-        try
-          {
-            syncTaskColWidths = baseTable.decodeColumnsPref(prefs.get(SYNCTABLE_COLS_PREF, null));
-          }
-        catch (RuntimeException ex)
-          {
-          }
-
-        try
-          {
-            taskColWidths = baseTable.decodeColumnsPref(prefs.get(SCHEDTABLE_COLS_PREF, null));
-          }
-        catch (RuntimeException ex)
-          {
-          }
-
-        try
-          {
-            manualTaskColWidths = baseTable.decodeColumnsPref(prefs.get(MANUALTABLE_COLS_PREF, null));
-          }
-        catch (RuntimeException ex)
-          {
-          }
 
         if (debug)
           {
