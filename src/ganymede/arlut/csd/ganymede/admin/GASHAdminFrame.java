@@ -403,7 +403,6 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
         catch (RuntimeException ex)
           {
           }
-
       }
 
     // If we're running on the Mac, let's try to fit in a bit better.
