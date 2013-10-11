@@ -457,7 +457,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
   {
     StringBuilder builder = new StringBuilder();
 
-    for (int i = 0; i < colPos.size(); i++)
+    for (int i = 0; i < colPos.size() - 1; i++)
       {
         if (i != 0)
           {
