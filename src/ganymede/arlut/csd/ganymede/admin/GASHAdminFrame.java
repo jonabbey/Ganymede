@@ -103,6 +103,7 @@ import arlut.csd.JDialog.StringDialog;
 import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.aboutGanyDialog;
 import arlut.csd.JDialog.aboutJavaDialog;
+import arlut.csd.JTable.baseTable;
 import arlut.csd.JTable.rowSelectCallback;
 import arlut.csd.JTable.rowTable;
 import arlut.csd.Util.PackageResources;
@@ -175,6 +176,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   static final String SYNCTABLE_SORT_PREF = "synctable_sort";
   static final String SCHEDTABLE_SORT_PREF = "schedtable_sort";
   static final String MANUALTABLE_SORT_PREF = "manualtable_sort";
+  static final String USERTABLE_COLS_PREF = "usertable_cols";
+  static final String SYNCTABLE_COLS_PREF = "synctable_cols";
+  static final String SCHEDTABLE_COLS_PREF = "schedtable_cols";
+  static final String MANUALTABLE_COLS_PREF = "manualtable_cols";
 
   static final boolean debug = false;
 
@@ -302,7 +307,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
                       ts.l("global.user_col_4"), // "Activity"
                       ts.l("global.user_col_5")}; // "Locked Objects"
 
-  int colWidths[] = {50,50,25,325,50};
+  int userTableColWidths[] = {50,50,25,325,50};
 
   // resources for the sync task monitor table
 
@@ -364,6 +369,42 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     super(title);
 
     this.loginPanel = loginPanel;
+
+    if (prefs != null)
+      {
+        try
+          {
+            this.userTableColWidths = baseTable.decodeColumnsPref(prefs.get(USERTABLE_COLS_PREF, null));
+          }
+        catch (RuntimeException ex)
+          {
+          }
+
+        try
+          {
+            this.syncTaskColWidths = baseTable.decodeColumnsPref(prefs.get(SYNCTABLE_COLS_PREF, null));
+          }
+        catch (RuntimeException ex)
+          {
+          }
+
+        try
+          {
+            this.taskColWidths = baseTable.decodeColumnsPref(prefs.get(SCHEDTABLE_COLS_PREF, null));
+          }
+        catch (RuntimeException ex)
+          {
+          }
+
+        try
+          {
+            this.manualTaskColWidths = baseTable.decodeColumnsPref(prefs.get(MANUALTABLE_COLS_PREF, null));
+          }
+        catch (RuntimeException ex)
+          {
+          }
+
+      }
 
     // If we're running on the Mac, let's try to fit in a bit better.
 
@@ -957,7 +998,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     killUserMI.setActionCommand(KILLUSER);
     popMenu.add(killUserMI);
 
-    table = new rowTable(colWidths, headers, this, false, popMenu, false);
+    table = new rowTable(userTableColWidths, headers, this, false, popMenu, false);
     JPanel tableBox = new JPanel(new BorderLayout());
     tableBox.add("Center", table);
 
@@ -1645,6 +1686,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
         prefs.put(SYNCTABLE_SORT_PREF, syncTaskTable.getSortPref());
         prefs.put(SCHEDTABLE_SORT_PREF, taskTable.getSortPref());
         prefs.put(MANUALTABLE_SORT_PREF, manualTaskTable.getSortPref());
+        prefs.put(USERTABLE_COLS_PREF, table.getColumnsPref());
+        prefs.put(SYNCTABLE_COLS_PREF, syncTaskTable.getColumnsPref());
+        prefs.put(SCHEDTABLE_SORT_PREF, taskTable.getColumnsPref());
+        prefs.put(MANUALTABLE_COLS_PREF, manualTaskTable.getColumnsPref());
       }
   }
 
