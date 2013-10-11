@@ -464,14 +464,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
             builder.append(":");
           }
 
-        if (i == colPos.size()-1)
-          {
-            builder.append(origTotalWidth - colPos.get(i));
-          }
-        else
-          {
-            builder.append(colPos.get(i+1) - colPos.get(i));
-          }
+        builder.append((int)cols.get(i).origWidth);
       }
 
     return builder.toString();
@@ -1159,9 +1152,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
   }
 
   /**
-   *
    * This method takes the given column out of the table entirely.
-   *
    */
 
   public synchronized void deleteColumn(int index, boolean reportion)
@@ -1199,7 +1190,6 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
    *
    * @param x col of cell clicked in
    * @param y row of cell clicked in
-   *
    */
 
   public synchronized void clickInCell(int x, int y)
@@ -1762,7 +1752,6 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
   /**
    * Reinitializes the table with a new set of columns / headers
-   *
    */
 
   public synchronized void reinitialize(tableAttr[] colAttribs, int[] colWidths, String[] headers)

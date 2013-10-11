@@ -59,12 +59,10 @@ import javax.swing.JPopupMenu;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * This class holds the information on a particular column in the table,
  * including the header, header pop-up menu, current column width, and
  * any special font or style or color information to apply to cells in
  * this column.
- *
  */
 
 class tableCol {
