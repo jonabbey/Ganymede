@@ -118,10 +118,13 @@ import apple.dts.samplecode.osxadapter.OSXAdapter;
 ------------------------------------------------------------------------------*/
 
 /**
- * GASHAdminFrame is the main class for the Ganymede admin console.
- * The GASHAdminFrame constructor is the first piece of common code
+ * <p>GASHAdminFrame is the top-level window (JFrame) that contains
+ * the GUI for the admin console after the user has logged in.</p>
+ *
+ * <p>The GASHAdminFrame constructor is the first piece of common code
  * that is executed both in an applet context and as a stand-alone
- * app.
+ * app, after the {@link arlut.csd.ganymede.admin.glogin glogin} class
+ * has finished processing the admin's login.</p>
  */
 
 public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback, JsetValueCallback {
