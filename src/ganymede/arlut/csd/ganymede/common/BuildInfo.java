@@ -96,6 +96,8 @@ public class BuildInfo {
   private static String buildHost = null;
   private static String buildJVM = null;
   private static String releaseString = null;
+  private static String serverHost = null;
+  private static String serverPort = null;
 
   // We're going to load all our properties and build all of our
   // strings up front so that we can pop up the 'About Ganymede'
@@ -109,6 +111,8 @@ public class BuildInfo {
     getBuildJVM();
     getBuildHost();
     getReleaseString();
+    getServerHost();
+    getServerPort();
   }
 
   // ---
@@ -179,5 +183,25 @@ public class BuildInfo {
       }
 
     return BuildInfo.releaseString;
+  }
+
+  public static String getServerHost()
+  {
+    if (BuildInfo.serverHost == null)
+      {
+        BuildInfo.serverHost = properties.getProperty("ganymede.serverhost");
+      }
+
+    return BuildInfo.serverHost;
+  }
+
+  public static String getServerPort()
+  {
+    if (BuildInfo.serverPort == null)
+      {
+        BuildInfo.serverPort =  properties.getProperty("ganymede.serverPort");
+      }
+
+    return BuildInfo.serverPort;
   }
 }
