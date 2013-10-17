@@ -360,6 +360,7 @@ refresh the jar files.
       <manifest>
 	<attribute name="Permissions" value="all-permissions"/>
 	<attribute name="Codebase" value="*.${DOMAIN}"/>
+	<attribute name="Application-Name" value="Ganymede Network Management"/>
       </manifest>
     </jar>
 
@@ -408,6 +409,7 @@ refresh the jar files.
       <manifest>
 	<attribute name="Permissions" value="all-permissions"/>
 	<attribute name="Codebase" value="*.${DOMAIN}"/>
+	<attribute name="Application-Name" value="Ganymede Network Management"/>
       </manifest>
     </jar>
 
