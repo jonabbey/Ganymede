@@ -123,8 +123,8 @@ import apple.dts.samplecode.osxadapter.OSXAdapter;
  *
  * <p>The GASHAdminFrame constructor is the first piece of common code
  * that is executed both in an applet context and as a stand-alone
- * app, after the {@link arlut.csd.ganymede.admin.glogin glogin} class
- * has finished processing the admin's login.</p>
+ * app, after the {@link arlut.csd.ganymede.admin.GASHAdmin GASHAdmin}
+ * class has finished processing the admin's login.</p>
  */
 
 public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback, JsetValueCallback {
