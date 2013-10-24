@@ -5,6 +5,7 @@ src/build/classes/
 src/build/crypto/
 src/build/doc/
 src/resources/arlut/csd/ganymede/common/build.properties
+src/crypto.properties
 doc/javadoc/
 installServer
 installWeb
