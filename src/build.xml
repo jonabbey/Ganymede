@@ -6,7 +6,7 @@
 
 <project name="ganymede" default="build" basedir=".">
 
-  <!-- 
+  <!--
     Project-wide settings. All directories are relative to the project
     directories.
   -->
@@ -34,23 +34,59 @@
   <!-- Global properties for javac -->
   <property name="build.compiler" value="modern"/>
 
-  <!-- Crypto Key Properties -->
+  <!-- Location of custom crypto properties -->
+  <property name="crypto.properties" value="crypto.properties"/>
+
+  
+
+  <!-- Are we going to use SSL?  (Say yes!) -->
   <property name="use.ssl" value="true"/>
+
+  <!-- We're storing our server SSL key in a known location with a
+       known alias and store password so the server can access it.
+
+       The server_ssl_key.storepass must match the value stored in
+       arlut.csd.ganymede.common.RMISSLServerSocketFactory.passphrase.
+
+       We don't bother signing the server_ssl_key because we're
+       counting on the key being held in the server_ssl_key.keystore
+       on the server. -->
+  <property name="server_ssl_key.keystore" value="${build.crypto}/arlut/csd/ganymede/common/server_ssl_key.jks"/>
+  <property name="server_ssl_key.storepass" value="ganypassphrase"/>
+  <property name="server_ssl_key.keyalias" value="GanymedeServerKey"/>
+
+  <!-- Likewise, we've got a cert for our server SSL key that is
+       distributed with the clients in a known location -->
+  <property name="client_ssl_cert.keystore" value="${build.crypto}/arlut/csd/ganymede/common/client_ssl_cert.jks"/>
+  <property name="client_ssl_cert.storepass" value="unknown"/>
+
+  <!-- Are we going to sign our jars?  (Say yes!) -->
   <property name="do.signjars" value="true"/>
 
+  <!-- The location of the keystore containing the private key and the
+       certs required to sign our client jars -->
+  <property name="jar_signing.keystore" value="${build.crypto}/arlut/csd/ganymede/common/signing_key_and_certs.jks"/>
+  <property name="jar_signing.storepass" value="gclientpassphrase"/>
+  <property name="jar_signing.keyalias" value="signkey"/>
+  <property name="jar_signing.keypass" value="unknown"/>
 
-  <!-- This keystore passphrase must match that in arlut.csd.ganymede.common.RMISSLServerSocketFactory -->
-  <property name="priv_key.storepass" value="ganypassphrase"/>
+  <!-- The crypto properties are expected to be held in the
+       ${crypto.properties} file outside of revision control. -->
+  <condition property="crypto_properties.found">
+    <available file="${crypto.properties}"/>
+  </condition>
 
-  <!-- Let's make the private server key valid for 10 years -->
-  <property name="priv_key.days_valid" value="3650"/>
+  <target name="load_crypto_properties" if="crypto_properties.found">
+    <loadproperties srcFile="crypto.properties"/>
+  </target>
 
-  <!-- This filename should not be changed -->
-  <property name="priv_key.keystore" value="${build.crypto}/arlut/csd/ganymede/common/GanymedeSSLServerKeys"/>
-  <property name="priv_key.alias" value="GanymedeServerKey"/>
-  <property name="priv_key.dname" value="cn=Ganymede Server,ou=Your Domain Here,c=Your Country Here"/>
-  <property name="pubcert.truststore" value="${build.crypto}/arlut/csd/ganymede/common/client.truststore"/>
-  <property name="pubcert.storepass" value="gclientpassphrase"/>
+  <!-- If we are required to generate our own, unsigned private
+       server key, let's make it valid for 10 years -->
+  <property name="gen_key.days_valid" value="3650"/>
+
+  <!-- If we are required to generate our own, unsigned private
+       server key, give it the following name. -->
+  <property name="gen_key.dname" value="cn=Ganymede Server,ou=Your Domain Here,c=Your Country Here"/>
 
   <!--
       We're going to encode the DOMAIN name of the build host into
@@ -70,8 +106,8 @@
   <condition property="sslkeys.notgenerated">
     <not>
       <and>
-        <available file="${priv_key.keystore}"/>
-        <available file="${pubcert.truststore}"/>
+        <available file="${server_ssl_key.keystore}"/>
+        <available file="${client_ssl_cert.keystore}"/>
       </and>
     </not>
   </condition>
@@ -117,8 +153,20 @@ validate      - Cross-checks all Ganymede .java source files against
                 See verification/resource_validator.pl and
                 verification/translation_validator.pl for details.
 
-genkeys       - Generates a new private/public key pair and cert for authenticating
-                the server when using SSL sockets for client/server communications.
+genkeys       - Generates a new self-signed private/public key pair and cert for
+                authenticating the server when using SSL sockets for client/server
+		communications.
+
+		The generated private key and cert are also used to
+		sign the client ganymede.jar and
+		adminganymedeAdmin.jar files, but the Java environment
+		starting with Java 1.7u40 will complain vociferously
+		if you try to use jars signed with a self-signed cert
+		with Java Web Start or in an applet.
+
+		Later versions of Java will simply refuse to allow
+		self-signed jars to be used with Java Web Start or in
+		an applet.
 
 regenkeys     - Deletes and regenerates SSL private key for the server and
                 public certificate for the client.  Be careful!  When you delete
@@ -173,7 +221,7 @@ refresh the jar files.
 
     <echo>Building, java.home is ${java.home}
 </echo>
-    
+
     <javac destdir="${build.classes}"
            debug="${debug.flag}"
            debuglevel="${debug.level}"
@@ -240,7 +288,7 @@ refresh the jar files.
 
       <include name="arlut/csd/ganymede/server/serverAdminAsyncResponder.class"/>
       <include name="arlut/csd/ganymede/server/serverClientAsyncResponder.class"/>
-      
+
       <include name="arlut/csd/ganymede/server/XMLTransmitter.class"/>
     </rmic>
   </target>
@@ -294,7 +342,7 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="arlut/csd/crypto/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/listHandle.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDialog/**/*.class"/>
-      <fileset dir="${build.classes}" includes="com/jclark/**/*.class"/> 
+      <fileset dir="${build.classes}" includes="com/jclark/**/*.class"/>
       <fileset dir="${build.classes}" includes="Qsmtp/**/*.class"/>
       <fileset dir="${build.classes}" includes="jcrypt/**/*.class"/>
       <fileset dir="${build.classes}" includes="md5/**/*.class"/>
@@ -305,7 +353,7 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/server/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/common/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/rmi/*.class"/>
-      
+
       <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/server/**"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/common/**"/>
       <fileset dir="${resources.dir}" includes="org/solinger/**"/>
@@ -351,7 +399,7 @@ refresh the jar files.
       <zipfileset src="${lib.dir}/forms-1.3.0pre4.jar"/>
 
       <!-- add in a few extra for use w new calendar popup widget. James -->
-      
+
       <zipfileset src="${lib.dir}/swingx-core-1.6.2.jar"/>
 
       <!-- Manifest attributes to satisfy a couple of security checks
@@ -414,7 +462,7 @@ refresh the jar files.
     </jar>
 
     <antcall target="signjars"/>
-    
+
     <!-- Copy over the newly created jars -->
     <copy todir="${dist.jars}">
       <fileset dir="${build.lib}" includes="*.jar"/>
@@ -423,7 +471,7 @@ refresh the jar files.
 
 
   <target name="signjars" if="do.signjars">
-    <signjar alias="${priv_key.alias}" storepass="${priv_key.storepass}" keystore="${priv_key.keystore}" keypass="${priv_key.storepass}">
+    <signjar alias="${jar_signing.alias}" storepass="${jar_signing.storepass}" keystore="${jar_signing.keystore}" keypass="${jar_signing.keypass}">
      <fileset dir="." includes="${build.lib}/ganymede.jar, ${build.lib}/ganymedeAdmin.jar"/>
     </signjar>
   </target>
@@ -447,8 +495,8 @@ refresh the jar files.
       <fileset dir="${build.doc}"/>
     </copy>
   </target>
-  
-  
+
+
   <target name="clean">
     <delete includeemptydirs="true" failonerror="false">
       <fileset dir="${build.classes}" includes="**/*"/>
@@ -457,7 +505,7 @@ refresh the jar files.
     </delete>
   </target>
 
-  
+
   <target name="javadoc_clean">
     <delete includeemptydirs="true" failonerror="false">
       <fileset dir="${build.doc}" includes="**/*"/>
@@ -473,9 +521,9 @@ refresh the jar files.
     </delete>
   </target>
 
-  
+
   <target name="veryclean" depends="javadoc_clean,clean,dist_clean"/>
-  
+
 
   <target name="total" depends="veryclean,main,validate,jars,javadoc"/>
 
@@ -496,21 +544,27 @@ refresh the jar files.
 
 
   <target name="genkeys" if="need.sslkeys" depends="prepare">
-    <genkey alias="${priv_key.alias}" keystore="${priv_key.keystore}" storepass="${priv_key.storepass}"
-            dname="${priv_key.dname}" validity="${priv_key.days_valid}" verbose="false"/>
+    <genkey alias="${server_ssl_key.keyalias}" keystore="${server_ssl_key.keystore}" storepass="${server_ssl_key.storepass}"
+            dname="${gen_key.dname}" validity="${gen_key.days_valid}" verbose="false"/>
     <exec dir="." executable="${java.home}${file.separator}bin${file.separator}keytool">
-      <arg line= "-export -v -keystore ${priv_key.keystore} -alias ${priv_key.alias} -file ${pubcert.truststore}.tmp -storepass ${priv_key.storepass}"/>
+      <arg line= "-export -v -keystore ${ssl_key.keystore} -alias ${ssl_key.alias} -file ${keystore.path}.tmp -storepass ${ssl_key.pass}"/>
     </exec>
     <exec dir="." executable="${java.home}${file.separator}bin${file.separator}keytool">
-      <arg line="-import -v -alias ${priv_key.alias} -noprompt -file ${pubcert.truststore}.tmp -keystore ${pubcert.truststore} -storepass ${pubcert.storepass}"/>
+      <arg line="-import -v -alias ${ssl_key.alias} -noprompt -file ${keystore.path}.tmp -keystore ${keystore.path} -storepass ${keystore.pass}"/>
     </exec>
-    <delete failonerror="false"><fileset dir="." includes="${pubcert.truststore}.tmp"/></delete>
+    <delete failonerror="false"><fileset dir="." includes="${keystore.path}.tmp"/></delete>
     <echo>
- 
-Fresh SSL keys have been generated.  Be sure and run 'ant jars' to rebuild the jar files.  Remember
-that the server, admin, and client jar files must all be updated at one time in order to keep
-the SSL keys and certificates matched.
- 
+
+Fresh self-signed SSL and signing keys have been generated.  Be sure
+and run 'ant jars' to rebuild the jar files.  Remember that the
+server, admin, and client jar files must all be updated at one time in
+order to keep the SSL keys and certificates matched.
+
+Warning: jars signed with self-signed certificates are not valid for
+use with Java Web Start and/or in an applet.  Modern Java environments
+will either give a scary warning or prevent execution of such jars
+altogether.
+
 </echo>
   </target>
 </project>
