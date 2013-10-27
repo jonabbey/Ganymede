@@ -34,10 +34,27 @@
   <!-- Global properties for javac -->
   <property name="build.compiler" value="modern"/>
 
-  <!-- Location of custom crypto properties -->
-  <property name="crypto.properties" value="crypto.properties"/>
+  <!-- ============================================================
 
-  
+       We use crypto for two things in Ganymede.
+
+       The first is we want to have a private key on the server and a
+       self-signed certificate (containing the matching public key) on
+       the client in order to SSL-protect communications between the
+       client and the server.
+
+       We have no need to use a certificate authority to authenticate
+       this private/public key pair because the server, client, and
+       admin console jar files are built with the appropriate crypto
+       material included.
+
+       This section defines the properties we need to generate this
+       private/public key pair and to package the appropriate
+       materials in the jar files we build.
+
+       You shouldn't need to change any of the following.
+
+       ============================================================ -->
 
   <!-- Are we going to use SSL?  (Say yes!) -->
   <property name="use.ssl" value="true"/>
@@ -60,49 +77,6 @@
   <property name="client_ssl_cert.keystore" value="${build.crypto}/arlut/csd/ganymede/common/client_ssl_cert.jks"/>
   <property name="client_ssl_cert.storepass" value="unknown"/>
 
-  <!-- Are we going to sign our jars?  (Say yes!) -->
-  <property name="do.signjars" value="true"/>
-
-  <!-- The location of the keystore containing the private key and the
-       certs required to sign our client jars -->
-  <property name="jar_signing.keystore" value="${build.crypto}/arlut/csd/ganymede/common/signing_key_and_certs.jks"/>
-  <property name="jar_signing.storepass" value="gclientpassphrase"/>
-  <property name="jar_signing.keyalias" value="signkey"/>
-  <property name="jar_signing.keypass" value="unknown"/>
-
-  <!-- The crypto properties are expected to be held in the
-       ${crypto.properties} file outside of revision control. -->
-  <condition property="crypto_properties.found">
-    <available file="${crypto.properties}"/>
-  </condition>
-
-  <target name="load_crypto_properties" if="crypto_properties.found">
-    <loadproperties srcFile="crypto.properties"/>
-  </target>
-
-  <!-- If we are required to generate our own, unsigned private
-       server key, let's make it valid for 10 years -->
-  <property name="gen_key.days_valid" value="3650"/>
-
-  <!-- If we are required to generate our own, unsigned private
-       server key, give it the following name. -->
-  <property name="gen_key.dname" value="cn=Ganymede Server,ou=Your Domain Here,c=Your Country Here"/>
-
-  <!--
-      We're going to encode the DOMAIN name of the build host into
-      the client and admin console jar files, to let Java7u25 and
-      later know not to let people run the jar files we are building
-      here from some random foreign system.
-
-      See
-
-      http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/no_redeploy.html
-
-      for details.
-  -->
-
-  <hostinfo/>
-
   <condition property="sslkeys.notgenerated">
     <not>
       <and>
@@ -114,10 +88,91 @@
 
   <condition property="need.sslkeys">
     <and>
-      <equals arg1="${sslkeys.notgenerated}" arg2="true"/>
       <equals arg1="${use.ssl}" arg2="true"/>
+      <equals arg1="${sslkeys.notgenerated}" arg2="true"/>
     </and>
   </condition>
+
+  <!-- ============================================================
+
+       The second thing we use crypto for is to sign the client
+       and admin console jar files so that they will be accepted by
+       Java Web Start.
+
+       Starting with the version 7u40 of the Oracle JDK, the JDK will
+       either provide a scary warning dialog or will refuse to permit
+       the clients to run unless the client jar files are signed with
+       a certificate from a certificate authority (CA) recognized by
+       the Oracle JDK distribution.
+
+       In order to set this up, you need to create a private / public
+       key pair using the Java keytool command, then use keytool to
+       generate a certificate signing request (CSR)..
+
+       Here are the instructions for this as provided by one
+       certificate authority:
+
+       https://www.globalsign.com/support/ordering-guides/SignJavaCodeApplets.pdf
+
+       After generating the CSR, you will need to purchase a
+       certificate from a certificate authority recognized by the
+       Oracle JDK, such as GlobalSign, Thawte, Verisign, among others.
+
+       You'll need to retrieve the purchased certificate (and any
+       intermediate certificates provided to you by the certificate
+       authority web site) and include it/them in a Java keystore (a
+       JKS file) along with the private key you initially generated
+       with keytool.
+
+       Once you've got a Java keystore that includes the private key
+       along with the certificate or certificates from the CA, you'll
+       need to specify the following properties:
+
+       jar_signing.keystore, the location of the keystore
+       jar_signing.storepass, the password for the keystore
+       jar_signing.keyalias, the identifier for the private key
+       jar_signing.keypass, the password for the private key
+
+       For obvious reasons, the keystore and the properties specified
+       above should never be recorded in Git or any other revision
+       control system.  For this reason, I've put *.jks and
+       src/build/crypto/crypto.properties in the .gitignore file at
+       the root of the Ganymede distribution.
+
+       Put the above properties in src/build/crypto/crypto.properties,
+       and they'll be used by this build.xml file.
+
+       If any of the above properties are not found in
+       crypto.properties, the jars produced by the "jars" task will
+       not be signed, and a warning will be emitted.
+
+       ============================================================ -->
+
+  <!-- Are we going to sign our jars?  (Say yes!) -->
+  <property name="do.signjars" value="true"/>
+
+  <property file="${build.crypto}/crypto.properties"/>
+
+  <!-- If we are required to generate our own, unsigned private server
+       key, let's make it valid for 10 years -->
+  <property name="gen_key.days_valid" value="3650"/>
+
+  <!-- If we are required to generate our own, unsigned private server
+       key, give it the following name. -->
+  <property name="gen_key.dname" value="cn=Ganymede Server,ou=Your Domain Here,c=Your Country Here"/>
+
+  <!--
+      We're going to encode the DOMAIN name of the build host into the
+      client and admin console jar files, to let Java7u25 and later
+      know not to let people run the jar files we are building here
+      from some random foreign system.
+
+      See
+
+      http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/no_redeploy.html
+
+      for details. -->
+  <hostinfo/>
 
   <!-- Include the JarBundler task so that we can do Mac OS X specific
   build packaging. -->
