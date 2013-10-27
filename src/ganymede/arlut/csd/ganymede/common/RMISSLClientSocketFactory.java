@@ -1,17 +1,19 @@
 /*
 
    RMISSLServerSocketFactory.java
- 
+
    Created: 27 August 2004
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -67,7 +69,7 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
 
   private int _hashCode = "arlut.csd.ganymede.common.RMISSLClientSocketFactory".hashCode();
 
-  private static String certsResource = "client.truststore";
+  private static String certsResource = "client_ssl_cert.jks";
   private static int counter = 0;
   private static final boolean socketDebug = false;
   private static final boolean mrShouty = false;
@@ -123,7 +125,7 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
             System.err.println("Creating client socket # " + counter + " to host " + host + " on port " + port);
             counter++;
           }
-        
+
         RMISSLClientSocketFactory.printCallStack();
       }
 
@@ -218,7 +220,7 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
                 try
                   {
                     int i = x.read();
-                    
+
                     while (i >= 0)
                       {
                         count++;
@@ -229,7 +231,7 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
                   {
                     ex.printStackTrace();
                   }
-                
+
                 System.err.println("Read " + count + " bytes from " + certsResource);
               }
 
