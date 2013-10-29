@@ -120,9 +120,8 @@
 
        You'll need to retrieve the purchased certificate (and any
        intermediate certificates provided to you by the certificate
-       authority web site) and include it/them in a Java keystore (a
-       JKS file) along with the private key you initially generated
-       with keytool.
+       authority web site) and bind them with the private key you
+       initially generated with keytool in a Java keystore (JKS) file.
 
        Once you've got a Java keystore that includes the private key
        along with the certificate or certificates from the CA, you'll
