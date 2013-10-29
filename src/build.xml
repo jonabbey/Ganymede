@@ -234,17 +234,6 @@ genkeys       - Generates a new self-signed private/public key pair and cert for
                 authenticating the server when using SSL sockets for client/server
 		communications.
 
-		The generated private key and cert are also used to
-		sign the client ganymede.jar and
-		adminganymedeAdmin.jar files, but the Java environment
-		starting with Java 1.7u40 will complain vociferously
-		if you try to use jars signed with a self-signed cert
-		with Java Web Start or in an applet.
-
-		Later versions of Java will simply refuse to allow
-		self-signed jars to be used with Java Web Start or in
-		an applet.
-
 regenkeys     - Deletes and regenerates SSL private key for the server and
                 public certificate for the client.  Be careful!  When you delete
                 or regenerate your SSL key material, you will have to be sure and
