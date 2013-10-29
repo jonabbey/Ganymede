@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-21 August 2013
+29 October 2013
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 21 August 2013
+RELEASE DATE: 29 October 2013
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -2229,6 +2229,20 @@ See
   http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/no_redeploy.html
 
 for details.
+
+164. [BUILD] Improved build.xml with instructions on how to sign jars
+
+As of Java 7u40 and later, the JRE will no longer passively accept
+self-signed certificates for jar files.  In response to this, I have
+modified the build.xml script in src to allow the necessary pieces for
+signing the jars with a private / public key pair signed by a
+certificate from a Certificate Authority recognized by the Java
+Runtime Environment to be held outside of the Git repository.
+
+Now, all of the sensitive pieces for signing are held in an external
+src/build/crypto/crypto.properties file which is listed in .gitignore
+to prevent that material from being accidentally included in a Git
+repository.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
