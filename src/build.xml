@@ -146,7 +146,7 @@
        crypto.properties, the jars produced by the "jars" task will
        not be signed, and a warning will be emitted.
 
-       --
+       ==
 
        In addition to the above, this build.xml file supports signing
        the JNLP files that you use to launch the client and admin
