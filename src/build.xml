@@ -498,7 +498,7 @@ refresh the jar files.
 
       <fileset dir="${build.classes}" includes="foxtrot/**/*.class"/>
 
-      <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/client.truststore"/>
+      <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/client_ssl_cert.jks"/>
 
       <!-- Pull in a couple of jar files that we'll use to provide
            better GUI support on Mac. -->
