@@ -146,6 +146,29 @@
        crypto.properties, the jars produced by the "jars" task will
        not be signed, and a warning will be emitted.
 
+       --
+
+       In addition to the above, this build.xml file supports signing
+       the JNLP files that you use to launch the client and admin
+       console.
+
+       In order to sign your client JNLP file, you'll need to create
+       the following directory tree under src/build/crypto:
+       
+       client/JNLP-INF/APPLICATION.JNLP
+
+       where APPLICATION.JNLP is either a copy or a symlink to the
+       client.jnlp file server by your web server to launch the client,
+       and
+
+       console/JNLP-INF/APPLICATION.JNLP
+
+       as a copy or symlink to the console.jnlp file used to launch
+       the admin client.
+
+       If you don't want to sign your JNLP launch files, just don't
+       provide the client and console directories.
+
        ============================================================ -->
 
   <!-- Are we going to sign our jars?  (Say yes!) -->
@@ -446,6 +469,7 @@ refresh the jar files.
       <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/common/**"/>
 
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/client_ssl_cert.jks"/>
+      <fileset dir="${build.crypto}/client" erroronmissingdir="false" includes="JNLP-INF/APPLICATION.JNLP"/>
 
       <!-- Pull in a couple of jar files that we'll use to provide
            better GUI support on Mac. -->
@@ -499,6 +523,7 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="foxtrot/**/*.class"/>
 
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/client_ssl_cert.jks"/>
+      <fileset dir="${build.crypto}/console" erroronmissingdir="FALSE" includes="JNLP-INF/APPLICATION.JNLP"/>
 
       <!-- Pull in a couple of jar files that we'll use to provide
            better GUI support on Mac. -->
