@@ -70,7 +70,7 @@
        on the server. -->
   <property name="server_ssl_key.keystore" value="${build.crypto}/arlut/csd/ganymede/common/server_ssl_key.jks"/>
   <property name="server_ssl_key.storepass" value="ganypassphrase"/>
-  <property name="server_ssl_key.keyalias" value="GanymedeServerKey"/>
+  <property name="server_ssl_key.keyalias" value="ganymedeserverkey"/>
 
   <!-- Likewise, we've got a cert for our server SSL key that is
        distributed with the clients in a known location -->
@@ -526,7 +526,7 @@ refresh the jar files.
 
 
   <target name="signjars" if="do.signjars">
-    <signjar alias="${jar_signing.alias}" storepass="${jar_signing.storepass}" keystore="${jar_signing.keystore}" keypass="${jar_signing.keypass}">
+    <signjar alias="${jar_signing.keyalias}" storepass="${jar_signing.storepass}" keystore="${jar_signing.keystore}" keypass="${jar_signing.keypass}">
      <fileset dir="." includes="${build.lib}/ganymede.jar, ${build.lib}/ganymedeAdmin.jar"/>
     </signjar>
   </target>
@@ -593,7 +593,7 @@ refresh the jar files.
 
   <target name="cleankeys">
     <delete failonerror="false">
-      <fileset dir="${build.crypto}" includes="**/*"/>
+      <fileset dir="${build.crypto}/arlut/csd/ganymede/common" includes="*.jks"/>
     </delete>
   </target>
 
@@ -602,18 +602,18 @@ refresh the jar files.
     <genkey alias="${server_ssl_key.keyalias}" keystore="${server_ssl_key.keystore}" storepass="${server_ssl_key.storepass}"
             dname="${gen_key.dname}" validity="${gen_key.days_valid}" verbose="false"/>
     <exec dir="." executable="${java.home}${file.separator}bin${file.separator}keytool">
-      <arg line= "-export -v -keystore ${ssl_key.keystore} -alias ${ssl_key.alias} -file ${keystore.path}.tmp -storepass ${ssl_key.pass}"/>
+      <arg line= "-export -v -keystore ${server_ssl_key.keystore} -alias ${server_ssl_key.keyalias} -file ${client_ssl_cert.keystore}.tmp -storepass ${server_ssl_key.storepass}"/>
     </exec>
     <exec dir="." executable="${java.home}${file.separator}bin${file.separator}keytool">
-      <arg line="-import -v -alias ${ssl_key.alias} -noprompt -file ${keystore.path}.tmp -keystore ${keystore.path} -storepass ${keystore.pass}"/>
+      <arg line="-import -v -alias ${server_ssl_key.keyalias} -noprompt -file ${client_ssl_cert.keystore}.tmp -keystore ${client_ssl_cert.keystore} -storepass ${client_ssl_cert.storepass}"/>
     </exec>
-    <delete failonerror="false"><fileset dir="." includes="${keystore.path}.tmp"/></delete>
+    <delete failonerror="false"><fileset dir="." includes="${client_ssl_cert.keystore}.tmp"/></delete>
     <echo>
 
-Fresh self-signed SSL and signing keys have been generated.  Be sure
-and run 'ant jars' to rebuild the jar files.  Remember that the
-server, admin, and client jar files must all be updated at one time in
-order to keep the SSL keys and certificates matched.
+Fresh self-signed SSL keys have been generated.  Be sure and run 'ant
+jars' to rebuild the jar files.  Remember that the server, admin, and
+client jar files must all be updated at one time in order to keep the
+SSL keys and certificates matched.
 
 Warning: jars signed with self-signed certificates are not valid for
 use with Java Web Start and/or in an applet.  Modern Java environments
