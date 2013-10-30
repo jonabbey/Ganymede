@@ -112,23 +112,25 @@ import arlut.csd.ganymede.rmi.db_field;
  *
  * <p>Each DBField subclass is responsible for writing itself to disk
  * on command with the {@link
- * arlut.csd.ganymede.server.DBField#emit(java.io.DataOutput) emit()} method,
- * and reading its state in with the {@link
- * arlut.csd.ganymede.server.DBField#receive(java.io.DataInput, arlut.csd.ganymede.server.DBObjectBaseField) receive()}
- * method.  Each DBField subclass may also have extensive special
- * logic to handle special operations on fields of the appropriate
- * type.  For instance, the InvidDBField class has lots and lots of
- * logic for handling the bi-directional object linking that the
- * server depends on for its object handling.  Mostly the DBField
- * subclasses provide customization that modifies how things like
- * {@link arlut.csd.ganymede.server.DBField#setValue(java.lang.Object)
+ * arlut.csd.ganymede.server.DBField#emit(java.io.DataOutput) emit()}
+ * method, and reading its state in with the {@link
+ * arlut.csd.ganymede.server.DBField#receive(java.io.DataInput,
+ * arlut.csd.ganymede.server.DBObjectBaseField) receive()} method.
+ * Each DBField subclass may also have extensive special logic to
+ * handle special operations on fields of the appropriate type.  For
+ * instance, the InvidDBField class has lots and lots of logic for
+ * handling the bi-directional object linking that the server depends
+ * on for its object handling.  Mostly the DBField subclasses provide
+ * customization that modifies how things like {@link
+ * arlut.csd.ganymede.server.DBField#setValue(java.lang.Object)
  * setValue()} and {@link arlut.csd.ganymede.server.DBField#getValue()
- * getValue()} work, but PasswordDBField and PermissionMatrixDBField
- * don't fit with the standard generic value-container model, and
- * contain their own methods for manipulating and accessing data held
- * in the Ganymede database. Most DBField subclasses only allow a
- * single value to be held, but StringDBField, InvidDBField, and
- * IPDBField support vectors of values.</p>
+ * getValue()} work, but FieldOptionDBField, PasswordDBField and
+ * PermissionMatrixDBField don't fit with the standard generic
+ * value-container model, and contain their own methods for
+ * manipulating and accessing data held in the Ganymede database. Most
+ * DBField subclasses only allow a single value to be held, but
+ * StringDBField, InvidDBField, and IPDBField support vectors of
+ * values.</p>
  *
  * <p>The Ganymede client can directly access fields in RMI-published
  * objects using the {@link arlut.csd.ganymede.rmi.db_field db_field} RMI
