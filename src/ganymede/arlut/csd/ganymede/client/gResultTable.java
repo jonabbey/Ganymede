@@ -791,35 +791,35 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // this may not be an issue.
 
     result.append("<html>\n");
-    result.append("<head>\n");
-    result.append("<title>Ganymede Table Dump - ");
+    result.append("  <head>\n");
+    result.append("    <title>Ganymede Table Dump - ");
     result.append(date);
     result.append("</title>\n");
-    result.append("</head>\n");
-    result.append("<body bgcolor=\"#FFFFFF\">\n");
-    result.append("<h1>Ganymede Table Dump - ");
+    result.append("  </head>\n");
+    result.append("  <body bgcolor=\"#FFFFFF\">\n");
+    result.append("    <h1>Ganymede Table Dump - ");
     result.append(date);
     result.append("</h1>\n");
-    result.append("<hr>\n");
-    result.append("<table border>\n");
-    result.append("<tr>\n");
+    result.append("    <hr/>\n");
+    result.append("    <table border>\n");
+    result.append("      <tr>\n");
 
     for (int i = 0; i < colcount; i++)
       {
-        result.append("<th>");
+        result.append("        <th>");
         result.append(sTable.getColumnName(i));
         result.append("</th>\n");
       }
 
-    result.append("</tr>\n");
+    result.append("      </tr>\n");
 
     for (int i = 0; i < size; i++)
       {
-        result.append("<tr>\n");
+        result.append("      <tr>\n");
 
         for (int j = 0; j < colcount; j++)
           {
-            result.append("<td>");
+            result.append("        <td>");
 
             Object value = sTable.getValueAt(i, j);
 
@@ -832,10 +832,13 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
             result.append("</td>\n");
           }
 
-        result.append("</tr>\n");
+        result.append("      </tr>\n");
       }
 
-    result.append("</table><hr></body></html>\n");
+    result.append("    </table>\n");
+    result.append("    <hr/>\n");
+    result.append("  </body>\n");
+    result.append("</html>\n");
 
     return result;
   }
