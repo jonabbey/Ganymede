@@ -920,7 +920,7 @@ public class SmartTable extends JPanel implements ActionListener
     public void clearRows()
     {
       index = new HashMap<Object, Integer>(); // Clear Keys
-      rows = new Vector();     // Clear Rows
+      rows = new Vector<rowHandler>();     // Clear Rows
     }
 
     public String getColumnName(int col)
