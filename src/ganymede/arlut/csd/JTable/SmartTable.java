@@ -1,8 +1,8 @@
 /*
    SmartTable.java
 
-   This Module encapsulates user interactions with a JTable, including
-   right click menus to sort and remove columns
+   This Module encapsulates user interactions with a standard Swing
+   JTable, including right click menus to sort and remove columns
 
    Created: 14 December 2005
 
@@ -12,8 +12,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -100,10 +102,11 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Extending upon the JTable, adding the ability to Sort Columns with
- * the TableSorter Class, Adding Right click context menu's for the
- * header row and the data rows.  Re-created a Optimize Column Widths
- * with the TextAreaRenderer class to make each cell a TextArea.</p>
+ * <p>Extending upon the standard Swing JTable, adding the ability to
+ * Sort Columns with the TableSorter Class, Adding Right click context
+ * menu's for the header row and the data rows.  Re-created a Optimize
+ * Column Widths with the TextAreaRenderer class to make each cell a
+ * TextArea.</p>
  */
 
 public class SmartTable extends JPanel implements ActionListener
