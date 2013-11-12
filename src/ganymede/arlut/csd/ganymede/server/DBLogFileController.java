@@ -5,17 +5,19 @@
    This controller class manages the recording and retrieval of
    DBLogEvents for the DBLog class, using an on-disk text file for the
    storage format.
-   
+
    Created: 18 February 2003
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -51,11 +53,15 @@ package arlut.csd.ganymede.server;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -115,7 +121,7 @@ public class DBLogFileController implements DBLogController {
   {
     logFileName = filename;
     logStream = new FileOutputStream(logFileName, true); // append
-    logWriter = new PrintWriter(logStream, true); // auto-flush on newline
+    logWriter = new PrintWriter(new PrintStream(logStream, true, "UTF-8")); // auto-flush on newline
 
     logWriter.println();        // emit newline to terminate any incomplete entry
   }
@@ -255,7 +261,7 @@ public class DBLogFileController implements DBLogController {
     long timeCode;
 
     BufferedReader in = null;
-    FileReader reader = null;
+    Reader reader = null;
 
     if (sinceTime != null)
       {
@@ -335,7 +341,7 @@ public class DBLogFileController implements DBLogController {
                                                           beforeArgs,
                                                           loginArg,
                                                           invidArgs);  // invid must be last for back compat
-        
+
         java.lang.Runtime runtime = java.lang.Runtime.getRuntime();
 
         try
@@ -344,23 +350,27 @@ public class DBLogFileController implements DBLogController {
 
             helperProcess = runtime.exec(paramArgs);
 
-            in = new BufferedReader(new InputStreamReader(helperProcess.getInputStream()));
+            in = new BufferedReader(new InputStreamReader(helperProcess.getInputStream(), "UTF-8"));
           }
         catch (IOException ex)
           {
-            System.err.println("DBLog.retrieveHistory(): Couldn't use helperProcess " + 
+            System.err.println("DBLog.retrieveHistory(): Couldn't use helperProcess " +
                                Ganymede.logHelperProperty);
             in = null;
           }
       }
-    
+
     if (in == null)
       {
         try
           {
-            reader = new FileReader(logFileName);
+            reader = new InputStreamReader(new FileInputStream(logFileName), "UTF-8");
           }
-        catch (FileNotFoundException ex)
+        catch (UnsupportedEncodingException ex1)
+          {
+            throw new RuntimeException(ex1);
+          }
+        catch (FileNotFoundException ex2)
           {
             return null;
           }
@@ -391,7 +401,7 @@ public class DBLogFileController implements DBLogController {
             if ((sinceTime != null && !afterSinceTime) || beforeTime != null)
               {
                 dateString = line.substring(0, line.indexOf('|'));
-    
+
                 try
                   {
                     timeCode = new Long(dateString).longValue();
@@ -450,7 +460,7 @@ public class DBLogFileController implements DBLogController {
                         found = true;
                       }
                   }
-                
+
                 if (transactionID != null)
                   {
                     if (transactionID.equals(event.transactionID))
@@ -565,7 +575,7 @@ public class DBLogFileController implements DBLogController {
       }
 
     dateString = line.substring(0, i);
-    
+
     try
       {
         timeCode = new Long(dateString).longValue();
@@ -574,22 +584,22 @@ public class DBLogFileController implements DBLogController {
       {
         throw new IOException("couldn't parse time code");
       }
-    
+
     event.time = new Date(timeCode);
-    
+
     j = i+1;
     i = scanSep(cary, j);       // find next |, skip human readable date
-    
+
     j = i+1;
     i = scanSep(cary, j);
-    
+
     event.eventClassToken = readNextField(cary, j);
-    
+
     j = i+1;
     i = scanSep(cary, j);
-    
+
     tmp = readNextField(cary, j);
-    
+
     if (!tmp.equals(""))
       {
         event.admin = Invid.createInvid(tmp);   // get admin invid
@@ -605,7 +615,7 @@ public class DBLogFileController implements DBLogController {
     i = scanSep(cary, j);
 
     event.adminName = readNextField(cary, j); // get admin name
-    
+
     j = i+1;
     i = scanSep(cary, j);
 
@@ -720,7 +730,7 @@ public class DBLogFileController implements DBLogController {
   /**
    *
    * scan the string for this field, decoding backslash escapes in the
-   * process 
+   * process
    *
    */
 
@@ -875,7 +885,7 @@ public class DBLogFileController implements DBLogController {
    * This method shuts down this controller, freeing up any resources used by this
    * controller.
    */
-  
+
   public synchronized void close()
   {
     if (logWriter != null)
