@@ -799,16 +799,16 @@ public final class DBEditSet {
   }
 
   /**
-   * <p>This brings this transaction back to the state it was
-   * at at the time of the matching checkPoint() call.  Any
-   * objects that were checked out in care of this transaction
-   * since the checkPoint() will be checked back into the
-   * database and made available for other transactions to
-   * access.  All namespace changes made by this transaction
-   * will likewise be rolled back to their state at the
-   * checkpoint.</p>
+   * <p>This brings this transaction back to the state it was at at
+   * the time of the matching checkPoint() call.  Any objects that
+   * were checked out in care of this transaction since the
+   * checkPoint() will be checked back into the database and made
+   * available for other transactions to access.  All namespace
+   * changes made by this transaction will likewise be rolled back to
+   * their state at the checkpoint.</p>
    *
    * @param name An identifier for the checkpoint to be rolled back to.
+   * @return true if the rollback could be performed, false otherwise
    */
 
   public synchronized boolean rollback(String name)
