@@ -492,15 +492,14 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public DBObject(DBObject original, GanymedeSession gSession)
   {
-    this.gSession = gSession;
-    this.myInvid = original.myInvid;
-    this.objectBase = original.objectBase;
-
     if (original == null || original.fieldAry == null)
       {
         throw new NullPointerException(ts.l("global.pseudostatic_constructor"));
       }
 
+    this.gSession = gSession;
+    this.myInvid = original.myInvid;
+    this.objectBase = original.objectBase;
     this.permCacheAry = new PermEntry[original.fieldAry.length];
 
     synchronized (original.fieldAry)
