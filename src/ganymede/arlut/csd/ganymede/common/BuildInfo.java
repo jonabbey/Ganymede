@@ -146,7 +146,7 @@ public class BuildInfo {
       }
   }
 
-  public static Date getBuildDate()
+  public synchronized static Date getBuildDate()
   {
     if (BuildInfo.buildDate == null)
       {
@@ -164,7 +164,7 @@ public class BuildInfo {
     return BuildInfo.buildDate;
   }
 
-  public static String getBuildJVM()
+  public synchronized static String getBuildJVM()
   {
     if (BuildInfo.buildJVM == null)
       {
@@ -174,7 +174,7 @@ public class BuildInfo {
     return BuildInfo.buildJVM;
   }
 
-  public static String getBuildHost()
+  public synchronized static String getBuildHost()
   {
     if (BuildInfo.buildHost == null)
       {
@@ -189,7 +189,7 @@ public class BuildInfo {
    * Ganymede dialog and elsewhere.</p>
    */
 
-  public static String getReleaseString()
+  public synchronized static String getReleaseString()
   {
     if (BuildInfo.releaseString == null)
       {
@@ -202,7 +202,7 @@ public class BuildInfo {
     return BuildInfo.releaseString;
   }
 
-  public static String getServerHost()
+  public synchronized static String getServerHost()
   {
     if (BuildInfo.serverHost == null)
       {
@@ -212,11 +212,11 @@ public class BuildInfo {
     return BuildInfo.serverHost;
   }
 
-  public static String getServerPort()
+  public synchronized  static String getServerPort()
   {
     if (BuildInfo.serverPort == null)
       {
-        BuildInfo.serverPort =  properties.getProperty("ganymede.serverPort");
+        BuildInfo.serverPort = properties.getProperty("ganymede.serverPort");
       }
 
     return BuildInfo.serverPort;
