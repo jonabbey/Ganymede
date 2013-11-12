@@ -2535,7 +2535,6 @@ final public class DBLog implements java.io.Closeable {
 
 class systemEventType {
 
-  String token;
   String name;
   String description;
   boolean mail;
@@ -2549,7 +2548,6 @@ class systemEventType {
 
   systemEventType(DBObject obj)
   {
-    token = getString(obj, SchemaConstants.EventToken);
     name = getString(obj, SchemaConstants.EventName);
     description = getString(obj, SchemaConstants.EventDescription);
     mail = getBoolean(obj, SchemaConstants.EventMailBoolean);
@@ -2633,7 +2631,6 @@ class objectEventType {
   String token;
   short objType;
   String name;
-  String description;
   List<String> addressList;
   boolean ccToSelf;
   boolean ccToOwners;
@@ -2647,7 +2644,6 @@ class objectEventType {
   {
     token = getString(obj, SchemaConstants.ObjectEventToken);
     name = getString(obj, SchemaConstants.ObjectEventName);
-    description = getString(obj, SchemaConstants.ObjectEventDescription);
     addressList = getAddresses(obj);
     ccToSelf = getBoolean(obj, SchemaConstants.ObjectEventMailToSelf);
     ccToOwners = getBoolean(obj, SchemaConstants.ObjectEventMailOwners);
