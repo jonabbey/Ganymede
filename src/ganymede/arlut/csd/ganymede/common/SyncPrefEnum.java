@@ -4,15 +4,15 @@
 
    This Enum is used to record the synchronization configuration for a
    specific object or field in a Ganymede server Sync Channel.
-   
+
    Created: 5 October 2010
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2010
    The University of Texas at Austin
 
@@ -197,7 +197,7 @@ public enum SyncPrefEnum {
         return labels[2];
 
       default:
-        return null;            // no-op
+        return "";            // no-op
       }
   }
 
@@ -211,11 +211,11 @@ public enum SyncPrefEnum {
       {
       case NEVER:
         return "0";
-      
+
       case WHENCHANGED:
         return "1";
 
-      case ALWAYS:   
+      case ALWAYS:
         return "2";
 
       default:
@@ -234,11 +234,11 @@ public enum SyncPrefEnum {
       {
       case NEVER:
         return 0;
-      
+
       case WHENCHANGED:
         return 1;
 
-      case ALWAYS:   
+      case ALWAYS:
         return 2;
 
       default:
