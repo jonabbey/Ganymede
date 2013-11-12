@@ -1141,21 +1141,24 @@ final public class DBLog implements java.io.Closeable {
               {
                 name = event.adminName;
 
-                // skip any persona info after a colon in case the
-                // user tried logging in with admin privileges
-
-                if (name != null && name.indexOf(':') != -1)
+                if (name != null)
                   {
-                    name = name.substring(0, name.indexOf(':'));
-                  }
+                    // skip any persona info after a colon in case the
+                    // user tried logging in with admin privileges
 
-                // don't bother trying to send mail if the username
-                // attempted has a space in it, we know that won't fly
-                // as valid email address.
+                    if (name.indexOf(':') != -1)
+                      {
+                        name = name.substring(0, name.indexOf(':'));
+                      }
 
-                if (name.indexOf(' ') != -1)
-                  {
-                    name = null;
+                    // don't bother trying to send mail if the username
+                    // attempted has a space in it, we know that won't fly
+                    // as valid email address.
+
+                    if (name.indexOf(' ') != -1)
+                      {
+                        name = null;
+                      }
                   }
               }
           }
