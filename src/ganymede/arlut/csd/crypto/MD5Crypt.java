@@ -14,7 +14,7 @@
    this stuff is worth it, you can buy me a beer in return.   Poul-Henning Kamp
    ----------------------------------------------------------------------------
 
-   This Java Port is  
+   This Java Port is
 
      Copyright (c) 1999-2010 The University of Texas at Austin.
 
@@ -34,6 +34,7 @@
 
 package arlut.csd.crypto;
 
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 
 /*------------------------------------------------------------------------------
@@ -75,8 +76,13 @@ public final class MD5Crypt {
       {
         System.err.println(MD5Crypt.crypt(argv[0]));
       }
-    
+
     System.exit(0);
+  }
+
+  static private Charset UTF8()
+  {
+    return Charset.forName("UTF-8");
   }
 
   static private final String SALTCHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
@@ -240,8 +246,8 @@ public final class MD5Crypt {
    * the salt.  crypt() will strip the salt chars out properly.
    * @param magic Either "$apr1$" or "$1$", which controls whether we
    * are doing Apache-style or FreeBSD-style md5Crypt.
-   * 
-   * @return An md5-hashed password string. 
+   *
+   * @return An md5-hashed password string.
    */
 
   static public final String crypt(String password, String salt, String magic)
@@ -258,7 +264,7 @@ public final class MD5Crypt {
     /* Refine the Salt first */
 
     /* If it starts with the magic string, then skip that */
-    
+
     if (salt.startsWith(magic))
       {
         salt = salt.substring(magic.length());
@@ -278,16 +284,16 @@ public final class MD5Crypt {
 
     ctx = getMD5();
 
-    ctx.update(password.getBytes());    // The password first, since that is what is most unknown
-    ctx.update(magic.getBytes());    // Then our magic string
-    ctx.update(salt.getBytes());    // Then the raw salt
+    ctx.update(password.getBytes(UTF8()));    // The password first, since that is what is most unknown
+    ctx.update(magic.getBytes(UTF8()));    // Then our magic string
+    ctx.update(salt.getBytes(UTF8()));    // Then the raw salt
 
     /* Then just as many characters of the MD5(pw,salt,pw) */
 
     ctx1 = getMD5();
-    ctx1.update(password.getBytes());
-    ctx1.update(salt.getBytes());
-    ctx1.update(password.getBytes());
+    ctx1.update(password.getBytes(UTF8()));
+    ctx1.update(salt.getBytes(UTF8()));
+    ctx1.update(password.getBytes(UTF8()));
     finalState = ctx1.digest();
 
     for (int pl = password.length(); pl > 0; pl -= 16)
@@ -300,7 +306,7 @@ public final class MD5Crypt {
        required in order to get the right output. */
 
     clearbits(finalState);
-    
+
     /* Then something really weird... */
 
     for (int i = password.length(); i != 0; i >>>=1)
@@ -311,7 +317,7 @@ public final class MD5Crypt {
           }
         else
           {
-            ctx.update(password.getBytes(), 0, 1);
+            ctx.update(password.getBytes(UTF8()), 0, 1);
           }
       }
 
@@ -331,7 +337,7 @@ public final class MD5Crypt {
 
         if ((i & 1) != 0)
           {
-            ctx1.update(password.getBytes());
+            ctx1.update(password.getBytes(UTF8()));
           }
         else
           {
@@ -340,12 +346,12 @@ public final class MD5Crypt {
 
         if ((i % 3) != 0)
           {
-            ctx1.update(salt.getBytes());
+            ctx1.update(salt.getBytes(UTF8()));
           }
 
         if ((i % 7) != 0)
           {
-            ctx1.update(password.getBytes());
+            ctx1.update(password.getBytes(UTF8()));
           }
 
         if ((i & 1) != 0)
@@ -354,7 +360,7 @@ public final class MD5Crypt {
           }
         else
           {
-            ctx1.update(password.getBytes());
+            ctx1.update(password.getBytes(UTF8()));
           }
 
         finalState = ctx1.digest();
