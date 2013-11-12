@@ -161,7 +161,12 @@ public class BuildInfo {
           }
       }
 
-    return BuildInfo.buildDate;
+    if (BuildInfo.buildDate == null)
+      {
+        return null;
+      }
+
+    return new Date(BuildInfo.buildDate.getTime());
   }
 
   public synchronized static String getBuildJVM()
