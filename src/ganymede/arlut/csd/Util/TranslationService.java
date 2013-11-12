@@ -183,19 +183,11 @@ public final class TranslationService {
    * <p>Private helper to handle lazy-loading of the resource bundle.</p>
    */
 
-  private ResourceBundle getBundle()
+  private synchronized ResourceBundle getBundle()
   {
-    if (this.bundle != null)
+    if (this.bundle == null)
       {
-        return this.bundle;
-      }
-
-    synchronized (this)
-      {
-        if (this.bundle == null)
-          {
-            this.bundle = ResourceBundle.getBundle(resourceName, ourLocale);
-          }
+        this.bundle = ResourceBundle.getBundle(resourceName, ourLocale);
       }
 
     return this.bundle;
