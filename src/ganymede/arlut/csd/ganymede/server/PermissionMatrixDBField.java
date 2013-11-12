@@ -415,11 +415,10 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     result.append("PermMatrix DebugDump\n");
 
-    for (String key: matrix.keySet())
+    for (Map.Entry<String, PermEntry> item: matrix.entrySet())
       {
-        entry = matrix.get(key);
-
-        basename = decodeBaseName(key);
+        entry = item.getValue();
+        basename = decodeBaseName(item.getKey());
 
         if (baseHash.containsKey(basename))
           {
@@ -431,16 +430,16 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
             baseHash.put(basename, vec);
           }
 
-        vec.add(decodeFieldName(key) + " -- " + entry.toString());
+        vec.add(decodeFieldName(item.getKey()) + " -- " + entry.toString());
       }
 
-    for (String key: baseHash.keySet())
+    for (Map.Entry<String, Vector<String>> item: baseHash.entrySet())
       {
-        vec = baseHash.get(key);
+        vec = item.getValue();
 
         for (String val: vec)
           {
-            result.append(key + ":" + val + "\n");
+            result.append(item.getKey() + ":" + val + "\n");
           }
 
         result.append("\n");
@@ -806,12 +805,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     xmlOut.startElementIndent("permissions");
     xmlOut.indentOut();
 
-    for (String key: baseHash.keySet())
+    for (Map.Entry<String,Hashtable<String, PermEntry>> item: baseHash.entrySet())
       {
-        innerTable = baseHash.get(key);
+        innerTable = item.getValue();
         entry = innerTable.get("[base]");
 
-        xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(key));
+        xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(item.getKey()));
         xmlOut.indentOut();
 
         if (entry != null)
@@ -819,22 +818,22 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
             xmlOut.attribute("perm", entry.getXMLCode());
           }
 
-        for (String fieldKey: innerTable.keySet())
+        for (Map.Entry<String, PermEntry> fieldItem: innerTable.entrySet())
           {
-            if (fieldKey.equals("[base]"))
+            if (fieldItem.getKey().equals("[base]"))
               {
                 continue;       // we've already wrote perms for the base
               }
 
-            PermEntry fieldEntry = innerTable.get(fieldKey);
+            PermEntry fieldEntry = fieldItem.getValue();
 
-            xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(fieldKey));
+            xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(fieldItem.getKey()));
             xmlOut.attribute("perm", fieldEntry.getXMLCode());
-            xmlOut.endElement(arlut.csd.Util.XMLUtils.XMLEncode(fieldKey));
+            xmlOut.endElement(arlut.csd.Util.XMLUtils.XMLEncode(fieldItem.getKey()));
           }
 
         xmlOut.indentIn();
-        xmlOut.endElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(key));
+        xmlOut.endElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(item.getKey()));
       }
 
     xmlOut.indentIn();
