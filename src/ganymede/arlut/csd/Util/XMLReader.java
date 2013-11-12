@@ -54,8 +54,10 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PipedOutputStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -143,7 +145,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
   public XMLReader(String xmlFilename, int bufferSize, boolean skipWhiteSpace) throws IOException
   {
-    this(xmlFilename, bufferSize, skipWhiteSpace, new PrintWriter(System.err));
+    this(xmlFilename, bufferSize, skipWhiteSpace, new PrintWriter(new OutputStreamWriter(System.err, "UTF-8")));
   }
 
   /**
@@ -157,7 +159,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
   public XMLReader(File xmlFile, int bufferSize, boolean skipWhiteSpace) throws IOException
   {
-    this(xmlFile, bufferSize, skipWhiteSpace, new PrintWriter(System.err));
+    this(xmlFile, bufferSize, skipWhiteSpace, new PrintWriter(new OutputStreamWriter(System.err, "UTF-8")));
   }
 
   /**
@@ -260,7 +262,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   public XMLReader(PipedOutputStream sourcePipe, int bufferSize,
                    boolean skipWhiteSpace) throws IOException
   {
-    this(sourcePipe, bufferSize, skipWhiteSpace, new PrintWriter(System.err));
+    this(sourcePipe, bufferSize, skipWhiteSpace, new PrintWriter(new OutputStreamWriter(System.err, "UTF-8")));
   }
 
   /**
