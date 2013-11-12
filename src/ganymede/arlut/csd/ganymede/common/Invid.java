@@ -171,8 +171,7 @@ public final class Invid implements java.io.Serializable {
 
     try
       {
-        return createInvid(Short.valueOf(first).shortValue(),
-                           Integer.valueOf(last).intValue());
+        return createInvid(Short.parseShort(first), Integer.parseInt(last));
       }
     catch (NumberFormatException ex)
       {

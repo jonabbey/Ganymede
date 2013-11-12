@@ -8,15 +8,15 @@
    The Parser code assumes that the tokenizer has been set up to
    treat ':', ',', and '\n' as distinct tokens, with everything else
    treated as word chars.
-   
+
    Created: 6 August 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2010
    The University of Texas at Austin
 
@@ -163,7 +163,7 @@ public class Parser {
 
     try
       {
-        return Integer.valueOf(nextBit).intValue();
+        return Integer.parseInt(nextBit);
       }
     catch (NumberFormatException ex)
       {
@@ -179,7 +179,7 @@ public class Parser {
    * ':'s and ','s along the way, up to the next ',' or ':'.
    *
    */
-  
+
   public String getNextBit() throws IOException
   {
     return getNextBit(tokens, false, false);
@@ -192,7 +192,7 @@ public class Parser {
    * ':'s along the way, up to the next ':'.
    *
    */
-  
+
   public String getNextLongBit() throws IOException
   {
     StringBuilder buffer = new StringBuilder();
@@ -241,12 +241,12 @@ public class Parser {
    * eol/eof.
    *
    */
-  
+
   public String getNextBit(boolean skipleading) throws IOException
   {
     return getNextBit(tokens, skipleading, false);
   }
-  
+
   /**
    *
    * getNextBit() returns the next String from the StreamTokenizer,
@@ -255,7 +255,7 @@ public class Parser {
    * @param tokens The StreamTokenizer to read from
    *
    */
-  
+
   public String getNextBit(StreamTokenizer tokens) throws IOException
   {
     return getNextBit(tokens, true, false);
@@ -274,7 +274,7 @@ public class Parser {
    * field separators
    *
    */
-  
+
   public String getNextBit(StreamTokenizer tokens, boolean skipleading, boolean includeCommas) throws IOException
   {
     String result;

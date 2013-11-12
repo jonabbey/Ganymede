@@ -150,7 +150,7 @@ public final class Sha512Crypt
         if (saltStr.startsWith(sha512_rounds_prefix))
           {
             String num = saltStr.substring(sha512_rounds_prefix.length(), saltStr.indexOf('$'));
-            int srounds = Integer.valueOf(num).intValue();
+            int srounds = Integer.parseInt(num);
             saltStr = saltStr.substring(saltStr.indexOf('$')+1);
             rounds = Math.max(ROUNDS_MIN, Math.min(srounds, ROUNDS_MAX));
             include_round_count = true;
@@ -407,7 +407,7 @@ public final class Sha512Crypt
 
         try
           {
-            int srounds = Integer.valueOf(num).intValue();
+            int srounds = Integer.parseInt(num);
           }
         catch (NumberFormatException ex)
           {

@@ -404,7 +404,7 @@ public class DBLogFileController implements DBLogController {
 
                 try
                   {
-                    timeCode = new Long(dateString).longValue();
+                    timeCode = Long.parseLong(dateString);
                   }
                 catch (NumberFormatException ex)
                   {
@@ -578,7 +578,7 @@ public class DBLogFileController implements DBLogController {
 
     try
       {
-        timeCode = new Long(dateString).longValue();
+        timeCode = Long.parseLong(dateString);
       }
     catch (NumberFormatException ex)
       {
