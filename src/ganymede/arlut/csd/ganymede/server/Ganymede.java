@@ -211,7 +211,7 @@ public final class Ganymede {
    * admin console.</p>
    */
 
-  static public Date startTime = new Date();
+  static final public Date startTime = new Date();
 
   /**
    * <p>If the server is started with propFilename on
