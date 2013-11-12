@@ -47,6 +47,7 @@
 
 package arlut.csd.ganymede.common;
 
+import java.io.InputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -119,13 +120,29 @@ public class BuildInfo {
 
   private synchronized static void loadProps()
   {
+    InputStream inStream = null;
+
     try
       {
-        properties.load(BuildInfo.class.getResourceAsStream("build.properties"));
+        inStream = BuildInfo.class.getResourceAsStream("build.properties");
+        properties.load(inStream);
         getBuildDate();
       }
     catch (IOException ex)
       {
+      }
+    finally
+      {
+        if (inStream != null)
+          {
+            try
+              {
+                inStream.close();
+              }
+            catch (IOException ex)
+              {
+              }
+          }
       }
   }
 
