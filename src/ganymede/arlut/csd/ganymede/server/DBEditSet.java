@@ -219,7 +219,7 @@ public final class DBEditSet {
    * to keep track of check points performed during the course of this transaction.
    */
 
-  private NamedStack checkpoints = new NamedStack();
+  private NamedStack<DBCheckPoint> checkpoints = new NamedStack<DBCheckPoint>();
 
   /**
    * <p>The writelock acquired during the course of a commit attempt.  We keep
@@ -758,7 +758,7 @@ public final class DBEditSet {
 
     // see if we can find the checkpoint
 
-    point = (DBCheckPoint) checkpoints.pop(name);
+    point = checkpoints.pop(name);
 
     if (point == null)
       {
@@ -2358,7 +2358,7 @@ public final class DBEditSet {
 
         base.put(new DBObject(eObj));
 
-        // (note that we can't use a no-sync put above, since
+        // note that we can't use a no-sync put above, since
         // we don't prevent asynchronous viewDBObject().
 
         if (getGSession() != null)
@@ -2384,7 +2384,7 @@ public final class DBEditSet {
 
         base.remove(eObj.getID());
 
-        // (note that we can't use a no-sync remove above, since
+        // note that we can't use a no-sync remove above, since
         // we don't prevent asynchronous viewDBObject().
 
         session.GSession.checkIn(); // *synchronized*
