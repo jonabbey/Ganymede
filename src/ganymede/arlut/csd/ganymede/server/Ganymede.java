@@ -1969,7 +1969,8 @@ public final class Ganymede {
                                 ts.l("registerTasks.memory_status_task"));
 
     // register garbage collection task without any schedule for
-    // execution.. this is so that the admin can launch it from theadmin console
+    // execution.. this is so that the admin can launch it from the
+    // admin console manually if she is feeling silly
 
     scheduler.addActionOnDemand(new gcTask(),
                                 ts.l("registerTasks.gc_task"));
