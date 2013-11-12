@@ -3577,11 +3577,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   synchronized final void rollback(Hashtable<Short, Object> ckpoint)
   {
-    for (Short key: ckpoint.keySet())
+    for (Map.Entry<Short, Object> entry: ckpoint.entrySet())
       {
-        DBField field = retrieveField(key.shortValue());
-
-        Object value = ckpoint.get(key);
+        DBField field = retrieveField(entry.getKey().shortValue());
+        Object value = entry.getValue();
 
         // again, we use a reference to ourselves as a
         // hackish way of representing null in the
