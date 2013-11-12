@@ -14,6 +14,8 @@
 
 package arlut.csd.crypto;
 
+import java.nio.charset.Charset;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                           Base64
@@ -685,7 +687,7 @@ public class Base64
         }   // end try
         catch (java.io.UnsupportedEncodingException uue){
             // Fall back to some Java default
-            return new String( baos.toByteArray() );
+          return new String( baos.toByteArray(), Charset.defaultCharset() );
         }   // end catch
 
     }   // end encode
@@ -825,7 +827,7 @@ public class Base64
             return new String( encoded, PREFERRED_ENCODING );
         }   // end try
         catch (java.io.UnsupportedEncodingException uue) {
-            return new String( encoded );
+            return new String( encoded, Charset.defaultCharset()  );
         }   // end catch
 
     }   // end encodeBytes
@@ -1235,7 +1237,7 @@ public class Base64
             bytes = s.getBytes( PREFERRED_ENCODING );
         }   // end try
         catch( java.io.UnsupportedEncodingException uee ) {
-            bytes = s.getBytes();
+            bytes = s.getBytes( Charset.defaultCharset() );
         }   // end catch
                 //</change>
 
