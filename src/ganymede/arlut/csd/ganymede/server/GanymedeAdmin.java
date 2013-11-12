@@ -148,7 +148,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   /**
    * <p>Background thread that will order a refresh of the admin
-   * consoles' task lists if we have any tasks currently running.</p>
+   * consoles' task lists every second if we have any sync activities
+   * currently running.  Will be null if no syncs are running.</p>
    */
 
   private static Thread taskRefreshThread;
