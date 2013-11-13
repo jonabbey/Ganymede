@@ -856,18 +856,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       {
         PermEntry entry = matrix.get(key);
 
-        if (isBasePerm(key))
-          {
-            result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
-                          " -- " + entry.difference(null));
-            result.append("\n");
-          }
-        else
-          {
-            result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
-                          " -- " + entry.difference(null));
-            result.append("\n");
-          }
+        result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
+                      " -- " + entry.difference(null));
+        result.append("\n");
       }
 
     return result.toString();
