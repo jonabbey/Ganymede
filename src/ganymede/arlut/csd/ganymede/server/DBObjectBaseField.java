@@ -4911,7 +4911,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     // look for fieldName in the base currently specified in
     // allowedTarget
 
-    if (allowedTarget == -1 && fieldName != null && !fieldName.equals(""))
+    if (allowedTarget == -1)
       {
         // "Can''t set target field on a non-symmetric invid field {0} to {1}"
         return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
