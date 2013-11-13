@@ -395,7 +395,7 @@ public final class Sha256Crypt
 
         try
           {
-            int srounds = Integer.parseInt(num);
+            Integer.parseInt(num);
           }
         catch (NumberFormatException ex)
           {

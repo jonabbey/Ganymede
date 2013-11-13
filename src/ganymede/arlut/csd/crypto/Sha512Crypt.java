@@ -407,7 +407,7 @@ public final class Sha512Crypt
 
         try
           {
-            int srounds = Integer.parseInt(num);
+            Integer.parseInt(num);
           }
         catch (NumberFormatException ex)
           {
