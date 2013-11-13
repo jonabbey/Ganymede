@@ -75,8 +75,16 @@ public class dateThing implements java.io.Serializable {
   public dateThing(String label, Date currentDate, Date maxDate)
   {
     this.stringLabel = label;
-    this.currentDate = currentDate;
-    this.maxDate = maxDate;
+
+    if (currentDate != null)
+      {
+        this.currentDate = new Date(currentDate.getTime());
+      }
+
+    if (maxDate != null)
+      {
+        this.maxDate = new Date(maxDate.getTime());
+      }
   }
 
   public String getLabel()
