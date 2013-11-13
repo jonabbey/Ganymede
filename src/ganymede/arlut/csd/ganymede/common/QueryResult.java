@@ -317,14 +317,11 @@ public class QueryResult implements java.io.Serializable {
           }
       }
 
-    if (label != null)
-      {
-        labelSet.add(label);
+    labelSet.add(label);
 
-        if (labelList != null)
-          {
-            labelList.add(label);
-          }
+    if (labelList != null)
+      {
+        labelList.add(label);
       }
 
     unpacked = false;
