@@ -1282,11 +1282,6 @@ final public class DBLog implements java.io.Closeable {
 
     mailSet = cleanupAddresses(mailSet);
 
-    // looking up the object name can be pricey, so we wait until we
-    // know we probably need to do it, here
-
-    String objectName = transSession.getGSession().getDBSession().getObjectLabel(objectInvid);
-
     // okay, we have some users interested in getting notified about this
     // object event..
 
