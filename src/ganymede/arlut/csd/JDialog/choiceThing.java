@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -63,6 +63,8 @@ import java.util.Vector;
  */
 
 public class choiceThing implements java.io.Serializable {
+
+  static final long serialVersionUID = -6328930520385869639L;
 
   String choiceLabel;
   Vector items;
