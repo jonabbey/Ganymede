@@ -161,7 +161,7 @@ public class DumpResult implements java.io.Serializable, List {
           }
       }
 
-    return headers;
+    return new Vector(headers);
   }
 
   /**
@@ -175,11 +175,11 @@ public class DumpResult implements java.io.Serializable, List {
    * modified by the caller, at the risk of surprising behavior.</p>
    */
 
-  public Vector<DumpResultCol> getHeaderObjects()
+  public synchronized Vector<DumpResultCol> getHeaderObjects()
   {
     checkBuffer();
 
-    return headerObjects;
+    return new Vector(headerObjects);
   }
 
   /**
@@ -187,7 +187,7 @@ public class DumpResult implements java.io.Serializable, List {
    * DumpResult.</p>
    */
 
-  public String getFieldName(int col)
+  public synchronized String getFieldName(int col)
   {
     checkBuffer();
 
@@ -199,7 +199,7 @@ public class DumpResult implements java.io.Serializable, List {
    * DumpResult.</p>
    */
 
-  public short getFieldId(int col)
+  public synchronized short getFieldId(int col)
   {
     checkBuffer();
 
@@ -215,7 +215,7 @@ public class DumpResult implements java.io.Serializable, List {
    * arlut.csd.ganymede.common.FieldType FieldType} interface.</p>
    */
 
-  public short getFieldType(int col)
+  public synchronized short getFieldType(int col)
   {
     checkBuffer();
 
@@ -232,7 +232,7 @@ public class DumpResult implements java.io.Serializable, List {
    * modified by the caller, at the risk of surprising behavior.</p>
    */
 
-  public Vector<Invid> getInvids()
+  public synchronized Vector<Invid> getInvids()
   {
     checkBuffer();
 
@@ -245,7 +245,7 @@ public class DumpResult implements java.io.Serializable, List {
    * given result row.</p>
    */
 
-  public Invid getInvid(int row)
+  public synchronized Invid getInvid(int row)
   {
     checkBuffer();
 
@@ -265,7 +265,7 @@ public class DumpResult implements java.io.Serializable, List {
    * modified by the caller, at the risk of surprising behavior.</p>
    */
 
-  public Vector<Map<String,Object>> getRows()
+  public synchronized Vector<Map<String,Object>> getRows()
   {
     checkBuffer();
 
@@ -282,7 +282,7 @@ public class DumpResult implements java.io.Serializable, List {
    * getHeaderObjects()}.</p>
    */
 
-  public Vector<Object> getFieldRow(int rowNumber)
+  public synchronized Vector<Object> getFieldRow(int rowNumber)
   {
     checkBuffer();
 
@@ -307,7 +307,7 @@ public class DumpResult implements java.io.Serializable, List {
    * fields.</p>
    */
 
-  public Object getResult(int row, int col)
+  public synchronized Object getResult(int row, int col)
   {
     checkBuffer();
 
@@ -319,7 +319,7 @@ public class DumpResult implements java.io.Serializable, List {
    * number of objects encoded in this DumpResult.</p>
    */
 
-  public int resultSize()
+  public synchronized int resultSize()
   {
     checkBuffer();
 
@@ -593,7 +593,7 @@ public class DumpResult implements java.io.Serializable, List {
    * longer needed on the client.</p>
    */
 
-  public void dissociate()
+  public synchronized void dissociate()
   {
     if (headerObjects != null)
       {
