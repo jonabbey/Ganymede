@@ -971,7 +971,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * @see arlut.csd.ganymede.rmi.perm_field
    */
 
-  public PermMatrix getMatrix()
+  public synchronized PermMatrix getMatrix()
   {
     return new PermMatrix(this.matrix);
   }
@@ -989,7 +989,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * @see arlut.csd.ganymede.rmi.perm_field
    */
 
-  public PermMatrix getTemplateMatrix()
+  public synchronized PermMatrix getTemplateMatrix()
   {
     if (!(this.owner instanceof DBEditObject))
       {
@@ -1023,7 +1023,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * @see arlut.csd.ganymede.common.PermMatrix
    */
 
-  public PermEntry getPerm(short baseID, short fieldID)
+  public synchronized PermEntry getPerm(short baseID, short fieldID)
   {
     return matrix.get(matrixEntry(baseID, fieldID));
   }
@@ -1036,7 +1036,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * @see arlut.csd.ganymede.common.PermMatrix
    */
 
-  public PermEntry getPerm(short baseID)
+  public synchronized PermEntry getPerm(short baseID)
   {
     return matrix.get(matrixEntry(baseID));
   }
@@ -1049,7 +1049,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * @see arlut.csd.ganymede.common.PermMatrix
    */
 
-  public PermEntry getPerm(Base base, BaseField field)
+  public synchronized PermEntry getPerm(Base base, BaseField field)
   {
     try
       {
@@ -1070,7 +1070,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * @see arlut.csd.ganymede.common.PermMatrix
    */
 
-  public PermEntry getPerm(Base base)
+  public synchronized PermEntry getPerm(Base base)
   {
     try
       {
@@ -1392,7 +1392,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * those for the field itself.</p>
    */
 
-  public boolean allowablePermEntry(short baseID, short fieldID, PermEntry entry)
+  public synchronized boolean allowablePermEntry(short baseID, short fieldID, PermEntry entry)
   {
     if (this.owner.gSession == null)
       {
@@ -1477,7 +1477,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * for PermMatrix creation.</p>
    */
 
-  public Hashtable<String, PermEntry> getInnerMatrix()
+  public synchronized Hashtable<String, PermEntry> getInnerMatrix()
   {
     return new Hashtable<String, PermEntry>(this.matrix);
   }
