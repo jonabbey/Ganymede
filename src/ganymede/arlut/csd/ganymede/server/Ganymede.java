@@ -1434,11 +1434,6 @@ public final class Ganymede {
       }
     catch (RuntimeException ex)
       {
-        if (bindingName == null)
-          {
-            bindingName = "unknown";
-          }
-
         // We're catching RuntimeException separately to placate
         // FindBugs.
         // "Couldn''t establish server binding {0}: "
@@ -1446,11 +1441,6 @@ public final class Ganymede {
       }
     catch (Exception ex)
       {
-        if (bindingName == null)
-          {
-            bindingName = "unknown";
-          }
-
         // "Couldn''t establish server binding {0}: "
         throw new GanymedeStartupException(ts.l("main.error_no_binding", bindingName) + ex, ex);
       }
