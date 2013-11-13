@@ -366,6 +366,15 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
+   * We'll use DBObject's identity-based equals
+   */
+
+  @Override public boolean equals(Object param)
+  {
+    return super.equals(param);
+  }
+
+  /**
    * Returns the primary label of this object.
    *
    * @see arlut.csd.ganymede.rmi.db_object

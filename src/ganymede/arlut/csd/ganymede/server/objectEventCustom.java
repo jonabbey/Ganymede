@@ -140,6 +140,15 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
+   * We'll use DBObject's identity-based equals
+   */
+
+  @Override public boolean equals(Object param)
+  {
+    return super.equals(param);
+  }
+
+  /**
    * <p>Customization method to control whether a specified field is
    * required to be defined at commit time for a given object.</p>
    *
