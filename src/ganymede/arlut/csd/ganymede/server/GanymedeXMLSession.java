@@ -3140,7 +3140,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
         return true;
       }
-    catch (Exception ex)
+    catch (RuntimeException ex)
       {
         if (!(ex instanceof XMLIntegrationException))
           {
