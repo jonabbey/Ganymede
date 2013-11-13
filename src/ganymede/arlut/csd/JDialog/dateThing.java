@@ -66,9 +66,9 @@ public class dateThing implements java.io.Serializable {
 
   static final long serialVersionUID = 8718087676857868186L;
 
-  String stringLabel;
-  Date currentDate;
-  Date maxDate;
+  private final String stringLabel;
+  private final Date currentDate;
+  private final Date maxDate;
 
   /* -- */
 
@@ -80,10 +80,18 @@ public class dateThing implements java.io.Serializable {
       {
         this.currentDate = new Date(currentDate.getTime());
       }
+    else
+      {
+        this.currentDate = null;
+      }
 
     if (maxDate != null)
       {
         this.maxDate = new Date(maxDate.getTime());
+      }
+    else
+      {
+        this.maxDate = null;
       }
   }
 
