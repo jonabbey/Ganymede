@@ -276,7 +276,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * within.</p>
    */
 
-  private DBStore store;
+  final private DBStore store;
 
   /**
    * <p>Name of this object type</p>
