@@ -1674,10 +1674,6 @@ public final class DBStore implements JythonMap {
 
         b.setLabelField(SchemaConstants.OwnerNameField);
 
-        // link in the class we specified
-
-        b.createHook();
-
         // and link in the base to this DBStore
 
         setBase(b);
@@ -1773,10 +1769,6 @@ public final class DBStore implements JythonMap {
 
         b.setLabelField(SchemaConstants.PersonaLabelField);
 
-        // link in the class we specified
-
-        b.createHook();
-
         // and link in the base to this DBStore
 
         setBase(b);
@@ -1830,10 +1822,6 @@ public final class DBStore implements JythonMap {
         b.addFieldToEnd(bf);
 
         b.setLabelField(SchemaConstants.RoleName);
-
-        // link in the class we specified
-
-        b.createHook();
 
         // and link in the base to this DBStore
 
@@ -1906,10 +1894,6 @@ public final class DBStore implements JythonMap {
         b.addFieldToEnd(bf);
 
         b.setLabelField(SchemaConstants.EventToken);
-
-        // link in the class we specified
-
-        b.createHook();
 
         // and link in the base to this DBStore
 
@@ -1997,10 +1981,6 @@ public final class DBStore implements JythonMap {
         // set the label field
 
         b.setLabelField(SchemaConstants.ObjectEventLabel);
-
-        // link in the class we specified
-
-        b.createHook();
 
         // and link in the base to this DBStore
 
@@ -2121,10 +2101,6 @@ public final class DBStore implements JythonMap {
 
         b.setLabelField(SchemaConstants.TaskName);
 
-        // link in the class we specified
-
-        b.createHook();
-
         // and record the base
 
         setBase(b);
@@ -2200,10 +2176,6 @@ public final class DBStore implements JythonMap {
         b.addFieldToEnd(bf);
 
         b.setLabelField(SchemaConstants.SyncChannelName);
-
-        // link in the class we specified
-
-        b.createHook();
 
         // and record the base
 
@@ -2327,10 +2299,6 @@ public final class DBStore implements JythonMap {
             b.addFieldToEnd(bf);
 
             b.setLabelField(SchemaConstants.SyncChannelName);
-
-            // link in the class we specified
-
-            b.createHook();
 
             setBase(b);
           }

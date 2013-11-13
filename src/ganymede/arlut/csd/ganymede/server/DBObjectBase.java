@@ -1761,7 +1761,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * overridden methods for DBEditObject subclasses.</p>
    */
 
-  DBEditObject createHook() throws RemoteException
+  private DBEditObject createHook() throws RemoteException
   {
     if (classdef == null)
       {
