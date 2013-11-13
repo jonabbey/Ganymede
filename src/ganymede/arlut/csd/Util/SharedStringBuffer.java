@@ -848,6 +848,6 @@ public final class SharedStringBuffer implements java.io.Serializable {
 
   public final char[] getValue()
   {
-    return value;
+    return value.clone();
   }
 }
