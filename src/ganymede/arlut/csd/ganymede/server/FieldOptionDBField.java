@@ -922,7 +922,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     return result.toString();
   }
 
-  public HashMap<String, SyncPrefEnum> getInternalsCopy()
+  public synchronized HashMap<String, SyncPrefEnum> getInternalsCopy()
   {
     return new HashMap<String, SyncPrefEnum>(this.matrix);
   }
@@ -934,7 +934,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public FieldOptionMatrix getMatrix()
+  public synchronized FieldOptionMatrix getMatrix()
   {
     return new FieldOptionMatrix(this.matrix);
   }
@@ -947,7 +947,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public SyncPrefEnum getOption(short baseID, short fieldID)
+  public synchronized SyncPrefEnum getOption(short baseID, short fieldID)
   {
     return matrix.get(matrixEntry(baseID, fieldID));
   }
@@ -959,7 +959,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public SyncPrefEnum getOption(short baseID)
+  public synchronized SyncPrefEnum getOption(short baseID)
   {
     return matrix.get(matrixEntry(baseID));
   }
@@ -971,7 +971,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public SyncPrefEnum getOption(Base base, BaseField field)
+  public synchronized SyncPrefEnum getOption(Base base, BaseField field)
   {
     try
       {
@@ -990,7 +990,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public SyncPrefEnum getOption(Base base)
+  public synchronized SyncPrefEnum getOption(Base base)
   {
     try
       {
@@ -1011,7 +1011,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * on permissions failure.</p>
    */
 
-  public ReturnVal resetOptions()
+  public synchronized ReturnVal resetOptions()
   {
     if (isEditable())
       {
