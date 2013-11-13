@@ -302,7 +302,7 @@ public final class DBPermissionManager {
    * sessions on the server and may not be null.
    */
 
-  public DBPermissionManager configureInternalSession(String sessionName)
+  public synchronized DBPermissionManager configureInternalSession(String sessionName)
   {
     if (sessionName == null)
       {
@@ -315,12 +315,10 @@ public final class DBPermissionManager {
       }
 
     this.sessionName = sessionName;
-
-    username = null;
-    userInvid = null;
-
-    supergashMode = true;
-    beforeversupergash = true;
+    this.username = null;
+    this.userInvid = null;
+    this.supergashMode = true;
+    this.beforeversupergash = true;
 
     updatePerms(true);
 
@@ -344,7 +342,7 @@ public final class DBPermissionManager {
    * among logged-in sessions in the server and may not be null.
    */
 
-  public DBPermissionManager configureClientSession(DBObject userObject, DBObject personaObject, String sessionName)
+  public synchronized DBPermissionManager configureClientSession(DBObject userObject, DBObject personaObject, String sessionName)
   {
     if (sessionName == null)
       {
@@ -393,7 +391,7 @@ public final class DBPermissionManager {
    * level privileges.
    */
 
-  public boolean isSuperGash()
+  public synchronized boolean isSuperGash()
   {
     return supergashMode;
   }
@@ -403,7 +401,7 @@ public final class DBPermissionManager {
    * default end-user privileges.
    */
 
-  public boolean isPrivileged()
+  public synchronized boolean isPrivileged()
   {
     return personaName != null || isSuperGash();
   }
@@ -413,7 +411,7 @@ public final class DBPermissionManager {
    * elevated privileges.
    */
 
-  public boolean isElevated()
+  public synchronized boolean isElevated()
   {
     return userInvid != null;
   }
@@ -428,7 +426,7 @@ public final class DBPermissionManager {
    * user.</p>
    */
 
-  public String getUserName()
+  public synchronized String getUserName()
   {
     return username;
   }
@@ -440,7 +438,7 @@ public final class DBPermissionManager {
    * internal process is running the session.</p>
    */
 
-  public Invid getUserInvid()
+  public synchronized Invid getUserInvid()
   {
     return userInvid;
   }
@@ -453,7 +451,7 @@ public final class DBPermissionManager {
    * internal process is running the session.</p>
    */
 
-  public DBObject getUser()
+  public synchronized DBObject getUser()
   {
     if (userInvid != null)
       {
@@ -473,7 +471,7 @@ public final class DBPermissionManager {
    * no elevated persona privileges.</p>
    */
 
-  public String getPersonaName()
+  public synchronized String getPersonaName()
   {
     return personaName;
   }
@@ -482,7 +480,7 @@ public final class DBPermissionManager {
    * <p>Convenience method to get access to this session's persona invid.</p>
    */
 
-  public Invid getPersonaInvid()
+  public synchronized Invid getPersonaInvid()
   {
     return personaInvid;
   }
@@ -494,7 +492,7 @@ public final class DBPermissionManager {
    * label for the administrator for record keeping.</p>
    */
 
-  public DBObject getPersona()
+  public synchronized DBObject getPersona()
   {
     return personaObj;
   }
@@ -506,7 +504,7 @@ public final class DBPermissionManager {
    * <p>getSessionName() will never return a null value.</p>
    */
 
-  public String getSessionName()
+  public synchronized String getSessionName()
   {
     return sessionName;
   }
@@ -519,7 +517,7 @@ public final class DBPermissionManager {
    * session.</p>
    */
 
-  public String getBaseIdentity()
+  public synchronized String getBaseIdentity()
   {
     if (username != null && !username.equals(""))
       {
@@ -538,7 +536,7 @@ public final class DBPermissionManager {
    * session if no user is attached to this session.</p>
    */
 
-  public String getIdentity()
+  public synchronized String getIdentity()
   {
     if (personaName == null || personaName.equals(""))
       {
@@ -566,7 +564,7 @@ public final class DBPermissionManager {
    * server task or internal process.</p>
    */
 
-  public Invid getIdentityInvid()
+  public synchronized Invid getIdentityInvid()
   {
     if (userInvid != null)
       {
@@ -585,7 +583,7 @@ public final class DBPermissionManager {
    * Ganymede server task or internal process.</p>
    */
 
-  public Vector<Invid> getIdentityInvids()
+  public synchronized Vector<Invid> getIdentityInvids()
   {
     Vector<Invid> ids = new Vector<Invid>();
 
@@ -608,7 +606,7 @@ public final class DBPermissionManager {
    * DBPermissionManager.
    */
 
-  public String getIdentityReturnAddress()
+  public synchronized String getIdentityReturnAddress()
   {
     String returnAddr;
 
@@ -651,7 +649,7 @@ public final class DBPermissionManager {
    * by the containing GanymedeSession.</p>
    */
 
-  public Invid getResponsibleInvid()
+  public synchronized Invid getResponsibleInvid()
   {
     if (personaInvid != null)
       {
@@ -666,7 +664,7 @@ public final class DBPermissionManager {
    * user logged in.</p>
    */
 
-  public Vector<String> getAvailablePersonae()
+  public synchronized Vector<String> getAvailablePersonae()
   {
     DBObject user;
     Vector<String> results;
@@ -709,22 +707,22 @@ public final class DBPermissionManager {
     return results;
   }
 
-  public PermMatrix getPersonaPerms()
+  public synchronized PermMatrix getPersonaPerms()
   {
     return personaPerms;
   }
 
-  public PermMatrix getDefaultPerms()
+  public synchronized PermMatrix getDefaultPerms()
   {
     return defaultPerms;
   }
 
-  public PermMatrix getDelegatablePersonaPerms()
+  public synchronized PermMatrix getDelegatablePersonaPerms()
   {
     return delegatablePersonaPerms;
   }
 
-  public PermMatrix getDelegatableDefaultPerms()
+  public synchronized PermMatrix getDelegatableDefaultPerms()
   {
     return delegatableDefaultPerms;
   }
@@ -735,7 +733,7 @@ public final class DBPermissionManager {
    * in the database.</p>
    */
 
-  public boolean selectPersona(String newPersona, String password)
+  public synchronized boolean selectPersona(String newPersona, String password)
   {
     DBObject
       user,
@@ -903,7 +901,7 @@ public final class DBPermissionManager {
    * on.</p>
    */
 
-  public QueryResult getAvailableOwnerGroups()
+  public synchronized QueryResult getAvailableOwnerGroups()
   {
     Query q;
     QueryResult result = new QueryResult();
@@ -1035,7 +1033,7 @@ public final class DBPermissionManager {
    * first one in the list.</p>
    */
 
-  public Vector<Invid> getNewOwnerInvids()
+  public synchronized Vector<Invid> getNewOwnerInvids()
   {
     if (newObjectOwnerInvids != null)
       {
@@ -1240,7 +1238,7 @@ public final class DBPermissionManager {
    * <p>NB: This method requires no external synchronization</p>
    */
 
-  public QueryResult filterQueryResult(QueryResult qr)
+  public synchronized QueryResult filterQueryResult(QueryResult qr)
   {
     if (qr == null)
       {
@@ -1279,7 +1277,7 @@ public final class DBPermissionManager {
    * <p>This method finds the ultimate owner of an embedded object</p>
    */
 
-  DBObject getContainingObj(DBObject object)
+  synchronized DBObject getContainingObj(DBObject object)
   {
     return dbSession.getContainingObj(object);
   }
@@ -1294,7 +1292,7 @@ public final class DBPermissionManager {
    * an appropriate result.</p>
    */
 
-  public PermEntry getPerm(DBObject object)
+  public synchronized PermEntry getPerm(DBObject object)
   {
     boolean doDebug = permsdebug && object.getInvid().getType() == 267;
     boolean useSelfPerm = false;
@@ -1446,7 +1444,7 @@ public final class DBPermissionManager {
    * persona.</p>
    */
 
-  public PermEntry getPerm(DBObject object, short fieldId)
+  public synchronized PermEntry getPerm(DBObject object, short fieldId)
   {
     // if this is true, the object was considered to be owned.
 
@@ -1683,7 +1681,7 @@ public final class DBPermissionManager {
    * the persona.
    */
 
-  PermEntry getPerm(short baseID, boolean includeOwnedPerms)
+  synchronized PermEntry getPerm(short baseID, boolean includeOwnedPerms)
   {
     PermEntry result;
 
@@ -1737,7 +1735,7 @@ public final class DBPermissionManager {
    * permissions that apply to objects not owned by the persona.
    */
 
-  PermEntry getPerm(short baseID, short fieldID, boolean includeOwnedPerms)
+  synchronized PermEntry getPerm(short baseID, short fieldID, boolean includeOwnedPerms)
   {
     PermEntry
       result = null;
@@ -1799,7 +1797,7 @@ public final class DBPermissionManager {
    * permission object in the Ganymede database.</p>
    */
 
-  private void resetDefaultPerms()
+  private synchronized void resetDefaultPerms()
   {
     PermissionMatrixDBField pField;
 
@@ -2213,7 +2211,7 @@ public final class DBPermissionManager {
    * @return true if a match is found
    */
 
-  public boolean recursePersonasMatch(Vector<Invid> owners, Vector<Invid> alreadySeen)
+  public synchronized boolean recursePersonasMatch(Vector<Invid> owners, Vector<Invid> alreadySeen)
   {
     // *** It is critical that this method not modify the owners parameter passed
     // *** in, as it may be 'live' in a DBField.
@@ -2247,7 +2245,7 @@ public final class DBPermissionManager {
    * @return true if a match is found
    */
 
-  public boolean recursePersonaMatch(Invid owner, Vector<Invid> alreadySeen)
+  public synchronized boolean recursePersonaMatch(Invid owner, Vector<Invid> alreadySeen)
   {
     DBObject ownerObj;
     InvidDBField inf;
@@ -2386,7 +2384,7 @@ public final class DBPermissionManager {
    * recursePersonasMatch().</p>
    */
 
-  private boolean isMemberAll(Vector<Invid> owners)
+  private synchronized boolean isMemberAll(Vector<Invid> owners)
   {
     DBObject ownerObj;
     InvidDBField inf;
@@ -2458,7 +2456,7 @@ public final class DBPermissionManager {
    * up), so it's a simple loop-di-loop.</p>
    */
 
-  public boolean filterMatch(DBObject obj)
+  public synchronized boolean filterMatch(DBObject obj)
   {
     Vector<Invid> owners;
     InvidDBField inf;
