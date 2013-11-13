@@ -275,18 +275,6 @@ public final class DBSession implements QueryDescriber {
 
     e_object = base.createNewObject(editSet, chosenSlot);
 
-    if (e_object == null)
-      {
-        // failure?  Report it, but we don't have to do any clean up at this
-        // point.
-
-        // "Object Creation Failure"
-        // "Couldn''t create the new object in the database."
-        return Ganymede.createErrorDialog(this.getGSession(),
-                                          ts.l("createDBObject.failure"),
-                                          ts.l("createDBObject.failure_text"));
-      }
-
     // Checkpoint the transaction at this point so that we can
     // recover if we can't get the object into the owner groups
     // it needs to go into
