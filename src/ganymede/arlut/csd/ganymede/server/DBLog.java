@@ -827,7 +827,6 @@ final public class DBLog implements java.io.Closeable {
               {
                 returnAddr = adminPersonaCustom.convertAdminInvidToString(event.admin,
                                                                           transaction.session);
-                returnAddrDesc = returnAddrDesc;
               }
             else
               {
