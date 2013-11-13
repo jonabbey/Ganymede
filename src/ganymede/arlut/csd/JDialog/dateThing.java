@@ -86,12 +86,21 @@ public class dateThing implements java.io.Serializable {
 
   public Date getDate()
   {
-    return currentDate;
+    if (currentDate == null)
+      {
+        return null;
+      }
+
+    return new Date(currentDate.getTime());
   }
 
   public Date getMaxDate()
   {
-    return maxDate;
-  }
+    if (maxDate == null)
+      {
+        return null;
+      }
 
+    return new Date(maxDate.getTime());
+  }
 }
