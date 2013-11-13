@@ -205,13 +205,13 @@ public class PermEntry implements java.io.Serializable {
   private boolean create;
   private boolean delete;
 
-  // transient fields are initialized to 0 or false when objects
-  // are deserialized, so we can use indexSet to differentiate
-  // between index being zero because we have no permissions and
-  // index being zero because of deserialization
+  // initialize our transient fields when we're deserialized on the
+  // client.  we'll use indexSet to differentiate between index being
+  // zero because we have no permissions and index being zero because
+  // of deserialization
 
-  private transient byte index;
-  private transient boolean indexSet;
+  private transient byte index = 0;
+  private transient boolean indexSet = false;
 
   /* -- */
 
@@ -549,7 +549,7 @@ public class PermEntry implements java.io.Serializable {
     return result.toString();
   }
 
-  private synchronized void calcIndex()
+  private void calcIndex()
   {
     index = 0;
 
