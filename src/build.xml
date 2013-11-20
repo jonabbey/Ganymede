@@ -427,7 +427,7 @@ refresh the jar files.
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/server_ssl_key.jks"/>
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/client_ssl_cert.jks"/>
 
-      <zipfileset src="${lib.dir}/antlr-runtime-3.2.jar"/>
+      <zipfileset src="${lib.dir}/antlr-3.5.1-runtime.jar"/>
     </jar>
 
     <!-- Build the client jar file -->
