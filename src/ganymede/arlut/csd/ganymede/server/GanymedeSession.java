@@ -505,7 +505,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // set our initial status
 
-    status = ts.l("init.loggedin");
+    status = ts.l("init.loggedin"); // "logged in"
     setLastEvent(ts.l("init.loggedin"));
   }
 
@@ -1170,6 +1170,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (dbSession.editSet == null)
       {
+        // "Server: Error in commitTransaction()"
+        // "Error.. no transaction in progress"
         return Ganymede.createErrorDialog(this,
                                           ts.l("commitTransaction.error"),
                                           ts.l("commitTransaction.error_text"));
@@ -1251,6 +1253,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (dbSession.editSet == null)
       {
+        // "No transaction in progress"
         throw new IllegalArgumentException(ts.l("abortTransaction.exception"));
       }
 
@@ -1915,12 +1918,14 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (invid == null)
       {
+        // "Null invid passed into viewAdminHistory"
         setLastError(ts.l("viewAdminHistory.null_invid"));
         return null;
       }
 
     if (invid.getType() != SchemaConstants.PersonaBase)
       {
+        // "Wrong type of invid passed into viewAdminHistory"
         setLastError(ts.l("viewAdminHistory.wrong_invid"));
         return null;
       }
@@ -1931,17 +1936,20 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (obj == null)
       {
+        // "argh!! null object in viewAdminHistory on invid {0}"
         throw new NullPointerException(ts.l("viewAdminHistory.null_pointer", String.valueOf(invid)));
       }
 
     if (!permManager.getPerm(obj).isVisible())
       {
+        // "Permissions denied to view the history for this invid."
         setLastError(ts.l("viewObjectHistory.permissions"));
         return null;
       }
 
     if (Ganymede.log == null)
       {
+        // "Log not active, can''t view invid history"
         setLastError(ts.l("viewObjectHistory.no_log"));
         return null;
       }
@@ -2009,7 +2017,6 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Object Not Found"
         // "Could not find object {0} in the database.  Perhaps the object does not exist?"
-
         return Ganymede.createErrorDialog(this,
                                           ts.l("view_db_object.no_object_error"),
                                           ts.l("view_db_object.no_object_error_text", String.valueOf(invid)));
@@ -2051,9 +2058,13 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
     else
       {
+        // "Permissions Error"
+        // "Permission to view object [{0} - {1}] denied."
         return Ganymede.createErrorDialog(this,
                                           ts.l("global.permissions_error"),
-                                          ts.l("view_db_object.permissions_error_text", viewObjectLabel(invid), String.valueOf(invid)));
+                                          ts.l("view_db_object.permissions_error_text",
+                                               viewObjectLabel(invid),
+                                               String.valueOf(invid)));
       }
   }
 
@@ -2385,6 +2396,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (vObj == null)
       {
+        // "Can''t inactivate a non-existent object"
         setLastError(ts.l("inactivate_db_object.error_text"));
 
         // "Server: Error in inactivate_db_object()"
@@ -2407,6 +2419,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (!permManager.getPerm(vObj).isDeletable())
       {
+        // "Don''t have permission to inactivate {0} {1}"
         setLastError(ts.l("inactivate_db_object.permission_text",
                           vObj.getTypeName(),
                           vObj.getLabel()));
@@ -3536,6 +3549,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
     else
       {
+        // "Tried to unregister a wizard that wasn''t registered"
         throw new IllegalArgumentException(ts.l("unregisterWizard.exception"));
       }
   }
