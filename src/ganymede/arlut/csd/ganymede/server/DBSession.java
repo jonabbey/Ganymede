@@ -344,6 +344,10 @@ public final class DBSession implements QueryDescriber {
 
         if (!editSet.addObject(e_object))
           {
+            // "Couldn''t create object"
+            // "Couldn''t create the object, because it came pre-linked to a deleted object.\n
+            //  Don''t worry, this wasn''t your fault.\n
+            //  Talk to whoever customized Ganymede for you, or try again later."
             return Ganymede.createErrorDialog(this.getGSession(),
                                               ts.l("createDBObject.failure"),
                                               ts.l("createDBObject.addObject_failed"));
