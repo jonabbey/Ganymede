@@ -38,7 +38,7 @@ public class QueryLexer extends Lexer {
     // delegates
     // delegators
 
-    public QueryLexer() {;} 
+    public QueryLexer() {;}
     public QueryLexer(CharStream input) {
         this(input, new RecognizerSharedState());
     }
@@ -1446,7 +1446,7 @@ public class QueryLexer extends Lexer {
                     {
                     match('n'); if (state.failed) return ;
                     if ( state.backtracking==0 ) {
-                       this.setText("\n"); 
+                       this.setText("\n");
                     }
 
                     }
@@ -1456,7 +1456,7 @@ public class QueryLexer extends Lexer {
                     {
                     match('\"'); if (state.failed) return ;
                     if ( state.backtracking==0 ) {
-                       this.setText("\""); 
+                       this.setText("\"");
                     }
 
                     }
@@ -1466,7 +1466,7 @@ public class QueryLexer extends Lexer {
                     {
                     match('\''); if (state.failed) return ;
                     if ( state.backtracking==0 ) {
-                       this.setText("'");  
+                       this.setText("'");
                     }
 
                     }
@@ -1476,7 +1476,7 @@ public class QueryLexer extends Lexer {
                     {
                     match(' '); if (state.failed) return ;
                     if ( state.backtracking==0 ) {
-                       this.setText(" "); 
+                       this.setText(" ");
                     }
 
                     }
@@ -2014,7 +2014,7 @@ public class QueryLexer extends Lexer {
     }
 
     // $ANTLR start synpred1_Query
-    public final void synpred1_Query_fragment() throws RecognitionException {   
+    public final void synpred1_Query_fragment() throws RecognitionException {
         // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:10: ( ESC )
         // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:11: ESC
         {
@@ -2025,7 +2025,7 @@ public class QueryLexer extends Lexer {
     // $ANTLR end synpred1_Query
 
     // $ANTLR start synpred2_Query
-    public final void synpred2_Query_fragment() throws RecognitionException {   
+    public final void synpred2_Query_fragment() throws RecognitionException {
         // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:185:11: ( ESC )
         // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:185:12: ESC
         {
@@ -2130,7 +2130,7 @@ public class QueryLexer extends Lexer {
         }
     }
 
-    class DFA2 extends DFA {
+    static class DFA2 extends DFA {
 
         public DFA2(BaseRecognizer recognizer) {
             this.recognizer = recognizer;
@@ -2210,10 +2210,10 @@ public class QueryLexer extends Lexer {
             IntStream input = _input;
                 int _s = s;
             switch ( s ) {
-                    case 0 : 
+                    case 0 :
                         int LA5_5 = input.LA(1);
 
-                         
+
                         int index5_5 = input.index();
                         input.rewind();
                         s = -1;
@@ -2221,14 +2221,14 @@ public class QueryLexer extends Lexer {
 
                         else if ( (true) ) {s = 3;}
 
-                         
+
                         input.seek(index5_5);
                         if ( s>=0 ) return s;
                         break;
-                    case 1 : 
+                    case 1 :
                         int LA5_8 = input.LA(1);
 
-                         
+
                         int index5_8 = input.index();
                         input.rewind();
                         s = -1;
@@ -2236,14 +2236,14 @@ public class QueryLexer extends Lexer {
 
                         else if ( (true) ) {s = 3;}
 
-                         
+
                         input.seek(index5_8);
                         if ( s>=0 ) return s;
                         break;
-                    case 2 : 
+                    case 2 :
                         int LA5_4 = input.LA(1);
 
-                         
+
                         int index5_4 = input.index();
                         input.rewind();
                         s = -1;
@@ -2255,14 +2255,14 @@ public class QueryLexer extends Lexer {
 
                         else s = 3;
 
-                         
+
                         input.seek(index5_4);
                         if ( s>=0 ) return s;
                         break;
-                    case 3 : 
+                    case 3 :
                         int LA5_6 = input.LA(1);
 
-                         
+
                         int index5_6 = input.index();
                         input.rewind();
                         s = -1;
@@ -2270,14 +2270,14 @@ public class QueryLexer extends Lexer {
 
                         else if ( (true) ) {s = 3;}
 
-                         
+
                         input.seek(index5_6);
                         if ( s>=0 ) return s;
                         break;
-                    case 4 : 
+                    case 4 :
                         int LA5_7 = input.LA(1);
 
-                         
+
                         int index5_7 = input.index();
                         input.rewind();
                         s = -1;
@@ -2285,11 +2285,11 @@ public class QueryLexer extends Lexer {
 
                         else if ( (true) ) {s = 3;}
 
-                         
+
                         input.seek(index5_7);
                         if ( s>=0 ) return s;
                         break;
-                    case 5 : 
+                    case 5 :
                         int LA5_2 = input.LA(1);
 
                         s = -1;
@@ -2307,7 +2307,7 @@ public class QueryLexer extends Lexer {
 
                         if ( s>=0 ) return s;
                         break;
-                    case 6 : 
+                    case 6 :
                         int LA5_0 = input.LA(1);
 
                         s = -1;
@@ -2391,10 +2391,10 @@ public class QueryLexer extends Lexer {
             IntStream input = _input;
                 int _s = s;
             switch ( s ) {
-                    case 0 : 
+                    case 0 :
                         int LA6_8 = input.LA(1);
 
-                         
+
                         int index6_8 = input.index();
                         input.rewind();
                         s = -1;
@@ -2402,14 +2402,14 @@ public class QueryLexer extends Lexer {
 
                         else if ( (true) ) {s = 3;}
 
-                         
+
                         input.seek(index6_8);
                         if ( s>=0 ) return s;
                         break;
-                    case 1 : 
+                    case 1 :
                         int LA6_6 = input.LA(1);
 
-                         
+
                         int index6_6 = input.index();
                         input.rewind();
                         s = -1;
@@ -2421,14 +2421,14 @@ public class QueryLexer extends Lexer {
 
                         else s = 3;
 
-                         
+
                         input.seek(index6_6);
                         if ( s>=0 ) return s;
                         break;
-                    case 2 : 
+                    case 2 :
                         int LA6_5 = input.LA(1);
 
-                         
+
                         int index6_5 = input.index();
                         input.rewind();
                         s = -1;
@@ -2436,11 +2436,11 @@ public class QueryLexer extends Lexer {
 
                         else if ( (true) ) {s = 3;}
 
-                         
+
                         input.seek(index6_5);
                         if ( s>=0 ) return s;
                         break;
-                    case 3 : 
+                    case 3 :
                         int LA6_2 = input.LA(1);
 
                         s = -1;
@@ -2458,10 +2458,10 @@ public class QueryLexer extends Lexer {
 
                         if ( s>=0 ) return s;
                         break;
-                    case 4 : 
+                    case 4 :
                         int LA6_4 = input.LA(1);
 
-                         
+
                         int index6_4 = input.index();
                         input.rewind();
                         s = -1;
@@ -2469,11 +2469,11 @@ public class QueryLexer extends Lexer {
 
                         else if ( (true) ) {s = 3;}
 
-                         
+
                         input.seek(index6_4);
                         if ( s>=0 ) return s;
                         break;
-                    case 5 : 
+                    case 5 :
                         int LA6_0 = input.LA(1);
 
                         s = -1;
@@ -2485,10 +2485,10 @@ public class QueryLexer extends Lexer {
 
                         if ( s>=0 ) return s;
                         break;
-                    case 6 : 
+                    case 6 :
                         int LA6_7 = input.LA(1);
 
-                         
+
                         int index6_7 = input.index();
                         input.rewind();
                         s = -1;
@@ -2496,7 +2496,7 @@ public class QueryLexer extends Lexer {
 
                         else if ( (true) ) {s = 3;}
 
-                         
+
                         input.seek(index6_7);
                         if ( s>=0 ) return s;
                         break;
@@ -2693,7 +2693,7 @@ public class QueryLexer extends Lexer {
         }
     }
 
-    class DFA12 extends DFA {
+    static class DFA12 extends DFA {
 
         public DFA12(BaseRecognizer recognizer) {
             this.recognizer = recognizer;
@@ -2710,6 +2710,6 @@ public class QueryLexer extends Lexer {
             return "1:1: Tokens : ( BACKSLASH | LPAREN | RPAREN | COMMA | DEREF | AND | OR | NOT | SELECT | FROM | WHERE | OBJECT | EDITABLE | BOOLEAN_VALUE | UNARY_OPERATOR | BINARY_OPERATOR | TOKEN | ESC | STRING_VALUE | INT_VALUE | DECIMAL_VALUE | WS );";
         }
     }
- 
+
 
 }
