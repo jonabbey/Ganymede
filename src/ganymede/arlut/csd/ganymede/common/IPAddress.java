@@ -6,7 +6,7 @@
    that allows IP addresses to be stored and processed in the Ganymede
    system.
 
-   Created: 20 May 1998
+   Created: 12 August 2013
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
