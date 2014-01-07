@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -257,6 +257,10 @@ public class IRISLink {
 
         return result;
       }
+    catch (SQLException ex)
+      {
+        throw new SQLException("Error: " + ex.getMessage() + "\nQuery: " + queryString, ex);
+      }
     finally
       {
         myConn.close();
@@ -279,14 +283,13 @@ public class IRISLink {
   public static String findHistoricalBadge(String username)
   {
     Connection myConn = null;
+    String queryString = "select BADGE_NUMBER from HR_EMPLOYEES_GA_VW where NETWORK_USER_ID = ?";
 
     try
       {
         myConn = getConnection();
 
-        String queryString = "select BADGE_NUMBER from HR_EMPLOYEES_GA_VW where NETWORK_USER_ID = ?";
         PreparedStatement queryName = myConn.prepareStatement(queryString);
-
         queryName.setString(1, username);
 
         ResultSet rs = queryName.executeQuery();
@@ -329,7 +332,7 @@ public class IRISLink {
       }
     catch (SQLException ex)
       {
-        rethrowException(ex);
+        rethrowException(new SQLException("Error: " + ex.getMessage() + "\nQuery: " + queryString, ex));
 
         // the compiler doesn't realize that rethrowException()
         // always throws an exception..
@@ -365,14 +368,13 @@ public class IRISLink {
   public static String findHistoricalUsername(String badge)
   {
     Connection myConn = null;
+    String queryString = "select NETWORK_USER_ID from HR_EMPLOYEES_GA_VW where BADGE_NUMBER = ?";
 
     try
       {
         myConn = getConnection();
 
-        String queryString = "select NETWORK_USER_ID from HR_EMPLOYEES_GA_VW where BADGE_NUMBER = ?";
         PreparedStatement queryName = myConn.prepareStatement(queryString);
-
         queryName.setString(1, badge);
 
         ResultSet rs = queryName.executeQuery();
@@ -395,7 +397,7 @@ public class IRISLink {
       }
     catch (SQLException ex)
       {
-        rethrowException(ex);
+        rethrowException(new SQLException("Error: " + ex.getMessage() + "\nQuery: " + queryString, ex));
 
         // the compiler doesn't realize that rethrowException()
         // always throws an exception..
@@ -425,14 +427,13 @@ public class IRISLink {
   public static String findHistoricalEmployeeName(String username)
   {
     Connection myConn = null;
+    String queryString = "select EMPLOYEE_NAME from HR_EMPLOYEES_GA_VW where NETWORK_USER_ID = ?";
 
     try
       {
         myConn = getConnection();
 
-        String queryString = "select EMPLOYEE_NAME from HR_EMPLOYEES_GA_VW where NETWORK_USER_ID = ?";
         PreparedStatement queryName = myConn.prepareStatement(queryString);
-
         queryName.setString(1, username);
 
         ResultSet rs = queryName.executeQuery();
@@ -455,7 +456,7 @@ public class IRISLink {
       }
     catch (SQLException ex)
       {
-        rethrowException(ex);
+        rethrowException(new SQLException("Error: " + ex.getMessage() + "\nQuery: " + queryString, ex));
 
         // the compiler doesn't realize that rethrowException()
         // always throws an exception..
@@ -481,14 +482,13 @@ public class IRISLink {
   public static String getPhone(String badge)
   {
     Connection myConn = null;
+    String queryString = "select ARL_PHONE from HR_EMPLOYEES_GA_VW where BADGE_NUMBER = ?";
 
     try
       {
         myConn = getConnection();
 
-        String queryString = "select ARL_PHONE from HR_EMPLOYEES_GA_VW where BADGE_NUMBER = ?";
         PreparedStatement queryName = myConn.prepareStatement(queryString);
-
         queryName.setString(1, bufBadge(badge));
 
         ResultSet rs = queryName.executeQuery();
@@ -511,7 +511,7 @@ public class IRISLink {
       }
     catch (SQLException ex)
       {
-        rethrowException(ex);
+        rethrowException(new SQLException("Error: " + ex.getMessage() + "\nQuery: " + queryString, ex));
 
         // the compiler doesn't realize that rethrowException()
         // always throws an exception..
@@ -532,12 +532,12 @@ public class IRISLink {
 
 
   /**
-   * This method returns true if the given username is either not
+   * <p>This method returns true if the given username is either not
    * present in the IRIS database, or if it is present and the badge
-   * identifier matches.
+   * identifier matches.</p>
    *
-   * This method will return false if the given username is present in
-   * the database with a different badge code.
+   * <p>This method will return false if the given username is present
+   * in the database with a different badge code.</p>
    */
 
   public static boolean okayToUseName(String username, String badge)
@@ -583,22 +583,21 @@ public class IRISLink {
   public static boolean isRegisteredBadgeNumber(String badge)
   {
     Connection myConn = null;
+    String queryString = "select BADGE_NUMBER from HR_EMPLOYEES_GA_VW where BADGE_NUMBER = ?";
 
     try
       {
         myConn = getConnection();
 
-        String queryString = "select BADGE_NUMBER from HR_EMPLOYEES_GA_VW where BADGE_NUMBER = ?";
         PreparedStatement queryName = myConn.prepareStatement(queryString);
-
         queryName.setString(1, bufBadge(badge));
-
         ResultSet rs = queryName.executeQuery();
 
         try
           {
             return rs.next();
           }
+
         finally
           {
             rs.close();
@@ -606,7 +605,7 @@ public class IRISLink {
       }
     catch (SQLException ex)
       {
-        rethrowException(ex);
+        rethrowException(new SQLException("Error: " + ex.getMessage() + "\nQuery: " + queryString, ex));
 
         // the compiler doesn't realize that rethrowException()
         // always throws an exception..
