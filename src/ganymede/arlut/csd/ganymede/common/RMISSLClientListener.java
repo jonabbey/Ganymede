@@ -4,18 +4,19 @@
 
    This interface is used to receive notifications when an RMI SSL
    connection is formed on the Ganymede client.
- 
+
    Created: 13 January 2005
-   Last Changed By: $Author: broccol $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2014
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 

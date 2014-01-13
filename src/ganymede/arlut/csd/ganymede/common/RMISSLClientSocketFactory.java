@@ -85,9 +85,9 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
   private transient SSLSocketFactory sf;
 
   /**
-   * <P>This static method is used to register an optional listener on
+   * <p>This static method is used to register an optional listener on
    * the Ganymede client, to receive notification when an RMI SSL
-   * socket is opened.</P>
+   * socket is opened.</p>
    */
 
   public synchronized static void setSSLClientListener(RMISSLClientListener listener)
