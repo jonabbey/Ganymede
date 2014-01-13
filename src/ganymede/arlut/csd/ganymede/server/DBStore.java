@@ -2491,7 +2491,7 @@ public final class DBStore implements JythonMap {
 
     /* -- */
 
-    // manually insert the root (supergash) admin object
+    // create a 'supergash' session to work with
 
     try
       {

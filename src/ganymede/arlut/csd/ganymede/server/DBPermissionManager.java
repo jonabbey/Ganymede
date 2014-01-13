@@ -1426,16 +1426,16 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method takes the administrator's current
-   * persona, considers the owner groups the administrator
-   * is a member of, checks to see if the object is owned
-   * by that group, and determines the appropriate permission
-   * bits for the field in the object.</p>
+   * <p>This method takes the administrator's current persona,
+   * considers the owner groups the administrator is a member of,
+   * checks to see if the object is owned by that group, and
+   * determines the appropriate permission bits for the field in the
+   * object.</p>
    *
    * <p>This method duplicates the logic of {@link
    * arlut.csd.ganymede.server.DBPermissionManager#getPerm(arlut.csd.ganymede.server.DBObject)
    * getPerm(object)} internally for efficiency.  This method is
-   * called <B>quite</B> a lot in the server, and has been tuned
+   * called <b>quite</b> a lot in the server, and has been tuned
    * to use the pre-calculated DBPermissionManager
    * {@link arlut.csd.ganymede.server.DBPermissionManager#defaultPerms defaultPerms}
    * and {@link arlut.csd.ganymede.server.DBPermissionManager#personaPerms personaPerms}
@@ -1825,14 +1825,15 @@ public final class DBPermissionManager {
    * generate a comprehensive permissions matrix that applies to all
    * objects owned by the active persona for this user.</p>
    *
-   * <p>This method is synchronized, and a whole lot of operations in the server
-   * need to pass through here to ensure that the effective permissions for this
-   * session haven't changed.  This method is designed to return very quickly
-   * if permissions have not changed and forceUpdate is false.</p>
+   * <p>This method is synchronized, and a whole lot of operations in
+   * the server need to pass through here to ensure that the effective
+   * permissions for this session haven't changed.  This method is
+   * designed to return very quickly if permissions have not changed
+   * and forceUpdate is false.</p>
    *
-   * @param forceUpdate If false, updatePerms() will do nothing if the Ganymede
-   * permissions database has not been changed since updatePerms() was last
-   * called in this DBPermissionManager.
+   * @param forceUpdate If false, updatePerms() will do nothing if the
+   * Ganymede permissions database has not been changed since
+   * updatePerms() was last called in this DBPermissionManager.
    */
 
   private synchronized void updatePerms(boolean forceUpdate)
@@ -1841,29 +1842,21 @@ public final class DBPermissionManager {
 
     /* -- */
 
+    if (permsdebug)
+      {
+        System.err.println("updatePerms(" + Boolean.toString(forceUpdate) + ")");
+      }
+
     if (forceUpdate)
       {
-        // clear our time stamp to force an update further on
-
         personaTimeStamp = null;
-
-        if (permsdebug)
-          {
-            System.err.println("updatePerms(true)");
-          }
-      }
-    else
-      {
-        if (permsdebug)
-          {
-            System.err.println("updatePerms(false)");
-          }
       }
 
     // first, make sure we have a copy of our default role
     // DBObject.. permTimeStamp is used to track this.
 
-    if (permTimeStamp == null || !permTimeStamp.before(Ganymede.db.getObjectBase(SchemaConstants.RoleBase).getTimeStamp()))
+    if (permTimeStamp == null ||
+        !permTimeStamp.before(Ganymede.db.getObjectBase(SchemaConstants.RoleBase).getTimeStamp()))
       {
         defaultObj = dbSession.viewDBObject(SchemaConstants.RoleBase,
                                             SchemaConstants.RoleDefaultObj);
@@ -1901,7 +1894,8 @@ public final class DBPermissionManager {
     // here's where we break out if nothing needs to be updated.. note
     // that we are testing personaTimeStamp here, not permTimeStamp.
 
-    if (personaTimeStamp != null && personaTimeStamp.after(Ganymede.db.getObjectBase(SchemaConstants.PersonaBase).getTimeStamp()))
+    if (personaTimeStamp != null &&
+        personaTimeStamp.after(Ganymede.db.getObjectBase(SchemaConstants.PersonaBase).getTimeStamp()))
       {
         return;
       }
