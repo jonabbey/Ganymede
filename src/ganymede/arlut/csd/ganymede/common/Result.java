@@ -15,7 +15,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -59,11 +59,11 @@ package arlut.csd.ganymede.common;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>The Result class is effectively a serializable, labeled
- * {@link arlut.csd.ganymede.common.Invid Invid} that can be passed from the server
- * to the client.  The client uses Results to load labeled items into the
- * client tree, or to provide a list of labeled object handles in Invid
- * chooser fields.</P>
+ * <p>The Result class is effectively a serializable, labeled {@link
+ * arlut.csd.ganymede.common.Invid Invid} that can be passed from the
+ * server to the client.  The client uses Results to load labeled
+ * items into the client tree, or to provide a list of labeled object
+ * handles in Invid chooser fields.</p>
  */
 
 public class Result implements java.io.Serializable {
