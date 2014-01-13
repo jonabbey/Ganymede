@@ -10,7 +10,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -53,8 +53,9 @@ package arlut.csd.ganymede.common;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Logical AND node for use in a serialized {@link arlut.csd.ganymede.common.Query Query}
- * object's {@link arlut.csd.ganymede.common.QueryNode QueryNode} tree.</P>
+ * <p>Logical AND node for use in a serialized {@link
+ * arlut.csd.ganymede.common.Query Query} object's {@link
+ * arlut.csd.ganymede.common.QueryNode QueryNode} tree.</p>
  */
 
 public class QueryAndNode extends QueryNode {
