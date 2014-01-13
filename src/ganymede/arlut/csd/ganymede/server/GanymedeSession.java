@@ -21,7 +21,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -59,16 +59,11 @@
 package arlut.csd.ganymede.server;
 
 import java.io.IOException;
-import java.net.ProtocolException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.Unreferenced;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -697,7 +692,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @see arlut.csd.ganymede.rmi.Session
    */
 
-  public Vector getPersonae() throws NotLoggedInException
+  public Vector<String> getPersonae() throws NotLoggedInException
   {
     checklogin();
 
@@ -1327,7 +1322,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     Qsmtp mailer;
     StringBuilder signature = new StringBuilder();
-    Vector addresses = new Vector();
+    Vector<String> addresses = new Vector<String>();
     StringTokenizer tokens = new StringTokenizer(address, ", ", false);
 
     /* -- */
@@ -1338,7 +1333,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         while (tokens.hasMoreElements())
           {
-            addresses.addElement(tokens.nextToken());
+            addresses.add(tokens.nextToken());
           }
 
         // create the signature
@@ -1405,7 +1400,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     Qsmtp mailer;
     StringBuilder asciiContent = new StringBuilder();
     StringBuilder signature = new StringBuilder();
-    Vector addresses = new Vector();
+    Vector<String> addresses = new Vector<String>();
     StringTokenizer tokens = new StringTokenizer(address, ", ", false);
 
     /* -- */
@@ -1416,7 +1411,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         while (tokens.hasMoreElements())
           {
-            addresses.addElement(tokens.nextToken());
+            addresses.add(tokens.nextToken());
           }
 
         // create the signature
