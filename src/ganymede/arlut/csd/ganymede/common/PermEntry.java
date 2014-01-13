@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -61,15 +61,15 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Serializable and immutable permissions entry object, used to
+ * <p>Serializable and immutable permissions entry object, used to
  * store and transmit permissions for a specific {@link
  * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} and {@link
- * arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}.</P>
+ * arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}.</p>
  *
- * <P>Used in conjunction with
+ * <p>Used in conjunction with
  * {@link arlut.csd.ganymede.server.PermissionMatrixDBField PermissionMatrixDBField}
  * and {@link arlut.csd.ganymede.common.PermMatrix PermMatrix} to handle Permissions
- * in a Role object in the Ganymede server.</P>
+ * in a Role object in the Ganymede server.</p>
  */
 
 public class PermEntry implements java.io.Serializable {
