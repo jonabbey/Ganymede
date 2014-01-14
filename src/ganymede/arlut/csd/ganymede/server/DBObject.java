@@ -1570,6 +1570,28 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * <p>Returns true if this object contains the given field id.</p>
+   *
+   * <p>Not permission checked, server-side only.</p>
+   */
+
+  public final boolean containsField(short id)
+  {
+    return (retrieveField(id) != null);
+  }
+
+  /**
+   * <p>Returns true if this object contains the given field id.</p>
+   *
+   * <p>Not permission checked, server-side only.</p>
+   */
+
+  public final boolean containsField(String fieldName)
+  {
+    return (retrieveField(fieldName) != null);
+  }
+
+  /**
    * <p>This method retrieves a DBField from this object's fieldAry
    * DBField array.  retrieveField() uses a hashing algorithm to try
    * and speed up field retrieving, but we are optimizing for low
