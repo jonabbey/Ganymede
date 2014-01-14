@@ -294,7 +294,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * transaction support.</p>
    */
 
-  private DBSession dbSession;
+  final private DBSession dbSession;
 
   /**
    * Our DBQueryEngine object.  DBQueryEngine has all the routines for
@@ -302,14 +302,14 @@ final public class GanymedeSession implements Session, Unreferenced {
    * datastore with permission and transaction awareness.
    */
 
-  private DBQueryEngine queryEngine;
+  final private DBQueryEngine queryEngine;
 
   /**
    * Our DBPermissionManager object.  DBPermissionManager manages our
    * access privileges.
    */
 
-  private DBPermissionManager permManager;
+  final private DBPermissionManager permManager;
 
   /**
    * A GanymedeSession can have a single wizard active.  If this variable
@@ -3179,8 +3179,6 @@ final public class GanymedeSession implements Session, Unreferenced {
             // "{0} logged off"
             Ganymede.debug(ts.l("logout.logged_off", permManager.getUserName()));
           }
-
-        queryEngine = null;
       }
   }
 
