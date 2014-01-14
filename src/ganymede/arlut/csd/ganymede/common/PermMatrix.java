@@ -165,7 +165,7 @@ public class PermMatrix implements java.io.Serializable {
 
   public PermMatrix union(Hashtable<String, PermEntry> orig)
   {
-    return union(new PermMatrix(orig)); // this will cause a redundant copy, but who cares?
+    return this.union(new PermMatrix(orig));
   }
 
   /**
@@ -195,15 +195,7 @@ public class PermMatrix implements java.io.Serializable {
         return new PermMatrix(this);
       }
 
-    // duplicate orig as our starting point.  we'll then union
-    // anything in this PermMatrix on top of orig in result
-
-    //    result = new PermMatrix(orig);
     result = new PermMatrix();
-
-    // now go through our matrix and for any entries in this.matrix,
-    // put the union of that and the matching entry already in result
-    // into result.
 
     for (String key: this.matrix.keySet())
       {
