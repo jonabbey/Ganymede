@@ -335,7 +335,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * return null.
    */
 
-  public final DBObject getOriginal()
+  @Override public final DBObject getOriginal()
   {
     return original;
   }

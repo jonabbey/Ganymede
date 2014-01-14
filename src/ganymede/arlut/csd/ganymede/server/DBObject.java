@@ -758,6 +758,17 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * Returns the original version of the object that we were created
+   * to edit.  If we are a newly created object, this method will
+   * return null.
+   */
+
+  public DBObject getOriginal()
+  {
+    return this;
+  }
+
+  /**
    * <p>Returns the field definition for the given field code, or null
    * if that field code is not registered with this object type.</p>
    */
