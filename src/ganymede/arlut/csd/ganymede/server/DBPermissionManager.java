@@ -95,13 +95,20 @@ public final class DBPermissionManager {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBPermissionManager");
 
-  // ---
-
   /**
-   * The GanymedeSession that this DBPermissionManager is connected to.
+   * Invid for the supergash Owner Group Object
    */
 
-  private GanymedeSession gSession = null;
+  static final Invid SUPERGASH_GROUP_INVID = Invid.createInvid(SchemaConstants.OwnerBase,
+                                                               SchemaConstants.OwnerSupergash);
+
+  /**
+   * Invid for the default Role Object
+   */
+
+  static final Invid DEFAULT_ROLE_INVID = Invid.createInvid(SchemaConstants.RoleBase,
+                                                            SchemaConstants.RoleDefaultObj);
+
   // ---
 
   /**
