@@ -748,7 +748,7 @@ public final class DBPermissionManager {
     return results;
   }
 
-  public synchronized PermMatrix getPersonaPerms()
+  public synchronized PermMatrix getOwnedObjectPerms()
   {
     return personaPerms;
   }
@@ -758,12 +758,12 @@ public final class DBPermissionManager {
     return defaultPerms;
   }
 
-  public synchronized PermMatrix getDelegatablePersonaPerms()
+  public synchronized PermMatrix getDelegatableOwnedObjectPerms()
   {
     return delegatablePersonaPerms;
   }
 
-  public synchronized PermMatrix getDelegatableDefaultPerms()
+  public synchronized PermMatrix getDelegatableUnownedObjectPerms()
   {
     return delegatableDefaultPerms;
   }

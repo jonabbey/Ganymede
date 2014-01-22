@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -1011,12 +1011,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     if (getID() == SchemaConstants.RoleMatrix)
       {
-        return this.owner.gSession.getPermManager().getDelegatablePersonaPerms();
+        return this.owner.gSession.getPermManager().getDelegatableOwnedObjectPerms();
       }
 
     if (getID() == SchemaConstants.RoleDefaultMatrix)
       {
-        return this.owner.gSession.getPermManager().getDelegatableDefaultPerms();
+        return this.owner.gSession.getPermManager().getDelegatableUnownedObjectPerms();
       }
 
     return null;
@@ -1431,7 +1431,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     if (getID() == SchemaConstants.RoleMatrix)
       {
-        if (this.owner.gSession.getPermManager().getPersonaPerms() == null)
+        if (this.owner.gSession.getPermManager().getOwnedObjectPerms() == null)
           {
             return false;
           }
@@ -1440,11 +1440,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
         if (fieldID < 0)
           {
-            adminPriv = (PermEntry) this.owner.gSession.getPermManager().getDelegatablePersonaPerms().getPerm(baseID);
+            adminPriv = (PermEntry) this.owner.gSession.getPermManager().getDelegatableOwnedObjectPerms().getPerm(baseID);
           }
         else
           {
-            adminPriv = (PermEntry) this.owner.gSession.getPermManager().getDelegatablePersonaPerms().getPerm(baseID, fieldID);
+            adminPriv = (PermEntry) this.owner.gSession.getPermManager().getDelegatableOwnedObjectPerms().getPerm(baseID, fieldID);
           }
 
         // the adminPriv should have all the bits set that we are seeking to set
@@ -1462,11 +1462,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
         if (fieldID < 0)
           {
-            adminPriv = (PermEntry) this.owner.gSession.getPermManager().getDelegatableDefaultPerms().getPerm(baseID);
+            adminPriv = (PermEntry) this.owner.gSession.getPermManager().getDelegatableUnownedObjectPerms().getPerm(baseID);
           }
         else
           {
-            adminPriv = (PermEntry) this.owner.gSession.getPermManager().getDelegatableDefaultPerms().getPerm(baseID, fieldID);
+            adminPriv = (PermEntry) this.owner.gSession.getPermManager().getDelegatableUnownedObjectPerms().getPerm(baseID, fieldID);
           }
 
         // the adminPriv should have all the bits set that we are seeking to set
