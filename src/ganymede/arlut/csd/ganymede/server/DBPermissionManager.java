@@ -717,45 +717,30 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method returns a list of personae names available to the
-   * user logged in.</p>
+   * This method returns a list of personae names available to the
+   * user logged in.
    */
 
   public synchronized Vector<String> getAvailablePersonae()
   {
-    DBObject user;
-    Vector<String> results;
-    InvidDBField inv;
-
-    /* -- */
-
-    user = getUser();
+    DBObject user = getUser();
 
     if (user == null)
       {
         return null;
       }
 
-    results = new Vector<String>();
+    Vector<String> results = new Vector<String>();
+    Vector<Invid> personae = (Vector<Invid>) user.getFieldValuesLocal(SchemaConstants.UserAdminPersonae);
 
-    inv = (InvidDBField) user.getField(SchemaConstants.UserAdminPersonae);
-
-    if (inv != null)
+    for (Invid invid: personae)
       {
-        // it's okay to loop on this field since we should be looking
-        // at a DBObject and not a DBEditObject
-
-        for (int i = 0; i < inv.size(); i++)
+        try
           {
-            Invid invid = (Invid) inv.getElementLocal(i);
-
-            try
-              {
-                results.add(dbSession.viewDBObject(invid).getLabel());
-              }
-            catch (NullPointerException ex)
-              {
-              }
+            results.add(dbSession.viewDBObject(invid).getOriginal().getLabel());
+          }
+        catch (NullPointerException ex)
+          {
           }
       }
 
@@ -2317,7 +2302,7 @@ public final class DBPermissionManager {
         alreadySeen.add(owner);
       }
 
-    ownerObj = dbSession.viewDBObject(owner);
+    ownerObj = dbSession.viewDBObject(owner).getOriginal();
 
     inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
 
@@ -2463,7 +2448,7 @@ public final class DBPermissionManager {
             return false;
           }
 
-        ownerObj = dbSession.viewDBObject(owner);
+        ownerObj = dbSession.viewDBObject(owner).getOriginal();
 
         inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
 
