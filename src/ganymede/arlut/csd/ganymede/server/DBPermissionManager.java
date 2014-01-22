@@ -477,19 +477,20 @@ public final class DBPermissionManager {
    * user.</p>
    */
 
-  public synchronized String getUserName()
+  public String getUserName()
   {
     return username;
   }
 
   /**
-   * <p>Convenience method to get access to this session's user invid.</p>
+   * <p>Convenience method to get access to this session's user
+   * invid.</p>
    *
    * <p>May be null if supergash, monitor, or Ganymede server task or
    * internal process is running the session.</p>
    */
 
-  public synchronized Invid getUserInvid()
+  public Invid getUserInvid()
   {
     return userInvid;
   }
@@ -555,7 +556,7 @@ public final class DBPermissionManager {
    * <p>getSessionName() will never return a null value.</p>
    */
 
-  public synchronized String getSessionName()
+  public String getSessionName()
   {
     return sessionName;
   }
