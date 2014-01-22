@@ -458,6 +458,16 @@ public final class DBPermissionManager {
   }
 
   /**
+   * Returns true if the session is operating solely with unprivileged
+   * end-users privileges.
+   */
+
+  public boolean isEndUser()
+  {
+    return personaObj == null;
+  }
+
+  /**
    * <p>This method returns the name of the user that is logged into
    * this session, or null if this session was created by a Ganymede
    * server task or other internal process.</p>
@@ -1646,7 +1656,7 @@ public final class DBPermissionManager {
         // to edit the owner list field at all.
 
         if (fieldId == SchemaConstants.OwnerListField &&
-            (!objectIsOwned || personaObj == null))
+            (!objectIsOwned || this.isEndUser()))
           {
             return objectPerm.intersection(PermEntry.viewPerms);
           }
@@ -1679,7 +1689,7 @@ public final class DBPermissionManager {
     // look at a field in an object we can't look at.
 
     if ((fieldId == SchemaConstants.OwnerListField &&
-        (!objectIsOwned || personaObj == null)) ||
+         (!objectIsOwned || this.isEndUser())) ||
         (fieldId == SchemaConstants.CreationDateField ||
          fieldId == SchemaConstants.CreatorField ||
          fieldId == SchemaConstants.ModificationDateField ||
