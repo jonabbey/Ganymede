@@ -219,12 +219,16 @@ public final class DBPermissionManager {
 
   private Date permTimeStamp;
 
-  /**
-   * <p>This variable stores the permission bits that are applicable
-   * to objects that the current persona has ownership privilege over.
+   * <p>This variable stores the permission bits that are applicable to
+   * objects that the current persona has ownership privilege over.
    * This matrix is always a permissive superset of {@link
-   * arlut.csd.ganymede.server.DBPermissionManager#defaultPerms
-   * defaultPerms}.</p>
+   * arlut.csd.ganymede.server.DBPermissionManager#unownedObjectPerms
+   * unownedObjectPerms}.</p>
+   *
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
+   * String} is called or if the relevant Role Objects are changed in
+   * the database .</p>
    */
 
   private PermMatrix personaPerms;
@@ -233,13 +237,10 @@ public final class DBPermissionManager {
    * <p>This variable stores the permission bits that are applicable
    * to generic objects not specifically owned by this persona.</p>
    *
-   * <p>Each permission object in the Ganymede database includes
-   * permissions as apply to objects owned by the persona and as apply
-   * to objects not owned by the persona.</p>
-   *
-   * <p>This variable holds the union of the 'as apply to objects not
-   * owned by the persona' matrices across all permissions objects
-   * that apply to the current persona.</p>
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
+   * String} is called or if the relevant Role or Owner Group objects
+   * are changed in the database .</p>
    */
 
   private PermMatrix defaultPerms;
@@ -252,6 +253,11 @@ public final class DBPermissionManager {
    * of {@link
    * arlut.csd.ganymede.server.DBPermissionManager#delegatableDefaultPerms
    * delegatableDefaultPerms}.</p>
+   *
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
+   * String} is called or if the relevant Role Objects are changed in
+   * the database .</p>
    */
 
   private PermMatrix delegatablePersonaPerms;
@@ -262,33 +268,39 @@ public final class DBPermissionManager {
    * the current admin has permission to delegate to subordinate
    * roles.</p>
    *
-   * <p>Each permission object in the Ganymede database includes
-   * permissions as apply to objects owned by the persona and as apply
-   * to objects not owned by the persona.</p>
-   *
-   * <p>This variable holds the union of the 'as apply to objects not
-   * owned by the persona' matrices across all permissions objects
-   * that apply to the current persona.</p>
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
+   * String} is called or if the relevant Role Objects are changed in
+   * the database .</p>
    */
 
   private PermMatrix delegatableDefaultPerms;
 
   /**
-   * <p>A reference to the Ganymede {@link
+   * <p>A reference to the checked-in Ganymede {@link
    * arlut.csd.ganymede.server.DBObject DBObject} storing our default
    * permissions, or the permissions that applies when we are not in
    * supergash mode and we do not have any ownership over the object
    * in question.</p>
+   *
+   * <p>May change if the relevant Role Object is changed in the
+   * database .</p>
+   */
+
    */
 
   private DBObject defaultObj;
 
   /**
-   * <p>This variable is a vector of object references
-   * ({@link arlut.csd.ganymede.common.Invid Invid}'s) to the owner groups
-   * that the client has requested newly created objects be placed in.  While
-   * this vector is not-null, any new objects created will be owned by the list
-   * of ownergroups held here.</p>
+   * <p>This variable is a vector of object references ({@link
+   * arlut.csd.ganymede.common.Invid Invid}'s) to the owner groups
+   * that the client has requested newly created objects be placed in.
+   * While this vector is not-null, any new objects created will be
+   * owned by the list of ownergroups held here.</p>
+   *
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#setDefaultOwner(java.util.Vector)}
+   * is called.</p>
    */
 
   private Vector<Invid> newObjectOwnerInvids = null;
@@ -301,6 +313,10 @@ public final class DBPermissionManager {
    * owner groups in this list.  This feature is used primarily for
    * when a client is logged in with supergash privileges, but the
    * user wants to restrict the visibility of objects for convenience.</p>
+   *
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#filterQueries(java.util.Vector)}
+   * is called.</p>
    */
 
   private Vector<Invid> visibilityFilterInvids = null;
