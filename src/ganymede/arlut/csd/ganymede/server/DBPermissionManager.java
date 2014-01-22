@@ -507,11 +507,16 @@ public final class DBPermissionManager {
   {
     if (userInvid != null)
       {
-        // okay to use session.viewDBObject() here, because getUser()
-        // is only used for internal purposes, and we don't need or
-        // want to do permissions checking
+        // using dbSession to skip perms checking
 
-        return dbSession.viewDBObject(userInvid);
+        DBObject userObject = dbSession.viewDBObject(userInvid);
+
+        if (userObject == null)
+          {
+            return null;
+          }
+
+        return userObject.getOriginal();
       }
 
     return null;
