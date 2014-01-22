@@ -2863,6 +2863,32 @@ final public class GanymedeSession implements Session, Unreferenced {
   //************************************************************
 
   /**
+   * Method used by DBPermissionManager to ensure that any open
+   * transaction is closed and re-opened after a session is changed.
+   */
+
+  public synchronized void restartTransaction()
+  {
+    if (dbSession.editSet == null)
+      {
+        return;
+      }
+
+    String description = dbSession.editSet.description;
+    boolean interactive = dbSession.editSet.isInteractive();
+
+    try
+      {
+        abortTransaction();
+        openTransaction(description, interactive);
+      }
+    catch (NotLoggedInException ex)
+      {
+        throw new RuntimeException(ex);
+      }
+  }
+
+  /**
    * <p>This private method is called by all methods in
    * GanymedeSession that require the client to be logged in to
    * operate.</p>
