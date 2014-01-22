@@ -3847,7 +3847,7 @@ final public class GanymedeSession implements Session, Unreferenced {
                 // message and just wait another couple of minutes for
                 // the forceoff.
 
-                if (permManager.isElevated())
+                if (permManager.isUserLinked())
                   {
                     // "Sending a timeout message to {0}"
                     System.err.println(ts.l("timeCheck.sending", this.toString()));

@@ -448,11 +448,11 @@ public final class DBPermissionManager {
   }
 
   /**
-   * Returns true if the session is a standard user with currently
-   * elevated privileges.
+   * Returns true if the session is either an end-user user or an
+   * end-user user using a persona.
    */
 
-  public synchronized boolean isElevated()
+  public boolean isUserLinked()
   {
     return userInvid != null;
   }
