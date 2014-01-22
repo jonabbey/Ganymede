@@ -523,9 +523,9 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method returns the name of the persona who is active.
-   * May be null or empty if we have an end-user who is logged in with
-   * no elevated persona privileges.</p>
+   * This method returns the name of the persona who is active.  May
+   * be null or empty if we have an end-user who is logged in with no
+   * elevated persona privileges.
    */
 
   public synchronized String getPersonaName()
@@ -534,7 +534,7 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>Convenience method to get access to this session's persona invid.</p>
+   * Convenience method to get access to this session's persona invid.
    */
 
   public synchronized Invid getPersonaInvid()
@@ -543,10 +543,10 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method gives access to the DBObject for the administrator's
-   * persona record, if any.  This is used by
-   * {@link arlut.csd.ganymede.server.DBSession DBSession} to get the
-   * label for the administrator for record keeping.</p>
+   * This method gives access to the DBObject for the administrator's
+   * persona record, if any.  This is used by {@link
+   * arlut.csd.ganymede.server.DBSession DBSession} to get the label
+   * for the administrator for record keeping.
    */
 
   public synchronized DBObject getPersona()
@@ -785,9 +785,9 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method is used to select an admin persona, changing the
+   * This method is used to select an admin persona, changing the
    * permissions that the user has and the objects that are accessible
-   * in the database.</p>
+   * in the database.
    */
 
   public synchronized boolean selectPersona(String newPersona, String password)
