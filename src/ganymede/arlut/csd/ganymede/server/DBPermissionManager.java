@@ -85,7 +85,6 @@ import arlut.csd.ganymede.common.SchemaConstants;
 
 public final class DBPermissionManager {
 
-  static final boolean debug = false;
   static final boolean permsdebug = false;
 
   /**
@@ -1191,11 +1190,6 @@ public final class DBPermissionManager {
             Ganymede.catTransport = Ganymede.db.rootCategory.getTransport(Ganymede.internalSession, true);
           }
 
-        if (debug)
-          {
-            System.err.println("getCategoryTree(): returning system's complete category tree");
-          }
-
         return Ganymede.catTransport;
       }
     else
@@ -1203,20 +1197,6 @@ public final class DBPermissionManager {
         // not in supergash mode.. download a subset of the category tree to the user
 
         CategoryTransport transport = Ganymede.db.rootCategory.getTransport(gSession, hideNonEditables);
-
-        if (debug)
-          {
-            System.err.println("getCategoryTree(): generated custom category tree");
-          }
-
-        if (false)
-          {
-            System.err.println("%%% Printing PersonaPerms");
-            PermissionMatrixDBField.debugdump(personaPerms);
-
-            System.err.println("%%% Printing DefaultPerms");
-            PermissionMatrixDBField.debugdump(defaultPerms);
-          }
 
         return transport;
       }
