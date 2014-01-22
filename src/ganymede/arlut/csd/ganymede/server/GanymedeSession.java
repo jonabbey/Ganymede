@@ -433,7 +433,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     dbSession = new DBSession(Ganymede.db, this, sessionName);
     queryEngine = new DBQueryEngine(this, dbSession);
-    permManager = new DBPermissionManager(this).configureInternalSession(sessionName);
+    permManager = new DBPermissionManager(this, sessionName);
   }
 
   /**
@@ -494,7 +494,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     this.dbSession = new DBSession(Ganymede.db, this, sessionName);
     this.queryEngine = new DBQueryEngine(this, dbSession);
-    this.permManager = new DBPermissionManager(this).configureClientSession(userObject, personaObject, sessionName);
+    this.permManager = new DBPermissionManager(this, userObject, personaObject, sessionName);
 
     this.loggedInSemaphore.set(true);
 

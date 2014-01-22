@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -50,7 +50,6 @@
 package arlut.csd.ganymede.server;
 
 import java.util.Date;
-import java.util.Hashtable;
 import java.util.Vector;
 
 import arlut.csd.Util.booleanSemaphore;
@@ -65,7 +64,6 @@ import arlut.csd.ganymede.common.PermEntry;
 import arlut.csd.ganymede.common.PermMatrix;
 import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.QueryResult;
-import arlut.csd.ganymede.common.Result;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
 
@@ -104,19 +102,19 @@ public final class DBPermissionManager {
    */
 
   private GanymedeSession gSession = null;
+  // ---
+
+  /**
+   * The GanymedeSession that this DBPermissionManager is connected to.
+   */
+
+  final private GanymedeSession gSession;
 
   /**
    * The DBSession that lays under gSession.
    */
 
-  private DBSession dbSession = null;
-
-  /**
-   * A flag indicating whether the client has supergash priviliges.  We
-   * keep track of this to speed internal operations.
-   */
-
-  private boolean supergashMode = false;
+  final private DBSession dbSession;
 
   /**
    * GanymedeSessions created for internal operations always operate
@@ -124,45 +122,67 @@ public final class DBPermissionManager {
    * having to do persona membership checks on initial set-up.
    */
 
-  private boolean beforeversupergash = false; // Be Forever Yamamoto
-
-  /**
-   * <p>The name of the user logged in.  If the person logged in is
-   * using supergash, username will be supergash, even though
-   * supergash isn't technically a user.</p>
-   *
-   * <p>May be null if the containing GanymedeSession was created by
-   * an internal Ganymede task or process.</p>
-   */
-
-  private String username;
+  final private boolean beforeversupergash; // Be Forever Yamamoto
 
   /**
    * <p>The name that the session is given.  Must be non-null and
    * unique among logged in sessions on the server.</p>
    */
 
-  private String sessionName;
+  final private String sessionName;
 
   /**
    * <p>The object reference identifier for the logged in user, if
-   * any.  If the client logged in directly to a persona account, this
-   * will be null.  See personaInvid in that case.</p>
+   * any. If the client logged in directly to a non user-linked
+   * persona account (e.g., supergash, monitor), this will be null.
+   * See personaInvid in that case.</p>
    */
 
-  private Invid userInvid;
+  final private Invid userInvid;
+
+  /**
+   * <p>The name of the user logged in.  If the person logged in is
+   * using supergash, username will be supergash, even though
+   * supergash isn't technically a user.</p>
+   *
+   * <p>May be null if the containing GanymedeSession is created by an
+   * internal Ganymede task or process.</p>
+   */
+
+  final private String username;
+
+  // --
+
+  /**
+   * <p>True if the gSession currently has supergash privileges.</p>
+   *
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
+   * String} is called.</p>
+   */
+
+  private boolean supergashMode = false;
 
   /**
    * <p>The name of the current persona, of the form
    * '&lt;username&gt;:&lt;description&gt;', for example,
    * 'broccol:GASH Admin'.  If the user is logged in with just
    * end-user privileges, personaName will be null.</p>
+   *
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
+   * String} is called.</p>
    */
 
   private String personaName = null;
 
   /**
-   * <p>The object reference identifier for the current persona, if any.</p>
+   * <p>The object reference identifier for the current persona, if
+   * any.</p>
+   *
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
+   * String} is called.</p>
    */
 
   private Invid personaInvid;
@@ -172,12 +192,16 @@ public final class DBPermissionManager {
    * can look up owner groups and what not more quickly.  An end-user
    * logged in without any extra privileges will have a null
    * personaObj value.</p>
+   *
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
+   * String} is called.</p>
    */
 
   private DBObject personaObj = null;
 
   /**
-   * <p>When did we last check our persona permissions?</p>
+   * When did we last check our persona permissions?
    */
 
   private Date personaTimeStamp = null;
@@ -274,27 +298,13 @@ public final class DBPermissionManager {
 
   private Vector<Invid> visibilityFilterInvids = null;
 
-  /**
-   * <p>Boolean semaphore to control whether we have already been
-   * configured.</p>
-   */
-
-  private booleanSemaphore configured = new booleanSemaphore(false);
-
   /* -- */
 
   /**
-   * Constructor
-   */
-
-  public DBPermissionManager(GanymedeSession gSession)
-  {
-    this.gSession = gSession;
-    this.dbSession = gSession.getDBSession();
-  }
-
-  /**
-   * Configures this DBPermissionManager for a privileged internal session.
+   * Constructor for a privileged internal session
+   *
+   * @param gSession The GanymedeSession that we are managing
+   * permissions for.
    *
    * @param sessionName The name of this session, used for identifying
    * the task or server component that is using our GanymedeSession to
@@ -302,31 +312,32 @@ public final class DBPermissionManager {
    * sessions on the server and may not be null.
    */
 
-  public synchronized DBPermissionManager configureInternalSession(String sessionName)
+  public DBPermissionManager(GanymedeSession gSession, String sessionName)
   {
+    if (gSession == null)
+      {
+        throw new IllegalArgumentException("gSession must be non-null");
+      }
+
     if (sessionName == null)
       {
         throw new IllegalArgumentException("sessionName may not be null");
       }
 
-    if (configured.set(true))
-      {
-        throw new IllegalStateException("Reconfiguring a DBPermissionManager is not allowed.");
-      }
-
+    this.gSession = gSession;
+    this.dbSession = gSession.getDBSession();
     this.sessionName = sessionName;
     this.username = null;
     this.userInvid = null;
-    this.supergashMode = true;
     this.beforeversupergash = true;
-
-    updatePerms(true);
-
-    return this;
+    this.supergashMode = true;
   }
 
   /**
-   * Configures this DBPermissionManager for a remote user session.
+   * Constructor for a logged-in user
+   *
+   * @param gSession The GanymedeSession that we are managing
+   * permissions for.
    *
    * @param userObject A DBObject describing the user logged in, or
    * null if the user is logging in with a non-user-linked persona
@@ -342,48 +353,55 @@ public final class DBPermissionManager {
    * among logged-in sessions in the server and may not be null.
    */
 
-  public synchronized DBPermissionManager configureClientSession(DBObject userObject, DBObject personaObject, String sessionName)
+  public DBPermissionManager(GanymedeSession gSession,
+                             DBObject userObject,
+                             DBObject personaObject,
+                             String sessionName)
   {
+    if (gSession == null)
+      {
+        throw new IllegalArgumentException("gSession must be non-null");
+      }
+
     if (sessionName == null)
       {
         throw new IllegalArgumentException("sessionLabel may not be null");
       }
 
-    if (configured.set(true))
+    if (userObject == null && personaObject == null)
       {
-        throw new IllegalStateException("Reconfiguring a DBPermissionManager is not allowed.");
+        throw new IllegalArgumentException("userObject or personaObject must be non-null");
       }
 
+    this.gSession = gSession;
+    this.dbSession = gSession.getDBSession();
+    this.beforeversupergash = false;
+    this.supergashMode = false;
     this.sessionName = sessionName;
 
     if (userObject != null)
       {
-        userInvid = userObject.getInvid();
-        username = userObject.getLabel();
+        this.userInvid = userObject.getInvid();
+        this.username = userObject.getLabel();
       }
     else
       {
-        userInvid = null;
+        this.userInvid = null;
+        this.username = personaObject.getLabel();
       }
 
     if (personaObject != null)
       {
-        personaInvid = personaObject.getInvid();
-        personaName = personaObject.getLabel();
-
-        if (username == null)
-          {
-            username = personaName; // for supergash, monitor
-          }
+        this.personaInvid = personaObject.getInvid();
+        this.personaName = personaObject.getLabel();
       }
     else
       {
-        personaInvid = null;    // shouldn't happen
+        this.personaInvid = null;
+        this.personaName = null;
       }
 
     updatePerms(true);
-
-    return this;
   }
 
   /**
