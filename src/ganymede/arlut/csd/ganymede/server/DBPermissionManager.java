@@ -656,39 +656,19 @@ public final class DBPermissionManager {
 
   public synchronized String getIdentityReturnAddress()
   {
-    String returnAddr;
-
-    // do we have a real user name, or a persona name?
-
-    if (username == null || userInvid == null)
+    if (!isUserLinked())
       {
-        // local server process or supergash/monitor
-
-        returnAddr = Ganymede.returnaddrProperty;
-      }
-    else
-      {
-        if (username.indexOf(':') == -1)
-          {
-            // real username, save it as is
-
-            returnAddr = username;
-          }
-        else
-          {
-            // persona, extract the user's name out of it
-            returnAddr = username.substring(0, username.indexOf(':'));
-          }
-
-        String mailsuffix = System.getProperty("ganymede.defaultmailsuffix");
-
-        if (mailsuffix != null)
-          {
-            returnAddr += mailsuffix;
-          }
+        return Ganymede.returnaddrProperty;
       }
 
-    return returnAddr;
+    String mailsuffix = System.getProperty("ganymede.defaultmailsuffix");
+
+    if (mailsuffix != null)
+      {
+        return username + mailsuffix;
+      }
+
+    return username;
   }
 
   /**
