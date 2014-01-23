@@ -147,9 +147,7 @@ public final class DBPermissionManager {
   final private Invid userInvid;
 
   /**
-   * <p>The name of the user logged in.  If the person logged in is
-   * using supergash, username will be supergash, even though
-   * supergash isn't technically a user.</p>
+   * <p>The name of the user logged in.</p>
    *
    * <p>May be null if the containing GanymedeSession is created by an
    * internal Ganymede task or process.</p>
@@ -466,13 +464,9 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method returns the name of the user that is logged into
-   * this session, or null if this session was created by a Ganymede
-   * server task or other internal process.</p>
-   *
-   * <p>If supergash is using this session, this method will return
-   * supergash as well, even though technically supergash isn't a
-   * user.</p>
+   * This method returns the name of the user that is logged into this
+   * session, or null if this session was created for supergash,
+   * monitor, or a Ganymede server task or other internal process.
    */
 
   public String getUserName()
