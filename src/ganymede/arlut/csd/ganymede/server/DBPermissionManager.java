@@ -180,7 +180,7 @@ public final class DBPermissionManager {
    * String} is called.</p>
    */
 
-  private String personaName = null;
+  private String personaName;
 
   /**
    * <p>The object reference identifier for the current persona, if
@@ -204,13 +204,13 @@ public final class DBPermissionManager {
    * String} is called.</p>
    */
 
-  private DBObject personaObj = null;
+  private DBObject personaObj;
 
   /**
    * When did we last check our persona permissions?
    */
 
-  private Date personaTimeStamp = null;
+  private Date personaTimeStamp;
 
   /**
    * <p>This variable stores the permission bits that are applicable to
@@ -287,7 +287,7 @@ public final class DBPermissionManager {
    * When did we last update our defaultRoleObj?
    */
 
-  private Date defaultRoleTimeStamp = null;
+  private Date defaultRoleTimeStamp;
 
   /**
    * <p>This variable is a vector of object references ({@link
@@ -301,7 +301,7 @@ public final class DBPermissionManager {
    * is called.</p>
    */
 
-  private Vector<Invid> newObjectOwnerInvids = null;
+  private Vector<Invid> newObjectOwnerInvids;
 
   /**
    * <p>This variable is a vector of object references (Invid's) to the
@@ -317,7 +317,7 @@ public final class DBPermissionManager {
    * is called.</p>
    */
 
-  private Vector<Invid> visibilityFilterInvids = null;
+  private Vector<Invid> visibilityFilterInvids;
 
   /* -- */
 
