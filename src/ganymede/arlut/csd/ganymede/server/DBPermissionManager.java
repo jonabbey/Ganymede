@@ -131,17 +131,17 @@ public final class DBPermissionManager {
   final private boolean beforeversupergash; // Be Forever Yamamoto
 
   /**
-   * <p>The name that the session is given.  Must be non-null and
-   * unique among logged in sessions on the server.</p>
+   * The name that the session is given.  Must be non-null and unique
+   * among logged in sessions on the server.
    */
 
   final private String sessionName;
 
   /**
-   * <p>The object reference identifier for the logged in user, if
+   * The object reference identifier for the logged in user, if
    * any. If the client logged in directly to a non user-linked
    * persona account (e.g., supergash, monitor), this will be null.
-   * See personaInvid in that case.</p>
+   * See personaInvid in that case.
    */
 
   final private Invid userInvid;
@@ -478,8 +478,8 @@ public final class DBPermissionManager {
    * <p>Convenience method to get access to this session's user
    * invid.</p>
    *
-   * <p>May be null if supergash, monitor, or Ganymede server task or
-   * internal process is running the session.</p>
+   * <p>May be null if supergash, monitor, or a Ganymede server task
+   * or internal process is running the session.</p>
    */
 
   public Invid getUserInvid()
@@ -488,8 +488,8 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>Convenience method to get access to this session's UserBase
-   * instance.</p>
+   * <p>Convenience method to get access to this session's User
+   * Object.</p>
    *
    * <p>May be null if supergash, monitor, or Ganymede server task or
    * internal process is running the session.</p>
@@ -559,11 +559,10 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method returns the name of the user who is active
-   * (including supergash or monitor for the non-user-linked
-   * personas), or the name of the internal Ganymede task or process
-   * that is running the session if no user is attached to this
-   * session.</p>
+   * This method returns the name of the user who is active (including
+   * supergash or monitor for the non-user-linked personas), or the
+   * name of the internal Ganymede task or process that is running the
+   * session if no user is attached to this session.
    */
 
   public synchronized String getBaseIdentity()
@@ -579,10 +578,10 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method returns the name of the persona who is active, the
+   * This method returns the name of the persona who is active, the
    * raw user name if no persona privileges have been assumed, or the
    * name of the internal Ganymede task or process that is running the
-   * session if no user is attached to this session.</p>
+   * session if no user is attached to this session.
    */
 
   public synchronized String getIdentity()
@@ -650,7 +649,7 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>Returns the email address that should be used in the 'From:'
+   * Returns the email address that should be used in the 'From:'
    * field of mail sent by the GanymedeSession which owns this
    * DBPermissionManager.
    */
@@ -693,9 +692,9 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>Returns the Invid of the admin persona (or user, if running
-   * with unelevated privileges) who is responsible for actions taken
-   * by the containing GanymedeSession.</p>
+   * Returns the Invid of the admin persona (or user, if running with
+   * unelevated privileges) who is responsible for actions taken by
+   * the containing GanymedeSession.
    */
 
   public synchronized Invid getResponsibleInvid()
@@ -864,12 +863,12 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method returns a QueryResult of owner groups that the
+   * This method returns a QueryResult of owner groups that the
    * current persona has access to.  This list is the transitive
    * closure of the list of owner groups in the current persona.  That
    * is, the list includes all the owner groups in the current persona
    * along with all of the owner groups those owner groups own, and so
-   * on.</p>
+   * on.
    */
 
   public synchronized QueryResult getAvailableOwnerGroups()
@@ -1053,7 +1052,8 @@ public final class DBPermissionManager {
    * <p>This method cannot be used to grant access to objects that are
    * not accessible by the client's adminPersona.</p>
    *
-   * <p>Calling this method with ownerInvids set to null will turn off the filtering.</p>
+   * <p>Calling this method with ownerInvids set to null will turn off
+   * the filtering.</p>
    *
    * @param ownerInvids a Vector of Invid objects pointing to ownergroup objects.
    *
@@ -1128,14 +1128,15 @@ public final class DBPermissionManager {
 
   /**
    * <p>Returns a serialized representation of the object types
-   * defined on the server.  This BaseListTransport object
-   * will not include field information.  The client is
-   * obliged to call getFieldTemplateVector() on any
-   * bases that it needs field information for.</p>
+   * defined on the server.  This BaseListTransport object will not
+   * include field information.  The client is obliged to call
+   * getFieldTemplateVector() on any bases that it needs field
+   * information for.</p>
    *
    * <p>This method is synchronized to avoid any possible deadlock
    * between DBStore and GanymedeSession, as the BaseListTransport
-   * constructor calls other synchronized methods on GanymedeSession.</p>
+   * constructor calls other synchronized methods on
+   * GanymedeSession.</p>
    *
    * @see arlut.csd.ganymede.common.BaseListTransport
    */
@@ -1173,13 +1174,13 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method applies this GanymedeSession's current owner filter
-   * to the given QueryResult &lt;qr&gt; and returns a QueryResult
-   * with any object handles that are not matched by the filter
-   * stripped.</p>
+   * <p>This method applies this GanymedeSession's current owner
+   * filter to the given QueryResult &lt;qr&gt; and returns a
+   * QueryResult with any object handles that are not matched by the
+   * filter stripped.</p>
    *
-   * <p>If the submitted QueryResult &lt;qr&gt; is null, filterQueryResult()
-   * will itself return null.</p>
+   * <p>If the submitted QueryResult &lt;qr&gt; is null,
+   * filterQueryResult() will itself return null.</p>
    *
    * <p>NB: This method requires no external synchronization</p>
    */
@@ -1220,7 +1221,7 @@ public final class DBPermissionManager {
   // **
 
   /**
-   * <p>This method finds the ultimate owner of an embedded object</p>
+   * This method finds the ultimate owner of an embedded object
    */
 
   synchronized DBObject getContainingObj(DBObject object)
@@ -1229,13 +1230,12 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method takes the administrator's current
-   * persona, considers the owner groups the administrator
-   * is a member of, checks to see if the object is owned
-   * by that group, and determines the appropriate permission
-   * bits for the object.  getPerm() will OR any proprietary
-   * ownership bits with the default permissions to give
-   * an appropriate result.</p>
+   * This method takes the administrator's current persona, considers
+   * the owner groups the administrator is a member of, checks to see
+   * if the object is owned by that group, and determines the
+   * appropriate permission bits for the object.  getPerm() will OR
+   * any proprietary ownership bits with the default permissions to
+   * give an appropriate result.
    */
 
   public synchronized PermEntry getPerm(DBObject object)
@@ -1664,10 +1664,10 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method returns the current persona's default permissions for
-   * a base and field.  This permission applies generically to objects
-   * that are not owned by this persona and to objects that are
-   * owned.</p>
+   * <p>This method returns the current persona's default permissions
+   * for a base and field.  This permission applies generically to
+   * objects that are not owned by this persona and to objects that
+   * are owned.</p>
    *
    * <p>This is used by the {@link
    * arlut.csd.ganymede.server.GanymedeSession#dump(arlut.csd.ganymede.common.Query)
@@ -1675,10 +1675,11 @@ public final class DBPermissionManager {
    * set of possible fields to be returned at the time that the dump
    * results are being prepared.</p>
    *
-   * @param includeOwnedPerms If true, this method will return the permission
-   * that the current persona would have for an object that was owned
-   * by the current persona.  If false, this method will return the default
-   * permissions that apply to objects not owned by the persona.
+   * @param includeOwnedPerms If true, this method will return the
+   * permission that the current persona would have for an object that
+   * was owned by the current persona.  If false, this method will
+   * return the default permissions that apply to objects not owned by
+   * the persona.
    */
 
   synchronized PermEntry getPerm(short baseID, short fieldID, boolean includeOwnedPerms)
@@ -2050,10 +2051,10 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>Recursive helper method for personaMatch.. this method does a
+   * Recursive helper method for personaMatch.. this method does a
    * depth first search up the owner tree for each Invid contained in
    * the owners Vector to see if the gSession's personaInvid is a
-   * member of any of the containing owner groups.</p>
+   * member of any of the containing owner groups.
    *
    * @param owners A vector of invids pointing to OwnerBase objects
    * @param alreadySeen A vector of owner group Invid's that have
@@ -2084,10 +2085,10 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>Recursive helper method for personaMatch.. this method does a
+   * Recursive helper method for personaMatch.. this method does a
    * depth first search up the owner tree for the owner Invid to see
    * if the gSession's personaInvid is a member of any of the
-   * containing owner groups.</p>
+   * containing owner groups.
    *
    * @param owner An Invid pointing to an OwnerBase object
    * @param alreadySeen A vector of owner group Invid's that have
@@ -2145,9 +2146,9 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>Returns true if the active persona has some sort of
-   * owner/access relationship with the object in question through
-   * its list of owner groups.</p>
+   * Returns true if the active persona has some sort of owner/access
+   * relationship with the object in question through its list of
+   * owner groups.
    */
 
   public boolean personaMatch(DBObject obj)
@@ -2228,11 +2229,10 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This helper method iterates through the owners vector and
-   * checks to see if the current personaInvid is a member of all of
-   * the groups through either direct membership or through membership
-   * of an owning group.  This method depends on
-   * recursePersonasMatch().</p>
+   * This helper method iterates through the owners vector and checks
+   * to see if the current personaInvid is a member of all of the
+   * groups through either direct membership or through membership of
+   * an owning group.  This method depends on recursePersonasMatch().
    */
 
   private synchronized boolean isMemberAll(Vector<Invid> owners)
@@ -2301,10 +2301,10 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method returns true if the visibility filter vector
-   * allows visibility of the object in question.  The visibility
-   * vector works by direct ownership identity (i.e., no recursing
-   * up), so it's a simple loop-di-loop.</p>
+   * This method returns true if the visibility filter vector allows
+   * visibility of the object in question.  The visibility vector
+   * works by direct ownership identity (i.e., no recursing up), so
+   * it's a simple loop-di-loop.
    */
 
   public synchronized boolean filterMatch(DBObject obj)
