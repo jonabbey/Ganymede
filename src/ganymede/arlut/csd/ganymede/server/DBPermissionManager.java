@@ -665,7 +665,14 @@ public final class DBPermissionManager {
 
     if (mailsuffix != null)
       {
-        return username + mailsuffix;
+        if (mailsuffix.contains("@"))
+          {
+            return username + mailsuffix;
+          }
+        else
+          {
+            return username + "@" + mailsuffix;
+          }
       }
 
     return username;
@@ -813,7 +820,9 @@ public final class DBPermissionManager {
    * found.
    */
 
-  private DBObject findMatchingAuthenticatedPersona(DBObject userObject, String newPersona, String pass)
+  private DBObject findMatchingAuthenticatedPersona(DBObject userObject,
+                                                    String newPersona,
+                                                    String pass)
   {
     if (userObject == null || newPersona == null || pass == null)
       {
