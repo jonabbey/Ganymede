@@ -825,14 +825,17 @@ public final class DBEditSet {
 
         this.mustAbort = true;
 
-        try
+        if (false)
           {
-            // "rollback() called in non-interactive transaction"
-            throw new RuntimeException(ts.l("rollback.non_interactive"));
-          }
-        catch (RuntimeException ex)
-          {
-            Ganymede.logError(ex);
+            try
+              {
+                // "rollback() called in non-interactive transaction"
+                throw new RuntimeException(ts.l("rollback.non_interactive"));
+              }
+            catch (RuntimeException ex)
+              {
+                Ganymede.logError(ex);
+              }
           }
 
         return false;
