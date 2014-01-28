@@ -2247,10 +2247,6 @@ public final class DBPermissionManager {
 
   private synchronized boolean isMemberAll(Vector<Invid> owners)
   {
-    boolean found;
-
-    /* -- */
-
     if (owners == null)
       {
         return false;           // shouldn't happen in context
@@ -2263,35 +2259,13 @@ public final class DBPermissionManager {
 
     for (Invid owner: owners)
       {
-        found = false;  // yes, but what have you done for me _lately_?
-
         if (owner.getType() != SchemaConstants.OwnerBase)
           {
             Ganymede.debug("DBPermissionManager.isMemberAll(): bad invid passed " + owner.toString());
             return false;
           }
 
-        DBObject ownerGroupObj = dbSession.viewDBObject(owner).getOriginal();
-
-        Vector<Invid> personaeInOwnerGroup = (Vector<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
-
-        if (personaeInOwnerGroup.contains(this.personaInvid))
-          {
-            found = true;
-          }
-        else
-          {
-            // didn't find, recurse up
-
-            Vector<Invid> ownersOfOwnerGroup = (Vector<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerListField);
-
-            if (isMemberOfOwnerGroups(ownersOfOwnerGroup, new HashSet<Invid>()))
-              {
-                found = true;
-              }
-          }
-
-        if (!found)
+        if (!isMemberOfOwnerGroup(owner))
           {
             return false;
           }
