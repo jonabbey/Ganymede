@@ -903,18 +903,14 @@ public final class DBPermissionManager {
         return fullOwnerList;
       }
 
-    Set<Invid> alreadySeen = new HashSet<Invid>();
-
     // otherwise, we've got to do a very little bit of legwork
 
     for (int i = 0; i < fullOwnerList.size(); i++)
       {
-        alreadySeen.clear();
-
         Invid inv = fullOwnerList.getInvid(i);
         String label = fullOwnerList.getLabel(i);
 
-        if (recursePersonaMatch(inv, alreadySeen))
+        if (isMemberOfOwnerGroup(inv))
           {
             result.addRow(inv, label, false);
           }
@@ -2064,7 +2060,7 @@ public final class DBPermissionManager {
    * @return true if a match is found
    */
 
-  private synchronized boolean recursePersonasMatch(Vector<Invid> owners, Set<Invid> alreadySeen)
+  private synchronized boolean isMemberOfOwnerGroups(Vector<Invid> owners, Set<Invid> alreadySeen)
   {
     // *** It is critical that this method not modify the owners parameter passed
     // *** in, as it may be 'live' in a DBField.
@@ -2076,7 +2072,7 @@ public final class DBPermissionManager {
 
     for (Invid owner: owners)
       {
-        if (recursePersonaMatch(owner, alreadySeen))
+        if (isMemberOfOwnerGroup(owner, alreadySeen))
           {
             return true;
           }
@@ -2092,22 +2088,37 @@ public final class DBPermissionManager {
    * containing owner groups.
    *
    * @param owner An Invid pointing to an OwnerBase object
+   * @return true if a match is found
+   */
+
+  private boolean isMemberOfOwnerGroup(Invid owner)
+  {
+    return isMemberOfOwnerGroup(owner, new HashSet<Invid>());
+  }
+
+  /**
+   * Recursive helper method for personaMatch.. this method does a
+   * depth first search up the owner tree for the owner Invid to see
+   * if the gSession's personaInvid is a member of any of the
+   * containing owner groups.
+   *
+   * @param owner An Invid pointing to an OwnerBase object
    * @param alreadySeen A Set of owner group Invid's that have
    * already been checked.  (For infinite loop avoidance).
    *
    * @return true if a match is found
    */
 
-  private synchronized boolean recursePersonaMatch(Invid owner, Set<Invid> alreadySeen)
+  private synchronized boolean isMemberOfOwnerGroup(Invid owner, Set<Invid> alreadySeen)
   {
     if (owner == null)
       {
-        throw new IllegalArgumentException("Null owner passed to recursePersonaMatch");
+        throw new IllegalArgumentException("Null owner passed to isMemberOfOwnerGroup");
       }
 
     if (owner.getType() != SchemaConstants.OwnerBase)
       {
-        throw new IllegalArgumentException("recursePersonaMatch() called with something other than an Owner Group");
+        throw new IllegalArgumentException("isMemberOfOwnerGroup() called with something other than an Owner Group");
       }
 
     if (alreadySeen.contains(owner))
@@ -2132,7 +2143,7 @@ public final class DBPermissionManager {
 
     Vector<Invid> ownersOfOwnerGroup = (Vector<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerListField);
 
-    if (recursePersonasMatch(ownersOfOwnerGroup, alreadySeen))
+    if (isMemberOfOwnerGroups(ownersOfOwnerGroup, alreadySeen))
       {
         return true;
       }
@@ -2213,7 +2224,7 @@ public final class DBPermissionManager {
           }
       }
 
-    boolean result = recursePersonasMatch(owners, new HashSet<Invid>());
+    boolean result = isMemberOfOwnerGroups(owners, new HashSet<Invid>());
 
     if (showit)
       {
@@ -2227,7 +2238,7 @@ public final class DBPermissionManager {
    * This helper method iterates through the owners vector and checks
    * to see if the current personaInvid is a member of all of the
    * groups through either direct membership or through membership of
-   * an owning group.  This method depends on recursePersonasMatch().
+   * an owning group.  This method depends on isMemberOfOwnerGroups().
    */
 
   private synchronized boolean isMemberAll(Vector<Invid> owners)
@@ -2275,11 +2286,11 @@ public final class DBPermissionManager {
             if (inf != null)
               {
                 // using getValuesLocal() here is safe only because
-                // recursePersonasMatch() never tries to modify the
+                // isMemberOfOwnerGroups() never tries to modify the
                 // owners value passed in.  Otherwise, we'd have to
                 // clone the results from getValuesLocal().
 
-                if (recursePersonasMatch(inf.getValuesLocal(), new HashSet<Invid>()))
+                if (isMemberOfOwnerGroups(inf.getValuesLocal(), new HashSet<Invid>()))
                   {
                     found = true;
                   }
