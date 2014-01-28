@@ -2058,7 +2058,7 @@ public final class DBPermissionManager {
    * member of any of the containing owner groups.
    *
    * @param owners A vector of invids pointing to OwnerBase objects
-   * @param alreadySeen A vector of owner group Invid's that have
+   * @param alreadySeen A Set of owner group Invid's that have
    * already been checked.  (For infinite loop avoidance).
    *
    * @return true if a match is found
@@ -2092,7 +2092,7 @@ public final class DBPermissionManager {
    * containing owner groups.
    *
    * @param owner An Invid pointing to an OwnerBase object
-   * @param alreadySeen A vector of owner group Invid's that have
+   * @param alreadySeen A Set of owner group Invid's that have
    * already been checked.  (For infinite loop avoidance).
    *
    * @return true if a match is found
