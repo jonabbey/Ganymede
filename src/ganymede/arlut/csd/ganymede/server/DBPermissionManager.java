@@ -867,23 +867,21 @@ public final class DBPermissionManager {
 
   public synchronized QueryResult getAvailableOwnerGroups()
   {
-    Query q;
     QueryResult result = new QueryResult();
     QueryResult fullOwnerList;
-    Invid inv;
 
     /* -- */
 
     if (!isPrivileged())
       {
-        return result;          // End users don't have any owner group access
+        return result;
       }
-
-    q = new Query(SchemaConstants.OwnerBase);
-    q.setFiltered(false);
 
     try
       {
+        Query q = new Query(SchemaConstants.OwnerBase);
+        q.setFiltered(false);
+
         fullOwnerList = gSession.query(q);
       }
     catch (NotLoggedInException ex)
@@ -906,11 +904,12 @@ public final class DBPermissionManager {
       {
         alreadySeen.clear();
 
-        inv = fullOwnerList.getInvid(i);
+        Invid inv = fullOwnerList.getInvid(i);
+        String label = fullOwnerList.getLabel(i);
 
         if (recursePersonaMatch(inv, alreadySeen))
           {
-            result.addRow(inv, dbSession.viewDBObject(inv).getOriginal().getLabel(), false);
+            result.addRow(inv, label, false);
           }
       }
 
