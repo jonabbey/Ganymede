@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -1750,7 +1750,9 @@ public final class DBSession implements QueryDescriber {
   }
 
   /**
-   * <p>Returns the label of a given Invid in this session.</p>
+   * Returns the label of a given Invid in this session.
+   *
+   * @return null if the Invid is not found in this session
    */
 
   public String getObjectLabel(Invid invid)
@@ -1763,6 +1765,17 @@ public final class DBSession implements QueryDescriber {
       {
         return null;
       }
+  }
+
+  /**
+   * Returns the label of a given Invid committed into the database.
+   *
+   * @throws NullPointerException if invid could not be found.
+   */
+
+  public String getCommittedObjectLabel(Invid invid)
+  {
+    return store.getObject(invid).getLabel();
   }
 
   /**
