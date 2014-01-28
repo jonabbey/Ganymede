@@ -715,7 +715,7 @@ public final class DBPermissionManager {
       {
         try
           {
-            results.add(dbSession.viewDBObject(invid).getOriginal().getLabel());
+            results.add(dbSession.getCommittedObjectLabel(invid));
           }
         catch (NullPointerException ex)
           {
