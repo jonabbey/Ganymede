@@ -2048,10 +2048,10 @@ public final class DBPermissionManager {
   }
 
   /**
-   * Recursive helper method for personaMatch.. this method does a
-   * depth first search up the owner tree for each Invid contained in
-   * the owners Vector to see if the gSession's personaInvid is a
-   * member of any of the containing owner groups.
+   * Returns true if this.personaInvid is a member of any of the owner
+   * group objects whose Invids are included in the owners Vector, or
+   * in any of the owner groups that own those owner groups,
+   * transitively.
    *
    * @param owners A vector of invids pointing to OwnerBase objects
    * @param alreadySeen A Set of owner group Invid's that have
@@ -2082,10 +2082,9 @@ public final class DBPermissionManager {
   }
 
   /**
-   * Recursive helper method for personaMatch.. this method does a
-   * depth first search up the owner tree for the owner Invid to see
-   * if the gSession's personaInvid is a member of any of the
-   * containing owner groups.
+   * Returns true if this.personaInvid is a member of the owner group
+   * pointed to by the owner Invid, or in any of the owner groups that
+   * own that owner group, transitively.
    *
    * @param owner An Invid pointing to an OwnerBase object
    * @return true if a match is found
@@ -2097,10 +2096,9 @@ public final class DBPermissionManager {
   }
 
   /**
-   * Recursive helper method for personaMatch.. this method does a
-   * depth first search up the owner tree for the owner Invid to see
-   * if the gSession's personaInvid is a member of any of the
-   * containing owner groups.
+   * Returns true if this.personaInvid is a member of the owner group
+   * pointed to by the owner Invid, or in any of the owner groups that
+   * own that owner group, transitively.
    *
    * @param owner An Invid pointing to an OwnerBase object
    * @param alreadySeen A Set of owner group Invid's that have
