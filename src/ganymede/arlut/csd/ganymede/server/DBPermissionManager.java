@@ -2110,6 +2110,11 @@ public final class DBPermissionManager {
         throw new IllegalArgumentException("Null owner passed to recursePersonaMatch");
       }
 
+    if (owner.getInvid().getType() != SchemaConstants.OwnerBase)
+      {
+        throw new IllegalArgumentException("recursePersonaMatch() called with something other than an Owner Group");
+      }
+
     if (alreadySeen.contains(owner))
       {
         return false;
