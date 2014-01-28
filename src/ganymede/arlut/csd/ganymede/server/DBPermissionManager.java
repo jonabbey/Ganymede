@@ -1244,7 +1244,6 @@ public final class DBPermissionManager {
   public synchronized PermEntry getPerm(DBObject object)
   {
     boolean doDebug = permsdebug && object.getInvid().getType() == 267;
-    boolean useSelfPerm = false;
     PermEntry result;
 
     /* -- */
@@ -1295,36 +1294,11 @@ public final class DBPermissionManager {
 
     updatePerms(false);         // *sync*
 
-    // if we are operating on behalf of an end user and the object in
-    // question happens to be that user's record, we'll act as if we
-    // own ourself.  We'll then wind up with the default permission
-    // object's objects owned privs.
-
-    useSelfPerm = (userInvid != null) && userInvid.equals(object.getInvid());
-
-    // If we aren't editing ourselves, go ahead and check to see
-    // whether the custom logic for this object type wants to grant
-    // ownership of this object.
-
-    if (!useSelfPerm && object.getBase().getObjectHook().grantOwnership(gSession, object))
+    if (isOwnedByUs(object))
       {
         if (doDebug)
           {
-            System.err.println("getPerm(): grantOwnership() returned true");
-          }
-
-        useSelfPerm = true;
-      }
-
-    // If the current persona owns the object, look to our
-    // ownedObjectPerms to get the permissions applicable, else
-    // look at the default perms
-
-    if (useSelfPerm || isOwnedByUs(object))
-      {
-        if (doDebug)
-          {
-            System.err.println("getPerm(): personaMatch or useSelfPerm returned true");
+            System.err.println("getPerm(): isOwnedByUs()");
           }
 
         PermEntry temp = ownedObjectPerms.getPerm(object.getTypeID());
@@ -1350,7 +1324,7 @@ public final class DBPermissionManager {
       {
         if (doDebug)
           {
-            System.err.println("getPerm(): personaMatch and useSelfPerm returned false");
+            System.err.println("getPerm(): !isOwnedByUs()");
           }
 
         PermEntry temp = unownedObjectPerms.getPerm(object.getTypeID());
@@ -1466,10 +1440,7 @@ public final class DBPermissionManager {
 
     DBObject containingObj = getContainingObj(object);
 
-    if ((userInvid != null && userInvid.equals(containingObj.getInvid())) ||
-        objectHook.grantOwnership(gSession, object) ||
-        objectHook.grantOwnership(gSession, containingObj) ||
-        isOwnedByUs(containingObj))
+    if (isOwnedByUs(object))
       {
         if (permsdebug)
           {
@@ -1545,7 +1516,7 @@ public final class DBPermissionManager {
           }
 
         // if we are returning permissions for the owner list field
-        // and the object in question has not been granted owner ship
+        // and the object in question has not been granted ownership
         // privileges, make sure that we don't allow editing of the
         // owner list field, which could be used to make the object
         // owned, and thus gain privileges
@@ -2167,7 +2138,36 @@ public final class DBPermissionManager {
 
     /* -- */
 
-    if (obj == null || this.personaInvid == null)
+    if (obj == null)
+      {
+        return false;
+      }
+
+    // end users are considered to own themselves
+
+    if (!isPrivileged() && this.userInvid != null && this.userInvid.equals(obj.getInvid()))
+      {
+        return true;
+      }
+
+    DBEditObject objectHook = obj.getBase().getObjectHook();
+
+    if (obj.isEmbedded())
+      {
+        if (objectHook.grantOwnership(gSession, obj))
+          {
+            return true;
+          }
+
+        obj = getContainingObj(obj);
+      }
+
+    if (objectHook.grantOwnership(gSession, obj))
+      {
+        return true;
+      }
+
+    if (this.personaInvid == null)
       {
         return false;
       }
