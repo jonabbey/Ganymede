@@ -772,6 +772,9 @@ public final class DBPermissionManager {
         return false;
       }
 
+    // we don't need to check a password to switch to our end-user
+    // privs
+
     if (newPersona.equals(user.getLabel()))
       {
         // the GUI client closes transactions first, but just in case
@@ -810,7 +813,7 @@ public final class DBPermissionManager {
 
     updatePerms(true);
 
-    gSession.resetAdminEntry(); // null our admin console cache
+    gSession.resetAdminEntry();
     gSession.setLastEvent("selectPersona: " + newPersona);
 
     return true;
