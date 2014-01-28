@@ -2100,17 +2100,12 @@ public final class DBPermissionManager {
 
   private synchronized boolean recursePersonaMatch(Invid owner, Set<Invid> alreadySeen)
   {
-    DBObject ownerObj;
-    InvidDBField inf;
-
-    /* -- */
-
     if (owner == null)
       {
         throw new IllegalArgumentException("Null owner passed to recursePersonaMatch");
       }
 
-    if (owner.getInvid().getType() != SchemaConstants.OwnerBase)
+    if (owner.getType() != SchemaConstants.OwnerBase)
       {
         throw new IllegalArgumentException("recursePersonaMatch() called with something other than an Owner Group");
       }
@@ -2124,28 +2119,22 @@ public final class DBPermissionManager {
         alreadySeen.add(owner);
       }
 
-    ownerObj = dbSession.viewDBObject(owner).getOriginal();
+    DBObject ownerGroupObj = dbSession.viewDBObject(owner).getOriginal();
 
-    inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
+    Vector<Invid> personaInOwnerGroup = (Vector<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
 
-    if (inf != null)
+    if (personaInOwnerGroup.contains(getPersonaInvid()))
       {
-        if (inf.getValuesLocal().contains(getPersonaInvid()))
-          {
-            return true;
-          }
+        return true;
       }
 
     // didn't find, recurse up
 
-    inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerListField);
+    Vector<Invid> ownersOfOwnerGroup = (Vector<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerListField);
 
-    if (inf != null)
+    if (recursePersonasMatch(ownersOfOwnerGroup, alreadySeen))
       {
-        if (recursePersonasMatch((Vector<Invid>) inf.getValuesLocal(), alreadySeen))
-          {
-            return true;
-          }
+        return true;
       }
 
     return false;
