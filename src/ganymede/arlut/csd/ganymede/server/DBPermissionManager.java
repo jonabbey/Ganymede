@@ -2152,7 +2152,7 @@ public final class DBPermissionManager {
    * owner groups.
    */
 
-  public boolean personaMatch(DBObject obj)
+  private boolean personaMatch(DBObject obj)
   {
     boolean showit = false;
 
