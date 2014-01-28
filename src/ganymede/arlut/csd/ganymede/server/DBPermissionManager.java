@@ -1320,7 +1320,7 @@ public final class DBPermissionManager {
     // ownedObjectPerms to get the permissions applicable, else
     // look at the default perms
 
-    if (useSelfPerm || personaMatch(object))
+    if (useSelfPerm || isOwnedByUs(object))
       {
         if (doDebug)
           {
@@ -1469,7 +1469,7 @@ public final class DBPermissionManager {
     if ((userInvid != null && userInvid.equals(containingObj.getInvid())) ||
         objectHook.grantOwnership(gSession, object) ||
         objectHook.grantOwnership(gSession, containingObj) ||
-        personaMatch(containingObj))
+        isOwnedByUs(containingObj))
       {
         if (permsdebug)
           {
@@ -2161,7 +2161,7 @@ public final class DBPermissionManager {
    * owner groups.
    */
 
-  private boolean personaMatch(DBObject obj)
+  private boolean isOwnedByUs(DBObject obj)
   {
     boolean showit = false;
 
