@@ -2161,7 +2161,7 @@ public final class DBPermissionManager {
 
     /* -- */
 
-    if (obj == null || personaInvid == null)
+    if (obj == null || this.personaInvid == null)
       {
         return false;
       }
@@ -2271,7 +2271,7 @@ public final class DBPermissionManager {
 
         inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
 
-        if (inf != null && inf.getValuesLocal().contains(personaInvid))
+        if (inf != null && inf.getValuesLocal().contains(this.personaInvid))
           {
             found = true;
           }
