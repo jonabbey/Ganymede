@@ -50,6 +50,8 @@
 package arlut.csd.ganymede.server;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
 import arlut.csd.Util.booleanSemaphore;
@@ -865,7 +867,6 @@ public final class DBPermissionManager {
     Query q;
     QueryResult result = new QueryResult();
     QueryResult fullOwnerList;
-    Vector<Invid> alreadySeen = new Vector<Invid>();
     Invid inv;
 
     /* -- */
@@ -893,6 +894,8 @@ public final class DBPermissionManager {
       {
         return fullOwnerList;
       }
+
+    Set<Invid> alreadySeen = new HashSet<Invid>();
 
     // otherwise, we've got to do a very little bit of legwork
 
@@ -2052,7 +2055,7 @@ public final class DBPermissionManager {
    * @return true if a match is found
    */
 
-  public synchronized boolean recursePersonasMatch(Vector<Invid> owners, Vector<Invid> alreadySeen)
+  public synchronized boolean recursePersonasMatch(Vector<Invid> owners, Set<Invid> alreadySeen)
   {
     // *** It is critical that this method not modify the owners parameter passed
     // *** in, as it may be 'live' in a DBField.
@@ -2086,7 +2089,7 @@ public final class DBPermissionManager {
    * @return true if a match is found
    */
 
-  public synchronized boolean recursePersonaMatch(Invid owner, Vector<Invid> alreadySeen)
+  public synchronized boolean recursePersonaMatch(Invid owner, Set<Invid> alreadySeen)
   {
     DBObject ownerObj;
     InvidDBField inf;
@@ -2207,7 +2210,7 @@ public final class DBPermissionManager {
           }
       }
 
-    boolean result = recursePersonasMatch(owners, new Vector<Invid>());
+    boolean result = recursePersonasMatch(owners, new HashSet<Invid>());
 
     if (showit)
       {
@@ -2273,7 +2276,7 @@ public final class DBPermissionManager {
                 // owners value passed in.  Otherwise, we'd have to
                 // clone the results from getValuesLocal().
 
-                if (recursePersonasMatch(inf.getValuesLocal(), new Vector<Invid>()))
+                if (recursePersonasMatch(inf.getValuesLocal(), new HashSet<Invid>()))
                   {
                     found = true;
                   }
