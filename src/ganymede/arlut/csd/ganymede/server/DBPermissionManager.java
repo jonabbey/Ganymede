@@ -2130,9 +2130,9 @@ public final class DBPermissionManager {
 
     DBObject ownerGroupObj = dbSession.viewDBObject(owner).getOriginal();
 
-    Vector<Invid> personaInOwnerGroup = (Vector<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
+    Vector<Invid> personaeInOwnerGroup = (Vector<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
 
-    if (personaInOwnerGroup.contains(getPersonaInvid()))
+    if (personaeInOwnerGroup.contains(getPersonaInvid()))
       {
         return true;
       }
@@ -2241,8 +2241,6 @@ public final class DBPermissionManager {
 
   private synchronized boolean isMemberAll(Vector<Invid> owners)
   {
-    DBObject ownerObj;
-    InvidDBField inf;
     boolean found;
 
     /* -- */
@@ -2267,11 +2265,11 @@ public final class DBPermissionManager {
             return false;
           }
 
-        ownerObj = dbSession.viewDBObject(owner).getOriginal();
+        DBObject ownerGroupObj = dbSession.viewDBObject(owner).getOriginal();
 
-        inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
+        Vector<Invid> personaeInOwnerGroup = (Vector<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
 
-        if (inf != null && inf.getValuesLocal().contains(this.personaInvid))
+        if (personaeInOwnerGroup.contains(this.personaInvid))
           {
             found = true;
           }
@@ -2279,19 +2277,11 @@ public final class DBPermissionManager {
           {
             // didn't find, recurse up
 
-            inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerListField);
+            Vector<Invid> ownersOfOwnerGroup = (Vector<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerListField);
 
-            if (inf != null)
+            if (isMemberOfOwnerGroups(ownersOfOwnerGroup, new HashSet<Invid>()))
               {
-                // using getValuesLocal() here is safe only because
-                // isMemberOfOwnerGroups() never tries to modify the
-                // owners value passed in.  Otherwise, we'd have to
-                // clone the results from getValuesLocal().
-
-                if (isMemberOfOwnerGroups(inf.getValuesLocal(), new HashSet<Invid>()))
-                  {
-                    found = true;
-                  }
+                found = true;
               }
           }
 
