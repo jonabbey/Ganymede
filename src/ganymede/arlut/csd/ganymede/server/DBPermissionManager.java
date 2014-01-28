@@ -838,18 +838,25 @@ public final class DBPermissionManager {
 
     for (Invid invid: personae)
       {
-        DBObject personaObject = dbSession.viewDBObject(invid).getOriginal();
+        try
+          {
+            DBObject personaObject = dbSession.viewDBObject(invid).getOriginal();
 
-        if (!newPersona.equals(personaObject.getLabel()))
+            if (!newPersona.equals(personaObject.getLabel()))
+              {
+                continue;
+              }
+
+            PasswordDBField pdbf = (PasswordDBField) personaObject.getField(SchemaConstants.PersonaPasswordField);
+
+            if (pdbf != null && pdbf.matchPlainText(pass))
+              {
+                return personaObject;
+              }
+          }
+        catch (NullPointerException ex)
           {
             continue;
-          }
-
-        PasswordDBField pdbf = (PasswordDBField) personaObject.getField(SchemaConstants.PersonaPasswordField);
-
-        if (pdbf != null && pdbf.matchPlainText(pass))
-          {
-            return personaObject;
           }
       }
 
