@@ -2249,13 +2249,8 @@ public final class DBPermissionManager {
   {
     if (owners == null)
       {
-        return false;           // shouldn't happen in context
+        return false;
       }
-
-    // loop over all the owner groups in the vector, make sure
-    // that we are a valid member of each of these groups, either
-    // directly or through being a member of a group that owns
-    // one of these groups.
 
     for (Invid owner: owners)
       {
