@@ -2064,7 +2064,7 @@ public final class DBPermissionManager {
    * @return true if a match is found
    */
 
-  public synchronized boolean recursePersonasMatch(Vector<Invid> owners, Set<Invid> alreadySeen)
+  private synchronized boolean recursePersonasMatch(Vector<Invid> owners, Set<Invid> alreadySeen)
   {
     // *** It is critical that this method not modify the owners parameter passed
     // *** in, as it may be 'live' in a DBField.
@@ -2098,7 +2098,7 @@ public final class DBPermissionManager {
    * @return true if a match is found
    */
 
-  public synchronized boolean recursePersonaMatch(Invid owner, Set<Invid> alreadySeen)
+  private synchronized boolean recursePersonaMatch(Invid owner, Set<Invid> alreadySeen)
   {
     DBObject ownerObj;
     InvidDBField inf;
