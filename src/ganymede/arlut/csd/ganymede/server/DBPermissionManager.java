@@ -953,6 +953,8 @@ public final class DBPermissionManager {
 
         if (ownerInvidItem.getType() != SchemaConstants.OwnerBase)
           {
+            // "Error in setDefaultOwner()"
+            // "Error.. ownerInvids contains an invalid invid"
             return Ganymede.createErrorDialog(gSession,
                                               ts.l("setDefaultOwner.error_title"),
                                               ts.l("setDefaultOwner.error_text"));
@@ -977,6 +979,8 @@ public final class DBPermissionManager {
 
     if (!supergashMode && !isMemberAll(tmpInvids))
       {
+        // "Error in setDefaultOwner()"
+        // "Error.. ownerInvids contains invid that the persona is not a member of."
         return Ganymede.createErrorDialog(gSession,
                                           ts.l("setDefaultOwner.error_title"),
                                           ts.l("setDefaultOwner.error_text2"));
@@ -1069,6 +1073,8 @@ public final class DBPermissionManager {
 
     if (!supergashMode && !isMemberAll(ownerInvids))
       {
+        // "Server: Error in filterQueries()"
+        // "Error.. ownerInvids contains invid that the persona is not a member of."
         return Ganymede.createErrorDialog(gSession,
                                           ts.l("filterQueries.error"),
                                           ts.l("setDefaultOwner.error_text2"));
