@@ -965,12 +965,10 @@ public final class DBPermissionManager {
                                           ts.l("setDefaultOwner.error_title"),
                                           ts.l("setDefaultOwner.error_text2"));
       }
-    else
-      {
-        newObjectOwnerInvids = tmpInvids;
-        gSession.setLastEvent("setDefaultOwner");
-        return null;
-      }
+
+    newObjectOwnerInvids = tmpInvids;
+    gSession.setLastEvent("setDefaultOwner");
+    return null;
   }
 
   /**
@@ -1711,11 +1709,6 @@ public final class DBPermissionManager {
 
   private synchronized void updatePerms(boolean forceUpdate)
   {
-    if (permsdebug)
-      {
-        System.err.println("updatePerms(" + Boolean.toString(forceUpdate) + ")");
-      }
-
     if (beforeversupergash || Ganymede.firstrun)
       {
         this.supergashMode = true;
@@ -1742,117 +1735,45 @@ public final class DBPermissionManager {
         return;
       }
 
-    if (permsdebug)
+    // Personae do not get the default 'objects-owned' privileges for
+    // the wider range of objects under their ownership.  Any special
+    // privileges granted to admins over objects owned by them must be
+    // derived from a non-default role.
+
+    this.ownedObjectPerms = new PermMatrix(this.unownedObjectPerms);
+    this.delegatableOwnedObjectPerms = new PermMatrix(this.unownedObjectPerms);
+
+    for (Invid role: (Vector<Invid>) this.personaObj.getFieldValuesLocal(SchemaConstants.PersonaPrivs))
       {
-        System.err.println("updatePerms(): calculating new ownedObjectPerms");
-      }
+        DBObject roleObj = dbSession.viewDBObject(role).getOriginal();
 
-    // Personae do not get the default 'objects-owned'
-    // privileges for the wider range of objects under
-    // their ownership.  Any special privileges granted to
-    // admins over objects owned by them must be derived
-    // from a non-default role.
-
-    // they do get the default permissions that all users have
-    // for non-owned objects, though.
-
-    this.ownedObjectPerms = new PermMatrix(unownedObjectPerms);
-
-    // default permissions on non-owned are implicitly delegatable.
-
-    this.delegatableOwnedObjectPerms = new PermMatrix(unownedObjectPerms);
-
-    // now we loop over all permissions objects referenced
-    // by our persona, or'ing in both the objects owned
-    // permissions and default permissions to augment unownedObjectPerms
-    // and ownedObjectPerms.
-
-    for (Invid inv: (Vector<Invid>) this.personaObj.getFieldValuesLocal(SchemaConstants.PersonaPrivs))
-      {
-        DBObject pObj = dbSession.viewDBObject(inv).getOriginal();
-        PermMatrix ownedObjsPerm = null;
-        PermMatrix unownedObjsPerm = null;
-
-        if (pObj == null)
+        if (roleObj.containsField(SchemaConstants.RoleMatrix))
           {
-            continue;
+            PermissionMatrixDBField ownedObjsPermField = (PermissionMatrixDBField) roleObj.getField(SchemaConstants.RoleMatrix);
+            PermMatrix ownedMatrix = ownedObjsPermField.getMatrix();
+
+            this.ownedObjectPerms = this.ownedObjectPerms.union(ownedMatrix);
+
+            if (roleObj.isSet(SchemaConstants.RoleDelegatable))
+              {
+                this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(ownedMatrix);
+              }
           }
 
-        if (permsdebug)
+        if (roleObj.containsField(SchemaConstants.RoleDefaultMatrix))
           {
-            System.err.println("updatePerms(): unioning " + pObj + " into ownedObjectPerms and unownedObjectPerms");
-            System.err.println("ownedObjectPerms is currently:");
-            PermissionMatrixDBField.debugdump(this.ownedObjectPerms);
+            PermissionMatrixDBField unownedObjsPermField = (PermissionMatrixDBField) roleObj.getField(SchemaConstants.RoleDefaultMatrix);
+            PermMatrix unownedMatrix = unownedObjsPermField.getMatrix();
+
+            this.ownedObjectPerms = this.ownedObjectPerms.union(unownedMatrix);
+            this.unownedObjectPerms = this.unownedObjectPerms.union(unownedMatrix);
+
+            if (roleObj.isSet(SchemaConstants.RoleDelegatable))
+              {
+                this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(unownedMatrix);
+                this.delegatableUnownedObjectPerms = this.delegatableUnownedObjectPerms.union(unownedMatrix);
+              }
           }
-
-        // The default permissions for this
-        // administrator consists of the union of
-        // all default perms fields in all
-        // permission matrices for this admin
-        // persona.
-
-        // ownedObjectPerms is the union of all
-        // permissions applicable to objects that
-        // are owned by this persona
-
-        PermissionMatrixDBField ownedObjsPermField = (PermissionMatrixDBField) pObj.getField(SchemaConstants.RoleMatrix);
-
-        if (ownedObjsPermField != null)
-          {
-            ownedObjsPerm = ownedObjsPermField.getMatrix();
-          }
-
-        PermissionMatrixDBField unownedObjsPermField = (PermissionMatrixDBField) pObj.getField(SchemaConstants.RoleDefaultMatrix);
-
-        if (unownedObjsPermField != null)
-          {
-            unownedObjsPerm = unownedObjsPermField.getMatrix();
-          }
-
-        if (permsdebug)
-          {
-            System.err.println("updatePerms(): RoleMatrix for " + pObj + ":");
-            PermissionMatrixDBField.debugdump(ownedObjsPerm);
-
-            System.err.println("updatePerms(): RoleDefaultMatrix for " + pObj + ":");
-            PermissionMatrixDBField.debugdump(unownedObjsPerm);
-          }
-
-        this.ownedObjectPerms = this.ownedObjectPerms.union(ownedObjsPerm);
-
-        if (permsdebug)
-          {
-            System.err.println("updatePerms(): ownedObjectPerms after unioning with RoleMatrix is");
-            PermissionMatrixDBField.debugdump(this.ownedObjectPerms);
-          }
-
-        this.ownedObjectPerms = this.ownedObjectPerms.union(unownedObjsPerm);
-
-        if (permsdebug)
-          {
-            System.err.println("updatePerms(): ownedObjectPerms after unioning with RoleDefaultMatrix is");
-            PermissionMatrixDBField.debugdump(this.ownedObjectPerms);
-          }
-
-        this.unownedObjectPerms = this.unownedObjectPerms.union(unownedObjsPerm);
-
-        // we want to maintain our notion of
-        // delegatable permissions separately..
-
-        if (pObj.isSet(SchemaConstants.RoleDelegatable))
-          {
-            this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(ownedObjsPerm).union(unownedObjsPerm);
-            this.delegatableUnownedObjectPerms = this.delegatableUnownedObjectPerms.union(unownedObjsPerm);
-          }
-      }
-
-    if (permsdebug)
-      {
-        System.err.println("DBPermissionManager.updatePerms(): finished full permissions recalc for " +
-                           (this.personaName == null ? this.username : this.personaName));
-
-        System.err.println("ownedObjectPerms = \n\n" + this.ownedObjectPerms);
-        System.err.println("\n\nunownedObjectPerms = \n\n" + this.unownedObjectPerms);
       }
   }
 
