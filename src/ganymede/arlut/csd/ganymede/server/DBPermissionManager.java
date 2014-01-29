@@ -1721,7 +1721,7 @@ public final class DBPermissionManager {
       }
 
     this.supergashMode = false;
-    initializeDefaultUnownedPerms();
+    initializeDefaultPerms();
 
     if (this.isEndUser())
       {
@@ -1740,9 +1740,6 @@ public final class DBPermissionManager {
     // the wider range of objects under their ownership.  Any special
     // privileges granted to admins over objects owned by them must be
     // derived from a non-default role.
-
-    this.ownedObjectPerms = new PermMatrix(this.unownedObjectPerms);
-    this.delegatableOwnedObjectPerms = new PermMatrix(this.unownedObjectPerms);
 
     for (Invid role: (Vector<Invid>) this.personaObj.getFieldValuesLocal(SchemaConstants.PersonaPrivs))
       {
@@ -1863,18 +1860,17 @@ public final class DBPermissionManager {
 
   private synchronized void configureEndUser()
   {
-    PermMatrix selfPerm = null;
     PermissionMatrixDBField permField = (PermissionMatrixDBField) this.defaultRoleObj.getField(SchemaConstants.RoleMatrix);
 
-    if (permField != null)
+    if (permField == null)
       {
-        selfPerm = permField.getMatrix();
+        return;
       }
 
-    // if selfPerm is null, the unions are no-op
+    PermMatrix selfPerm = permField.getMatrix();
 
-    this.ownedObjectPerms = this.unownedObjectPerms.union(selfPerm);
-    this.delegatableOwnedObjectPerms = this.unownedObjectPerms.union(selfPerm);
+    this.ownedObjectPerms = this.ownedObjectPerms.union(selfPerm);
+    this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(selfPerm);
   }
 
   /**
@@ -1882,23 +1878,24 @@ public final class DBPermissionManager {
    * default permission object in the Ganymede database.
    */
 
-  private synchronized void initializeDefaultUnownedPerms()
+  private synchronized void initializeDefaultPerms()
   {
     PermissionMatrixDBField pField = (PermissionMatrixDBField) this.defaultRoleObj.getField(SchemaConstants.RoleDefaultMatrix);
+    PermMatrix defaultMatrix;
 
-    if (pField == null)
+    if (pField != null)
       {
-        this.unownedObjectPerms = new PermMatrix();
-        this.delegatableUnownedObjectPerms = new PermMatrix();
+        defaultMatrix = pField.getMatrix();
       }
     else
       {
-        this.unownedObjectPerms = pField.getMatrix();
-
-        // default permissions are implicitly delegatable
-
-        this.delegatableUnownedObjectPerms = pField.getMatrix();
+        defaultMatrix = new PermMatrix();
       }
+
+    this.unownedObjectPerms = defaultMatrix;
+    this.delegatableUnownedObjectPerms = defaultMatrix;
+    this.ownedObjectPerms = defaultMatrix;
+    this.delegatableOwnedObjectPerms = defaultMatrix;
   }
 
   /**
