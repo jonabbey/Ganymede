@@ -2157,11 +2157,6 @@ public final class DBPermissionManager {
 
   public synchronized boolean filterMatch(DBObject obj)
   {
-    Vector<Invid> owners;
-    InvidDBField inf;
-
-    /* -- */
-
     if (obj == null)
       {
         return false;
@@ -2172,34 +2167,8 @@ public final class DBPermissionManager {
         return true;            // no visibility restriction, go for it
       }
 
-    inf = (InvidDBField) obj.getField(SchemaConstants.OwnerListField);
+    Vector owners = obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
 
-    if (inf == null)
-      {
-        return false;   // we have a restriction, but the object is only owned by supergash.. nope.
-      }
-
-    owners = (Vector<Invid>) inf.getValuesLocal();
-
-    if (owners == null)
-      {
-        return false;   // we shouldn't get here, but we don't really care either
-      }
-
-    // we've got the owners for this object.. now, is there any match between our
-    // visibilityFilterInvids and the owners of this object?
-
-    for (Invid tmpInvid: visibilityFilterInvids)
-      {
-        for (Invid secondInvid: owners)
-          {
-            if (tmpInvid.equals(secondInvid))
-              {
-                return true;
-              }
-          }
-      }
-
-    return false;
+    return VectorUtils.overlaps(visibilityFilterInvids, owners);
   }
 }
