@@ -1721,6 +1721,7 @@ public final class DBPermissionManager {
       }
 
     this.supergashMode = false;
+    initializeUnownedPerms();
 
     if (this.isEndUser())
       {
@@ -1778,8 +1779,7 @@ public final class DBPermissionManager {
   }
 
   /**
-   * Check to see if the defaultRoleObj has changed, in which case we
-   * need to resetDefaultPerms().
+   * Check to see if the defaultRoleObj has changed.
    *
    * @return true if this.defaultRoleObj was changed
    */
@@ -1802,7 +1802,6 @@ public final class DBPermissionManager {
           }
 
         this.defaultRoleObj = currentDefaultRoleObj;
-        resetDefaultPerms();
       }
     catch (NullPointerException ex)
       {
@@ -1880,7 +1879,7 @@ public final class DBPermissionManager {
    * default permission object in the Ganymede database.
    */
 
-  private synchronized void resetDefaultPerms()
+  private synchronized void initializeUnownedPerms()
   {
     PermissionMatrixDBField pField = (PermissionMatrixDBField) this.defaultRoleObj.getField(SchemaConstants.RoleDefaultMatrix);
 
