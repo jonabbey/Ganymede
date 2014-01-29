@@ -757,45 +757,14 @@ public final class DBPermissionManager {
 
   public synchronized boolean selectPersona(String newPersona, String password)
   {
-    DBObject
-      user,
-      personaObject = null;
+    DBObject userObject = getUser();
 
-    PasswordDBField pdbf;
-
-    /* -- */
-
-    user = getUser();
-
-    if (user == null)
+    if (userObject == null)
       {
         return false;
       }
 
-    // we don't need to check a password to switch to our end-user
-    // privs
-
-    if (newPersona.equals(user.getLabel()))
-      {
-        // the GUI client closes transactions first, but just in case
-
-        gSession.restartTransaction();
-
-        this.personaInvid = null;
-        this.personaName = null;
-        this.visibilityFilterInvids = null;
-
-        updatePerms(true);
-
-        gSession.resetAdminEntry(); // null our admin console cache
-        gSession.setLastEvent("selectPersona: " + newPersona);
-
-        return true;
-      }
-
-    personaObject = findMatchingAuthenticatedPersona(user, newPersona, password);
-
-    if (personaObject == null)
+    if (!findMatchingAuthenticatedPersona(userObject, newPersona, password))
       {
         // "Couldn''t find persona {0} for user: {1}"
         Ganymede.debug(ts.l("selectPersona.no_persona", newPersona, this.username));
@@ -807,31 +776,40 @@ public final class DBPermissionManager {
 
     gSession.restartTransaction();
 
-    this.personaName = personaObject.getLabel();
-    this.personaInvid = personaObject.getInvid();
     this.visibilityFilterInvids = null;
 
     updatePerms(true);
 
-    gSession.resetAdminEntry();
+    gSession.resetAdminEntry(); // null our admin console cache
     gSession.setLastEvent("selectPersona: " + newPersona);
 
     return true;
   }
 
   /**
-   * Returns a Persona Object linked to the user that matches the
-   * given persona name and password, or null if none such can be
-   * found.
+   * Sets this.personaName and this.personaInvid and returns true if
+   * the persona object linked to userObject (or the end-user itself)
+   * can be found that has the name newPersona and a password that
+   * matches pass.
    */
 
-  private DBObject findMatchingAuthenticatedPersona(DBObject userObject,
-                                                    String newPersona,
-                                                    String pass)
+  private boolean findMatchingAuthenticatedPersona(DBObject userObject,
+                                                   String newPersona,
+                                                   String pass)
   {
     if (userObject == null || newPersona == null || pass == null)
       {
-        return null;
+        return false;
+      }
+
+    // we don't need to check a password to switch to our end-user
+    // privs
+
+    if (userObject.getLabel().equals(newPersona))
+      {
+        this.personaInvid = null;
+        this.personaName = null;
+        return true;
       }
 
     Vector<Invid> personae = (Vector<Invid>) userObject.getFieldValuesLocal(SchemaConstants.UserAdminPersonae);
@@ -851,7 +829,9 @@ public final class DBPermissionManager {
 
             if (pdbf != null && pdbf.matchPlainText(pass))
               {
-                return personaObject;
+                this.personaName = personaObject.getLabel();
+                this.personaInvid = personaObject.getInvid();
+                return true;
               }
           }
         catch (NullPointerException ex)
@@ -860,7 +840,7 @@ public final class DBPermissionManager {
           }
       }
 
-    return null;
+    return false;
   }
 
   /**
