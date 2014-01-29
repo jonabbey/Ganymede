@@ -1832,6 +1832,8 @@ public final class DBPermissionManager {
         return true;
       }
 
+    this.personaTimeStamp = new Date();
+
     DBObject currentPersonaObj = dbSession.viewDBObject(this.personaInvid);
 
     if (currentPersonaObj == null)
@@ -1849,7 +1851,6 @@ public final class DBPermissionManager {
       }
 
     this.personaObj = currentPersonaObj;
-    this.personaTimeStamp = new Date();
 
     return true;
   }
