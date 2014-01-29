@@ -422,7 +422,7 @@ public final class DBPermissionManager {
         this.personaName = null;
       }
 
-    updatePerms(true);
+    updatePerms();
   }
 
   /**
@@ -777,8 +777,9 @@ public final class DBPermissionManager {
     gSession.restartTransaction();
 
     this.visibilityFilterInvids = null;
+    this.personaObj = null;
 
-    updatePerms(true);
+    updatePerms();
 
     gSession.resetAdminEntry(); // null our admin console cache
     gSession.setLastEvent("selectPersona: " + newPersona);
@@ -1270,7 +1271,7 @@ public final class DBPermissionManager {
 
     // make sure we have ownedObjectPerms up to date
 
-    updatePerms(false);         // *sync*
+    updatePerms();         // *sync*
 
     if (isOwnedByUs(object))
       {
@@ -1412,7 +1413,7 @@ public final class DBPermissionManager {
 
     // make sure we have ownedObjectPerms up to date
 
-    updatePerms(false);         // *sync*
+    updatePerms();         // *sync*
 
     // embedded object ownership is determined by the top-level object
 
@@ -1590,7 +1591,7 @@ public final class DBPermissionManager {
         return PermEntry.fullPerms;
       }
 
-    updatePerms(false); // *sync* make sure we have ownedObjectPerms up to date
+    updatePerms(); // *sync* make sure we have ownedObjectPerms up to date
 
     // note that we can use ownedObjectPerms, since the persona's
     // base type privileges apply generically to objects of the
@@ -1648,7 +1649,7 @@ public final class DBPermissionManager {
 
     // make sure we have unownedObjectPerms and ownedObjectPerms up to date
 
-    updatePerms(false);         // *sync*
+    updatePerms();         // *sync*
 
     // remember that ownedObjectPerms is a permissive superset of
     // unownedObjectPerms
@@ -1701,13 +1702,9 @@ public final class DBPermissionManager {
    * permissions for this session haven't changed.  This method is
    * designed to return very quickly if permissions have not changed
    * and forceUpdate is false.</p>
-   *
-   * @param forceUpdate If false, updatePerms() will do nothing if the
-   * Ganymede permissions database has not been changed since
-   * updatePerms() was last called in this DBPermissionManager.
    */
 
-  private synchronized void updatePerms(boolean forceUpdate)
+  private synchronized void updatePerms()
   {
     if (beforeversupergash || Ganymede.firstrun)
       {
@@ -1715,7 +1712,7 @@ public final class DBPermissionManager {
         return;
       }
 
-    if (!updateDefaultRoleObj() && !updatePersonaObj(forceUpdate))
+    if (!updateDefaultRoleObj() && !updatePersonaObj())
       {
         return;
       }
@@ -1819,35 +1816,42 @@ public final class DBPermissionManager {
    * @return true if this.personaObj was changed
    */
 
-  private synchronized boolean updatePersonaObj(boolean forceUpdate)
+  private synchronized boolean updatePersonaObj()
   {
-    if (!forceUpdate &&
+    if (((this.personaObj != null && this.personaInvid != null) ||
+         (this.personaObj == null && this.personaInvid == null)) &&
         this.personaTimeStamp != null &&
         !this.personaTimeStamp.after(Ganymede.db.getObjectBase(SchemaConstants.PersonaBase).getTimeStamp()))
       {
         return false;
       }
 
-    try
-      {
-        DBObject currentPersonaObj = dbSession.viewDBObject(this.personaInvid).getOriginal();
-
-        if (currentPersonaObj == this.personaObj)
-          {
-            return false;
-          }
-
-        this.personaObj = currentPersonaObj;
-      }
-    catch (NullPointerException ex)
+    if (this.personaInvid == null)
       {
         this.personaObj = null;
-      }
-    finally
-      {
-        this.personaTimeStamp = new Date();
         return true;
       }
+
+    DBObject currentPersonaObj = dbSession.viewDBObject(this.personaInvid);
+
+    if (currentPersonaObj == null)
+      {
+        throw new NullPointerException("Couldn't find personaObj for " +
+                                       this.personaInvid +
+                                       " in updatePersonaObj()");
+      }
+
+    currentPersonaObj = currentPersonaObj.getOriginal();
+
+    if (currentPersonaObj == this.personaObj)
+      {
+        return false;
+      }
+
+    this.personaObj = currentPersonaObj;
+    this.personaTimeStamp = new Date();
+
+    return true;
   }
 
   /**
