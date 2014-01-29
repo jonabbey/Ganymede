@@ -766,7 +766,7 @@ public final class DBPermissionManager {
 
     if (!findMatchingAuthenticatedPersona(userObject, newPersona, password))
       {
-        // "Couldn''t find persona {0} for user: {1}"
+        // "Failed attempt to switch to persona {0} for user: {1}"
         Ganymede.debug(ts.l("selectPersona.no_persona", newPersona, this.username));
         return false;
       }
@@ -1727,7 +1727,7 @@ public final class DBPermissionManager {
         return;
       }
 
-    supergashMode = false;
+    this.supergashMode = false;
 
     if (this.isEndUser())
       {
@@ -1744,10 +1744,10 @@ public final class DBPermissionManager {
 
     if (permsdebug)
       {
-        System.err.println("updatePerms(): calculating new ownedObjectPerms");;
+        System.err.println("updatePerms(): calculating new ownedObjectPerms");
       }
 
-    // Personas do not get the default 'objects-owned'
+    // Personae do not get the default 'objects-owned'
     // privileges for the wider range of objects under
     // their ownership.  Any special privileges granted to
     // admins over objects owned by them must be derived
@@ -1766,11 +1766,6 @@ public final class DBPermissionManager {
     // by our persona, or'ing in both the objects owned
     // permissions and default permissions to augment unownedObjectPerms
     // and ownedObjectPerms.
-
-    if (!this.personaObj.containsField(SchemaConstants.PersonaPrivs))
-      {
-        return;
-      }
 
     for (Invid inv: (Vector<Invid>) this.personaObj.getFieldValuesLocal(SchemaConstants.PersonaPrivs))
       {
