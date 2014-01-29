@@ -1851,31 +1851,8 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>Do the perms configuration needed for an unprivileged end
-   * user.</p>
-   *
-   * <p>This is the only case in which the defaultRoleObj's owned
-   * objects matrix (SchemaConstants.RoleMatrix) is consulted.</p>
-   */
-
-  private synchronized void configureEndUser()
-  {
-    PermissionMatrixDBField permField = (PermissionMatrixDBField) this.defaultRoleObj.getField(SchemaConstants.RoleMatrix);
-
-    if (permField == null)
-      {
-        return;
-      }
-
-    PermMatrix selfPerm = permField.getMatrix();
-
-    this.ownedObjectPerms = this.ownedObjectPerms.union(selfPerm);
-    this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(selfPerm);
-  }
-
-  /**
-   * This convenience method resets unownedObjectPerms from the
-   * default permission object in the Ganymede database.
+   * This convenience method resets all privilege matricies from the
+   * default unowned permissions in the default Role object.
    */
 
   private synchronized void initializeDefaultPerms()
@@ -1896,6 +1873,29 @@ public final class DBPermissionManager {
     this.delegatableUnownedObjectPerms = defaultMatrix;
     this.ownedObjectPerms = defaultMatrix;
     this.delegatableOwnedObjectPerms = defaultMatrix;
+  }
+
+  /**
+   * <p>Do the perms configuration needed for an unprivileged end
+   * user.</p>
+   *
+   * <p>This is the only case in which the defaultRoleObj's owned
+   * objects matrix (SchemaConstants.RoleMatrix) is consulted.</p>
+   */
+
+  private synchronized void configureEndUser()
+  {
+    PermissionMatrixDBField permField = (PermissionMatrixDBField) this.defaultRoleObj.getField(SchemaConstants.RoleMatrix);
+
+    if (permField == null)
+      {
+        return;
+      }
+
+    PermMatrix selfPerm = permField.getMatrix();
+
+    this.ownedObjectPerms = this.ownedObjectPerms.union(selfPerm);
+    this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(selfPerm);
   }
 
   /**
