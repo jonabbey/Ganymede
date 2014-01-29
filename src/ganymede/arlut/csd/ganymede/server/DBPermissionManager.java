@@ -1855,7 +1855,10 @@ public final class DBPermissionManager {
   }
 
   /**
-   * Do the perms configuration needed for an unprivileged end user.
+   * <p>Do the perms configuration needed for an unprivileged end user.</p>
+   *
+   * <p>This is the only case in which the defaultRoleObj's owned
+   * objects matrix (SchemaConstants.RoleMatrix) is consulted.</p>
    */
 
   private synchronized void configureEndUser()
