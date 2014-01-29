@@ -1721,7 +1721,7 @@ public final class DBPermissionManager {
       }
 
     this.supergashMode = false;
-    initializeUnownedPerms();
+    initializeDefaultUnownedPerms();
 
     if (this.isEndUser())
       {
@@ -1862,13 +1862,13 @@ public final class DBPermissionManager {
 
   private synchronized void configureEndUser()
   {
-    if (!this.defaultRoleObj.containsField(SchemaConstants.RoleMatrix))
-      {
-        return;
-      }
-
+    PermMatrix selfPerm = null;
     PermissionMatrixDBField permField = (PermissionMatrixDBField) this.defaultRoleObj.getField(SchemaConstants.RoleMatrix);
-    PermMatrix selfPerm = permField.getMatrix();
+
+    if (permField != null)
+      {
+        selfPerm = permField.getMatrix();
+      }
 
     this.ownedObjectPerms = this.unownedObjectPerms.union(selfPerm);
     this.delegatableOwnedObjectPerms = this.unownedObjectPerms.union(selfPerm);
@@ -1879,7 +1879,7 @@ public final class DBPermissionManager {
    * default permission object in the Ganymede database.
    */
 
-  private synchronized void initializeUnownedPerms()
+  private synchronized void initializeDefaultUnownedPerms()
   {
     PermissionMatrixDBField pField = (PermissionMatrixDBField) this.defaultRoleObj.getField(SchemaConstants.RoleDefaultMatrix);
 
