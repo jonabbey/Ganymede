@@ -1860,40 +1860,16 @@ public final class DBPermissionManager {
 
   private synchronized void configureEndUser()
   {
-    PermMatrix selfPerm = null;
-
-    /* -- */
-
-    resetDefaultPerms();
+    if (!this.defaultRoleObj.containsField(SchemaConstants.RoleMatrix))
+      {
+        return;
+      }
 
     PermissionMatrixDBField permField = (PermissionMatrixDBField) this.defaultRoleObj.getField(SchemaConstants.RoleMatrix);
-
-    if (permField != null)
-      {
-        selfPerm = permField.getMatrix();
-
-        if (selfPerm == null)
-          {
-            System.err.println(ts.l("updatePerms.null_selfperm"));
-          }
-      }
-    else
-      {
-        selfPerm = new PermMatrix();
-      }
-
-    // ownedObjectPerms starts off as the union of permissions
-    // applicable to all objects and all objects owned, from
-    // the default permissions object.
+    PermMatrix selfPerm = permField.getMatrix();
 
     this.ownedObjectPerms = this.unownedObjectPerms.union(selfPerm);
     this.delegatableOwnedObjectPerms = this.unownedObjectPerms.union(selfPerm);
-
-    if (permsdebug)
-      {
-        System.err.println("DBPermissionManager.updatePerms(): returning.. no persona obj for " +
-                           (this.personaName == null ? this.username : this.personaName));
-      }
   }
 
   /**
