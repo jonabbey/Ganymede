@@ -777,7 +777,7 @@ public final class DBPermissionManager {
     gSession.restartTransaction();
 
     this.visibilityFilterInvids = null;
-    this.personaObj = null;
+    this.personaObj = null;     // force updatePerms to recalc
 
     updatePerms();
 
