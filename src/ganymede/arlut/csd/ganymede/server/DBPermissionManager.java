@@ -1742,7 +1742,7 @@ public final class DBPermissionManager {
         return;
       }
 
-    if (!isDefaultRoleChanged() && !isPersonaObjChanged(forceUpdate))
+    if (!updateDefaultRoleObj() && !updatePersonaObj(forceUpdate))
       {
         return;
       }
@@ -1888,7 +1888,7 @@ public final class DBPermissionManager {
    * @return true if this.defaultRoleObj was changed
    */
 
-  private synchronized boolean isDefaultRoleChanged()
+  private synchronized boolean updateDefaultRoleObj()
   {
     if (this.defaultRoleTimeStamp != null &&
         !this.defaultRoleTimeStamp.after(Ganymede.db.getObjectBase(SchemaConstants.RoleBase).getTimeStamp()))
@@ -1927,7 +1927,7 @@ public final class DBPermissionManager {
    * @return true if this.personaObj was changed
    */
 
-  private synchronized boolean isPersonaObjChanged(boolean forceUpdate)
+  private synchronized boolean updatePersonaObj(boolean forceUpdate)
   {
     if (!forceUpdate &&
         this.personaTimeStamp != null &&
