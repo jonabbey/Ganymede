@@ -2013,10 +2013,6 @@ public final class DBPermissionManager {
 
   private boolean isOwnedByUs(DBObject obj)
   {
-    boolean showit = false;
-
-    /* -- */
-
     if (obj == null)
       {
         return false;
@@ -2051,18 +2047,12 @@ public final class DBPermissionManager {
         return false;
       }
 
-    Vector<Invid> owners = (Vector<Invid>) obj.getFieldValuesLocal(SchemaConstants.OwnerListField); // owner or container
+    Vector<Invid> owners = (Vector<Invid>) obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
 
     // All owner group objects are considered to be self-owning.
 
     if (obj.getTypeID() == SchemaConstants.OwnerBase)
       {
-        if (permsdebug)
-          {
-            System.err.println("** Augmenting owner group " + obj.getLabel() + " with self-ownership");
-            showit = true;
-          }
-
         if (!owners.contains(obj.getInvid()))
           {
             owners.add(obj.getInvid());
@@ -2074,47 +2064,12 @@ public final class DBPermissionManager {
 
     if (obj.getTypeID() == SchemaConstants.PersonaBase)
       {
-        if (permsdebug)
-          {
-            System.err.print("** Augmenting admin persona " + obj.getLabel() + " ");
-            showit = true;
-          }
-
         Vector<Invid> values = (Vector<Invid>) obj.getFieldValuesLocal(SchemaConstants.PersonaGroupsField);
-
-        if (permsdebug)
-          {
-            for (int i = 0; i < values.size(); i++)
-              {
-                if (i > 0)
-                  {
-                    System.err.print(", ");
-                  }
-
-                System.err.print(values.get(i));
-              }
-
-            System.err.println();
-          }
 
         owners = arlut.csd.Util.VectorUtils.union(owners, values);
       }
-    else
-      {
-        if (permsdebug)
-          {
-            System.err.println("<no owner groups in this persona>");
-          }
-      }
 
-    boolean result = isMemberOfOwnerGroups(owners, new HashSet<Invid>());
-
-    if (showit)
-      {
-        System.err.println("++ Result = " + result);
-      }
-
-    return result;
+    return isMemberOfOwnerGroups(owners, new HashSet<Invid>());
   }
 
   /**
