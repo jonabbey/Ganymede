@@ -1854,7 +1854,8 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>Do the perms configuration needed for an unprivileged end user.</p>
+   * <p>Do the perms configuration needed for an unprivileged end
+   * user.</p>
    *
    * <p>This is the only case in which the defaultRoleObj's owned
    * objects matrix (SchemaConstants.RoleMatrix) is consulted.</p>
@@ -1869,6 +1870,8 @@ public final class DBPermissionManager {
       {
         selfPerm = permField.getMatrix();
       }
+
+    // if selfPerm is null, the unions are no-op
 
     this.ownedObjectPerms = this.unownedObjectPerms.union(selfPerm);
     this.delegatableOwnedObjectPerms = this.unownedObjectPerms.union(selfPerm);
