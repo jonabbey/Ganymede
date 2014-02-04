@@ -66,15 +66,15 @@ import arlut.csd.ganymede.server.PermissionMatrixDBField;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Serializable permissions matrix object, used to handle
- * permissions for a given user, admin, or role.</p>
+ * <p>Immutable, serializable permissions matrix object, used to
+ * handle permissions for a given user, admin, or role.</p>
  *
- * <p>This class stores a read-only Hashtable of
- * {@link arlut.csd.ganymede.common.PermEntry PermEntry} objects, organized by
- * object type and field id's.</p>
+ * <p>This class stores a Map of {@link
+ * arlut.csd.ganymede.common.PermEntry PermEntry} objects, organized
+ * by object type and field id's.</p>
  *
- * <p>The keys to the Hashtable are Strings that are encoded by the
- * static {@link
+ * <p>The keys to the Map are Strings that are encoded by the static
+ * {@link
  * arlut.csd.ganymede.server.PermissionMatrixDBField#matrixEntry(short,
  * short) matrixEntry()} methods defined in this class.  I probably
  * could have used some sort of class object for the key, but then I
@@ -95,7 +95,7 @@ import arlut.csd.ganymede.server.PermissionMatrixDBField;
  * and {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}.</p>
  */
 
-public class PermMatrix implements java.io.Serializable {
+public final class PermMatrix implements java.io.Serializable {
 
   static final boolean debug = false;
 
@@ -103,7 +103,7 @@ public class PermMatrix implements java.io.Serializable {
 
   // ---
 
-  private Hashtable<String, PermEntry> matrix;
+  private final Hashtable<String, PermEntry> matrix;
 
   /* -- */
 
