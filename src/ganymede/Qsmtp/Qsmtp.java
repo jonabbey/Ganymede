@@ -960,6 +960,8 @@ public class Qsmtp implements Runnable, java.io.Closeable {
                     send.print("QUIT");
                     send.print(EOL);
                     send.flush();
+
+                    rstr = scanLine(reply);
                   }
                 catch (Throwable ioex)
                   {
