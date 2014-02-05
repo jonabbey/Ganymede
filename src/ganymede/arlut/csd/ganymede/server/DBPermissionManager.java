@@ -1222,11 +1222,6 @@ public final class DBPermissionManager {
 
   public synchronized PermEntry getPerm(DBObject object)
   {
-    boolean doDebug = permsdebug && object.getInvid().getType() == 267;
-    PermEntry result;
-
-    /* -- */
-
     if (object == null)
       {
         return null;
@@ -1237,93 +1232,31 @@ public final class DBPermissionManager {
         return PermEntry.fullPerms;
       }
 
-    // find the top-level object if we were passed an embedded object
-
-    if (doDebug)
-      {
-        System.err.println("DBPermissionManager.getPerm(" + object + ")");
-      }
-
     object = getContainingObj(object);
 
-    // does this object type have an override?
+    PermEntry customPerm = object.getBase().getObjectHook().permOverride(gSession, object);
 
-    result = object.getBase().getObjectHook().permOverride(gSession, object);
-
-    if (result != null)
+    if (customPerm != null)
       {
-        if (doDebug)
-          {
-            System.err.println("getPerm(): found an object override, returning " + result);
-          }
-
-        return result;
+        return customPerm;
       }
 
-    // no override.. do we have an expansion?
+    PermEntry expansionPerm = object.getBase().getObjectHook().permExpand(gSession, object);
 
-    result = object.getBase().getObjectHook().permExpand(gSession, object);
-
-    if (result == null)
+    if (expansionPerm == null)
       {
-        result = PermEntry.noPerms;
+        expansionPerm = PermEntry.noPerms;
       }
 
-    // make sure we have ownedObjectPerms up to date
-
-    updatePerms();         // *sync*
+    updatePerms();
 
     if (isOwnedByUs(object))
       {
-        if (doDebug)
-          {
-            System.err.println("getPerm(): isOwnedByUs()");
-          }
-
-        PermEntry temp = ownedObjectPerms.getPerm(object.getTypeID());
-
-        if (doDebug)
-          {
-            System.err.println("getPerm(): ownedObjectPerms.getPerm(" + object + ") returned " + temp);
-
-            System.err.println("%%% Printing PersonaPerms");
-            PermissionMatrixDBField.debugdump(ownedObjectPerms);
-          }
-
-        PermEntry val = result.union(temp);
-
-        if (doDebug)
-          {
-            System.err.println("getPerm(): returning " + val);
-          }
-
-        return val;
+        return expansionPerm.union(ownedObjectPerms.getPerm(object.getTypeID()));
       }
     else
       {
-        if (doDebug)
-          {
-            System.err.println("getPerm(): !isOwnedByUs()");
-          }
-
-        PermEntry temp = unownedObjectPerms.getPerm(object.getTypeID());
-
-        if (doDebug)
-          {
-            System.err.println("getPerm(): unownedObjectPerms.getPerm(" + object + ") returned " + temp);
-
-            System.err.println("%%% Printing DefaultPerms");
-            PermissionMatrixDBField.debugdump(unownedObjectPerms);
-          }
-
-        PermEntry val = result.union(temp);
-
-        if (doDebug)
-          {
-            System.err.println("getPerm(): returning " + val);
-          }
-
-        return val;
+        return expansionPerm.union(unownedObjectPerms.getPerm(object.getTypeID()));
       }
   }
 
