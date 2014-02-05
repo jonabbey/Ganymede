@@ -1210,6 +1210,11 @@ public final class DBPermissionManager {
         throw new NullPointerException();
       }
 
+    if (supergashMode)
+      {
+        return PermEntry.fullPerms;
+      }
+
     return this.getObjectPerm(object, isOwnedByUs(object));
   }
 
