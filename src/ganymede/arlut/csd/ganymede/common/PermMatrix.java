@@ -169,8 +169,9 @@ public final class PermMatrix implements java.io.Serializable {
   }
 
   /**
-   * <p>This method combines this PermMatrix with that of orig.  The
-   * returned PermMatrix will allow any access either of the source
+   * <p>This method returns a PermMatrix that has the combined
+   * permissions of this PermMatrix and that of orig.  The returned
+   * PermMatrix will allow any access either of the source
    * PermMatrices would.</p>
    *
    * <p>Note that unlike all the other methods in PermMatrix, we are
@@ -192,7 +193,7 @@ public final class PermMatrix implements java.io.Serializable {
 
     if (orig == null)
       {
-        return new PermMatrix(this);
+        return this;
       }
 
     result = new PermMatrix();
