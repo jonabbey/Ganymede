@@ -1259,7 +1259,6 @@ public final class DBPermissionManager {
       }
 
     if ((fieldID == SchemaConstants.OwnerListField &&
-         !supergashMode &&
          (!owned || this.isEndUser())) ||
         (fieldID == SchemaConstants.CreationDateField ||
          fieldID == SchemaConstants.CreatorField ||
@@ -1750,6 +1749,11 @@ public final class DBPermissionManager {
     if (obj == null)
       {
         return false;
+      }
+
+    if (supergashMode)
+      {
+        return true;
       }
 
     // end users are considered to own themselves
