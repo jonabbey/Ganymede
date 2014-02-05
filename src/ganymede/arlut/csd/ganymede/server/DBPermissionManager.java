@@ -1258,6 +1258,8 @@ public final class DBPermissionManager {
           }
       }
 
+    // the following check we do even for supergash
+
     if ((fieldID == SchemaConstants.OwnerListField &&
          (!owned || this.isEndUser())) ||
         (fieldID == SchemaConstants.CreationDateField ||
