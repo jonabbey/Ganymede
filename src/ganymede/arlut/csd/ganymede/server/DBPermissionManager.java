@@ -87,8 +87,6 @@ import arlut.csd.ganymede.common.SchemaConstants;
 
 public final class DBPermissionManager {
 
-  static final boolean permsdebug = false;
-
   /**
    * TranslationService object for handling string localization in
    * the Ganymede server.
@@ -1198,33 +1196,35 @@ public final class DBPermissionManager {
     return result;
   }
 
-  // **
-  // the following are the non-exported permissions management
-  // **
-
   /**
-   * This method finds the ultimate owner of an embedded object
-   */
-
-  synchronized DBObject getContainingObj(DBObject object)
-  {
-    return dbSession.getContainingObj(object);
-  }
-
-  /**
-   * This method takes the administrator's current persona, considers
-   * the owner groups the administrator is a member of, checks to see
-   * if the object is owned by that group, and determines the
-   * appropriate permission bits for the object.  getPerm() will OR
-   * any proprietary ownership bits with the default permissions to
-   * give an appropriate result.
+   * Returns the authorized privileges for this DBPermissionManager on
+   * object.
+   *
+   * @return a non-null PermEntry
    */
 
   public synchronized PermEntry getPerm(DBObject object)
   {
     if (object == null)
       {
-        return null;
+        throw new NullPointerException();
+      }
+
+    return this.getObjectPerm(object, isOwnedByUs(object));
+  }
+
+  /**
+   * Returns the authorized privileges for this DBPermissionManager on
+   * field fieldID in object.
+   *
+   * @return a non-null PermEntry
+   */
+
+  public synchronized PermEntry getPerm(DBObject object, short fieldID)
+  {
+    if (object == null)
+      {
+        throw new NullPointerException();
       }
 
     if (supergashMode)
@@ -1232,7 +1232,126 @@ public final class DBPermissionManager {
         return PermEntry.fullPerms;
       }
 
-    object = getContainingObj(object);
+    boolean owned = isOwnedByUs(object);
+    PermEntry objectPerm = this.getObjectPerm(object, owned);
+    PermEntry fieldPerm = this.getFieldPerm(object, fieldID, owned);
+
+    PermEntry result;
+
+    if (fieldPerm == null)
+      {
+        // it's possible to lack per-field perms, in which case we
+        // devolve to the object-level perms
+
+        result = objectPerm;
+      }
+    else
+      {
+        // the only perm that we can sensibly have on a field that we
+        // don't possess on the object is the create perm
+
+        result = fieldPerm.intersection(objectPerm);
+
+        if (fieldPerm.isCreatable())
+          {
+            result = result.union(PermEntry.createPerms);
+          }
+      }
+
+    if ((fieldID == SchemaConstants.OwnerListField &&
+         (!owned || this.isEndUser())) ||
+        (fieldID == SchemaConstants.CreationDateField ||
+         fieldID == SchemaConstants.CreatorField ||
+         fieldID == SchemaConstants.ModificationDateField ||
+         fieldID == SchemaConstants.ModifierField))
+      {
+        result = PermEntry.viewPerms.intersection(result);
+      }
+
+    return result != null ? result : PermEntry.noPerms;
+  }
+
+  /**
+   * <p>This method returns the generic permissions for a object type.
+   * This is currently used primarily to check to see whether a user
+   * has privileges to create an object of a specific type.</p>
+   *
+   * @param ownedByUs If true, this method will return the permission
+   * that the current persona would have for an object that was owned
+   * by the current persona.  If false, this method will return the
+   * default permissions that apply to objects not owned by the
+   * persona.
+   *
+   * @return a non-null PermEntry
+   */
+
+  synchronized PermEntry getPerm(short baseID, boolean ownedByUs)
+  {
+    if (supergashMode)
+      {
+        return PermEntry.fullPerms;
+      }
+
+    updatePerms();
+
+    PermMatrix applicablePerms = ownedByUs ? ownedObjectPerms : unownedObjectPerms;
+    PermEntry result = applicablePerms.getPerm(baseID);
+
+    return result != null ? result : PermEntry.noPerms;
+  }
+
+  /**
+   * <p>This method returns the current persona's default permissions
+   * for a base and field.  This permission applies generically to
+   * objects that are not owned by this persona and to objects that
+   * are owned.</p>
+   *
+   * <p>This is used by the {@link
+   * arlut.csd.ganymede.server.GanymedeSession#dump(arlut.csd.ganymede.common.Query)
+   * dump()} code to determine whether a field should be added to the
+   * set of possible fields to be returned at the time that the dump
+   * results are being prepared.</p>
+   *
+   * @return a non-null PermEntry
+   */
+
+  synchronized PermEntry getPerm(short baseID, short fieldID, boolean ownedByUs)
+  {
+    if (supergashMode)
+      {
+        return PermEntry.fullPerms;
+      }
+
+    updatePerms();
+
+    PermMatrix applicablePerms = ownedByUs ? ownedObjectPerms : unownedObjectPerms;
+    PermEntry result = applicablePerms.getPerm(baseID, fieldID);
+
+    if (result == null)
+      {
+        result = applicablePerms.getPerm(baseID);
+      }
+
+    return result != null ? result : PermEntry.noPerms;
+  }
+
+  /**
+   * Returns the permissions for object.
+   *
+   * @return a non-null PermEntry
+   */
+
+  private PermEntry getObjectPerm(DBObject object, boolean ownedByUs)
+  {
+    if (object == null)
+      {
+        throw new NullPointerException();
+      }
+
+    if (supergashMode)
+      {
+        return PermEntry.fullPerms;
+      }
 
     PermEntry customPerm = object.getBase().getObjectHook().permOverride(gSession, object);
 
@@ -1250,7 +1369,11 @@ public final class DBPermissionManager {
 
     updatePerms();
 
-    if (isOwnedByUs(object))
+    // we always union below so that we'll return PermEntry.noPerms
+    // rather than null even if the applicable PermMatrix doesn't have
+    // an entry for this object type.
+
+    if (ownedByUs)
       {
         return expansionPerm.union(ownedObjectPerms.getPerm(object.getTypeID()));
       }
@@ -1261,62 +1384,19 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method takes the administrator's current persona,
-   * considers the owner groups the administrator is a member of,
-   * checks to see if the object is owned by that group, and
-   * determines the appropriate permission bits for the field in the
-   * object.</p>
+   * Returns the permissions for fieldID in object, without
+   * considering object-level permissions.
    *
-   * <p>This method duplicates the logic of {@link
-   * arlut.csd.ganymede.server.DBPermissionManager#getPerm(arlut.csd.ganymede.server.DBObject)
-   * getPerm(object)} internally for efficiency.  This method is
-   * called <b>quite</b> a lot in the server, and has been tuned
-   * to use the pre-calculated DBPermissionManager
-   * {@link arlut.csd.ganymede.server.DBPermissionManager#unownedObjectPerms unownedObjectPerms}
-   * and {@link arlut.csd.ganymede.server.DBPermissionManager#ownedObjectPerms ownedObjectPerms}
-   * objects which cache the effective permissions for fields in the
-   * Ganymede {@link arlut.csd.ganymede.server.DBStore DBStore} for the current
-   * persona.</p>
+   * @return A null PermEntry if no appropriate field-level permission
+   * is granted, or a non-null PermEntry if we have an explicit
+   * permission recorded for this field type.
    */
 
-  public synchronized PermEntry getPerm(DBObject object, short fieldId)
+  private synchronized PermEntry getFieldPerm(DBObject object, short fieldID, boolean ownedByUs)
   {
-    // if this is true, the object was considered to be owned.
-
-    boolean objectIsOwned = false;
-
-    // reference to which PermMatrix we use to look up permissions..
-    // that for objects we own, or that for objects we don't.
-
-    PermMatrix applicablePerms = null;
-
-    // reference to custom pseudostatic DBEditObject handler
-    // registered with the object's type, if any
-
-    DBEditObject objectHook;
-
-    // object permissions resulting from DBEditObject subclass
-    // customization
-
-    PermEntry overrideObjPerm = null;
-    PermEntry expandObjPerm = null;
-
-    // field permissions resulting from DBEditObject subclass
-    // customization
-
-    PermEntry overrideFieldPerm = null;
-    PermEntry expandFieldPerm = null;
-
-    // and our results
-
-    PermEntry objectPerm = null;
-    PermEntry fieldPerm = null;
-
-    /* -- */
-
-    if (permsdebug)
+    if (object == null)
       {
-        System.err.println("Entering DBPermissionManager.getPerm(" + object + "," + fieldId + ")");
+        throw new NullPointerException();
       }
 
     if (supergashMode)
@@ -1324,304 +1404,29 @@ public final class DBPermissionManager {
         return PermEntry.fullPerms;
       }
 
-    objectHook = object.getBase().getObjectHook();
+    PermEntry customPerm = object.getBase().getObjectHook().permOverride(gSession, object, fieldID);
 
-    // check for permissions overrides or expansions from the object's
-    // custom plug-in class.. all of these objectHook calls will
-    // return null if there is no customization
-
-    overrideFieldPerm = objectHook.permOverride(gSession, object, fieldId);
-
-    if (overrideFieldPerm == null)
+    if (customPerm != null)
       {
-        expandFieldPerm = objectHook.permExpand(gSession, object, fieldId);
+        return customPerm;
       }
 
-    overrideObjPerm = objectHook.permOverride(gSession, object);
+    updatePerms();
 
-    if (overrideObjPerm == null)
+    PermMatrix applicablePerms = ownedByUs ? ownedObjectPerms: unownedObjectPerms;
+    PermEntry expansionPerm = object.getBase().getObjectHook().permExpand(gSession, object, fieldID);
+
+    if (expansionPerm == null)
       {
-        expandObjPerm = objectHook.permExpand(gSession, object);
-      }
+        // unlike in the getObjectPerm case, we do want to return null
+        // if there is no explicit permission recorded for a specific
+        // field
 
-    // make sure we have ownedObjectPerms up to date
-
-    updatePerms();         // *sync*
-
-    // embedded object ownership is determined by the top-level object
-
-    DBObject containingObj = getContainingObj(object);
-
-    if (isOwnedByUs(object))
-      {
-        if (permsdebug)
-          {
-            System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") choosing persona perms");
-          }
-
-        objectIsOwned = true;
-
-        applicablePerms = ownedObjectPerms; // superset of unownedObjectPerms
+        return applicablePerms.getPerm(object.getTypeID(), fieldID);
       }
     else
       {
-        if (permsdebug)
-          {
-            System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") choosing default perms");
-          }
-
-        applicablePerms = unownedObjectPerms;
-      }
-
-    if (overrideObjPerm != null)
-      {
-        objectPerm = overrideObjPerm;
-      }
-    else
-      {
-        objectPerm = applicablePerms.getPerm(object.getTypeID());
-
-        if (objectPerm == null)
-          {
-            if (permsdebug)
-              {
-                System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") found no object perm");
-              }
-
-            objectPerm = PermEntry.noPerms;
-          }
-
-        objectPerm = objectPerm.union(expandObjPerm);
-      }
-
-    if (overrideFieldPerm != null)
-      {
-        if (permsdebug)
-          {
-            System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") returning override perm");
-          }
-
-        // allow field create perm even if they don't have object create perm
-
-        PermEntry temp = overrideFieldPerm.intersection(objectPerm);
-
-        // add back the create bit if the field is creatable
-
-        if (overrideFieldPerm.isCreatable())
-          {
-            temp = temp.union(PermEntry.getPermEntry(false, false, true, false));
-          }
-
-        return temp;
-      }
-
-    fieldPerm = applicablePerms.getPerm(object.getTypeID(), fieldId);
-
-    // if we don't have an explicit permissions entry for the field,
-    // return the effective one for the object.
-
-    if (fieldPerm == null)
-      {
-        if (permsdebug)
-          {
-            System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") returning object perms");
-          }
-
-        // if we are returning permissions for the owner list field
-        // and the object in question has not been granted ownership
-        // privileges, make sure that we don't allow editing of the
-        // owner list field, which could be used to make the object
-        // owned, and thus gain privileges
-
-        // likewise, we don't want to allow non-privileged end users
-        // to edit the owner list field at all.
-
-        if (fieldId == SchemaConstants.OwnerListField &&
-            (!objectIsOwned || this.isEndUser()))
-          {
-            return objectPerm.intersection(PermEntry.viewPerms);
-          }
-
-        // nor do we want anyone to be able to modify the historical
-        // fields
-
-        if (fieldId == SchemaConstants.CreationDateField ||
-            fieldId == SchemaConstants.CreatorField ||
-            fieldId == SchemaConstants.ModificationDateField ||
-            fieldId == SchemaConstants.ModifierField)
-          {
-            return objectPerm.intersection(PermEntry.viewPerms);
-          }
-
-        return objectPerm;
-      }
-
-    if (permsdebug)
-      {
-        System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") returning field perms");
-
-        System.err.println("fieldPerm = " + fieldPerm);
-        System.err.println("objectPerm = " + objectPerm);
-        System.err.println("expandFieldPerm = " + expandFieldPerm);
-      }
-
-    // we want to return the more restrictive permissions of the
-    // object's permissions and the field's permissions.. we can never
-    // look at a field in an object we can't look at.
-
-    if ((fieldId == SchemaConstants.OwnerListField &&
-         (!objectIsOwned || this.isEndUser())) ||
-        (fieldId == SchemaConstants.CreationDateField ||
-         fieldId == SchemaConstants.CreatorField ||
-         fieldId == SchemaConstants.ModificationDateField ||
-         fieldId == SchemaConstants.ModifierField))
-      {
-        return fieldPerm.union(expandFieldPerm).intersection(objectPerm).intersection(PermEntry.viewPerms);
-      }
-    else
-      {
-        // allow field create perm even if they don't have object create perm
-
-        PermEntry temp = fieldPerm.union(expandFieldPerm);
-        PermEntry temp2 = temp.intersection(objectPerm);
-
-        // add back the create bit if the field is creatable
-
-        if (temp.isCreatable())
-          {
-            temp = temp2.union(PermEntry.getPermEntry(false, false, true, false));
-          }
-
-        return temp;
-      }
-  }
-
-  /**
-   * <p>This method returns the generic permissions for a object type.
-   * This is currently used primarily to check to see whether a user
-   * has privileges to create an object of a specific type.</p>
-   *
-   * <p>This method takes the administrator's current persona's set of
-   * appropriate permission matrices, does a binary OR'ing of the
-   * permission bits for the given base, and returns the effective
-   * permission entry.</p>
-   *
-   * @param includeOwnedPerms If true, this method will return the
-   * permission that the current persona would have for an object that
-   * was owned by the current persona.  If false, this method will
-   * return the default permissions that apply to objects not owned by
-   * the persona.
-   */
-
-  synchronized PermEntry getPerm(short baseID, boolean includeOwnedPerms)
-  {
-    PermEntry result;
-
-    /* -- */
-
-    if (supergashMode)
-      {
-        return PermEntry.fullPerms;
-      }
-
-    updatePerms(); // *sync* make sure we have ownedObjectPerms up to date
-
-    // note that we can use ownedObjectPerms, since the persona's
-    // base type privileges apply generically to objects of the
-    // given type
-
-    if (includeOwnedPerms)
-      {
-        result = ownedObjectPerms.getPerm(baseID);
-      }
-    else
-      {
-        result = unownedObjectPerms.getPerm(baseID);
-      }
-
-    if (result == null)
-      {
-        return PermEntry.noPerms;
-      }
-    else
-      {
-        return result;
-      }
-  }
-
-  /**
-   * <p>This method returns the current persona's default permissions
-   * for a base and field.  This permission applies generically to
-   * objects that are not owned by this persona and to objects that
-   * are owned.</p>
-   *
-   * <p>This is used by the {@link
-   * arlut.csd.ganymede.server.GanymedeSession#dump(arlut.csd.ganymede.common.Query)
-   * dump()} code to determine whether a field should be added to the
-   * set of possible fields to be returned at the time that the dump
-   * results are being prepared.</p>
-   *
-   * @param includeOwnedPerms If true, this method will return the
-   * permission that the current persona would have for an object that
-   * was owned by the current persona.  If false, this method will
-   * return the default permissions that apply to objects not owned by
-   * the persona.
-   */
-
-  synchronized PermEntry getPerm(short baseID, short fieldID, boolean includeOwnedPerms)
-  {
-    PermEntry
-      result = null;
-
-    /* -- */
-
-    if (supergashMode)
-      {
-        return PermEntry.fullPerms;
-      }
-
-    // make sure we have unownedObjectPerms and ownedObjectPerms up to date
-
-    updatePerms();         // *sync*
-
-    // remember that ownedObjectPerms is a permissive superset of
-    // unownedObjectPerms
-
-    if (includeOwnedPerms)
-      {
-        if (ownedObjectPerms != null)
-          {
-            result = ownedObjectPerms.getPerm(baseID, fieldID);
-
-            // if we don't have a specific permissions entry for
-            // this field, inherit the one for the base
-
-            if (result == null)
-              {
-                result = ownedObjectPerms.getPerm(baseID);
-              }
-          }
-      }
-    else
-      {
-        result = unownedObjectPerms.getPerm(baseID, fieldID);
-
-        // if we don't have a specific permissions entry for
-        // this field, inherit the one for the base
-
-        if (result == null)
-          {
-            result = unownedObjectPerms.getPerm(baseID);
-          }
-      }
-
-    if (result == null)
-      {
-        return PermEntry.noPerms;
-      }
-    else
-      {
-        return result;
+        return expansionPerm.union(applicablePerms.getPerm(object.getTypeID(), fieldID));
       }
   }
 
@@ -1967,7 +1772,7 @@ public final class DBPermissionManager {
             return true;
           }
 
-        obj = getContainingObj(obj);
+        obj = dbSession.getContainingObj(obj);
       }
 
     if (objectHook.grantOwnership(gSession, obj))
