@@ -1259,6 +1259,7 @@ public final class DBPermissionManager {
       }
 
     if ((fieldID == SchemaConstants.OwnerListField &&
+         !supergashMode &&
          (!owned || this.isEndUser())) ||
         (fieldID == SchemaConstants.CreationDateField ||
          fieldID == SchemaConstants.CreatorField ||
