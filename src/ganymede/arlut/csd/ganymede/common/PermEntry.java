@@ -72,7 +72,7 @@ import arlut.csd.Util.TranslationService;
  * in a Role object in the Ganymede server.</p>
  */
 
-public class PermEntry implements java.io.Serializable {
+public final class PermEntry implements java.io.Serializable {
 
   /**
    * TranslationService object for handling string localization in
@@ -81,7 +81,7 @@ public class PermEntry implements java.io.Serializable {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.common.PermEntry");
 
-  static private PermEntry[] permObs;
+  static private final PermEntry[] permObs;
   static public final PermEntry fullPerms;
   static public final PermEntry noPerms;
   static public final PermEntry viewPerms;
@@ -200,10 +200,10 @@ public class PermEntry implements java.io.Serializable {
 
   // ---
 
-  private boolean visible;
-  private boolean editable;
-  private boolean create;
-  private boolean delete;
+  private final boolean visible;
+  private final boolean editable;
+  private final boolean create;
+  private final boolean delete;
 
   // initialize our transient fields when we're deserialized on the
   // client.  we'll use indexSet to differentiate between index being
@@ -224,11 +224,6 @@ public class PermEntry implements java.io.Serializable {
 
     calcIndex();
     indexSet = true;
-  }
-
-  public PermEntry(DataInput in) throws IOException
-  {
-    receive(in);
   }
 
   public PermEntry(PermEntry orig)
@@ -278,38 +273,6 @@ public class PermEntry implements java.io.Serializable {
     out.writeBoolean(editable);
     out.writeBoolean(create);
     out.writeBoolean(delete);
-  }
-
-  /**
-   * <p>Private so only static method on PermEntry can call this to
-   * modify the PermEntry's internal state.</p>
-   */
-
-  private void receive(DataInput in) throws IOException
-  {
-    short entrySize;
-
-    /* -- */
-
-    entrySize = in.readShort();
-
-    // we'll only worry about entrySize if we add perm bools later
-
-    visible = in.readBoolean();
-    editable = in.readBoolean();
-    create = in.readBoolean();
-
-    if (entrySize >= 4)
-      {
-        delete = in.readBoolean();
-      }
-    else
-      {
-        delete = false;
-      }
-
-    calcIndex();
-    indexSet = true;
   }
 
   /**
