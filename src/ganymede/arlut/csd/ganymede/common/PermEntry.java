@@ -180,11 +180,14 @@ public final class PermEntry implements java.io.Serializable {
 
     entrySize = in.readShort();
 
-    // we'll only worry about entrySize if we add perm bools later
+    // We use entrySize to support being able to compatibly add extra
+    // perm bits to PermEntry.
 
     visible = in.readBoolean();
     editable = in.readBoolean();
     create = in.readBoolean();
+
+    // We added the delete bit after the above three
 
     if (entrySize >= 4)
       {
