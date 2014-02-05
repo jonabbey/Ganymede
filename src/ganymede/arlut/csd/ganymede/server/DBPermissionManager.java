@@ -1232,11 +1232,6 @@ public final class DBPermissionManager {
         throw new NullPointerException();
       }
 
-    if (supergashMode)
-      {
-        return PermEntry.fullPerms;
-      }
-
     boolean owned = isOwnedByUs(object);
     PermEntry objectPerm = this.getObjectPerm(object, owned);
     PermEntry fieldPerm = this.getFieldPerm(object, fieldID, owned);
