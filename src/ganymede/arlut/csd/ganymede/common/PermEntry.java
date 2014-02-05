@@ -85,6 +85,7 @@ public final class PermEntry implements java.io.Serializable {
   static public final PermEntry fullPerms;
   static public final PermEntry noPerms;
   static public final PermEntry viewPerms;
+  static public final PermEntry createPerms;
 
   static
     {
@@ -110,6 +111,7 @@ public final class PermEntry implements java.io.Serializable {
       fullPerms = permObs[15];
       noPerms = permObs[0];
       viewPerms = permObs[1];
+      createPerms = permObs[4]; // f,f,t,f
     }
 
   static final long serialVersionUID = 1867526089374473743L;
