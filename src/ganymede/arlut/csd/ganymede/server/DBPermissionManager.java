@@ -1369,18 +1369,13 @@ public final class DBPermissionManager {
 
     updatePerms();
 
+    PermMatrix applicablePerms = ownedByUs ? ownedObjectPerms : unownedObjectPerms;
+
     // we always union below so that we'll return PermEntry.noPerms
     // rather than null even if the applicable PermMatrix doesn't have
     // an entry for this object type.
 
-    if (ownedByUs)
-      {
-        return expansionPerm.union(ownedObjectPerms.getPerm(object.getTypeID()));
-      }
-    else
-      {
-        return expansionPerm.union(unownedObjectPerms.getPerm(object.getTypeID()));
-      }
+    return expansionPerm.union(applicablePerms.getPerm(object.getTypeID()));
   }
 
   /**
