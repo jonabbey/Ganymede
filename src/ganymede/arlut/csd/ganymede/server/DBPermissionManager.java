@@ -92,7 +92,8 @@ public final class DBPermissionManager {
    * the Ganymede server.
    */
 
-  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBPermissionManager");
+  static final TranslationService ts =
+    TranslationService.getTranslationService("arlut.csd.ganymede.server.DBPermissionManager");
 
   /**
    * Invid for the supergash Owner Group Object
