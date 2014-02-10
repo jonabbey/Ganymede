@@ -1661,12 +1661,15 @@ public final class DBPermissionManager {
   }
 
   /**
-   * Returns true if the active persona has some sort of owner/access
-   * relationship with the object in question through its list of
-   * owner groups.
+   * Returns true if the active persona is allowed to exert owned
+   * object permissions against obj.  Note that isOwnedByUs() checks
+   * the grantOwnership() method in custom plugin code, and must not
+   * be called from a grantOwnership call, lest recursion result.
+   *
+   * @perm obj The DBObject to check ownership privileges on
    */
 
-  public synchronized boolean isOwnedByUs(DBObject obj)
+  private synchronized boolean isOwnedByUs(DBObject obj)
   {
     if (obj == null)
       {
@@ -1707,6 +1710,34 @@ public final class DBPermissionManager {
       }
 
     if (objectHook.grantOwnership(gSession, obj))
+      {
+        return true;
+      }
+
+    return personaMatch(obj);
+  }
+
+  /**
+   * Returns true if the active person has ownership privileges over
+   * obj without consulting custom plugin code, solely through owner
+   * group membership.
+   */
+
+  public boolean personaMatch(DBObject obj)
+  {
+    if (obj == null)
+      {
+        return false;
+      }
+
+    if (supergashMode)
+      {
+        return true;
+      }
+
+    // end users are considered to own themselves
+
+    if (!isPrivileged() && this.userInvid != null && this.userInvid.equals(obj.getInvid()))
       {
         return true;
       }
