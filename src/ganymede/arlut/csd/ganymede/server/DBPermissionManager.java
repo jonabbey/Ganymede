@@ -997,39 +997,39 @@ public final class DBPermissionManager {
 
   public synchronized Vector<Invid> getNewOwnerInvids()
   {
-    if (newObjectOwnerInvids != null)
+    if (this.newObjectOwnerInvids != null)
       {
-        return newObjectOwnerInvids;
+        return this.newObjectOwnerInvids;
       }
-    else
+
+    // supergash is allowed to create objects with no owners, so if
+    // they haven't called setDefaultOwner(), provide an empty list
+
+    if (isSuperGash())
       {
-        Vector<Invid> ownerInvids = new Vector<Invid>();
-
-        // supergash is allowed to create objects with no owners,
-        // so we won't worry about what supergash might try to do.
-
-        if (!isSuperGash())
-          {
-            QueryResult ownerList = getAvailableOwnerGroups();
-
-            if (ownerList.size() > 0)
-              {
-                // If we're interactive, the client really should have
-                // helped us out by prompting the user for their
-                // preferred default owner list, but if we are talking
-                // to a custom client, this might not be the case, in
-                // which case we'll just pick the first owner group we
-                // can put it into and put it there.
-                //
-                // The client can always manually set the owner group
-                // in a created object after we return it, of course.
-
-                ownerInvids.add(ownerList.getInvid(0));
-              }
-          }
-
-        return ownerInvids;
+        return new Vector<Invid>();
       }
+
+    Vector<Invid> ownerInvids = new Vector<Invid>();
+
+    QueryResult ownerList = getAvailableOwnerGroups();
+
+    if (ownerList.size() > 0)
+      {
+        // If we're interactive, the client really should have
+        // helped us out by prompting the user for their
+        // preferred default owner list, but if we are talking
+        // to a custom client, this might not be the case, in
+        // which case we'll just pick the first owner group we
+        // can put it into and put it there.
+        //
+        // The client can always manually set the owner group
+        // in a created object after we return it, of course.
+
+        ownerInvids.add(ownerList.getInvid(0));
+      }
+
+    return ownerInvids;
   }
 
   /**
