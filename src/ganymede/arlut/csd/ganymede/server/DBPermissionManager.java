@@ -106,6 +106,14 @@ public final class DBPermissionManager {
                       SchemaConstants.OwnerSupergash);
 
   /**
+   * Invid for the supergash persona Object
+   */
+
+  static final Invid SUPERGASH_PERSONA_INVID =
+    Invid.createInvid(SchemaConstants.PersonaBase,
+                      SchemaConstants.PersonaSupergashObj);
+
+  /**
    * Invid for the default Role Object
    */
 
@@ -408,8 +416,18 @@ public final class DBPermissionManager {
 
     this.gSession = gSession;
     this.dbSession = gSession.getDBSession();
-    this.beforeversupergash = false;
-    this.supergashMode = false;
+
+    if (personaObject != null && personaObject.getInvid().equals(SUPERGASH_PERSONA_INVID))
+      {
+        this.beforeversupergash = true;
+        this.supergashMode = true;
+      }
+    else
+      {
+        this.beforeversupergash = false;
+        this.supergashMode = false;
+      }
+
     this.sessionName = sessionName;
 
     if (userObject != null)
