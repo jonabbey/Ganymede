@@ -1759,7 +1759,7 @@ public final class DBPermissionManager {
 
         if (lastModDate != null)
           {
-            this.ownedObjectsCache.put(obj.getInvid(), lastModDate);
+            this.ownedObjectsCache.put(obj.getInvid(), new Date(lastModDate.getTime()));
           }
 
         return true;
