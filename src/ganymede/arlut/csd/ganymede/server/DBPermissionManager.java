@@ -106,7 +106,7 @@ public final class DBPermissionManager {
                       SchemaConstants.OwnerSupergash);
 
   /**
-   * Invid for the supergash persona Object
+   * Invid for the supergash Persona Object
    */
 
   static final Invid SUPERGASH_PERSONA_INVID =
@@ -1487,6 +1487,7 @@ public final class DBPermissionManager {
 
     if (!rolesWereChanged() & !personaWasChanged())
       {
+        System.err.println("updatePerms(): don't need update");
         return;
       }
 
@@ -1495,6 +1496,7 @@ public final class DBPermissionManager {
 
     if (this.isEndUser())
       {
+        System.err.println("updatePerms() calling configureEndUser()");
         configureEndUser();
         return;
       }
@@ -1562,6 +1564,7 @@ public final class DBPermissionManager {
     if (this.rolesLastCheckedTimeStamp != null &&
         !this.rolesLastCheckedTimeStamp.after(Ganymede.db.getObjectBase(SchemaConstants.RoleBase).getTimeStamp()))
       {
+        System.err.println("rolesWereChanged exited early");
         return false;
       }
 
@@ -1570,6 +1573,7 @@ public final class DBPermissionManager {
         this.defaultRoleObj = dbSession.viewDBObject(DEFAULT_ROLE_INVID).getOriginal();
         this.rolesLastCheckedTimeStamp = new Date();
 
+        System.err.println("rolesWereChanged reloaded defaultRoleObj");
         return true;
       }
     catch (NullPointerException ex)
@@ -1593,12 +1597,14 @@ public final class DBPermissionManager {
         this.personaTimeStamp != null &&
         !this.personaTimeStamp.after(Ganymede.db.getObjectBase(SchemaConstants.PersonaBase).getTimeStamp()))
       {
+        System.err.println("personaWasChanged aborted earliest");
         return false;
       }
 
     if (this.personaInvid == null)
       {
         this.personaObj = null;
+        System.err.println("personaWasChanged set personaObj to null");
         return true;
       }
 
@@ -1621,10 +1627,13 @@ public final class DBPermissionManager {
 
     if (currentPersonaObj == this.personaObj)
       {
+        System.err.println("personaWasChanged aborted with equal");
         return false;
       }
 
     this.personaObj = currentPersonaObj;
+
+    System.err.println("personaWasChanged set personaObj to " + this.personaObj);
 
     return true;
   }
@@ -1664,6 +1673,7 @@ public final class DBPermissionManager {
 
   private synchronized void configureEndUser()
   {
+    System.err.println("called configureEndUser()");
     PermissionMatrixDBField permField = (PermissionMatrixDBField) this.defaultRoleObj.getField(SchemaConstants.RoleMatrix);
 
     if (permField == null)
@@ -1697,6 +1707,8 @@ public final class DBPermissionManager {
       {
         return true;
       }
+
+    System.err.println("isOwnedByUs(" + obj.getInvid() + ")");
 
     // end users are considered to own themselves
 
