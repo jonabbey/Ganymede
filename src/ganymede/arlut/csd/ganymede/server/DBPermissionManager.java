@@ -1464,6 +1464,11 @@ public final class DBPermissionManager {
         return;
       }
 
+    // either the default role or our persona obj has been changed, so
+    // our cache is invalid
+
+    this.ownedObjectsCache.clear();
+
     this.supergashMode = false;
     initializeDefaultPerms();
 
@@ -1573,8 +1578,6 @@ public final class DBPermissionManager {
         return false;
       }
 
-    this.ownedObjectsCache.clear();
-
     if (this.personaInvid == null)
       {
         this.personaObj = null;
@@ -1593,6 +1596,10 @@ public final class DBPermissionManager {
       }
 
     currentPersonaObj = currentPersonaObj.getOriginal();
+
+    // checked-in objects (as returned by getOriginal) are immutable,
+    // so we can do an identity test to see if the personaObj has
+    // changed.
 
     if (currentPersonaObj == this.personaObj)
       {
@@ -1700,20 +1707,22 @@ public final class DBPermissionManager {
         return false;
       }
 
+    // We check cache after checking for grantOwnership, and we don't
+    // cache positive results from grantOwnership, because we can't be
+    // sure what caused grantOwnership to return true.
+
     Date previouslySeen = this.ownedObjectsCache.get(obj.getInvid());
 
     if (previouslySeen != null)
       {
         Date lastModDate = (Date) obj.getFieldValueLocal(SchemaConstants.ModificationDateField);
 
-        if (!lastModDate.after(previouslySeen))
+        if (lastModDate != null && !lastModDate.after(previouslySeen))
           {
             return true;
           }
-        else
-          {
-            this.ownedObjectsCache.remove(obj.getInvid());
-          }
+
+        this.ownedObjectsCache.remove(obj.getInvid());
       }
 
     Vector<Invid> owners = (Vector<Invid>) obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
@@ -1742,7 +1751,10 @@ public final class DBPermissionManager {
       {
         Date lastModDate = (Date) obj.getFieldValueLocal(SchemaConstants.ModificationDateField);
 
-        this.ownedObjectsCache.put(obj.getInvid(), lastModDate);
+        if (lastModDate != null)
+          {
+            this.ownedObjectsCache.put(obj.getInvid(), lastModDate);
+          }
 
         return true;
       }
