@@ -1085,10 +1085,6 @@ public final class DBPermissionManager {
    * <p>Returns a serialized representation of the basic category
    * and base structure on the server.</p>
    *
-   * <p>This method is synchronized to avoid any possible deadlock
-   * between DBStore and GanymedeSession, as the CategoryTransport
-   * constructor calls other synchronized methods on GanymedeSession.</p>
-   *
    * @param hideNonEditables If true, the CategoryTransport returned
    * will only include those object types that are editable by the
    * client.
@@ -1098,27 +1094,20 @@ public final class DBPermissionManager {
 
   public synchronized CategoryTransport getCategoryTree(boolean hideNonEditables)
   {
-    if (supergashMode)
+    if (this.supergashMode && Ganymede.catTransport != null)
       {
-        // XXX CACHE WARNING! XXX
+        return Ganymede.catTransport;
+      }
 
-        // All sessions with supergash privileges can use the cached
-        // full category tree transport object.. we'll build it here
-        // if we need to.
-
-        if (Ganymede.catTransport == null)
-          {
-            // pass Ganymede.internalSession so that the master
-            // CategoryTransport object will correctly grant
-            // object creation privs for all object types
-
-            Ganymede.catTransport = Ganymede.db.rootCategory.getTransport(Ganymede.internalSession, true);
-          }
+    if (this.supergashMode)
+      {
+        // there's no such thing as hiding noneditables
+        Ganymede.catTransport = Ganymede.db.rootCategory.getTransport(this.gSession, true);
 
         return Ganymede.catTransport;
       }
 
-    return Ganymede.db.rootCategory.getTransport(gSession, hideNonEditables);
+    return Ganymede.db.rootCategory.getTransport(this.gSession, hideNonEditables);
   }
 
   /**
@@ -1128,39 +1117,24 @@ public final class DBPermissionManager {
    * getFieldTemplateVector() on any bases that it needs field
    * information for.</p>
    *
-   * <p>This method is synchronized to avoid any possible deadlock
-   * between DBStore and GanymedeSession, as the BaseListTransport
-   * constructor calls other synchronized methods on
-   * GanymedeSession.</p>
-   *
    * @see arlut.csd.ganymede.common.BaseListTransport
    */
 
   public synchronized BaseListTransport getBaseList()
   {
-    if (supergashMode && Ganymede.baseTransport != null)
+    if (this.supergashMode && Ganymede.baseTransport != null)
       {
         return Ganymede.baseTransport;
       }
 
     BaseListTransport transport = new BaseListTransport();
 
-    // *sync* on DBStore, this GanymedeSession
-
-    // we sync on Ganymede.db to make sure that no one adds or deletes
-    // any object bases while we're creating our BaseListTransport.
-    // We could use the loginSemaphore, but that would be a bit heavy
-    // for our purposes here.
-
-    synchronized (Ganymede.db)
+    for (DBObjectBase base: Ganymede.db.bases())
       {
-        for (DBObjectBase base: Ganymede.db.bases())
-          {
-            base.addBaseToTransport(transport, null);
-          }
+        base.addBaseToTransport(transport, this.gSession);
       }
 
-    if (supergashMode)
+    if (this.supergashMode)
       {
         Ganymede.baseTransport = transport;
       }
