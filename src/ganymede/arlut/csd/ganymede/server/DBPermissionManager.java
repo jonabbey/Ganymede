@@ -1681,7 +1681,7 @@ public final class DBPermissionManager {
 
     DBEditObject objectHook = obj.getBase().getObjectHook();
 
-    if (obj.isEmbedded())
+    while (obj.isEmbedded())
       {
         if (objectHook.grantOwnership(gSession, obj))
           {
