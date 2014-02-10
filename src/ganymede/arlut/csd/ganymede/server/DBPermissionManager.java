@@ -1688,7 +1688,15 @@ public final class DBPermissionManager {
             return true;
           }
 
-        obj = dbSession.getContainingObj(obj);
+        Invid inv = (Invid) obj.getFieldValueLocal(SchemaConstants.ContainerField);
+
+        if (inv == null)
+          {
+            // "isOwnedByUs couldn''t find owner of embedded object {0}"
+            throw new IntegrityConstraintException(ts.l("isOwnedByUs.integrity", obj.getLabel()));
+          }
+
+        obj = dbSession.viewDBObject(inv);
         objectHook = obj.getBase().getObjectHook();
       }
 
