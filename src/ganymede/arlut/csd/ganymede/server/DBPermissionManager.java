@@ -50,6 +50,8 @@
 package arlut.csd.ganymede.server;
 
 import java.util.Date;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
@@ -155,6 +157,15 @@ public final class DBPermissionManager {
    */
 
   final private String username;
+
+  /**
+   * Map of Invids that we have previously determined that we own to
+   * the Date stamp of the last modification time that the
+   * corresponding DBObject had at the time that we determined
+   * positive ownership.
+   */
+
+  final private Map<Invid, Date> ownedObjectsCache = new HashMap<Invid, Date>();
 
   // --
 
@@ -1562,6 +1573,8 @@ public final class DBPermissionManager {
         return false;
       }
 
+    this.ownedObjectsCache.clear();
+
     if (this.personaInvid == null)
       {
         this.personaObj = null;
@@ -1687,6 +1700,22 @@ public final class DBPermissionManager {
         return false;
       }
 
+    Date previouslySeen = this.ownedObjectsCache.get(obj.getInvid());
+
+    if (previouslySeen != null)
+      {
+        Date lastModDate = (Date) obj.getFieldValueLocal(SchemaConstants.ModificationDateField);
+
+        if (!lastModDate.after(previouslySeen))
+          {
+            return true;
+          }
+        else
+          {
+            this.ownedObjectsCache.remove(obj.getInvid());
+          }
+      }
+
     Vector<Invid> owners = (Vector<Invid>) obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
 
     // All owner group objects are considered to be self-owning.
@@ -1709,7 +1738,16 @@ public final class DBPermissionManager {
         owners = arlut.csd.Util.VectorUtils.union(owners, values);
       }
 
-    return isMemberOfOwnerGroups(owners, new HashSet<Invid>());
+    if (isMemberOfOwnerGroups(owners, new HashSet<Invid>()))
+      {
+        Date lastModDate = (Date) obj.getFieldValueLocal(SchemaConstants.ModificationDateField);
+
+        this.ownedObjectsCache.put(obj.getInvid(), lastModDate);
+
+        return true;
+      }
+
+    return false;
   }
 
   /**
