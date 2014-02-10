@@ -303,10 +303,10 @@ public final class DBPermissionManager {
   private DBObject defaultRoleObj;
 
   /**
-   * When did we last update our defaultRoleObj?
+   * When did we last notice a change in any Role objects?
    */
 
-  private Date defaultRoleTimeStamp;
+  private Date rolesLastCheckedTimeStamp;
 
   /**
    * <p>This variable is a vector of object references ({@link
@@ -1485,7 +1485,7 @@ public final class DBPermissionManager {
 
     // say, & and | are non short-circuiting in boolean context!
 
-    if (!updateDefaultRoleObj() & !updatePersonaObj())
+    if (!rolesWereChanged() & !personaWasChanged())
       {
         return;
       }
@@ -1546,39 +1546,36 @@ public final class DBPermissionManager {
   }
 
   /**
-   * Check to see if the defaultRoleObj has changed.
+   * Checks to see if any Role objects have changed in the server, and
+   * makes sure this.defaultRoleObj is up to date.
    *
-   * @return true if this.defaultRoleObj was changed
+   * @return true if any changes have been made to Role objects in the
+   * server
    */
 
-  private synchronized boolean updateDefaultRoleObj()
+  private synchronized boolean rolesWereChanged()
   {
-    if (this.defaultRoleTimeStamp != null &&
-        !this.defaultRoleTimeStamp.after(Ganymede.db.getObjectBase(SchemaConstants.RoleBase).getTimeStamp()))
+    // if any commits have been made to the Role DBObjectBase since
+    // rolesLastCheckedTimeStamp, we're going to return true to signal
+    // updatePerms() to do a full re-calc.
+
+    if (this.rolesLastCheckedTimeStamp != null &&
+        !this.rolesLastCheckedTimeStamp.after(Ganymede.db.getObjectBase(SchemaConstants.RoleBase).getTimeStamp()))
       {
         return false;
       }
 
     try
       {
-        DBObject currentDefaultRoleObj = dbSession.viewDBObject(DEFAULT_ROLE_INVID).getOriginal();
+        this.defaultRoleObj = dbSession.viewDBObject(DEFAULT_ROLE_INVID).getOriginal();
+        this.rolesLastCheckedTimeStamp = new Date();
 
-        if (currentDefaultRoleObj == this.defaultRoleObj)
-          {
-            return false;
-          }
-
-        this.defaultRoleObj = currentDefaultRoleObj;
+        return true;
       }
     catch (NullPointerException ex)
       {
         // "Serious error!  No default permissions object found in database!"
-        throw new RuntimeException(ts.l("updateDefaultRoleObj.no_default_perms"), ex);
-      }
-    finally
-      {
-        this.defaultRoleTimeStamp = new Date();
-        return true;
+        throw new RuntimeException(ts.l("rolesWereChanged.no_default_perms"), ex);
       }
   }
 
@@ -1589,7 +1586,7 @@ public final class DBPermissionManager {
    * @return true if this.personaObj was changed
    */
 
-  private synchronized boolean updatePersonaObj()
+  private synchronized boolean personaWasChanged()
   {
     if (((this.personaObj != null && this.personaInvid != null) ||
          (this.personaObj == null && this.personaInvid == null)) &&
@@ -1613,7 +1610,7 @@ public final class DBPermissionManager {
       {
         throw new NullPointerException("Couldn't find personaObj for " +
                                        this.personaInvid +
-                                       " in updatePersonaObj()");
+                                       " in personaWasChanged()");
       }
 
     currentPersonaObj = currentPersonaObj.getOriginal();
