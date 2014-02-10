@@ -1020,7 +1020,7 @@ public final class DBPermissionManager {
 
             if (ownerList.size() > 0)
               {
-                // If we're interactive, the client really should hav
+                // If we're interactive, the client really should have
                 // helped us out by prompting the user for their
                 // preferred default owner list, but if we are talking
                 // to a custom client, this might not be the case, in
