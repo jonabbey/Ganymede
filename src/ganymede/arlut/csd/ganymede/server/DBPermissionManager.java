@@ -1094,13 +1094,13 @@ public final class DBPermissionManager {
 
   public synchronized CategoryTransport getCategoryTree(boolean hideNonEditables)
   {
-    if (this.supergashMode && Ganymede.catTransport != null)
-      {
-        return Ganymede.catTransport;
-      }
-
     if (this.supergashMode)
       {
+        if (Ganymede.catTransport != null)
+          {
+            return Ganymede.catTransport;
+          }
+
         // hiding noneditables for supergash?  nonsense.
         Ganymede.catTransport = Ganymede.db.rootCategory.getTransport(this.gSession, true);
 
