@@ -1247,7 +1247,12 @@ public final class DBPermissionManager {
           }
       }
 
-    // the following check we do even for supergash
+    // the following check we do even for supergash, as we don't want
+    // to allow supergash-privileged end users from messing with
+    // metadata.
+    //
+    // DBEditSet.commit_recordModificationDates() bypasses perms, so
+    // no problem there
 
     if ((fieldID == SchemaConstants.OwnerListField &&
          (!owned || this.isEndUser())) ||
