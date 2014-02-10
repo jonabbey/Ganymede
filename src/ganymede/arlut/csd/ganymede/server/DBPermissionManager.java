@@ -462,7 +462,7 @@ public final class DBPermissionManager {
 
   public synchronized boolean isSuperGash()
   {
-    return supergashMode;
+    return this.supergashMode;
   }
 
   /**
@@ -988,7 +988,7 @@ public final class DBPermissionManager {
         tmpInvids.add(ownerInvidItem);
       }
 
-    if (!supergashMode && !isMemberAll(tmpInvids))
+    if (!this.supergashMode && !isMemberAll(tmpInvids))
       {
         // "Error in setDefaultOwner()"
         // "Error.. ownerInvids contains invid that the persona is not a member of."
@@ -1081,7 +1081,7 @@ public final class DBPermissionManager {
         return null;
       }
 
-    if (!supergashMode && !isMemberAll(ownerInvids))
+    if (!this.supergashMode && !isMemberAll(ownerInvids))
       {
         // "Server: Error in filterQueries()"
         // "Error.. ownerInvids contains invid that the persona is not a member of."
@@ -1241,7 +1241,7 @@ public final class DBPermissionManager {
         throw new NullPointerException();
       }
 
-    if (supergashMode)
+    if (this.supergashMode)
       {
         return PermEntry.fullPerms;
       }
@@ -1325,14 +1325,14 @@ public final class DBPermissionManager {
 
   synchronized PermEntry getPerm(short baseID, boolean ownedByUs)
   {
-    if (supergashMode)
+    if (this.supergashMode)
       {
         return PermEntry.fullPerms;
       }
 
     updatePerms();
 
-    PermMatrix applicablePerms = ownedByUs ? ownedObjectPerms : unownedObjectPerms;
+    PermMatrix applicablePerms = ownedByUs ? this.ownedObjectPerms : this.unownedObjectPerms;
     PermEntry result = applicablePerms.getPerm(baseID);
 
     return result != null ? result : PermEntry.noPerms;
@@ -1355,7 +1355,7 @@ public final class DBPermissionManager {
 
   synchronized PermEntry getPerm(short baseID, short fieldID, boolean ownedByUs)
   {
-    if (supergashMode)
+    if (this.supergashMode)
       {
         return PermEntry.fullPerms;
       }
@@ -1386,7 +1386,7 @@ public final class DBPermissionManager {
         throw new NullPointerException();
       }
 
-    if (supergashMode)
+    if (this.supergashMode)
       {
         return PermEntry.fullPerms;
       }
@@ -1432,7 +1432,7 @@ public final class DBPermissionManager {
         throw new NullPointerException();
       }
 
-    if (supergashMode)
+    if (this.supergashMode)
       {
         return PermEntry.fullPerms;
       }
@@ -1693,7 +1693,7 @@ public final class DBPermissionManager {
         return false;
       }
 
-    if (supergashMode)
+    if (this.supergashMode)
       {
         return true;
       }
@@ -1747,7 +1747,7 @@ public final class DBPermissionManager {
         return false;
       }
 
-    if (supergashMode)
+    if (this.supergashMode)
       {
         return true;
       }
