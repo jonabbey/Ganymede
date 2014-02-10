@@ -1640,6 +1640,79 @@ public final class DBPermissionManager {
   }
 
   /**
+   * Returns true if the active persona has some sort of owner/access
+   * relationship with the object in question through its list of
+   * owner groups.
+   */
+
+  private boolean isOwnedByUs(DBObject obj)
+  {
+    if (obj == null)
+      {
+        return false;
+      }
+
+    if (supergashMode)
+      {
+        return true;
+      }
+
+    // end users are considered to own themselves
+
+    if (!isPrivileged() && this.userInvid != null && this.userInvid.equals(obj.getInvid()))
+      {
+        return true;
+      }
+
+    DBEditObject objectHook = obj.getBase().getObjectHook();
+
+    if (obj.isEmbedded())
+      {
+        if (objectHook.grantOwnership(gSession, obj))
+          {
+            return true;
+          }
+
+        obj = dbSession.getContainingObj(obj);
+        objectHook = obj.getBase().getObjectHook();
+      }
+
+    if (objectHook.grantOwnership(gSession, obj))
+      {
+        return true;
+      }
+
+    if (this.personaInvid == null)
+      {
+        return false;
+      }
+
+    Vector<Invid> owners = (Vector<Invid>) obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
+
+    // All owner group objects are considered to be self-owning.
+
+    if (obj.getTypeID() == SchemaConstants.OwnerBase)
+      {
+        if (!owners.contains(obj.getInvid()))
+          {
+            owners.add(obj.getInvid());
+          }
+      }
+
+    // All admin personae are considered to be owned by the owner groups
+    // that they are members of
+
+    if (obj.getTypeID() == SchemaConstants.PersonaBase)
+      {
+        Vector<Invid> values = (Vector<Invid>) obj.getFieldValuesLocal(SchemaConstants.PersonaGroupsField);
+
+        owners = arlut.csd.Util.VectorUtils.union(owners, values);
+      }
+
+    return isMemberOfOwnerGroups(owners, new HashSet<Invid>());
+  }
+
+  /**
    * Returns true if this.personaInvid is a member of any of the owner
    * group objects whose Invids are included in the owners Vector, or
    * in any of the owner groups that own those owner groups,
@@ -1739,79 +1812,6 @@ public final class DBPermissionManager {
       }
 
     return false;
-  }
-
-  /**
-   * Returns true if the active persona has some sort of owner/access
-   * relationship with the object in question through its list of
-   * owner groups.
-   */
-
-  private boolean isOwnedByUs(DBObject obj)
-  {
-    if (obj == null)
-      {
-        return false;
-      }
-
-    if (supergashMode)
-      {
-        return true;
-      }
-
-    // end users are considered to own themselves
-
-    if (!isPrivileged() && this.userInvid != null && this.userInvid.equals(obj.getInvid()))
-      {
-        return true;
-      }
-
-    DBEditObject objectHook = obj.getBase().getObjectHook();
-
-    if (obj.isEmbedded())
-      {
-        if (objectHook.grantOwnership(gSession, obj))
-          {
-            return true;
-          }
-
-        obj = dbSession.getContainingObj(obj);
-        objectHook = obj.getBase().getObjectHook();
-      }
-
-    if (objectHook.grantOwnership(gSession, obj))
-      {
-        return true;
-      }
-
-    if (this.personaInvid == null)
-      {
-        return false;
-      }
-
-    Vector<Invid> owners = (Vector<Invid>) obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
-
-    // All owner group objects are considered to be self-owning.
-
-    if (obj.getTypeID() == SchemaConstants.OwnerBase)
-      {
-        if (!owners.contains(obj.getInvid()))
-          {
-            owners.add(obj.getInvid());
-          }
-      }
-
-    // All admin personae are considered to be owned by the owner groups
-    // that they are members of
-
-    if (obj.getTypeID() == SchemaConstants.PersonaBase)
-      {
-        Vector<Invid> values = (Vector<Invid>) obj.getFieldValuesLocal(SchemaConstants.PersonaGroupsField);
-
-        owners = arlut.csd.Util.VectorUtils.union(owners, values);
-      }
-
-    return isMemberOfOwnerGroups(owners, new HashSet<Invid>());
   }
 
   /**
