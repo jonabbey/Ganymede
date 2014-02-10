@@ -1483,7 +1483,7 @@ public final class DBPermissionManager {
         return;
       }
 
-    if (!updateDefaultRoleObj() && !updatePersonaObj())
+    if (!(updateDefaultRoleObj() || updatePersonaObj()))
       {
         return;
       }
