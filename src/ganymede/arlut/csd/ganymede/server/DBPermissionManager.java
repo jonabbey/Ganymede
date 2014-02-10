@@ -1473,11 +1473,6 @@ public final class DBPermissionManager {
         return;
       }
 
-    // either the default role or our persona obj has been changed, so
-    // our cache is invalid
-
-    this.ownedObjectsCache.clear();
-
     this.supergashMode = false;
     initializeDefaultPerms();
 
@@ -1590,6 +1585,7 @@ public final class DBPermissionManager {
     if (this.personaInvid == null)
       {
         this.personaObj = null;
+        this.ownedObjectsCache.clear();
         return true;
       }
 
@@ -1616,6 +1612,7 @@ public final class DBPermissionManager {
       }
 
     this.personaObj = currentPersonaObj;
+    this.ownedObjectsCache.clear();
 
     return true;
   }
