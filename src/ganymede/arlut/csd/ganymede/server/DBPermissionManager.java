@@ -1101,7 +1101,7 @@ public final class DBPermissionManager {
 
     if (this.supergashMode)
       {
-        // there's no such thing as hiding noneditables
+        // hiding noneditables for supergash?  nonsense.
         Ganymede.catTransport = Ganymede.db.rootCategory.getTransport(this.gSession, true);
 
         return Ganymede.catTransport;
