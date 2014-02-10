@@ -1777,9 +1777,6 @@ public final class DBPermissionManager {
 
   private synchronized boolean isMemberOfOwnerGroups(Vector<Invid> owners, Set<Invid> alreadySeen)
   {
-    // *** It is critical that this method not modify the owners parameter passed
-    // *** in, as it may be 'live' in a DBField.
-
     if (owners == null)
       {
         return false;
