@@ -1483,7 +1483,9 @@ public final class DBPermissionManager {
         return;
       }
 
-    if (!(updateDefaultRoleObj() || updatePersonaObj()))
+    // say, & and | are non short-circuiting in boolean context!
+
+    if (!updateDefaultRoleObj() & !updatePersonaObj())
       {
         return;
       }
