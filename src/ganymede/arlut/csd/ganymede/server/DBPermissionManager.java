@@ -158,15 +158,6 @@ public final class DBPermissionManager {
 
   final private String username;
 
-  /**
-   * Map of Invids that we have previously determined that we own to
-   * the Date stamp of the last modification time that the
-   * corresponding DBObject had at the time that we determined
-   * positive ownership.
-   */
-
-  final private Map<Invid, Date> ownedObjectsCache = new HashMap<Invid, Date>();
-
   // --
 
   /**
@@ -1585,7 +1576,6 @@ public final class DBPermissionManager {
     if (this.personaInvid == null)
       {
         this.personaObj = null;
-        this.ownedObjectsCache.clear();
         return true;
       }
 
@@ -1612,7 +1602,6 @@ public final class DBPermissionManager {
       }
 
     this.personaObj = currentPersonaObj;
-    this.ownedObjectsCache.clear();
 
     return true;
   }
@@ -1713,24 +1702,6 @@ public final class DBPermissionManager {
         return false;
       }
 
-    // We check cache after checking for grantOwnership, and we don't
-    // cache positive results from grantOwnership, because we can't be
-    // sure what caused grantOwnership to return true.
-
-    Date previouslySeen = this.ownedObjectsCache.get(obj.getInvid());
-
-    if (previouslySeen != null)
-      {
-        Date lastModDate = (Date) obj.getFieldValueLocal(SchemaConstants.ModificationDateField);
-
-        if (lastModDate != null && !lastModDate.after(previouslySeen))
-          {
-            return true;
-          }
-
-        this.ownedObjectsCache.remove(obj.getInvid());
-      }
-
     Vector<Invid> owners = (Vector<Invid>) obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
 
     // All owner group objects are considered to be self-owning.
@@ -1753,19 +1724,7 @@ public final class DBPermissionManager {
         owners = arlut.csd.Util.VectorUtils.union(owners, values);
       }
 
-    if (isMemberOfOwnerGroups(owners, new HashSet<Invid>()))
-      {
-        Date lastModDate = (Date) obj.getFieldValueLocal(SchemaConstants.ModificationDateField);
-
-        if (lastModDate != null)
-          {
-            this.ownedObjectsCache.put(obj.getInvid(), new Date(lastModDate.getTime()));
-          }
-
-        return true;
-      }
-
-    return false;
+    return isMemberOfOwnerGroups(owners, new HashSet<Invid>());
   }
 
   /**
