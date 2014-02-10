@@ -1776,6 +1776,7 @@ public final class DBPermissionManager {
           }
 
         obj = dbSession.getContainingObj(obj);
+        objectHook = obj.getBase().getObjectHook();
       }
 
     if (objectHook.grantOwnership(gSession, obj))
