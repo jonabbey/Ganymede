@@ -233,7 +233,7 @@ public final class DBPermissionManager {
    * <p>May change if {@link
    * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
    * String} is called or if the relevant Role Objects are changed in
-   * the database .</p>
+   * the database.</p>
    */
 
   private PermMatrix ownedObjectPerms;
