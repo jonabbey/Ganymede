@@ -1186,6 +1186,30 @@ public final class DBPermissionManager {
   }
 
   /**
+   * This method returns true if the visibility filter vector allows
+   * visibility of the object in question.  The visibility vector
+   * works by direct ownership identity (i.e., no recursing up), so
+   * it's a simple loop-di-loop.
+   */
+
+  public synchronized boolean filterMatch(DBObject obj)
+  {
+    if (obj == null)
+      {
+        return false;
+      }
+
+    if (visibilityFilterInvids == null || visibilityFilterInvids.size() == 0)
+      {
+        return true;            // no visibility restriction, go for it
+      }
+
+    Vector owners = obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
+
+    return VectorUtils.overlaps(visibilityFilterInvids, owners);
+  }
+
+  /**
    * Returns the authorized privileges for this DBPermissionManager on
    * object.
    *
@@ -1845,29 +1869,5 @@ public final class DBPermissionManager {
       }
 
     return true;
-  }
-
-  /**
-   * This method returns true if the visibility filter vector allows
-   * visibility of the object in question.  The visibility vector
-   * works by direct ownership identity (i.e., no recursing up), so
-   * it's a simple loop-di-loop.
-   */
-
-  public synchronized boolean filterMatch(DBObject obj)
-  {
-    if (obj == null)
-      {
-        return false;
-      }
-
-    if (visibilityFilterInvids == null || visibilityFilterInvids.size() == 0)
-      {
-        return true;            // no visibility restriction, go for it
-      }
-
-    Vector owners = obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
-
-    return VectorUtils.overlaps(visibilityFilterInvids, owners);
   }
 }
