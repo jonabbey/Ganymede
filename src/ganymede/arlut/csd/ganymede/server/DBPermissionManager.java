@@ -101,15 +101,17 @@ public final class DBPermissionManager {
    * Invid for the supergash Owner Group Object
    */
 
-  static final Invid SUPERGASH_GROUP_INVID = Invid.createInvid(SchemaConstants.OwnerBase,
-                                                               SchemaConstants.OwnerSupergash);
+  static final Invid SUPERGASH_GROUP_INVID =
+    Invid.createInvid(SchemaConstants.OwnerBase,
+                      SchemaConstants.OwnerSupergash);
 
   /**
    * Invid for the default Role Object
    */
 
-  static final Invid DEFAULT_ROLE_INVID = Invid.createInvid(SchemaConstants.RoleBase,
-                                                            SchemaConstants.RoleDefaultObj);
+  static final Invid DEFAULT_ROLE_INVID =
+    Invid.createInvid(SchemaConstants.RoleBase,
+                      SchemaConstants.RoleDefaultObj);
 
   // ---
 
@@ -313,13 +315,14 @@ public final class DBPermissionManager {
   private Vector<Invid> newObjectOwnerInvids;
 
   /**
-   * <p>This variable is a vector of object references (Invid's) to the
-   * owner groups that the client has requested the listing of objects
-   * be restricted to.  That is, the client has requested that the
-   * results of Queries and Dumps only include those objects owned by
-   * owner groups in this list.  This feature is used primarily for
+   * <p>This variable is a vector of object references (Invid's) to
+   * the owner groups that the client has requested the listing of
+   * objects be restricted to.  That is, the client has requested that
+   * the results of Queries and Dumps only include those objects owned
+   * by owner groups in this list.  This feature is used primarily for
    * when a client is logged in with supergash privileges, but the
-   * user wants to restrict the visibility of objects for convenience.</p>
+   * user wants to restrict the visibility of objects for
+   * convenience.</p>
    *
    * <p>May change if {@link
    * arlut.csd.ganymede.server.DBPermissionManager#filterQueries(java.util.Vector)}
