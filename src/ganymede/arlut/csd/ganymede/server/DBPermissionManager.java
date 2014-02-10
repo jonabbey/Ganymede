@@ -1039,13 +1039,14 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method may be used to cause the server to pre-filter any object
-   * listing to only show those objects directly owned by owner groups
-   * referenced in the ownerInvids list.  This filtering will not restrict
-   * the ability of the client to directly view any object that the client's
-   * persona would normally have access to, but will reduce clutter and allow
-   * the client to present the world as would be seen by administrator personas
-   * with just the listed ownerGroups accessible.</p>
+   * <p>This method may be used to cause the server to pre-filter any
+   * object listing to only show those objects directly owned by owner
+   * groups referenced in the ownerInvids list.  This filtering will
+   * not restrict the ability of the client to directly view any
+   * object that the client's persona would normally have access to,
+   * but will reduce clutter and allow the client to present the world
+   * as would be seen by administrator personas with just the listed
+   * ownerGroups accessible.</p>
    *
    * <p>This method cannot be used to grant access to objects that are
    * not accessible by the client's adminPersona.</p>
