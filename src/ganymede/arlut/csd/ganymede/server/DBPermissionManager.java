@@ -263,10 +263,9 @@ public final class DBPermissionManager {
    * String} is called or if the relevant Role Objects are changed in
    * the database .</p>
    *
-   * <p>Used by code in {@link arlut.csd.ganymede.server.ownerCustom}
-   * and {@link arlut.csd.ganymede.server.PermissionMatrixDBField} to
-   * control what privileges personae are able to grant to new
-   * personae.</p>
+   * <p>Used by code in {@link
+   * arlut.csd.ganymede.server.PermissionMatrixDBField} to control
+   * what privileges personae are able to grant to new personae.</p>
    */
 
   private PermMatrix delegatableOwnedObjectPerms;
@@ -282,10 +281,9 @@ public final class DBPermissionManager {
    * String} is called or if the relevant Role Objects are changed in
    * the database .</p>
    *
-   * <p>Used by code in {@link arlut.csd.ganymede.server.ownerCustom}
-   * and {@link arlut.csd.ganymede.server.PermissionMatrixDBField} to
-   * control what privileges personae are able to grant to new
-   * personae.</p>
+   * <p>Used by code in {@link
+   * arlut.csd.ganymede.server.PermissionMatrixDBField} to control
+   * what privileges personae are able to grant to new personae.</p>
    */
 
   private PermMatrix delegatableUnownedObjectPerms;
