@@ -1665,7 +1665,7 @@ public final class DBPermissionManager {
    * owner groups.
    */
 
-  private boolean isOwnedByUs(DBObject obj)
+  private synchronized boolean isOwnedByUs(DBObject obj)
   {
     if (obj == null)
       {
