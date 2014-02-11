@@ -297,7 +297,7 @@ public final class DBPermissionManager {
    * in question.</p>
    *
    * <p>May change if the relevant Role Object is changed in the
-   * database .</p>
+   * database.</p>
    */
 
   private DBObject defaultRoleObj;
