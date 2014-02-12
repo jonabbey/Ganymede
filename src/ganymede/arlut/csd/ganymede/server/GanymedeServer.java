@@ -332,13 +332,13 @@ public final class GanymedeServer implements Server {
   }
 
   /**
-   * <p>This internal method handles the client login logic for both the normal
-   * interactive client and the xml batch client.</p>
+   * <p>This internal method handles the client login logic for both
+   * the normal interactive client and the xml batch client.</p>
    *
    * @param clientName The user/persona name to be logged in
    * @param clientPass The password (in plaintext) to authenticate with
-   * @param directSession If true, the GanymedeSession returned be
-   * published for remote RMI access.
+   * @param directSession If true, the GanymedeSession returned will
+   * be published for remote RMI access.
    * @param exportObjects If true, the DBObjects viewed and edited by
    * the GanymedeSession will be exported for remote RMI access.
    */

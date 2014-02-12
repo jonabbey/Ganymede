@@ -438,7 +438,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <p>Constructor used to create a server-side attachment for a
-   * Ganymede user session.</p>
+   * Ganymede user or admin session.</p>
    *
    * <p>This constructor is called by the
    * {@link arlut.csd.ganymede.server server}
