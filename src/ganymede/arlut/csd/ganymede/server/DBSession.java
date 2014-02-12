@@ -1371,10 +1371,11 @@ public final class DBSession implements QueryDescriber {
    * in bases.</p>
    *
    * <p>The thread calling this method will block until the read lock
-   * can be established.  If any of the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases}
-   * in the bases vector have transactions
-   * currently committing, the establishment of the read lock will be suspended
-   * until all such transactions are committed.</p>
+   * can be established.  If any of the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} in the
+   * bases List have transactions currently committing, the
+   * establishment of the read lock will be suspended until all such
+   * transactions are committed.</p>
    *
    * <p>All viewDBObject calls done within the context of an open read lock
    * will be transaction consistent.  Other sessions may pull objects out for
@@ -1382,7 +1383,7 @@ public final class DBSession implements QueryDescriber {
    * will be made to those ObjectBases until the read lock is released.</p>
    */
 
-  public DBReadLock openReadLock(Vector<DBObjectBase> bases) throws InterruptedException
+  public DBReadLock openReadLock(List<DBObjectBase> bases) throws InterruptedException
   {
     return lockManager.openReadLock(bases);
   }
@@ -1408,20 +1409,21 @@ public final class DBSession implements QueryDescriber {
   }
 
   /**
-   * <p>Establishes a write lock for the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}s
-   * in bases.</p>
+   * <p>Establishes a write lock for the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase}s in
+   * bases.</p>
    *
    * <p>The thread calling this method will block until the write lock
-   * can be established.  If this DBSession already possesses a write lock,
-   * read lock, or dump lock, the openWriteLock() call will fail with
-   * an InterruptedException.</p>
+   * can be established.  If this DBSession already possesses a write
+   * lock, read lock, or dump lock, the openWriteLock() call will fail
+   * with an InterruptedException.</p>
    *
-   * <p>If one or more different DBSessions (besides this) have locks in
-   * place that would block acquisition of the write lock, this method
-   * will block until the lock can be acquired.</p>
+   * <p>If one or more different DBSessions (besides this) have locks
+   * in place that would block acquisition of the write lock, this
+   * method will block until the lock can be acquired.</p>
    */
 
-  public DBWriteLock openWriteLock(Vector<DBObjectBase> bases) throws InterruptedException
+  public DBWriteLock openWriteLock(List<DBObjectBase> bases) throws InterruptedException
   {
     return lockManager.openWriteLock(bases);
   }
@@ -1449,6 +1451,7 @@ public final class DBSession implements QueryDescriber {
   }
 
   /**
+   * Releases all DBLocks held by this DBSessions.
    */
 
   private void releaseAllLocks()
@@ -1457,12 +1460,13 @@ public final class DBSession implements QueryDescriber {
   }
 
   /**
-   * <p>openTransaction establishes a transaction context for this session.
-   * When this method returns, the session can call editDBObject() and
-   * createDBObject() to obtain {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}s.
-   * Methods can then be called
-   * on the DBEditObjects to make changes to the database.  These changes
-   * are actually performed when and if commitTransaction() is called.</p>
+   * <p>openTransaction establishes a transaction context for this
+   * session.  When this method returns, the session can call
+   * editDBObject() and createDBObject() to obtain {@link
+   * arlut.csd.ganymede.server.DBEditObject DBEditObject}s.  Methods
+   * can then be called on the DBEditObjects to make changes to the
+   * database.  These changes are actually performed when and if
+   * commitTransaction() is called.</p>
    *
    * @param describe An optional string containing a comment to be
    * stored in the modification history for objects modified by this
