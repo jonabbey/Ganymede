@@ -50,8 +50,6 @@
 package arlut.csd.ganymede.server;
 
 import java.util.Date;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
@@ -492,7 +490,7 @@ public final class DBPermissionManager {
 
   public boolean isEndUser()
   {
-    return personaObj == null;
+    return personaInvid == null;
   }
 
   /**
@@ -1493,71 +1491,92 @@ public final class DBPermissionManager {
         return;
       }
 
-    // say, & and | are non short-circuiting in boolean context!
-
-    if (!rolesWereChanged() & !personaWasChanged())
+    if (!rolesWereChanged() && !personaWasChanged())
       {
         return;
       }
 
-    this.supergashMode = false;
-    initializeDefaultPerms();
+    DBReadLock updatePermsLock = null;
 
-    if (this.isEndUser())
+    try
       {
-        configureEndUser();
-        return;
-      }
+        updatePermsLock = dbSession.openReadLock(Ganymede.db.getPermBases());
 
-    if (this.personaObj.containsField(SchemaConstants.PersonaGroupsField) &&
-        this.personaObj.retrieveField(SchemaConstants.PersonaGroupsField).containsElementLocal(SUPERGASH_GROUP_INVID))
-      {
-        this.supergashMode = true;
-        return;
-      }
+        updateDefaultRoleObj();
+        updatePersonaObj();
 
-    // Personae do not get the default 'objects-owned' privileges for
-    // the wider range of objects under their ownership.  Any special
-    // privileges granted to admins over objects owned by them must be
-    // derived from a non-default role.
+        this.supergashMode = false;
 
-    for (Invid role: (Vector<Invid>) this.personaObj.getFieldValuesLocal(SchemaConstants.PersonaPrivs))
-      {
-        DBObject roleObj = dbSession.viewDBObject(role).getOriginal();
-
-        if (roleObj.containsField(SchemaConstants.RoleMatrix))
+        if (this.isEndUser())
           {
-            PermissionMatrixDBField ownedObjsPermField = (PermissionMatrixDBField) roleObj.getField(SchemaConstants.RoleMatrix);
-            PermMatrix ownedMatrix = ownedObjsPermField.getMatrix();
-
-            this.ownedObjectPerms = this.ownedObjectPerms.union(ownedMatrix);
-
-            if (roleObj.isSet(SchemaConstants.RoleDelegatable))
-              {
-                this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(ownedMatrix);
-              }
+            initializeDefaultPerms();
+            configureEndUser();
+            return;
           }
 
-        if (roleObj.containsField(SchemaConstants.RoleDefaultMatrix))
+        if (this.personaObj.containsField(SchemaConstants.PersonaGroupsField) &&
+            this.personaObj.retrieveField(SchemaConstants.PersonaGroupsField).containsElementLocal(SUPERGASH_GROUP_INVID))
           {
-            PermissionMatrixDBField unownedObjsPermField = (PermissionMatrixDBField) roleObj.getField(SchemaConstants.RoleDefaultMatrix);
-            PermMatrix unownedMatrix = unownedObjsPermField.getMatrix();
+            this.supergashMode = true;
+            return;
+          }
 
-            this.ownedObjectPerms = this.ownedObjectPerms.union(unownedMatrix);
-            this.unownedObjectPerms = this.unownedObjectPerms.union(unownedMatrix);
+        initializeDefaultPerms();
 
-            if (roleObj.isSet(SchemaConstants.RoleDelegatable))
+        // Personae do not get the default 'objects-owned' privileges for
+        // the wider range of objects under their ownership.  Any special
+        // privileges granted to admins over objects owned by them must be
+        // derived from a non-default role.
+
+        for (Invid role: (Vector<Invid>) this.personaObj.getFieldValuesLocal(SchemaConstants.PersonaPrivs))
+          {
+            DBObject roleObj = dbSession.viewDBObject(role).getOriginal();
+
+            if (roleObj.containsField(SchemaConstants.RoleMatrix))
               {
-                this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(unownedMatrix);
-                this.delegatableUnownedObjectPerms = this.delegatableUnownedObjectPerms.union(unownedMatrix);
+                PermissionMatrixDBField ownedObjsPermField = (PermissionMatrixDBField) roleObj.getField(SchemaConstants.RoleMatrix);
+                PermMatrix ownedMatrix = ownedObjsPermField.getMatrix();
+
+                this.ownedObjectPerms = this.ownedObjectPerms.union(ownedMatrix);
+
+                if (roleObj.isSet(SchemaConstants.RoleDelegatable))
+                  {
+                    this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(ownedMatrix);
+                  }
               }
+
+            if (roleObj.containsField(SchemaConstants.RoleDefaultMatrix))
+              {
+                PermissionMatrixDBField unownedObjsPermField = (PermissionMatrixDBField) roleObj.getField(SchemaConstants.RoleDefaultMatrix);
+                PermMatrix unownedMatrix = unownedObjsPermField.getMatrix();
+
+                this.ownedObjectPerms = this.ownedObjectPerms.union(unownedMatrix);
+                this.unownedObjectPerms = this.unownedObjectPerms.union(unownedMatrix);
+
+                if (roleObj.isSet(SchemaConstants.RoleDelegatable))
+                  {
+                    this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(unownedMatrix);
+                    this.delegatableUnownedObjectPerms = this.delegatableUnownedObjectPerms.union(unownedMatrix);
+                  }
+              }
+          }
+      }
+    catch (InterruptedException ex)
+      {
+        throw new RuntimeException("Couldn't get read lock in DBPermissionManager.updatePerms()", ex);
+      }
+    finally
+      {
+        if (updatePermsLock != null)
+          {
+            dbSession.releaseLock(updatePermsLock);
           }
       }
   }
 
   /**
-   * Checks to see if any Role objects have changed in the server, and
-   * makes sure this.defaultRoleObj is up to date.
+   * Checks to see if any Role objects have changed in the server
+   * since we last updated our perms.
    *
    * @return true if any changes have been made to Role objects in the
    * server
@@ -1565,22 +1584,21 @@ public final class DBPermissionManager {
 
   private synchronized boolean rolesWereChanged()
   {
-    // if any commits have been made to the Role DBObjectBase since
-    // rolesLastCheckedTimeStamp, we're going to return true to signal
-    // updatePerms() to do a full re-calc.
+    return (this.rolesLastCheckedTimeStamp == null ||
+            Ganymede.db.getObjectBase(SchemaConstants.RoleBase).getTimeStamp().after(this.rolesLastCheckedTimeStamp));
+  }
 
-    if (this.rolesLastCheckedTimeStamp != null &&
-        !this.rolesLastCheckedTimeStamp.after(Ganymede.db.getObjectBase(SchemaConstants.RoleBase).getTimeStamp()))
-      {
-        return false;
-      }
+  /**
+   * Updates the defaultRoleObj we reference.  Separated from
+   * rolesWereChanged() so that we can do this part in a DBReadLock.
+   */
 
+  private synchronized void updateDefaultRoleObj()
+  {
     try
       {
         this.defaultRoleObj = dbSession.viewDBObject(DEFAULT_ROLE_INVID).getOriginal();
         this.rolesLastCheckedTimeStamp = new Date();
-
-        return true;
       }
     catch (NullPointerException ex)
       {
@@ -1598,20 +1616,25 @@ public final class DBPermissionManager {
 
   private synchronized boolean personaWasChanged()
   {
-    if (((this.personaObj != null && this.personaInvid != null) ||
-         (this.personaObj == null && this.personaInvid == null)) &&
-        this.personaTimeStamp != null &&
-        !this.personaTimeStamp.after(Ganymede.db.getObjectBase(SchemaConstants.PersonaBase).getTimeStamp()))
-      {
-        return false;
-      }
+    return ((this.personaObj == null && this.personaInvid != null) ||
+            (this.personaObj != null && this.personaInvid == null) ||
+            this.personaTimeStamp == null ||
+            Ganymede.db.getObjectBase(SchemaConstants.PersonaBase).getTimeStamp().after(this.personaTimeStamp));
+  }
 
+  /**
+   * Updates the personaObj we reference.  Separated from
+   * personaWasChanged() so that we can do this part in a DBReadLock.
+   */
+
+  private synchronized void updatePersonaObj()
+  {
     this.personaTimeStamp = new Date();
 
     if (this.personaInvid == null)
       {
         this.personaObj = null;
-        return true;
+        return;
       }
 
     DBObject currentPersonaObj = dbSession.viewDBObject(this.personaInvid);
@@ -1623,20 +1646,7 @@ public final class DBPermissionManager {
                                        " in personaWasChanged()");
       }
 
-    currentPersonaObj = currentPersonaObj.getOriginal();
-
-    // checked-in objects (as returned by getOriginal) are immutable,
-    // so we can do an identity test to see if the personaObj has
-    // changed.
-
-    if (currentPersonaObj == this.personaObj)
-      {
-        return false;
-      }
-
-    this.personaObj = currentPersonaObj;
-
-    return true;
+    this.personaObj = currentPersonaObj.getOriginal();
   }
 
   /**
