@@ -827,7 +827,7 @@ public final class DBPermissionManager {
                                                    String newPersona,
                                                    String pass)
   {
-    if (userObject == null || newPersona == null || pass == null)
+    if (userObject == null || newPersona == null)
       {
         return false;
       }
@@ -843,6 +843,11 @@ public final class DBPermissionManager {
         this.personaTimeStamp = null; // force updatePerms()
 
         return true;
+      }
+
+    if (pass == null)
+      {
+        return false;
       }
 
     Vector<Invid> personae = (Vector<Invid>) userObject.getFieldValuesLocal(SchemaConstants.UserAdminPersonae);
