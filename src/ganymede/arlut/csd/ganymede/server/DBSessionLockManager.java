@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -51,7 +51,7 @@
 package arlut.csd.ganymede.server;
 
 import java.util.HashSet;
-import java.util.Vector;
+import java.util.List;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -120,7 +120,7 @@ public final class DBSessionLockManager {
    * until the read lock is released.</p>
    */
 
-  public synchronized DBReadLock openReadLock(Vector<DBObjectBase> bases) throws InterruptedException
+  public synchronized DBReadLock openReadLock(List<DBObjectBase> bases) throws InterruptedException
   {
     // we'll never be able to establish a read lock if we have to
     // wait for this thread to release an existing write lock..
@@ -198,7 +198,7 @@ public final class DBSessionLockManager {
    * will block until the lock can be acquired.</p>
    */
 
-  public synchronized DBWriteLock openWriteLock(Vector<DBObjectBase> bases) throws InterruptedException
+  public synchronized DBWriteLock openWriteLock(List<DBObjectBase> bases) throws InterruptedException
   {
     // we'll never be able to establish a write lock if we have to
     // wait for this thread to release read, write, or dump locks..
