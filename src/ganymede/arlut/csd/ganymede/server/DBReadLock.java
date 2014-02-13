@@ -79,6 +79,10 @@ import java.util.List;
  * established will persist until released, whereupon the DBWriteLock
  * will establish.</p>
  *
+ * <p>{@link arlut.csd.ganymede.server.DBDumpLock DBDumpLocks} can be
+ * established while a DBReadLocks is active and vice-versa,
+ * though.</p>
+ *
  * <p>See {@link arlut.csd.ganymede.server.DBLock DBLock}, {@link
  * arlut.csd.ganymede.server.DBWriteLock DBWriteLock}, and {@link
  * arlut.csd.ganymede.server.DBDumpLock DBDumpLock} for details.</p>
@@ -91,8 +95,8 @@ public final class DBReadLock extends DBLock {
   /* -- */
 
   /**
-   * <p>Constructor to get a read lock on all of the server's object
-   * bases</p>
+   * Constructor to get a shared read lock on all of the server's
+   * object bases
    */
 
   public DBReadLock(DBStore store)
@@ -103,8 +107,8 @@ public final class DBReadLock extends DBLock {
   }
 
   /**
-   * <p>Constructor to get a read lock on a subset of the object
-   * bases.</p>
+   * Constructor to get a shared read lock on a subset of the object
+   * bases.
    */
 
   public DBReadLock(DBStore store, List<DBObjectBase> baseSet)
@@ -116,26 +120,31 @@ public final class DBReadLock extends DBLock {
 
   /**
    * <p>A thread that calls establish() will be suspended (waiting on
-   * the server's {@link arlut.csd.ganymede.server.DBStore DBStore}
-   * until all DBObjectBases listed in this DBReadLock's constructor
-   * are available to be locked.  At that point, the thread blocking
-   * on establish() will wake up possessing a shared read lock on the
-   * requested DBObjectBases.</p>
+   * the server's {@link arlut.csd.ganymede.server.DBLockSync
+   * DBLockSync} until all DBObjectBases listed in this DBReadLock's
+   * constructor are available to be locked.  At that point, the
+   * thread blocking on establish() will wake up possessing a shared
+   * read lock on the requested DBObjectBases.</p>
    *
    * <p>It is possible for the establish() to fail completely.. the
    * admin console may reject a client whose thread is blocking on
    * establish(), for instance, or the server may be shut down.  In
-   * those cases, another thread may call this DBReadLock's {@link
+   * those cases, another thread may call the DBReadLock's {@link
    * arlut.csd.ganymede.server.DBLock#abort() abort()} method, in
    * which case establish() will throw an InterruptedException, and
    * the lock will not be established.</p>
    *
+   * <p>The possessors of DBLocks are identified by a key Object that
+   * is provided on the call to {@link
+   * arlut.csd.ganymede.server.DBLock#establish(java.lang.Object)}.  A
+   * given key may only have one DBWriteLock established at a time,
+   * but it may have multiple concurrent DBDumpLocks and DBReadLocks
+   * established if there are no DBWriteLocks held by that key or
+   * locked with DBObjectBases that overlap this lock request.</p>
+   *
    * @param key An object used in the server to uniquely identify the
    * entity internal to Ganymede that is attempting to obtain the
-   * lock, typically a {@link
-   * arlut.csd.ganymede.server.GanymedeSession GanymedeSession} or a
-   * {@link arlut.csd.ganymede.server.GanymedeBuilderTask
-   * GanymedeBuilderTask}.
+   * lock, typically a unique String.
    */
 
   @Override public final void establish(Object key) throws InterruptedException

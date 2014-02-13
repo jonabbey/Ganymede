@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -3584,7 +3583,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * restore its state.</p>
    */
 
-  synchronized final void rollback(Hashtable<Short, Object> ckpoint)
+  synchronized final void rollback(Map<Short, Object> ckpoint)
   {
     for (Map.Entry<Short, Object> entry: ckpoint.entrySet())
       {
@@ -3757,17 +3756,17 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * entries.</p>
    *
    * <p>The second purpose of this method is to generate entries in
-   * the changedFieldDefs map, listing those DBObjectBaseFields for
+   * the changedFieldDefs Set, listing those DBObjectBaseFields for
    * which we have observed a value change when comparing this
    * object's state with its original.  We do this as part of the diff
    * algorithm because the original DBField definition only provided
    * one method to compare two fields for differences, and that is the
    * getDiffString() method.  Since we're calling that here anyway,
    * recording the definition of fields that we know changed is an
-   * extremely cheap win.  The changedFieldDefs Hashtable is used in
-   * the DBEditSet class to update time stamps in the
-   * DBObjectBaseFields, so that builder tasks can tell whether they
-   * have been run since any of a given field have been changed in a given
+   * extremely cheap win.  The changedFieldDefs Set is used in the
+   * DBEditSet class to update time stamps in the DBObjectBaseFields,
+   * so that builder tasks can tell whether they have been run since
+   * any of a given field have been changed in a given
    * DBObjectBase.</p>
    *
    * @param changedFieldDefs If not null, this parameter will be a Set

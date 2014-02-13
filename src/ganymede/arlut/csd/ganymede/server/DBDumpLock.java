@@ -69,10 +69,13 @@ import java.util.List;
  * DBWriteLock can be established until the dumping thread has
  * completed the dump and released the lock.</p>
  *
- * <p>{@link arlut.csd.ganymede.server.DBReadLock DBReadLock}'s can be
- * established while a DBDumpLock is active, though.</p>
+ * <p>{@link arlut.csd.ganymede.server.DBReadLock DBReadLocks} can be
+ * established while a DBDumpLock is active and vice-versa,
+ * though.</p>
  *
- * <p>A DBDumpLock acts as a highest priority DBReadLock.</p>
+ * <p>Essentially, DBDumpLock acts as a DBReadLock that has priority
+ * over incoming {@link arlut.csd.ganymede.server.DBWriteLock
+ * DBWriteLocks}.</p>
  */
 
 final class DBDumpLock extends DBLock {
@@ -82,7 +85,7 @@ final class DBDumpLock extends DBLock {
   /* -- */
 
   /**
-   * <p>Constructor to get a dump lock on all the object bases.</p>
+   * Constructor to get a dump lock on all the object bases.
    */
 
   public DBDumpLock(DBStore store)
@@ -94,8 +97,7 @@ final class DBDumpLock extends DBLock {
   }
 
   /**
-   * <p>Constructor to get a dump lock on a subset of the object
-   * bases.</p>
+   * Constructor to get a dump lock on a subset of the object bases.
    */
 
   public DBDumpLock(DBStore store, List<DBObjectBase> baseSet)
@@ -107,11 +109,11 @@ final class DBDumpLock extends DBLock {
 
   /**
    * <p>A thread that calls establish() will be suspended (waiting on
-   * the server's {@link arlut.csd.ganymede.server.DBStore DBStore}
-   * until all DBObjectBases listed in this DBDumpLock's constructor
-   * are available to be locked.  At that point, the thread blocking
-   * on establish() will wake up possessing a dump lock on the
-   * requested DBObjectBases.</p>
+   * the server's {@link arlut.csd.ganymede.server.DBLockSync
+   * DBLockSync} until all DBObjectBases listed in this DBDumpLock's
+   * constructor are available to be locked.  At that point, the
+   * thread blocking on establish() will wake up possessing a shared
+   * dump lock on the requested DBObjectBases.</p>
    *
    * <p>It is possible for the establish() to fail completely.. the
    * admin console may reject a client whose thread is blocking on
@@ -121,12 +123,17 @@ final class DBDumpLock extends DBLock {
    * which case establish() will throw an InterruptedException, and
    * the lock will not be established.</p>
    *
+   * <p>The possessors of DBLocks are identified by a key Object that
+   * is provided on the call to {@link
+   * arlut.csd.ganymede.server.DBLock#establish(java.lang.Object)}.  A
+   * given key may only have one DBWriteLock established at a time,
+   * but it may have multiple concurrent DBDumpLocks and DBReadLocks
+   * established if there are no DBWriteLocks held by that key or
+   * locked on DBObjectBases that overlap this lock request.</p>
+   *
    * @param key An object used in the server to uniquely identify the
    * entity internal to Ganymede that is attempting to obtain the
-   * lock, typically a {@link
-   * arlut.csd.ganymede.server.GanymedeSession GanymedeSession} or a
-   * {@link arlut.csd.ganymede.server.GanymedeBuilderTask
-   * GanymedeBuilderTask}.
+   * lock, typically a unique String.
    */
 
   @Override public final void establish(Object key) throws InterruptedException
@@ -237,7 +244,7 @@ final class DBDumpLock extends DBLock {
   }
 
   /**
-   * <p>Release this lock on all bases locked</p>
+   * Release this lock on all bases locked
    */
 
   @Override public final void release()

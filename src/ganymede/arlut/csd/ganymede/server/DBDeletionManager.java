@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -52,7 +52,6 @@ package arlut.csd.ganymede.server;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
@@ -284,7 +283,7 @@ public final class DBDeletionManager {
   }
 
   /**
-   * This method deletion-locks a vector of invids, returning false
+   * This method deletion-locks a Set of Invids, returning false
    * without changes if the deletion-locks could not all be performed.
    */
 
