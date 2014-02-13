@@ -1011,7 +1011,7 @@ public final class DBPermissionManager {
         tmpInvids.add(ownerInvidItem);
       }
 
-    if (!this.supergashMode && !isMemberAll(tmpInvids))
+    if (!this.supergashMode && !isMemberOfAllOwnerGroups(tmpInvids))
       {
         // "Error in setDefaultOwner()"
         // "Error.. ownerInvids contains invid that the persona is not a member of."
@@ -1104,7 +1104,7 @@ public final class DBPermissionManager {
         return null;
       }
 
-    if (!this.supergashMode && !isMemberAll(ownerInvids))
+    if (!this.supergashMode && !isMemberOfAllOwnerGroups(ownerInvids))
       {
         // "Server: Error in filterQueries()"
         // "Error.. ownerInvids contains invid that the persona is not a member of."
@@ -1939,7 +1939,7 @@ public final class DBPermissionManager {
    * an owning group.  This method depends on isMemberOfOwnerGroups().
    */
 
-  private synchronized boolean isMemberAll(Vector<Invid> owners)
+  private synchronized boolean isMemberOfAllOwnerGroups(Vector<Invid> owners)
   {
     if (owners == null)
       {
