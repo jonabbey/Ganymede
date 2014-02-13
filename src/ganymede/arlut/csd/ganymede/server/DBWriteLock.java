@@ -88,7 +88,7 @@ public final class DBWriteLock extends DBLock {
   /* -- */
 
   /**
-   * <p>Constructor to get a write lock on all the object bases</p>
+   * Constructor to get a write lock on all the object bases
    */
 
   public DBWriteLock(DBStore store)
@@ -99,8 +99,8 @@ public final class DBWriteLock extends DBLock {
   }
 
   /**
-   * <p>Constructor to get a write lock on a subset of the server's
-   * object bases.</p>
+   * Constructor to get a write lock on a subset of the server's
+   * object bases.
    */
 
   public DBWriteLock(DBStore store, List<DBObjectBase> baseSet)
@@ -112,11 +112,11 @@ public final class DBWriteLock extends DBLock {
 
   /**
    * <p>A thread that calls establish() will be suspended (waiting on
-   * the server's {@link arlut.csd.ganymede.server.DBStore DBStore}
-   * until all DBObjectBases listed in this DBWriteLock's constructor
-   * are available to be locked.  At that point, the thread blocking
-   * on establish() will wake up possessing a write lock on the
-   * requested DBObjectBases.</p>
+   * the server's {@link arlut.csd.ganymede.server.DBLockSync
+   * DBLockSync} until all DBObjectBases listed in this DBWriteLock's
+   * constructor are available to be locked.  At that point, the
+   * thread blocking on establish() will wake up possessing an
+   * exclusive write lock on the requested DBObjectBases.</p>
    *
    * <p>It is possible for the establish() to fail completely.. the
    * admin console may reject a client whose thread is blocking on
@@ -126,12 +126,17 @@ public final class DBWriteLock extends DBLock {
    * which case establish() will throw an InterruptedException, and
    * the lock will not be established.</p>
    *
+   * <p>The possessors of DBLocks are identified by a key Object that
+   * is provided on the call to {@link
+   * arlut.csd.ganymede.server.DBLock#establish(java.lang.Object)}.  A
+   * given key may only have one DBWriteLock established at a time,
+   * but it may have multiple concurrent DBDumpLocks and DBReadLocks
+   * established if there are no DBWriteLocks held by that key or
+   * locked with DBObjectBases that overlap this lock request.</p>
+   *
    * @param key An object used in the server to uniquely identify the
    * entity internal to Ganymede that is attempting to obtain the
-   * lock, typically a {@link
-   * arlut.csd.ganymede.server.GanymedeSession GanymedeSession} or a
-   * {@link arlut.csd.ganymede.server.GanymedeBuilderTask
-   * GanymedeBuilderTask}.
+   * lock, typically a unique String.
    */
 
   @Override public final void establish(Object key) throws InterruptedException
@@ -346,7 +351,7 @@ public final class DBWriteLock extends DBLock {
   }
 
   /**
-   * <p>Release this lock on all bases locked</p>
+   * Release this lock on all bases locked
    */
 
   @Override public final void release()
