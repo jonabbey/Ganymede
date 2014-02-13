@@ -1830,7 +1830,7 @@ public final class DBPermissionManager {
         owners = arlut.csd.Util.VectorUtils.union(owners, values);
       }
 
-    return isMemberOfOwnerGroups(owners, new HashSet<Invid>());
+    return isMemberOfAnyOwnerGroups(owners, new HashSet<Invid>());
   }
 
   /**
@@ -1846,7 +1846,7 @@ public final class DBPermissionManager {
    * @return true if a match is found
    */
 
-  private synchronized boolean isMemberOfOwnerGroups(Vector<Invid> owners, Set<Invid> alreadySeen)
+  private synchronized boolean isMemberOfAnyOwnerGroups(Vector<Invid> owners, Set<Invid> alreadySeen)
   {
     if (owners == null)
       {
@@ -1862,6 +1862,37 @@ public final class DBPermissionManager {
       }
 
     return false;
+  }
+
+  /**
+   * This helper method iterates through the owners vector and checks
+   * to see if the current personaInvid is a member of all of the
+   * groups through either direct membership or through membership of
+   * an owning group.  This method depends on isMemberOfOwnerGroup().
+   */
+
+  private synchronized boolean isMemberOfAllOwnerGroups(Vector<Invid> owners)
+  {
+    if (owners == null)
+      {
+        return false;
+      }
+
+    for (Invid owner: owners)
+      {
+        if (owner.getType() != SchemaConstants.OwnerBase)
+          {
+            Ganymede.debug("DBPermissionManager.isMemberOfAllOwnerGroups(): bad invid passed " + owner.toString());
+            return false;
+          }
+
+        if (!isMemberOfOwnerGroup(owner))
+          {
+            return false;
+          }
+      }
+
+    return true;
   }
 
   /**
@@ -1924,42 +1955,11 @@ public final class DBPermissionManager {
 
     Vector<Invid> ownersOfOwnerGroup = (Vector<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerListField);
 
-    if (isMemberOfOwnerGroups(ownersOfOwnerGroup, alreadySeen))
+    if (isMemberOfAnyOwnerGroups(ownersOfOwnerGroup, alreadySeen))
       {
         return true;
       }
 
     return false;
-  }
-
-  /**
-   * This helper method iterates through the owners vector and checks
-   * to see if the current personaInvid is a member of all of the
-   * groups through either direct membership or through membership of
-   * an owning group.  This method depends on isMemberOfOwnerGroups().
-   */
-
-  private synchronized boolean isMemberOfAllOwnerGroups(Vector<Invid> owners)
-  {
-    if (owners == null)
-      {
-        return false;
-      }
-
-    for (Invid owner: owners)
-      {
-        if (owner.getType() != SchemaConstants.OwnerBase)
-          {
-            Ganymede.debug("DBPermissionManager.isMemberAll(): bad invid passed " + owner.toString());
-            return false;
-          }
-
-        if (!isMemberOfOwnerGroup(owner))
-          {
-            return false;
-          }
-      }
-
-    return true;
   }
 }
