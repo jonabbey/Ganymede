@@ -1249,6 +1249,8 @@ public final class DBPermissionManager {
         throw new NullPointerException();
       }
 
+    updatePerms();
+
     if (this.supergashMode)
       {
         return PermEntry.fullPerms;
@@ -1270,6 +1272,8 @@ public final class DBPermissionManager {
       {
         throw new NullPointerException();
       }
+
+    updatePerms();
 
     boolean owned = isOwnedByUs(object);
     PermEntry objectPerm = this.getObjectPerm(object, owned);
@@ -1333,12 +1337,12 @@ public final class DBPermissionManager {
 
   synchronized PermEntry getPerm(short baseID, boolean ownedByUs)
   {
+    updatePerms();
+
     if (this.supergashMode)
       {
         return PermEntry.fullPerms;
       }
-
-    updatePerms();
 
     PermMatrix applicablePerms = ownedByUs ? this.ownedObjectPerms : this.unownedObjectPerms;
     PermEntry result = applicablePerms.getPerm(baseID);
@@ -1363,12 +1367,12 @@ public final class DBPermissionManager {
 
   synchronized PermEntry getPerm(short baseID, short fieldID, boolean ownedByUs)
   {
+    updatePerms();
+
     if (this.supergashMode)
       {
         return PermEntry.fullPerms;
       }
-
-    updatePerms();
 
     PermMatrix applicablePerms = ownedByUs ? ownedObjectPerms : unownedObjectPerms;
     PermEntry result = applicablePerms.getPerm(baseID, fieldID);
@@ -1394,6 +1398,8 @@ public final class DBPermissionManager {
         throw new NullPointerException();
       }
 
+    // getPerm() calls updatePerms() before calling us
+
     if (this.supergashMode)
       {
         return PermEntry.fullPerms;
@@ -1412,8 +1418,6 @@ public final class DBPermissionManager {
       {
         expansionPerm = PermEntry.noPerms;
       }
-
-    updatePerms();
 
     PermMatrix applicablePerms = ownedByUs ? ownedObjectPerms : unownedObjectPerms;
 
@@ -1440,6 +1444,8 @@ public final class DBPermissionManager {
         throw new NullPointerException();
       }
 
+    // getPerm() calls updatePerms() before calling us
+
     if (this.supergashMode)
       {
         return PermEntry.fullPerms;
@@ -1451,8 +1457,6 @@ public final class DBPermissionManager {
       {
         return customPerm;
       }
-
-    updatePerms();
 
     PermMatrix applicablePerms = ownedByUs ? ownedObjectPerms: unownedObjectPerms;
     PermEntry expansionPerm = object.getBase().getObjectHook().permExpand(gSession, object, fieldID);
@@ -1493,6 +1497,11 @@ public final class DBPermissionManager {
 
     if (!rolesWereChanged() && !personaWasChanged())
       {
+        // there's a bit of a race here, as the calling getPerm()
+        // method won't check for the currency of the perms we've got
+        // configured until the next updatePerms() call, but returning
+        // slightly out of date perms won't break consistency.
+
         return;
       }
 
