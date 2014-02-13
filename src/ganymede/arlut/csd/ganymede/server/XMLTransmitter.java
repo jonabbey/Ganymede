@@ -54,7 +54,6 @@ import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.rmi.FileTransmitter;
-import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.BigPipedInputStream;
 import arlut.csd.Util.TranslationService;
 
@@ -62,7 +61,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.PipedOutputStream;
 import java.rmi.RemoteException;
-import java.util.Vector;
 
 import com.jclark.xml.output.UTF8XMLWriter;
 
