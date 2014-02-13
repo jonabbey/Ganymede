@@ -1609,7 +1609,7 @@ public final class DBPermissionManager {
   private synchronized boolean rolesWereChanged()
   {
     return (this.rolesLastCheckedTimeStamp == null ||
-            Ganymede.db.getObjectBase(SchemaConstants.RoleBase).getTimeStamp().after(this.rolesLastCheckedTimeStamp));
+            Ganymede.db.getObjectBase(SchemaConstants.RoleBase).changedSince(this.rolesLastCheckedTimeStamp));
   }
 
   /**
@@ -1643,7 +1643,7 @@ public final class DBPermissionManager {
     return ((this.personaObj == null && this.personaInvid != null) ||
             (this.personaObj != null && this.personaInvid == null) ||
             this.personaTimeStamp == null ||
-            Ganymede.db.getObjectBase(SchemaConstants.PersonaBase).getTimeStamp().after(this.personaTimeStamp));
+            Ganymede.db.getObjectBase(SchemaConstants.PersonaBase).changedSince(this.personaTimeStamp));
   }
 
   /**
