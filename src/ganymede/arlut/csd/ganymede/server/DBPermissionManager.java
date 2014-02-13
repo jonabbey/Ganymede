@@ -245,8 +245,8 @@ public final class DBPermissionManager {
    *
    * <p>May change if {@link
    * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
-   * String} is called or if the relevant Role or Owner Group objects
-   * are changed in the database .</p>
+   * String} is called or if the relevant Role Objects are changed in
+   * the database .</p>
    *
    * <p>If this DBPermissionManager has supergash privileges, this
    * PermMatrix will be null.</p>
@@ -313,7 +313,7 @@ public final class DBPermissionManager {
   private DBObject defaultRoleObj;
 
   /**
-   * When did we last notice a change in any Role objects?
+   * When did we last notice a change in any Role Objects?
    */
 
   private Date rolesLastCheckedTimeStamp;
@@ -1599,10 +1599,10 @@ public final class DBPermissionManager {
   }
 
   /**
-   * Checks to see if any Role objects have changed in the server
+   * Checks to see if any Role Objects have changed in the server
    * since we last updated our perms.
    *
-   * @return true if any changes have been made to Role objects in the
+   * @return true if any changes have been made to Role Objects in the
    * server
    */
 
