@@ -1802,7 +1802,7 @@ public final class DBPermissionManager {
 
     if (obj.isEmbedded())
       {
-        obj = dbSession.getContainingObj(object);
+        obj = dbSession.getContainingObj(obj);
       }
 
     // end users are considered to own themselves
