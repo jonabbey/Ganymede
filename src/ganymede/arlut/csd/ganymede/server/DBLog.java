@@ -16,7 +16,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -1436,7 +1436,7 @@ final public class DBLog implements java.io.Closeable {
       {
         DBObjectBase eventBase = Ganymede.db.getObjectBase(SchemaConstants.EventBase);
 
-        if (!eventBase.getTimeStamp().after(sysEventCodesTimeStamp))
+        if (!eventBase.changedSince(sysEventCodesTimeStamp))
           {
             if (debug)
               {
@@ -1526,7 +1526,7 @@ final public class DBLog implements java.io.Closeable {
       {
         DBObjectBase eventBase = Ganymede.db.getObjectBase(SchemaConstants.ObjectEventBase);
 
-        if (!eventBase.getTimeStamp().after(objEventCodesTimeStamp))
+        if (!eventBase.changedSince(objEventCodesTimeStamp))
           {
             if (debug)
               {
