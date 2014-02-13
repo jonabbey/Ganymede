@@ -232,6 +232,9 @@ public final class DBPermissionManager {
    * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
    * String} is called or if the relevant Role Objects are changed in
    * the database.</p>
+   *
+   * <p>If this DBPermissionManager has supergash privileges, this
+   * PermMatrix will be null.</p>
    */
 
   private PermMatrix ownedObjectPerms;
@@ -244,6 +247,9 @@ public final class DBPermissionManager {
    * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
    * String} is called or if the relevant Role or Owner Group objects
    * are changed in the database .</p>
+   *
+   * <p>If this DBPermissionManager has supergash privileges, this
+   * PermMatrix will be null.</p>
    */
 
   private PermMatrix unownedObjectPerms;
@@ -265,6 +271,9 @@ public final class DBPermissionManager {
    * <p>Used by code in {@link
    * arlut.csd.ganymede.server.PermissionMatrixDBField} to control
    * what privileges personae are able to grant to new personae.</p>
+   *
+   * <p>If this DBPermissionManager has supergash privileges, this
+   * PermMatrix will be null.</p>
    */
 
   private PermMatrix delegatableOwnedObjectPerms;
@@ -283,6 +292,9 @@ public final class DBPermissionManager {
    * <p>Used by code in {@link
    * arlut.csd.ganymede.server.PermissionMatrixDBField} to control
    * what privileges personae are able to grant to new personae.</p>
+   *
+   * <p>If this DBPermissionManager has supergash privileges, this
+   * PermMatrix will be null.</p>
    */
 
   private PermMatrix delegatableUnownedObjectPerms;
@@ -805,10 +817,15 @@ public final class DBPermissionManager {
     gSession.restartTransaction();
 
     this.visibilityFilterInvids = null;
+    this.ownedObjectPerms = null;
+    this.unownedObjectPerms = null;
+    this.delegatableOwnedObjectPerms = null;
+    this.delegatableUnownedObjectPerms = null;
+    this.personaTimeStamp = null; // force updatePerms()
 
     updatePerms();
 
-    gSession.resetAdminEntry(); // null our admin console cache
+    gSession.resetAdminEntry();
     gSession.setLastEvent("selectPersona: " + newPersona);
 
     return true;
@@ -838,7 +855,6 @@ public final class DBPermissionManager {
         this.personaInvid = null;
         this.personaName = null;
         this.personaObj = null;
-        this.personaTimeStamp = null; // force updatePerms()
 
         return true;
       }
@@ -868,7 +884,6 @@ public final class DBPermissionManager {
                 this.personaName = personaObject.getLabel();
                 this.personaInvid = personaObject.getInvid();
                 this.personaObj = personaObject;
-                this.personaTimeStamp = null; // force updatePerms()
 
                 return true;
               }
