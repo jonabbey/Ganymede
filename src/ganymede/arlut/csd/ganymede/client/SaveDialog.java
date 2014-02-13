@@ -13,8 +13,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -54,11 +56,13 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Hashtable;
-import java.util.Vector;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -233,8 +237,9 @@ public class SaveDialog extends JDialog implements ActionListener {
   /**
    * <p>Show the dialog.</p>
    *
-   * <p>Use this instead of calling setVisible(true) yourself.  You need to get the boolean
-   * return from this method, in order to know if the user pressed "Ok" or "Cancel".
+   * <p>Use this instead of calling setVisible(true) yourself.  You
+   * need to get the boolean return from this method, in order to know
+   * if the user pressed "Ok" or "Cancel".</p>
    *
    * @return True if user pressed "Ok".
    */
@@ -275,12 +280,13 @@ public class SaveDialog extends JDialog implements ActionListener {
   /**
    * Set the choices for the format choices.
    *
-   * @param choices Vector of Strings of the different choices.
+   * @param choices List of Strings of the different choices.
    *
-   * <P>Usually we send in a Vector of strings like "HTML", "Plain text", etc.</p>
+   * <p>Usually we send in a List of strings like "HTML", "Plain
+   * text", etc.</p>
    */
 
-  public void setFormatChoices(Vector choices)
+  public void setFormatChoices(List<String> choices)
   {
     if (!addedFormatChoice)
       {
@@ -289,9 +295,9 @@ public class SaveDialog extends JDialog implements ActionListener {
   }
 
   /**
-   * <p>Returns the choice of format.
+   * <p>Returns the choice of format.</p>
    *
-   * This will be one of the Strings in setFormatChoicse(), unless
+   * <p>This will be one of the Strings in setFormatChoicse(), unless
    * something went horribly awry.</p>
    */
 
@@ -323,7 +329,7 @@ public class SaveDialog extends JDialog implements ActionListener {
 
   // This really just adds in a new formatButtonPanel
 
-  private void addFormatChoiceButtons(Vector choices)
+  private void addFormatChoiceButtons(List<String> choices)
   {
     gbc.gridy = 3;
     gbc.gridx = 0;
@@ -383,7 +389,7 @@ class formatButtonPanel extends JPanel {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.formatButtonPanel");
 
-  private Hashtable modelToLabel = new Hashtable();
+  private Map<ButtonModel, String> modelToLabel = new HashMap<ButtonModel, String>();
 
   private ButtonGroup
     group = new ButtonGroup();
@@ -394,11 +400,9 @@ class formatButtonPanel extends JPanel {
   private GridBagConstraints
     constraints = new GridBagConstraints();
 
-  formatButtonPanel(Vector choices)
+  formatButtonPanel(List<String> choices)
   {
     setLayout(layout);
-
-    String s;
 
     // "Format"
     setBorder(BorderFactory.createTitledBorder(ts.l("init.title")));
@@ -407,7 +411,7 @@ class formatButtonPanel extends JPanel {
 
     for (int i = 0; i < choices.size(); i++)
       {
-        s = (String)choices.elementAt(i);
+        String s = choices.get(i);
 
         JRadioButton b = new JRadioButton(s);
 
@@ -427,7 +431,7 @@ class formatButtonPanel extends JPanel {
 
   public String getSelectedFormat()
   {
-    return (String)modelToLabel.get(group.getSelection());
+    return modelToLabel.get(group.getSelection());
   }
 }
 

@@ -1,17 +1,19 @@
 /*
 
    RMISSLServerSocketFactory.java
- 
+
    Created: 27 August 2004
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -70,7 +72,7 @@ public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serial
   private int _hashCode = "arlut.csd.ganymede.common.RMISSLServerSocketFactory".hashCode();
 
   private static String passphrase = "ganypassphrase";
-  private static String keysResource = "GanymedeSSLServerKeys";
+  private static String keysResource = "server_ssl_key.jks";
   private static final boolean socketDebug = false;
 
   private static int counter = 0;
@@ -176,17 +178,17 @@ public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serial
                   {
                     ex.printStackTrace();
                   }
-                
+
                 System.err.println("Read " + count + " bytes from " + keysResource);
               }
 
             x.close();
           }
-      
+
         ks.load(PackageResources.getPackageResourceAsStream(keysResource, this.getClass()), pass);
         kmf.init(ks, pass);
         ctx.init(kmf.getKeyManagers(), null, null);
-        
+
         ssf = ctx.getServerSocketFactory();
       }
     catch (Exception e)

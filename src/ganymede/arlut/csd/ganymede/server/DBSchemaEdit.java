@@ -974,6 +974,7 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
         store.objectBases = newBases;
         rootCategory.clearEditor();
         store.rootCategory = rootCategory;
+        store.finishSchemaEditCommit();
       }
 
     // update the serialized representation of the

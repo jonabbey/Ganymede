@@ -148,10 +148,17 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   /**
    * <p>Background thread that will order a refresh of the admin
-   * consoles' task lists if we have any tasks currently running.</p>
+   * consoles' task lists every second if we have any sync activities
+   * currently running.  Will be null if no syncs are running.</p>
    */
 
   private static Thread taskRefreshThread;
+
+  /**
+   * <p>Private monitor for managing taskRefreshThread.</p>
+   */
+
+  private static Object taskRefreshThread_monitor = new Object();
 
   /* -----====================--------------------====================-----
 
@@ -537,26 +544,33 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     detachBadConsoles();
 
-    if (anyRunningSyncs && GanymedeAdmin.taskRefreshThread == null)
+    synchronized (GanymedeAdmin.taskRefreshThread_monitor)
       {
-        GanymedeAdmin.taskRefreshThread =
-        new Thread(new Thread() {
-            public void run() {
+        if (anyRunningSyncs && GanymedeAdmin.taskRefreshThread == null)
+          {
+            Thread trt = new Thread(new Thread() {
+                public void run() {
 
-              try
-                {
-                  Thread.sleep(1000);
+                  try
+                    {
+                      Thread.sleep(1000);
+                    }
+                  catch (InterruptedException ex)
+                    {
+                    }
+
+                  synchronized (GanymedeAdmin.taskRefreshThread_monitor)
+                    {
+                      GanymedeAdmin.taskRefreshThread = null;
+                    }
+
+                  GanymedeAdmin.refreshTasks();
                 }
-              catch (InterruptedException ex)
-                {
-                }
+              }, "task reporter");
 
-              GanymedeAdmin.taskRefreshThread = null;
-              GanymedeAdmin.refreshTasks();
-            }
-          }, "task reporter");
-
-        GanymedeAdmin.taskRefreshThread.start();
+            GanymedeAdmin.taskRefreshThread = trt;
+            trt.start();
+          }
       }
   }
 

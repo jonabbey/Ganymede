@@ -14,6 +14,8 @@
 
 package arlut.csd.crypto;
 
+import java.nio.charset.Charset;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                           Base64
@@ -685,7 +687,7 @@ public class Base64
         }   // end try
         catch (java.io.UnsupportedEncodingException uue){
             // Fall back to some Java default
-            return new String( baos.toByteArray() );
+          return new String( baos.toByteArray(), Charset.defaultCharset() );
         }   // end catch
 
     }   // end encode
@@ -825,7 +827,7 @@ public class Base64
             return new String( encoded, PREFERRED_ENCODING );
         }   // end try
         catch (java.io.UnsupportedEncodingException uue) {
-            return new String( encoded );
+            return new String( encoded, Charset.defaultCharset()  );
         }   // end catch
 
     }   // end encodeBytes
@@ -1235,7 +1237,7 @@ public class Base64
             bytes = s.getBytes( PREFERRED_ENCODING );
         }   // end try
         catch( java.io.UnsupportedEncodingException uee ) {
-            bytes = s.getBytes();
+            bytes = s.getBytes( Charset.defaultCharset() );
         }   // end catch
                 //</change>
 
@@ -1590,7 +1592,6 @@ public class Base64
         private int     lineLength;
         private boolean breakLines;     // Break lines at less than 80 characters
         private int     options;        // Record options used to create the stream.
-        private byte[]  alphabet;       // Local copies to avoid extra method calls
         private byte[]  decodabet;      // Local copies to avoid extra method calls
 
 
@@ -1635,7 +1636,6 @@ public class Base64
             this.buffer       = new byte[ bufferLength ];
             this.position     = -1;
             this.lineLength   = 0;
-            this.alphabet     = getAlphabet(options);
             this.decodabet    = getDecodabet(options);
         }   // end constructor
 
@@ -1806,7 +1806,6 @@ public class Base64
         private byte[]  b4;         // Scratch used in a few places
         private boolean suspendEncoding;
         private int     options;    // Record for later
-        private byte[]  alphabet;   // Local copies to avoid extra method calls
         private byte[]  decodabet;  // Local copies to avoid extra method calls
 
         /**
@@ -1850,7 +1849,6 @@ public class Base64
             this.suspendEncoding = false;
             this.b4           = new byte[4];
             this.options      = options;
-            this.alphabet     = getAlphabet(options);
             this.decodabet    = getDecodabet(options);
         }   // end constructor
 

@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -349,6 +349,23 @@ public final class XMLTransmitter implements FileTransmitter {
                 Ganymede.logError(ex);
               }
           }
+      }
+  }
+
+  /**
+   * Consumes everything sent through the XMLTransmitter until the
+   * writer side has finished.  This method will block if necessary
+   * until the data is ready to be consumed..
+   */
+
+  public synchronized void drain()
+  {
+    try
+      {
+        while (getNextChunk() != null);
+      }
+    catch (Exception ex)
+      {
       }
   }
 

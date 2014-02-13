@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -50,8 +50,9 @@
 
 package arlut.csd.ganymede.server;
 
-import java.util.Hashtable;
-import java.util.Vector;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -85,10 +86,10 @@ public final class DBLockSync {
    *
    * <p>The values in this hash may either be scalar DBLock objects, or
    * in the case of readers (where it is permissible for a single client
-   * to have several distinct reader locks), a Vector of DBLocks.</p>
+   * to have several distinct reader locks), a List of DBReadLocks.</p>
    */
 
-  private Hashtable lockHash;
+  private HashMap lockHash;
 
   /**
    * <p>A count of how many {@link arlut.csd.ganymede.server.DBLock
@@ -116,20 +117,20 @@ public final class DBLockSync {
   }
 
   /**
-   * <p>This method causes the DBLockSync object's lock owner hashtable
-   * to be reset.  If count is not zero, that value will be used to set
-   * the initial capacity for the hashtable.</p>
+   * <p>This method causes the DBLockSync object's lock owner HashMap
+   * to be reset.  If count is not zero, that value will be used to
+   * set the initial capacity for the HashMap.</p>
    */
 
   public synchronized void resetLockHash(int count)
   {
     if (count <= 0)
       {
-        lockHash = new Hashtable(20); // default value
+        lockHash = new HashMap(20); // default value
       }
     else
       {
-        lockHash = new Hashtable(count);
+        lockHash = new HashMap(count);
       }
 
     locksHeld = 0;
@@ -150,16 +151,16 @@ public final class DBLockSync {
       {
         Object obj = lockHash.get(key);
 
-        if (obj != null && !(obj instanceof Vector))
+        if (obj != null && !(obj instanceof List))
           {
             return false;
           }
 
-        Vector<DBLock> lockList = (Vector<DBLock>) obj;
+        List<DBLock> lockList = (List<DBLock>) obj;
 
         if (lockList == null)
           {
-            lockList = new Vector<DBLock>();
+            lockList = new ArrayList<DBLock>();
             lockHash.put(key, lockList);
           }
 
@@ -196,7 +197,7 @@ public final class DBLockSync {
 
     if (lock instanceof DBReadLock)
       {
-        if (!(obj instanceof Vector))
+        if (!(obj instanceof List))
           {
             throw new IllegalStateException("Error, can't remove a read lock while there is a " +
                                             obj +
@@ -204,14 +205,14 @@ public final class DBLockSync {
                                             ".. there are no readlocks here.");
           }
 
-        Vector<DBLock> lockList = (Vector<DBLock>) obj;
+        List<DBLock> lockList = (List<DBLock>) obj;
 
         if (!lockList.contains(lock))
           {
             throw new IllegalStateException("Mismatched lock claim");
           }
 
-        lockList.removeElement(lock);
+        lockList.remove(lock);
 
         if (lockList.size() == 0)
           {
@@ -230,19 +231,18 @@ public final class DBLockSync {
   }
 
   /**
-   * <p>This method returns a Vector of DBReadLock objects associated
+   * <p>This method returns a List of DBReadLock objects associated
    * with key, if any.  If there is no DBReadLock vector associated
    * with the key, an IllegalStateException will be thrown.</p>
    *
-   * <p>The Vector returned is part of DBLockSync's internal
-   * data structures, and should only be browsed in a
-   * block synchronized on this DBLockSync object.</p>
+   * <p>The List returned is part of DBLockSync's internal data
+   * structures, and should only be browsed in a block synchronized on
+   * this DBLockSync object.</p>
    *
-   * <p>The Vector returned should not be modified by external
-   * code.</p>
+   * <p>The List returned should not be modified by external code.</p>
    */
 
-  public synchronized Vector<DBReadLock> getReadLockVector(Object key)
+  public synchronized List<DBReadLock> getReadLockList(Object key)
   {
     Object o = lockHash.get(key);
 
@@ -251,21 +251,21 @@ public final class DBLockSync {
         return null;
       }
 
-    if (o instanceof Vector)
+    if (o instanceof List)
       {
-        return (Vector<DBReadLock>) o;
+        return (List<DBReadLock>) o;
       }
 
-    throw new IllegalStateException("DBLockSync does not contain a readlock vector for key " + key);
+    throw new IllegalStateException("DBLockSync does not contain a readlock list for key " + key);
   }
 
   /**
-   * <p>This method returns a DBLock associated with the
-   * given key, if any.</p>
+   * <p>This method returns a DBLock associated with the given key, if
+   * any.</p>
    *
-   * <p>This method will only ever return a DBWriteLock or
-   * a DBDumpLock.  If the key is associated with a Vector
-   * of DBReadLocks, null will be returned.</p>
+   * <p>This method will only ever return a DBWriteLock or a
+   * DBDumpLock.  If the key is associated with a List of DBReadLocks,
+   * null will be returned.</p>
    */
 
   public synchronized DBLock getLockHeld(Object key)

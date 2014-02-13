@@ -6,7 +6,7 @@
    that allows IP addresses to be stored and processed in the Ganymede
    system.
 
-   Created: 20 May 1998
+   Created: 12 August 2013
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -378,6 +378,10 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
         return text;
       }
 
+    // synchronize on a handy private monitor so we won't accidentally
+    // waste our time generating the string twice if two threads ask
+    // concurrently
+
     synchronized (this.address)
       {
         if (text == null)
@@ -430,7 +434,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
   public final static byte u2s(int x)
   {
-    if ((x < 0) || (x > 255))
+    if (x < 0 || x > 255)
       {
         throw new IllegalArgumentException("Out of range: " + x);
       }
@@ -453,7 +457,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
     for (int i = 0; i < octets.length; i++)
       {
-        if ((octets[i] < 0) || (octets[i] > 255))
+        if (octets[i] < 0 || octets[i] > 255)
           {
             throw new IllegalArgumentException("Out of range: " + octets[i]);
           }
@@ -479,7 +483,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
     for (int i = 0; i < octets.length; i++)
       {
-        if ((octets[i] < 0) || (octets[i] > 255))
+        if (octets[i] < 0 || octets[i] > 255)
           {
             throw new IllegalArgumentException("Out of range: " + octets[i]);
           }
@@ -636,7 +640,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
       {
         temp.setLength(0);
 
-        while ((length < cAry.length) && (cAry[length] != '.'))
+        while (length < cAry.length && cAry[length] != '.')
           {
             temp.append(cAry[length++]);
           }
@@ -802,7 +806,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
         throw new IllegalArgumentException("Invalid IP Address (bad mixed IPv4/IPv6 address): " + input);
       }
 
-    if ((colonCount == 0) && (dotCount != 0))
+    if (colonCount == 0 && dotCount != 0)
       {
         // we've got an IPv4 address where we would like an IPv6 address.  Convert it.
 
@@ -841,7 +845,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
       {
         temp.setLength(0);
 
-        while ((length < v4v6boundary) && (cAry[length] != ':'))
+        while (length < v4v6boundary && cAry[length] != ':')
           {
             temp.append(cAry[length++]);
           }
@@ -1034,7 +1038,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
             localHi = j-1;
 
-            if ((localHi - localLo) > (hiCompress - loCompress))
+            if (localHi - localLo > hiCompress - loCompress)
               {
                 hiCompress = localHi;
                 loCompress = localLo;

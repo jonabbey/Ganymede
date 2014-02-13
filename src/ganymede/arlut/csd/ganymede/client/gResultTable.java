@@ -13,8 +13,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996 - 2011
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -61,9 +63,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -94,19 +97,21 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Client internal window for displaying the results of a
- * query {@link arlut.csd.ganymede.rmi.Session#dump(arlut.csd.ganymede.common.Query) dump}
- * in a table form.</p>
+ * <p>Client internal window for displaying the results of a query
+ * {@link
+ * arlut.csd.ganymede.rmi.Session#dump(arlut.csd.ganymede.common.Query)
+ * dump} in a table form.</p>
  *
- * <p>This window is created when {@link arlut.csd.ganymede.client.windowPanel windowPanel}'s
- * {@link arlut.csd.ganymede.client.windowPanel#addTableWindow(arlut.csd.ganymede.rmi.Session,
- * arlut.csd.ganymede.common.Query,arlut.csd.ganymede.common.DumpResult) addTableWindow}
- * method is called.</p>
+ * <p>This window is created when {@link
+ * arlut.csd.ganymede.client.windowPanel windowPanel}'s {@link
+ * arlut.csd.ganymede.client.windowPanel#addTableWindow(arlut.csd.ganymede.rmi.Session,
+ * arlut.csd.ganymede.common.Query,arlut.csd.ganymede.common.DumpResult)
+ * addTableWindow} method is called.</p>
  *
  * <p>Note that windowPanel's addTableWindow method is called from
- * {@link arlut.csd.ganymede.client.gclient gclient}'s actionPerformed method,
- * which spawns a separate thread in which the query is performed and
- * the gResultTable window is created.</p>
+ * {@link arlut.csd.ganymede.client.gclient gclient}'s actionPerformed
+ * method, which spawns a separate thread in which the query is
+ * performed and the gResultTable window is created.</p>
  *
  * <p>Constructors for this class take a {@link
  * arlut.csd.ganymede.common.Query Query} object describing the query
@@ -261,14 +266,14 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
       }
 
     int rows = results.resultSize();
-    Vector headerVect = results.getHeaders();
+    List<String> headers = results.getHeaders();
 
     // calculate which columns are not used, so we can exclude them
 
-    boolean used[] = new boolean[headerVect.size()];
+    boolean used[] = new boolean[headers.size()];
     int colsUsed = 0;
 
-    for (int j = 0; j < headerVect.size(); j++)
+    for (int j = 0; j < headers.size(); j++)
       {
         used[j] = false;
 
@@ -290,18 +295,18 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     if (debug)
       {
-        System.err.println("gResultTable: " + headerVect.size() + " headers returned by query, " + colsUsed + " in use.");
+        System.err.println("gResultTable: " + headers.size() + " headers returned by query, " + colsUsed + " in use.");
       }
 
     String[] columnNames = new String[colsUsed];
 
     // Get all used Column Names now
 
-    for (int j=0, k=0; j < headerVect.size(); j++)
+    for (int j=0, k=0; j < headers.size(); j++)
       {
         if (used[j])
           {
-            columnNames[k] = (String) headerVect.elementAt(j);
+            columnNames[k] = headers.get(j);
 
             if (debug)
               {
@@ -326,7 +331,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
         Invid invid = results.getInvid(i);
         sTable.newRow(invid);
 
-        for (int j=0, k=0; j < headerVect.size(); j++)
+        for (int j=0, k=0; j < headers.size(); j++)
           {
             if (used[j])
               {
@@ -508,15 +513,15 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   public void sendReport(boolean mailit)
   {
     SaveDialog dialog = new SaveDialog(wp.gc, mailit);
-    Vector formatChoices = new Vector();
     String addresses;
     String format;
     StringBuffer report = null;
+    List<String> formatChoices = new ArrayList<String>();
 
-    formatChoices.addElement(tab_option);
-    formatChoices.addElement(csv_option);
-    formatChoices.addElement(html_option);
-    formatChoices.addElement(xml_option);
+    formatChoices.add(tab_option);
+    formatChoices.add(csv_option);
+    formatChoices.add(html_option);
+    formatChoices.add(xml_option);
 
     dialog.setFormatChoices(formatChoices);
 
@@ -786,35 +791,35 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // this may not be an issue.
 
     result.append("<html>\n");
-    result.append("<head>\n");
-    result.append("<title>Ganymede Table Dump - ");
+    result.append("  <head>\n");
+    result.append("    <title>Ganymede Table Dump - ");
     result.append(date);
     result.append("</title>\n");
-    result.append("</head>\n");
-    result.append("<body bgcolor=\"#FFFFFF\">\n");
-    result.append("<h1>Ganymede Table Dump - ");
+    result.append("  </head>\n");
+    result.append("  <body bgcolor=\"#FFFFFF\">\n");
+    result.append("    <h1>Ganymede Table Dump - ");
     result.append(date);
     result.append("</h1>\n");
-    result.append("<hr>\n");
-    result.append("<table border>\n");
-    result.append("<tr>\n");
+    result.append("    <hr/>\n");
+    result.append("    <table border>\n");
+    result.append("      <tr>\n");
 
     for (int i = 0; i < colcount; i++)
       {
-        result.append("<th>");
+        result.append("        <th>");
         result.append(sTable.getColumnName(i));
         result.append("</th>\n");
       }
 
-    result.append("</tr>\n");
+    result.append("      </tr>\n");
 
     for (int i = 0; i < size; i++)
       {
-        result.append("<tr>\n");
+        result.append("      <tr>\n");
 
         for (int j = 0; j < colcount; j++)
           {
-            result.append("<td>");
+            result.append("        <td>");
 
             Object value = sTable.getValueAt(i, j);
 
@@ -827,10 +832,13 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
             result.append("</td>\n");
           }
 
-        result.append("</tr>\n");
+        result.append("      </tr>\n");
       }
 
-    result.append("</table><hr></body></html>\n");
+    result.append("    </table>\n");
+    result.append("    <hr/>\n");
+    result.append("  </body>\n");
+    result.append("</html>\n");
 
     return result;
   }

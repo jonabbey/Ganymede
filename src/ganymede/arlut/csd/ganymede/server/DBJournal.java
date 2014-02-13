@@ -104,7 +104,6 @@ import arlut.csd.ganymede.rmi.db_field;
 public final class DBJournal implements ObjectStatus {
 
   static boolean debug = false;
-  static DBStore store = null;
 
   public static void setDebug(boolean val)
   {
@@ -132,6 +131,8 @@ public final class DBJournal implements ObjectStatus {
 
   // instance variables
 
+  private final DBStore store;
+
   String filename;
   RandomAccessFile jFile = null;
   boolean dirty = false;        // dirty is true if the journal has any
@@ -149,7 +150,7 @@ public final class DBJournal implements ObjectStatus {
 
   /* -- */
 
-  static void initialize(DataOutput out) throws IOException
+  static void initialize(DataOutput out, DBStore store) throws IOException
   {
     out.writeUTF(DBJournal.id_string);
     out.writeShort(DBJournal.major_version);
@@ -206,7 +207,7 @@ public final class DBJournal implements ObjectStatus {
         // "Writing DBStore Journal header"
         debug(ts.l("init.writing"));
 
-        initialize(jFile);
+        initialize(jFile, this.store);
 
         dirty = false;
       }
@@ -364,7 +365,7 @@ public final class DBJournal implements ObjectStatus {
     debug(ts.l("reset.freshness", filename));
 
     jFile = new RandomAccessFile(filename, "rw");
-    initialize(jFile);
+    initialize(jFile, this.store);
     jFile.getFD().sync();
 
     dirty = false;

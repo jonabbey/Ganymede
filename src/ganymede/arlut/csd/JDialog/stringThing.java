@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -61,6 +61,8 @@ package arlut.csd.JDialog;
  */
 
 public class stringThing implements java.io.Serializable {
+
+  static final long serialVersionUID = -6210665552537616543L;
 
   String stringLabel;
   String value;

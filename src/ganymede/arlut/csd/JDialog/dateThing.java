@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -64,17 +64,35 @@ import java.util.Date;
 
 public class dateThing implements java.io.Serializable {
 
-  String stringLabel;
-  Date currentDate;
-  Date maxDate;
+  static final long serialVersionUID = 8718087676857868186L;
+
+  private final String stringLabel;
+  private final Date currentDate;
+  private final Date maxDate;
 
   /* -- */
 
   public dateThing(String label, Date currentDate, Date maxDate)
   {
     this.stringLabel = label;
-    this.currentDate = currentDate;
-    this.maxDate = maxDate;
+
+    if (currentDate != null)
+      {
+        this.currentDate = new Date(currentDate.getTime());
+      }
+    else
+      {
+        this.currentDate = null;
+      }
+
+    if (maxDate != null)
+      {
+        this.maxDate = new Date(maxDate.getTime());
+      }
+    else
+      {
+        this.maxDate = null;
+      }
   }
 
   public String getLabel()
@@ -84,12 +102,21 @@ public class dateThing implements java.io.Serializable {
 
   public Date getDate()
   {
-    return currentDate;
+    if (currentDate == null)
+      {
+        return null;
+      }
+
+    return new Date(currentDate.getTime());
   }
 
   public Date getMaxDate()
   {
-    return maxDate;
-  }
+    if (maxDate == null)
+      {
+        return null;
+      }
 
+    return new Date(maxDate.getTime());
+  }
 }

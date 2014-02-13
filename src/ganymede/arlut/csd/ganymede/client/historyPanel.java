@@ -3,17 +3,19 @@
 
    Tab panel for the Ganymede client that shows historical metadata
    and allows retrieval of history text for object windows.
-   
+
    Created: 9 September 1997
 
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -143,10 +145,10 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     historyBuffer = new StringBuffer();
 
   /* -- */
-  
-  public historyPanel(Invid invid, 
-                      gclient gc, 
-                      string_field    creator_field, 
+
+  public historyPanel(Invid invid,
+                      gclient gc,
+                      string_field    creator_field,
                       date_field      creation_date_field,
                       string_field    modifier_field,
                       date_field      modification_date_field)
@@ -226,20 +228,20 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     buttonPanel.add(showHistory);
 
     JPanel midPanel = new JPanel(new BorderLayout());
-    midPanel.add("West",  new datesPanel(creator_field, creation_date_field, 
+    midPanel.add("West",  new datesPanel(creator_field, creation_date_field,
                                          modifier_field, modification_date_field));;
 
     topPanel.add("North", midPanel);
     // "Creation/Modification"
     topPanel.setBorder(new TitledBorder(ts.l("init.top_panel_border")));
-    
+
     JPanel p = new JPanel(new BorderLayout());
 
     // "Detailed History"
     p.setBorder(new TitledBorder(ts.l("init.bottom_panel_border")));
     fillPanel.add("West", buttonPanel);
     p.add("North", fillPanel);
-    
+
     historyText = new JTextArea();
     historyText.setEditable(false);
 
@@ -273,7 +275,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
     add("Center", split);
   }
-  
+
   public void actionPerformed(ActionEvent e)
   {
     if (e.getSource() == showHistory)
@@ -325,7 +327,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
               {
                 public Object run() throws Exception
                 {
-                  return gc.getSession().viewObjectHistory(invid, startDateField.getDate());
+                  return gc.getSession().viewAdminHistory(invid, startDateField.getDate());
                 }
               });
           }
@@ -431,8 +433,8 @@ class datesPanel extends JPanel {
   int row = 0;
 
   /* -- */
-  
-  public datesPanel(string_field    creator_field, 
+
+  public datesPanel(string_field    creator_field,
                     date_field      creation_date_field,
                     string_field    modifier_field,
                     date_field      modification_date_field)
@@ -446,18 +448,18 @@ class datesPanel extends JPanel {
     Date creation_date = null;
     String modifier = null;
     Date mod_date = null;
-    
+
     /* -- */
-    
+
     setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-    
+
     gbc = new GridBagConstraints();
     gbl = new GridBagLayout();
     setLayout(gbl);
-    
+
     gbc.anchor = GridBagConstraints.NORTHWEST;
     gbc.insets = new Insets(6,6,6,6);
-    
+
     try
       {
         if (creator_field != null)
@@ -484,7 +486,7 @@ class datesPanel extends JPanel {
       {
         gclient.client.processExceptionRethrow(rx, "Could not get object creation info: ");
       }
-    
+
     if (creator == null)
       {
         // "No Creator set for this object."
@@ -497,7 +499,7 @@ class datesPanel extends JPanel {
 
     // "Created By:"
     addRow(createdBy, ts.l("init.created_by"));
-    
+
     if (creation_date == null)
       {
         // "No Creation Date has been set for this object."
@@ -510,7 +512,7 @@ class datesPanel extends JPanel {
 
     // "Created On:"
     addRow(createdOn, ts.l("init.created_on"));
-    
+
     if (modifier == null)
       {
         // "No information about the last modifier."
@@ -523,7 +525,7 @@ class datesPanel extends JPanel {
 
     // "Last Modified By:"
     addRow(modifiedBy, ts.l("init.last_modified_by"));
-    
+
     if (mod_date == null)
       {
         // "No last modification date"
@@ -543,7 +545,7 @@ class datesPanel extends JPanel {
     JLabel l = new JLabel(title);
 
     /* -- */
-    
+
     gbc.gridwidth = 1;
     gbc.gridy = row;
 

@@ -335,7 +335,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * return null.
    */
 
-  public final DBObject getOriginal()
+  @Override public final DBObject getOriginal()
   {
     return original;
   }
@@ -363,6 +363,15 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   public final boolean isDeleting()
   {
     return deleting;
+  }
+
+  /**
+   * We'll use DBObject's identity-based equals
+   */
+
+  @Override public boolean equals(Object param)
+  {
+    return super.equals(param);
   }
 
   /**
@@ -3577,11 +3586,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   synchronized final void rollback(Hashtable<Short, Object> ckpoint)
   {
-    for (Short key: ckpoint.keySet())
+    for (Map.Entry<Short, Object> entry: ckpoint.entrySet())
       {
-        DBField field = retrieveField(key.shortValue());
-
-        Object value = ckpoint.get(key);
+        DBField field = retrieveField(entry.getKey().shortValue());
+        Object value = entry.getValue();
 
         // again, we use a reference to ourselves as a
         // hackish way of representing null in the

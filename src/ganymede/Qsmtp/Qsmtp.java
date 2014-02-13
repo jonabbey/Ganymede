@@ -62,7 +62,8 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.ProtocolException;
 import java.net.Socket;
@@ -726,7 +727,7 @@ public class Qsmtp implements Runnable, java.io.Closeable {
 
     DataInputStream replyStream = null;
     BufferedReader reply = null;
-    PrintWriter send = null;
+    PrintStream send = null;
 
     Socket sock = null;
 
@@ -768,8 +769,16 @@ public class Qsmtp implements Runnable, java.io.Closeable {
             sock.setSoTimeout(Qsmtp.messageTimeout);
 
             replyStream = new DataInputStream(sock.getInputStream());
-            reply = new BufferedReader(new InputStreamReader(replyStream));
-            send = new PrintWriter(sock.getOutputStream(), true);
+
+            try
+              {
+                reply = new BufferedReader(new InputStreamReader(replyStream, "US-ASCII"));
+                send = new PrintStream(sock.getOutputStream(), true, "US-ASCII");
+              }
+            catch (UnsupportedEncodingException ex)
+              {
+                throw new RuntimeException(ex);
+              }
 
             rstr = scanLine(reply);
 
@@ -951,6 +960,8 @@ public class Qsmtp implements Runnable, java.io.Closeable {
                     send.print("QUIT");
                     send.print(EOL);
                     send.flush();
+
+                    rstr = scanLine(reply);
                   }
                 catch (Throwable ioex)
                   {

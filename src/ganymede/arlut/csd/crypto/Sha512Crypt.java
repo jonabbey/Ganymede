@@ -43,6 +43,7 @@
 
 package arlut.csd.crypto;
 
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 
 /*------------------------------------------------------------------------------
@@ -87,6 +88,11 @@ public final class Sha512Crypt
   static private final int ROUNDS_MAX = 999999999;
   static private final String SALTCHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
   static private final String itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+  static private Charset UTF8()
+  {
+    return Charset.forName("UTF-8");
+  }
 
   static private MessageDigest getSHA512()
   {
@@ -144,7 +150,7 @@ public final class Sha512Crypt
         if (saltStr.startsWith(sha512_rounds_prefix))
           {
             String num = saltStr.substring(sha512_rounds_prefix.length(), saltStr.indexOf('$'));
-            int srounds = Integer.valueOf(num).intValue();
+            int srounds = Integer.parseInt(num);
             saltStr = saltStr.substring(saltStr.indexOf('$')+1);
             rounds = Math.max(ROUNDS_MIN, Math.min(srounds, ROUNDS_MAX));
             include_round_count = true;
@@ -189,8 +195,8 @@ public final class Sha512Crypt
         rounds = Math.max(ROUNDS_MIN, Math.min(roundsCount, ROUNDS_MAX));
       }
 
-    byte[] key = keyStr.getBytes();
-    byte[] salt = saltStr.getBytes();
+    byte[] key = keyStr.getBytes(UTF8());
+    byte[] salt = saltStr.getBytes(UTF8());
 
     ctx.reset();
     ctx.update(key, 0, key.length);
@@ -401,7 +407,7 @@ public final class Sha512Crypt
 
         try
           {
-            int srounds = Integer.valueOf(num).intValue();
+            Integer.parseInt(num);
           }
         catch (NumberFormatException ex)
           {

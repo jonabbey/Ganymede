@@ -112,23 +112,25 @@ import arlut.csd.ganymede.rmi.db_field;
  *
  * <p>Each DBField subclass is responsible for writing itself to disk
  * on command with the {@link
- * arlut.csd.ganymede.server.DBField#emit(java.io.DataOutput) emit()} method,
- * and reading its state in with the {@link
- * arlut.csd.ganymede.server.DBField#receive(java.io.DataInput, arlut.csd.ganymede.server.DBObjectBaseField) receive()}
- * method.  Each DBField subclass may also have extensive special
- * logic to handle special operations on fields of the appropriate
- * type.  For instance, the InvidDBField class has lots and lots of
- * logic for handling the bi-directional object linking that the
- * server depends on for its object handling.  Mostly the DBField
- * subclasses provide customization that modifies how things like
- * {@link arlut.csd.ganymede.server.DBField#setValue(java.lang.Object)
+ * arlut.csd.ganymede.server.DBField#emit(java.io.DataOutput) emit()}
+ * method, and reading its state in with the {@link
+ * arlut.csd.ganymede.server.DBField#receive(java.io.DataInput,
+ * arlut.csd.ganymede.server.DBObjectBaseField) receive()} method.
+ * Each DBField subclass may also have extensive special logic to
+ * handle special operations on fields of the appropriate type.  For
+ * instance, the InvidDBField class has lots and lots of logic for
+ * handling the bi-directional object linking that the server depends
+ * on for its object handling.  Mostly the DBField subclasses provide
+ * customization that modifies how things like {@link
+ * arlut.csd.ganymede.server.DBField#setValue(java.lang.Object)
  * setValue()} and {@link arlut.csd.ganymede.server.DBField#getValue()
- * getValue()} work, but PasswordDBField and PermissionMatrixDBField
- * don't fit with the standard generic value-container model, and
- * contain their own methods for manipulating and accessing data held
- * in the Ganymede database. Most DBField subclasses only allow a
- * single value to be held, but StringDBField, InvidDBField, and
- * IPDBField support vectors of values.</p>
+ * getValue()} work, but FieldOptionDBField, PasswordDBField and
+ * PermissionMatrixDBField don't fit with the standard generic
+ * value-container model, and contain their own methods for
+ * manipulating and accessing data held in the Ganymede database. Most
+ * DBField subclasses only allow a single value to be held, but
+ * StringDBField, InvidDBField, and IPDBField support vectors of
+ * values.</p>
  *
  * <p>The Ganymede client can directly access fields in RMI-published
  * objects using the {@link arlut.csd.ganymede.rmi.db_field db_field} RMI
@@ -1271,7 +1273,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public Object getValue() throws GanyPermissionsException
+  public synchronized Object getValue() throws GanyPermissionsException
   {
     if (!verifyReadPermission())
       {
@@ -1567,7 +1569,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public Vector getValues() throws GanyPermissionsException
+  public synchronized Vector getValues() throws GanyPermissionsException
   {
     if (!verifyReadPermission())
       {
@@ -1594,7 +1596,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public Object getElement(int index) throws GanyPermissionsException
+  public synchronized Object getElement(int index) throws GanyPermissionsException
   {
     if (!verifyReadPermission())
       {
@@ -1627,7 +1629,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p>For server-side use only, permissions are not checked.</p>
    */
 
-  public Object getElementLocal(int index)
+  public synchronized Object getElementLocal(int index)
   {
     if (!isVector())
       {
@@ -3200,7 +3202,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * local is false and permission is denied to read from this field.
    */
 
-  public final boolean containsElement(Object value, boolean local) throws GanyPermissionsException
+  public final synchronized boolean containsElement(Object value, boolean local) throws GanyPermissionsException
   {
     if (!local && !verifyReadPermission())
       {
@@ -3223,7 +3225,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * state and that of the prior oldField state.</p>
    */
 
-  public fieldDeltaRec getVectorDiff(DBField oldField)
+  public synchronized fieldDeltaRec getVectorDiff(DBField oldField)
   {
     if (!isVector())
       {
@@ -3567,7 +3569,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * verification.</p>
    */
 
-   public boolean verifyReadPermission(GanymedeSession gSession)
+   public synchronized boolean verifyReadPermission(GanymedeSession gSession)
    {
      if (gSession == null)
        {
@@ -3597,7 +3599,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * DBEditSet has permission to write values into this field.</p>
    */
 
-  public boolean verifyWritePermission()
+  public synchronized boolean verifyWritePermission()
   {
     if (!(owner instanceof DBEditObject))
       {
@@ -3670,7 +3672,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * the permissions checking that getValues() does.</p>
    */
 
-  public Object getValueLocal()
+  public synchronized Object getValueLocal()
   {
     if (isVector())
       {
@@ -3706,7 +3708,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * method.</p>
    */
 
-  public Object checkpoint()
+  public synchronized Object checkpoint()
   {
     if (isVector())
       {

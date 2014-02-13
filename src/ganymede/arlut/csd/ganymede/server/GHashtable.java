@@ -62,8 +62,7 @@ import java.util.Hashtable;
  * <p>GHashtable is a Hashtable subclass that can map
  * uppercase/lowercase keys of the same string to identity.  It does
  * this by basically mapping all strings to the lowercase version
- * internally.  The case sensitivity of the hashtable is specified at
- * hash creation time, and may not change thereafter.</p>
+ * internally.</p>
  */
 
 public final class GHashtable extends Hashtable {
@@ -73,7 +72,7 @@ public final class GHashtable extends Hashtable {
     return String.valueOf(x);
   }
 
-  private boolean caseInsensitive; // we don't allow this to change after creation
+  private boolean caseInsensitive;
 
   /* -- */
 

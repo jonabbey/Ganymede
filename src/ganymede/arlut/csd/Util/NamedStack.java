@@ -5,18 +5,19 @@
    A Stack object in which items on the stack are given names, to
    allow items on the stack at or after the occurrence of a given name
    to be popped in one operation.
-   
-   Created: 2 October 2000
 
+   Created: 2 October 2000
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -239,7 +240,7 @@ final public class NamedStack<E> {
     for (int i = stack.size()-1; i >= 0; i--)
       {
         NamedStackHandle handle = stack.elementAt(i);
-        
+
         result.append(i);
         result.append(" : ");
         result.append(handle.getName());

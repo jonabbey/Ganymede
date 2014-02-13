@@ -211,7 +211,7 @@ public final class Ganymede {
    * admin console.</p>
    */
 
-  static public Date startTime = new Date();
+  static final public Date startTime = new Date();
 
   /**
    * <p>If the server is started with propFilename on
@@ -1434,11 +1434,6 @@ public final class Ganymede {
       }
     catch (RuntimeException ex)
       {
-        if (bindingName == null)
-          {
-            bindingName = "unknown";
-          }
-
         // We're catching RuntimeException separately to placate
         // FindBugs.
         // "Couldn''t establish server binding {0}: "
@@ -1446,11 +1441,6 @@ public final class Ganymede {
       }
     catch (Exception ex)
       {
-        if (bindingName == null)
-          {
-            bindingName = "unknown";
-          }
-
         // "Couldn''t establish server binding {0}: "
         throw new GanymedeStartupException(ts.l("main.error_no_binding", bindingName) + ex, ex);
       }
@@ -1969,7 +1959,8 @@ public final class Ganymede {
                                 ts.l("registerTasks.memory_status_task"));
 
     // register garbage collection task without any schedule for
-    // execution.. this is so that the admin can launch it from theadmin console
+    // execution.. this is so that the admin can launch it from the
+    // admin console manually if she is feeling silly
 
     scheduler.addActionOnDemand(new gcTask(),
                                 ts.l("registerTasks.gc_task"));

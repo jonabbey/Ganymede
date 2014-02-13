@@ -276,7 +276,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * within.</p>
    */
 
-  private DBStore store;
+  final private DBStore store;
 
   /**
    * <p>Name of this object type</p>
@@ -1761,7 +1761,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * overridden methods for DBEditObject subclasses.</p>
    */
 
-  DBEditObject createHook() throws RemoteException
+  private DBEditObject createHook() throws RemoteException
   {
     if (classdef == null)
       {
@@ -2186,7 +2186,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * @see arlut.csd.ganymede.rmi.Base
    */
 
-  public String getName()
+  public synchronized String getName()
   {
     return object_name;
   }
@@ -2196,7 +2196,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * Guaranteed to be unique in the Ganymede server.
    */
 
-  public String getPath()
+  public synchronized String getPath()
   {
     if (category == null)
       {
@@ -2277,7 +2277,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * @see arlut.csd.ganymede.rmi.Base
    */
 
-  public String getClassName()
+  public synchronized String getClassName()
   {
     return classname;
   }
@@ -2288,7 +2288,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * classOptionString} for more details.</p>
    */
 
-  public String getClassOptionString()
+  public synchronized String getClassOptionString()
   {
     return classOptionString;
   }
@@ -2433,7 +2433,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Returns the class definition for this object type</p>
    */
 
-  public Class getClassDef()
+  public synchronized Class getClassDef()
   {
     return classdef;
   }
@@ -2557,7 +2557,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * @see arlut.csd.ganymede.rmi.Base
    */
 
-  public short getTypeID()
+  public synchronized short getTypeID()
   {
     return type_code;
   }

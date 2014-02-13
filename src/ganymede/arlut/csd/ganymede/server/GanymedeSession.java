@@ -21,7 +21,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -59,16 +59,11 @@
 package arlut.csd.ganymede.server;
 
 import java.io.IOException;
-import java.net.ProtocolException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.Unreferenced;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -299,7 +294,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * transaction support.</p>
    */
 
-  private DBSession dbSession;
+  final private DBSession dbSession;
 
   /**
    * Our DBQueryEngine object.  DBQueryEngine has all the routines for
@@ -307,14 +302,14 @@ final public class GanymedeSession implements Session, Unreferenced {
    * datastore with permission and transaction awareness.
    */
 
-  private DBQueryEngine queryEngine;
+  final private DBQueryEngine queryEngine;
 
   /**
    * Our DBPermissionManager object.  DBPermissionManager manages our
    * access privileges.
    */
 
-  private DBPermissionManager permManager;
+  final private DBPermissionManager permManager;
 
   /**
    * A GanymedeSession can have a single wizard active.  If this variable
@@ -438,12 +433,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     dbSession = new DBSession(Ganymede.db, this, sessionName);
     queryEngine = new DBQueryEngine(this, dbSession);
-    permManager = new DBPermissionManager(this).configureInternalSession(sessionName);
+    permManager = new DBPermissionManager(this, sessionName);
   }
 
   /**
    * <p>Constructor used to create a server-side attachment for a
-   * Ganymede user session.</p>
+   * Ganymede user or admin session.</p>
    *
    * <p>This constructor is called by the
    * {@link arlut.csd.ganymede.server server}
@@ -499,13 +494,13 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     this.dbSession = new DBSession(Ganymede.db, this, sessionName);
     this.queryEngine = new DBQueryEngine(this, dbSession);
-    this.permManager = new DBPermissionManager(this).configureClientSession(userObject, personaObject, sessionName);
+    this.permManager = new DBPermissionManager(this, userObject, personaObject, sessionName);
 
     this.loggedInSemaphore.set(true);
 
     // set our initial status
 
-    status = ts.l("init.loggedin");
+    status = ts.l("init.loggedin"); // "logged in"
     setLastEvent(ts.l("init.loggedin"));
   }
 
@@ -697,7 +692,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @see arlut.csd.ganymede.rmi.Session
    */
 
-  public Vector getPersonae() throws NotLoggedInException
+  public Vector<String> getPersonae() throws NotLoggedInException
   {
     checklogin();
 
@@ -767,6 +762,9 @@ final public class GanymedeSession implements Session, Unreferenced {
                                 permManager.getUserName()));
           }
       }
+
+    // permManager.selectPersona() calls abortTransaction() followed
+    // by openTransaction() to start a new transaction.
 
     success = permManager.selectPersona(newPersona, password);
 
@@ -1170,6 +1168,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (dbSession.editSet == null)
       {
+        // "Server: Error in commitTransaction()"
+        // "Error.. no transaction in progress"
         return Ganymede.createErrorDialog(this,
                                           ts.l("commitTransaction.error"),
                                           ts.l("commitTransaction.error_text"));
@@ -1251,6 +1251,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (dbSession.editSet == null)
       {
+        // "No transaction in progress"
         throw new IllegalArgumentException(ts.l("abortTransaction.exception"));
       }
 
@@ -1324,7 +1325,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     Qsmtp mailer;
     StringBuilder signature = new StringBuilder();
-    Vector addresses = new Vector();
+    Vector<String> addresses = new Vector<String>();
     StringTokenizer tokens = new StringTokenizer(address, ", ", false);
 
     /* -- */
@@ -1335,7 +1336,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         while (tokens.hasMoreElements())
           {
-            addresses.addElement(tokens.nextToken());
+            addresses.add(tokens.nextToken());
           }
 
         // create the signature
@@ -1402,7 +1403,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     Qsmtp mailer;
     StringBuilder asciiContent = new StringBuilder();
     StringBuilder signature = new StringBuilder();
-    Vector addresses = new Vector();
+    Vector<String> addresses = new Vector<String>();
     StringTokenizer tokens = new StringTokenizer(address, ", ", false);
 
     /* -- */
@@ -1413,7 +1414,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         while (tokens.hasMoreElements())
           {
-            addresses.addElement(tokens.nextToken());
+            addresses.add(tokens.nextToken());
           }
 
         // create the signature
@@ -1915,12 +1916,14 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (invid == null)
       {
+        // "Null invid passed into viewAdminHistory"
         setLastError(ts.l("viewAdminHistory.null_invid"));
         return null;
       }
 
     if (invid.getType() != SchemaConstants.PersonaBase)
       {
+        // "Wrong type of invid passed into viewAdminHistory"
         setLastError(ts.l("viewAdminHistory.wrong_invid"));
         return null;
       }
@@ -1931,17 +1934,20 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (obj == null)
       {
+        // "argh!! null object in viewAdminHistory on invid {0}"
         throw new NullPointerException(ts.l("viewAdminHistory.null_pointer", String.valueOf(invid)));
       }
 
     if (!permManager.getPerm(obj).isVisible())
       {
+        // "Permissions denied to view the history for this invid."
         setLastError(ts.l("viewObjectHistory.permissions"));
         return null;
       }
 
     if (Ganymede.log == null)
       {
+        // "Log not active, can''t view invid history"
         setLastError(ts.l("viewObjectHistory.no_log"));
         return null;
       }
@@ -2009,7 +2015,6 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Object Not Found"
         // "Could not find object {0} in the database.  Perhaps the object does not exist?"
-
         return Ganymede.createErrorDialog(this,
                                           ts.l("view_db_object.no_object_error"),
                                           ts.l("view_db_object.no_object_error_text", String.valueOf(invid)));
@@ -2051,9 +2056,13 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
     else
       {
+        // "Permissions Error"
+        // "Permission to view object [{0} - {1}] denied."
         return Ganymede.createErrorDialog(this,
                                           ts.l("global.permissions_error"),
-                                          ts.l("view_db_object.permissions_error_text", viewObjectLabel(invid), String.valueOf(invid)));
+                                          ts.l("view_db_object.permissions_error_text",
+                                               viewObjectLabel(invid),
+                                               String.valueOf(invid)));
       }
   }
 
@@ -2385,6 +2394,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (vObj == null)
       {
+        // "Can''t inactivate a non-existent object"
         setLastError(ts.l("inactivate_db_object.error_text"));
 
         // "Server: Error in inactivate_db_object()"
@@ -2407,6 +2417,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (!permManager.getPerm(vObj).isDeletable())
       {
+        // "Don''t have permission to inactivate {0} {1}"
         setLastError(ts.l("inactivate_db_object.permission_text",
                           vObj.getTypeName(),
                           vObj.getLabel()));
@@ -2852,6 +2863,32 @@ final public class GanymedeSession implements Session, Unreferenced {
   //************************************************************
 
   /**
+   * Method used by DBPermissionManager to ensure that any open
+   * transaction is closed and re-opened after a session is changed.
+   */
+
+  public synchronized void restartTransaction()
+  {
+    if (dbSession.editSet == null)
+      {
+        return;
+      }
+
+    String description = dbSession.editSet.description;
+    boolean interactive = dbSession.editSet.isInteractive();
+
+    try
+      {
+        abortTransaction();
+        openTransaction(description, interactive);
+      }
+    catch (NotLoggedInException ex)
+      {
+        throw new RuntimeException(ex);
+      }
+  }
+
+  /**
    * <p>This private method is called by all methods in
    * GanymedeSession that require the client to be logged in to
    * operate.</p>
@@ -3171,8 +3208,6 @@ final public class GanymedeSession implements Session, Unreferenced {
             // "{0} logged off"
             Ganymede.debug(ts.l("logout.logged_off", permManager.getUserName()));
           }
-
-        queryEngine = null;
       }
   }
 
@@ -3536,6 +3571,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
     else
       {
+        // "Tried to unregister a wizard that wasn''t registered"
         throw new IllegalArgumentException(ts.l("unregisterWizard.exception"));
       }
   }
@@ -3811,7 +3847,7 @@ final public class GanymedeSession implements Session, Unreferenced {
                 // message and just wait another couple of minutes for
                 // the forceoff.
 
-                if (permManager.isElevated())
+                if (permManager.isUserLinked())
                   {
                     // "Sending a timeout message to {0}"
                     System.err.println(ts.l("timeCheck.sending", this.toString()));

@@ -551,6 +551,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
         String username = (String) getFieldValueLocal(userSchema.USERNAME);
         String badge = (String) getFieldValueLocal(userSchema.BADGE);
 
+        if (badge == null || badge.trim().equals(""))
+          {
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              "Badge Number Required",
+                                              "The " + username + " user object is categorized as a " + categoryName + " account, and requires a badge number.");
+          }
+
         // if we have a SQL exception thrown, we'll catch and log it,
         // but we won't block user creation / edit.
 

@@ -219,7 +219,7 @@ public final class DBEditSet {
    * to keep track of check points performed during the course of this transaction.
    */
 
-  private NamedStack checkpoints = new NamedStack();
+  private NamedStack<DBCheckPoint> checkpoints = new NamedStack<DBCheckPoint>();
 
   /**
    * <p>The writelock acquired during the course of a commit attempt.  We keep
@@ -758,7 +758,7 @@ public final class DBEditSet {
 
     // see if we can find the checkpoint
 
-    point = (DBCheckPoint) checkpoints.pop(name);
+    point = checkpoints.pop(name);
 
     if (point == null)
       {
@@ -799,16 +799,16 @@ public final class DBEditSet {
   }
 
   /**
-   * <p>This brings this transaction back to the state it was
-   * at at the time of the matching checkPoint() call.  Any
-   * objects that were checked out in care of this transaction
-   * since the checkPoint() will be checked back into the
-   * database and made available for other transactions to
-   * access.  All namespace changes made by this transaction
-   * will likewise be rolled back to their state at the
-   * checkpoint.</p>
+   * <p>This brings this transaction back to the state it was at at
+   * the time of the matching checkPoint() call.  Any objects that
+   * were checked out in care of this transaction since the
+   * checkPoint() will be checked back into the database and made
+   * available for other transactions to access.  All namespace
+   * changes made by this transaction will likewise be rolled back to
+   * their state at the checkpoint.</p>
    *
    * @param name An identifier for the checkpoint to be rolled back to.
+   * @return true if the rollback could be performed, false otherwise
    */
 
   public synchronized boolean rollback(String name)
@@ -825,14 +825,17 @@ public final class DBEditSet {
 
         this.mustAbort = true;
 
-        try
+        if (false)
           {
-            // "rollback() called in non-interactive transaction"
-            throw new RuntimeException(ts.l("rollback.non_interactive"));
-          }
-        catch (RuntimeException ex)
-          {
-            Ganymede.logError(ex);
+            try
+              {
+                // "rollback() called in non-interactive transaction"
+                throw new RuntimeException(ts.l("rollback.non_interactive"));
+              }
+            catch (RuntimeException ex)
+              {
+                Ganymede.logError(ex);
+              }
           }
 
         return false;
@@ -2358,7 +2361,7 @@ public final class DBEditSet {
 
         base.put(new DBObject(eObj));
 
-        // (note that we can't use a no-sync put above, since
+        // note that we can't use a no-sync put above, since
         // we don't prevent asynchronous viewDBObject().
 
         if (getGSession() != null)
@@ -2384,7 +2387,7 @@ public final class DBEditSet {
 
         base.remove(eObj.getID());
 
-        // (note that we can't use a no-sync remove above, since
+        // note that we can't use a no-sync remove above, since
         // we don't prevent asynchronous viewDBObject().
 
         session.GSession.checkIn(); // *synchronized*

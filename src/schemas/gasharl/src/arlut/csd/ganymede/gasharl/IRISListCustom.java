@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -73,7 +73,7 @@ import arlut.csd.ganymede.server.GanymedeSession;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                 IRISListCustom
+                                                                  IRISListCustom
 
 ------------------------------------------------------------------------------*/
 
@@ -196,8 +196,8 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
     // them.
 
     if ((targetFieldID == SchemaConstants.BackLinksField) &&
-        (sourceObject.getTypeID() == 274) && // email list
-        (sourceFieldID == 257)) // email list members
+        (sourceObject.getTypeID() == emailListSchema.BASE) &&
+        (sourceFieldID == emailListSchema.MEMBERS))
       {
         return true;
       }

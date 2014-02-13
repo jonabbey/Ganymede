@@ -67,6 +67,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -205,6 +206,14 @@ public final class DBStore implements JythonMap {
    */
 
   private Object transactionNumberLock = new Object();
+
+  /**
+   * An unmodifiable List of DBObjectBases that need to be locked by
+   * {@link arlut.csd.ganymede.server.DBPermissionManager
+   * DBPermissionManager} when doing permissions gathering.
+   */
+
+  private List<DBObjectBase> permObjectBases;
 
   /**
    * <p>Convenience function to find and return objects from the database
@@ -1365,6 +1374,44 @@ public final class DBStore implements JythonMap {
   }
 
   /**
+   * Returns an unmodifiable List of valid DBObjectBase objects that
+   * need to be locked by {@link
+   * arlut.csd.ganymede.server.DBPermissionManager
+   * DBPermissionManager} when it gathers permissions in {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#updatePerms()}
+   */
+
+  public List<DBObjectBase> getPermBases()
+  {
+    synchronized (objectBases)
+      {
+        if (permObjectBases != null)
+          {
+            return permObjectBases;
+          }
+
+        List<DBObjectBase> basesToLock = (List<DBObjectBase>) new ArrayList();
+
+        basesToLock.add(getObjectBase(SchemaConstants.OwnerBase));
+        basesToLock.add(getObjectBase(SchemaConstants.RoleBase));
+        basesToLock.add(getObjectBase(SchemaConstants.PersonaBase));
+
+        permObjectBases = Collections.unmodifiableList(basesToLock);
+
+        return permObjectBases;
+      }
+  }
+
+  /**
+   * Performs book-keeping when a schema edit is committed.
+   */
+
+  public void finishSchemaEditCommit()
+  {
+    this.permObjectBases = null;
+  }
+
+  /**
    * Method to replace/add a DBObjectBase in the DBStore.
    */
 
@@ -1674,10 +1721,6 @@ public final class DBStore implements JythonMap {
 
         b.setLabelField(SchemaConstants.OwnerNameField);
 
-        // link in the class we specified
-
-        b.createHook();
-
         // and link in the base to this DBStore
 
         setBase(b);
@@ -1773,10 +1816,6 @@ public final class DBStore implements JythonMap {
 
         b.setLabelField(SchemaConstants.PersonaLabelField);
 
-        // link in the class we specified
-
-        b.createHook();
-
         // and link in the base to this DBStore
 
         setBase(b);
@@ -1830,10 +1869,6 @@ public final class DBStore implements JythonMap {
         b.addFieldToEnd(bf);
 
         b.setLabelField(SchemaConstants.RoleName);
-
-        // link in the class we specified
-
-        b.createHook();
 
         // and link in the base to this DBStore
 
@@ -1906,10 +1941,6 @@ public final class DBStore implements JythonMap {
         b.addFieldToEnd(bf);
 
         b.setLabelField(SchemaConstants.EventToken);
-
-        // link in the class we specified
-
-        b.createHook();
 
         // and link in the base to this DBStore
 
@@ -1997,10 +2028,6 @@ public final class DBStore implements JythonMap {
         // set the label field
 
         b.setLabelField(SchemaConstants.ObjectEventLabel);
-
-        // link in the class we specified
-
-        b.createHook();
 
         // and link in the base to this DBStore
 
@@ -2121,10 +2148,6 @@ public final class DBStore implements JythonMap {
 
         b.setLabelField(SchemaConstants.TaskName);
 
-        // link in the class we specified
-
-        b.createHook();
-
         // and record the base
 
         setBase(b);
@@ -2200,10 +2223,6 @@ public final class DBStore implements JythonMap {
         b.addFieldToEnd(bf);
 
         b.setLabelField(SchemaConstants.SyncChannelName);
-
-        // link in the class we specified
-
-        b.createHook();
 
         // and record the base
 
@@ -2327,10 +2346,6 @@ public final class DBStore implements JythonMap {
             b.addFieldToEnd(bf);
 
             b.setLabelField(SchemaConstants.SyncChannelName);
-
-            // link in the class we specified
-
-            b.createHook();
 
             setBase(b);
           }
@@ -2523,7 +2538,7 @@ public final class DBStore implements JythonMap {
 
     /* -- */
 
-    // manually insert the root (supergash) admin object
+    // create a 'supergash' session to work with
 
     try
       {

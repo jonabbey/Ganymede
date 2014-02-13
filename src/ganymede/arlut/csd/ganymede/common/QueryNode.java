@@ -17,7 +17,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -60,10 +60,12 @@ package arlut.csd.ganymede.common;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>A QueryNode is a node in a serialized {@link arlut.csd.ganymede.common.Query Query}
- * tree.  The QueryNodes form a tree of boolean operators and comparison nodes
- * that are submitted to the server by the client, and which are interpreted
- * by the {@link arlut.csd.ganymede.server.DBQueryHandler DBQueryHandler}.</P>
+ * <p>A QueryNode is a node in a serialized {@link
+ * arlut.csd.ganymede.common.Query Query} tree.  The QueryNodes form a
+ * tree of boolean operators and comparison nodes that are submitted
+ * to the server by the client, and which are interpreted by the
+ * {@link arlut.csd.ganymede.server.DBQueryHandler
+ * DBQueryHandler}.</p>
  */
 
 public abstract class QueryNode implements java.io.Serializable {

@@ -492,15 +492,14 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public DBObject(DBObject original, GanymedeSession gSession)
   {
-    this.gSession = gSession;
-    this.myInvid = original.myInvid;
-    this.objectBase = original.objectBase;
-
     if (original == null || original.fieldAry == null)
       {
         throw new NullPointerException(ts.l("global.pseudostatic_constructor"));
       }
 
+    this.gSession = gSession;
+    this.myInvid = original.myInvid;
+    this.objectBase = original.objectBase;
     this.permCacheAry = new PermEntry[original.fieldAry.length];
 
     synchronized (original.fieldAry)
@@ -756,6 +755,17 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   public final DBObjectBase getBase()
   {
     return objectBase;
+  }
+
+  /**
+   * Returns the original version of the object that we were created
+   * to edit.  If we are a newly created object, this method will
+   * return null.
+   */
+
+  public DBObject getOriginal()
+  {
+    return this;
   }
 
   /**
@@ -1568,6 +1578,28 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
             i++;
           }
       }
+  }
+
+  /**
+   * <p>Returns true if this object contains the given field id.</p>
+   *
+   * <p>Not permission checked, server-side only.</p>
+   */
+
+  public final boolean containsField(short id)
+  {
+    return (retrieveField(id) != null);
+  }
+
+  /**
+   * <p>Returns true if this object contains the given field id.</p>
+   *
+   * <p>Not permission checked, server-side only.</p>
+   */
+
+  public final boolean containsField(String fieldName)
+  {
+    return (retrieveField(fieldName) != null);
   }
 
   /**

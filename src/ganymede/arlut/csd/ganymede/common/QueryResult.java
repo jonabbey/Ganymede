@@ -14,7 +14,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -164,12 +164,10 @@ public class QueryResult implements java.io.Serializable {
   }
 
   /**
-   *
    * This method is used to add an object's information to
    * the QueryResult's serializable buffer.  It is intended
    * to be called on the server, but may also be called on
    * the client for result augmentation.
-   *
    */
 
   public void addRow(Invid invid, String label, boolean editable)
@@ -178,12 +176,10 @@ public class QueryResult implements java.io.Serializable {
   }
 
   /**
-   *
    * This method is used to add an object's information to
    * the QueryResult's serializable buffer.  It is intended
    * to be called on the server, but may also be called on
    * the client for result augmentation.
-   *
    */
 
   public void addRow(ObjectHandle handle)
@@ -206,12 +202,10 @@ public class QueryResult implements java.io.Serializable {
   }
 
   /**
-   *
    * This method is used to add an object's information to
    * the QueryResult's serializable buffer.  It is intended
    * to be called on the server, but may also be called on
    * the client for result augmentation.
-   *
    */
 
   public synchronized void addRow(Invid invid, String label,
@@ -317,14 +311,11 @@ public class QueryResult implements java.io.Serializable {
           }
       }
 
-    if (label != null)
-      {
-        labelSet.add(label);
+    labelSet.add(label);
 
-        if (labelList != null)
-          {
-            labelList.add(label);
-          }
+    if (labelList != null)
+      {
+        labelList.add(label);
       }
 
     unpacked = false;

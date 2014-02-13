@@ -827,7 +827,6 @@ final public class DBLog implements java.io.Closeable {
               {
                 returnAddr = adminPersonaCustom.convertAdminInvidToString(event.admin,
                                                                           transaction.session);
-                returnAddrDesc = returnAddrDesc;
               }
             else
               {
@@ -1141,21 +1140,24 @@ final public class DBLog implements java.io.Closeable {
               {
                 name = event.adminName;
 
-                // skip any persona info after a colon in case the
-                // user tried logging in with admin privileges
-
-                if (name != null && name.indexOf(':') != -1)
+                if (name != null)
                   {
-                    name = name.substring(0, name.indexOf(':'));
-                  }
+                    // skip any persona info after a colon in case the
+                    // user tried logging in with admin privileges
 
-                // don't bother trying to send mail if the username
-                // attempted has a space in it, we know that won't fly
-                // as valid email address.
+                    if (name.indexOf(':') != -1)
+                      {
+                        name = name.substring(0, name.indexOf(':'));
+                      }
 
-                if (name.indexOf(' ') != -1)
-                  {
-                    name = null;
+                    // don't bother trying to send mail if the username
+                    // attempted has a space in it, we know that won't fly
+                    // as valid email address.
+
+                    if (name.indexOf(' ') != -1)
+                      {
+                        name = null;
+                      }
                   }
               }
           }
@@ -1279,11 +1281,6 @@ final public class DBLog implements java.io.Closeable {
       }
 
     mailSet = cleanupAddresses(mailSet);
-
-    // looking up the object name can be pricey, so we wait until we
-    // know we probably need to do it, here
-
-    String objectName = transSession.getGSession().getDBSession().getObjectLabel(objectInvid);
 
     // okay, we have some users interested in getting notified about this
     // object event..
@@ -2532,7 +2529,6 @@ final public class DBLog implements java.io.Closeable {
 
 class systemEventType {
 
-  String token;
   String name;
   String description;
   boolean mail;
@@ -2546,7 +2542,6 @@ class systemEventType {
 
   systemEventType(DBObject obj)
   {
-    token = getString(obj, SchemaConstants.EventToken);
     name = getString(obj, SchemaConstants.EventName);
     description = getString(obj, SchemaConstants.EventDescription);
     mail = getBoolean(obj, SchemaConstants.EventMailBoolean);
@@ -2630,7 +2625,6 @@ class objectEventType {
   String token;
   short objType;
   String name;
-  String description;
   List<String> addressList;
   boolean ccToSelf;
   boolean ccToOwners;
@@ -2644,7 +2638,6 @@ class objectEventType {
   {
     token = getString(obj, SchemaConstants.ObjectEventToken);
     name = getString(obj, SchemaConstants.ObjectEventName);
-    description = getString(obj, SchemaConstants.ObjectEventDescription);
     addressList = getAddresses(obj);
     ccToSelf = getBoolean(obj, SchemaConstants.ObjectEventMailToSelf);
     ccToOwners = getBoolean(obj, SchemaConstants.ObjectEventMailOwners);

@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -50,7 +50,7 @@
 
 package arlut.csd.ganymede.server;
 
-import java.util.Vector;
+import java.util.List;
 
 /*------------------------------------------------------------------------------
                                                                   abstract class
@@ -148,11 +148,11 @@ public abstract class DBLock {
    * <p>In order to prevent deadlocks, each individual lock must be
    * established on all applicable {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} at the time
-   * the lock is initially established.  baseSet is the Vector of
+   * the lock is initially established.  baseSet is the List of
    * DBObjectBases that this DBLock is/will be locked on.</p>
    */
 
-  Vector<DBObjectBase> baseSet;
+  List<DBObjectBase> baseSet;
 
   /**
    * <p>Will be true if a DBLock is successfully locked.</p>
@@ -223,10 +223,10 @@ public abstract class DBLock {
   /**
    * <p>Returns true if the lock has all of the {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects in
-   * the provided Vector locked.</p>
+   * the provided List locked.</p>
    */
 
-  boolean isLocked(Vector<DBObjectBase> bases)
+  boolean isLocked(List<DBObjectBase> bases)
   {
     synchronized (lockSync)
       {
@@ -237,10 +237,10 @@ public abstract class DBLock {
   /**
    * <p>Returns true if the lock has any of the {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects in
-   * the provided Vector locked.</p>
+   * the provided List locked.</p>
    */
 
-  boolean overlaps(Vector<DBObjectBase> bases)
+  boolean overlaps(List<DBObjectBase> bases)
   {
     synchronized (lockSync)
       {
@@ -354,9 +354,28 @@ public abstract class DBLock {
             returnString.append(", ");
           }
 
-        returnString.append(baseSet.elementAt(i).toString());
+        returnString.append(baseSet.get(i).toString());
       }
 
     return returnString.toString();
+  }
+
+  /**
+   * Utility method used when debugging is enabled in subclasses.
+   */
+
+  String getBaseNames(List<DBObjectBase> bases)
+  {
+    StringBuilder buf = new StringBuilder();
+
+    for (DBObjectBase base: bases)
+      {
+        buf.append("\n\t\t\t");
+        buf.append(base.getName());
+      }
+
+    buf.append("\n");
+
+    return buf.toString();
   }
 }

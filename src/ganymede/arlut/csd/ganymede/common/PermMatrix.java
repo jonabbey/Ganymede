@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -66,15 +66,15 @@ import arlut.csd.ganymede.server.PermissionMatrixDBField;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Serializable permissions matrix object, used to handle
- * permissions for a given user, admin, or role.</p>
+ * <p>Immutable, serializable permissions matrix object, used to
+ * handle permissions for a given user, admin, or role.</p>
  *
- * <p>This class stores a read-only Hashtable of
- * {@link arlut.csd.ganymede.common.PermEntry PermEntry} objects, organized by
- * object type and field id's.</p>
+ * <p>This class stores a Map of {@link
+ * arlut.csd.ganymede.common.PermEntry PermEntry} objects, organized
+ * by object type and field id's.</p>
  *
- * <p>The keys to the Hashtable are Strings that are encoded by the
- * static {@link
+ * <p>The keys to the Map are Strings that are encoded by the static
+ * {@link
  * arlut.csd.ganymede.server.PermissionMatrixDBField#matrixEntry(short,
  * short) matrixEntry()} methods defined in this class.  I probably
  * could have used some sort of class object for the key, but then I
@@ -95,7 +95,7 @@ import arlut.csd.ganymede.server.PermissionMatrixDBField;
  * and {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}.</p>
  */
 
-public class PermMatrix implements java.io.Serializable {
+public final class PermMatrix implements java.io.Serializable {
 
   static final boolean debug = false;
 
@@ -103,7 +103,7 @@ public class PermMatrix implements java.io.Serializable {
 
   // ---
 
-  private Hashtable<String, PermEntry> matrix;
+  private final Hashtable<String, PermEntry> matrix;
 
   /* -- */
 
@@ -157,30 +157,31 @@ public class PermMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>This method combines this PermMatrix with that
+   * <p>This method combines this PermMatrix with that
    * of orig.  The returned PermMatrix will allow
    * any access either of the source PermMatrices
-   * would.</P>
+   * would.</p>
    */
 
   public PermMatrix union(Hashtable<String, PermEntry> orig)
   {
-    return union(new PermMatrix(orig)); // this will cause a redundant copy, but who cares?
+    return this.union(new PermMatrix(orig));
   }
 
   /**
-   * <P>This method combines this PermMatrix with that of orig.  The
-   * returned PermMatrix will allow any access either of the source
-   * PermMatrices would.</P>
+   * <p>This method returns a PermMatrix that has the combined
+   * permissions of this PermMatrix and that of orig.  The returned
+   * PermMatrix will allow any access either of the source
+   * PermMatrices would.</p>
    *
-   * <P>Note that unlike all the other methods in PermMatrix, we are
+   * <p>Note that unlike all the other methods in PermMatrix, we are
    * handling inheritance of default permissions for an object base
    * into fields which do not have permissions specified.  We have
-   * to take this into account here in order to do a proper union.</P>
+   * to take this into account here in order to do a proper union.</p>
    *
-   * <P>As a consequence, this union() method is more complex than
+   * <p>As a consequence, this union() method is more complex than
    * you might expect.  That complexity really is needed.. don't
-   * mess with this unless you really, really know what you're doing.</P>
+   * mess with this unless you really, really know what you're doing.</p>
    */
 
   public synchronized PermMatrix union(PermMatrix orig)
@@ -192,18 +193,10 @@ public class PermMatrix implements java.io.Serializable {
 
     if (orig == null)
       {
-        return new PermMatrix(this);
+        return this;
       }
 
-    // duplicate orig as our starting point.  we'll then union
-    // anything in this PermMatrix on top of orig in result
-
-    //    result = new PermMatrix(orig);
     result = new PermMatrix();
-
-    // now go through our matrix and for any entries in this.matrix,
-    // put the union of that and the matching entry already in result
-    // into result.
 
     for (String key: this.matrix.keySet())
       {
@@ -285,11 +278,11 @@ public class PermMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Returns a PermEntry object representing this PermMatrix's
-   * permissions on the field &lt;fieldID&gt; in base &lt;baseID&gt;</P>
+   * <p>Returns a PermEntry object representing this PermMatrix's
+   * permissions on the field &lt;fieldID&gt; in base &lt;baseID&gt;</p>
    *
-   * <P>If there is no entry in this PermMatrix for the given field,
-   * getPerm() will return null.</P>
+   * <p>If there is no entry in this PermMatrix for the given field,
+   * getPerm() will return null.</p>
    *
    * @see arlut.csd.ganymede.common.PermMatrix
    */
@@ -300,8 +293,8 @@ public class PermMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Returns a PermEntry object representing this PermMatrix's
-   * permissions on the base &lt;baseID&gt;</P>
+   * <p>Returns a PermEntry object representing this PermMatrix's
+   * permissions on the base &lt;baseID&gt;</p>
    *
    * @see arlut.csd.ganymede.common.PermMatrix
    */
@@ -312,8 +305,8 @@ public class PermMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Returns a PermEntry object representing this PermMatrix's
-   * permissions on the field &lt;field&gt; in base &lt;base&gt;</P>
+   * <p>Returns a PermEntry object representing this PermMatrix's
+   * permissions on the field &lt;field&gt; in base &lt;base&gt;</p>
    *
    * @see arlut.csd.ganymede.common.PermMatrix
    */
@@ -331,8 +324,8 @@ public class PermMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Returns a PermEntry object representing this PermMatrix's
-   * permissions on the base &lt;base&gt;</P>
+   * <p>Returns a PermEntry object representing this PermMatrix's
+   * permissions on the base &lt;base&gt;</p>
    *
    * @see arlut.csd.ganymede.common.PermMatrix
    */
@@ -350,11 +343,11 @@ public class PermMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Private method to generate a key for use in
+   * <p>Private method to generate a key for use in
    * our internal Hashtable, used to encode the
    * permission for a given {@link arlut.csd.ganymede.server.DBObjectBase
    * DBObjectBase} and {@link arlut.csd.ganymede.server.DBObjectBaseField
-   * DBObjectBaseField}.</P>
+   * DBObjectBaseField}.</p>
    */
 
   private String matrixEntry(short baseID, short fieldID)
@@ -363,10 +356,10 @@ public class PermMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Private method to generate a key for use in
+   * <p>Private method to generate a key for use in
    * our internal Hashtable, used to encode the
    * permission for a given {@link arlut.csd.ganymede.server.DBObjectBase
-   * DBObjectBase}.</P>
+   * DBObjectBase}.</p>
    */
 
   private String matrixEntry(short baseID)
@@ -375,9 +368,9 @@ public class PermMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Returns true if the given String encodes the identity of
+   * <p>Returns true if the given String encodes the identity of
    * a {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} and
-   * not a field within a DBObjectBase.</P>
+   * not a field within a DBObjectBase.</p>
    */
 
   private boolean isBasePerm(String matrixEntry)
@@ -386,8 +379,8 @@ public class PermMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Private helper method used to decode a hash key generated
-   * by the matrixEntry() methods.</P>
+   * <p>Private helper method used to decode a hash key generated
+   * by the matrixEntry() methods.</p>
    *
    * @return Returns the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * object id encoded by the given String.
@@ -413,8 +406,8 @@ public class PermMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Private helper method used to decode a hash key generated
-   * by the matrixEntry() methods.</P>
+   * <p>Private helper method used to decode a hash key generated
+   * by the matrixEntry() methods.</p>
    *
    * @return Returns the
    * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}
@@ -446,9 +439,9 @@ public class PermMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Private helper method used to generate a matrixEntry() encoded String
+   * <p>Private helper method used to generate a matrixEntry() encoded String
    * for a single  {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} from
-   * a matrixEntry() encoded String that also includes a field specification.</P>
+   * a matrixEntry() encoded String that also includes a field specification.</p>
    */
 
   private String baseEntry(String matrixEntry)
@@ -464,7 +457,7 @@ public class PermMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Debugging output</P>
+   * <p>Debugging output</p>
    */
 
   public String toString()

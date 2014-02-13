@@ -47,6 +47,7 @@
 
 package arlut.csd.ganymede.common;
 
+import java.io.InputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -96,6 +97,8 @@ public class BuildInfo {
   private static String buildHost = null;
   private static String buildJVM = null;
   private static String releaseString = null;
+  private static String serverHost = null;
+  private static String serverPort = null;
 
   // We're going to load all our properties and build all of our
   // strings up front so that we can pop up the 'About Ganymede'
@@ -109,23 +112,41 @@ public class BuildInfo {
     getBuildJVM();
     getBuildHost();
     getReleaseString();
+    getServerHost();
+    getServerPort();
   }
 
   // ---
 
   private synchronized static void loadProps()
   {
+    InputStream inStream = null;
+
     try
       {
-        properties.load(BuildInfo.class.getResourceAsStream("build.properties"));
+        inStream = BuildInfo.class.getResourceAsStream("build.properties");
+        properties.load(inStream);
         getBuildDate();
       }
     catch (IOException ex)
       {
       }
+    finally
+      {
+        if (inStream != null)
+          {
+            try
+              {
+                inStream.close();
+              }
+            catch (IOException ex)
+              {
+              }
+          }
+      }
   }
 
-  public static Date getBuildDate()
+  public synchronized static Date getBuildDate()
   {
     if (BuildInfo.buildDate == null)
       {
@@ -140,10 +161,15 @@ public class BuildInfo {
           }
       }
 
-    return BuildInfo.buildDate;
+    if (BuildInfo.buildDate == null)
+      {
+        return null;
+      }
+
+    return new Date(BuildInfo.buildDate.getTime());
   }
 
-  public static String getBuildJVM()
+  public synchronized static String getBuildJVM()
   {
     if (BuildInfo.buildJVM == null)
       {
@@ -153,7 +179,7 @@ public class BuildInfo {
     return BuildInfo.buildJVM;
   }
 
-  public static String getBuildHost()
+  public synchronized static String getBuildHost()
   {
     if (BuildInfo.buildHost == null)
       {
@@ -168,7 +194,7 @@ public class BuildInfo {
    * Ganymede dialog and elsewhere.</p>
    */
 
-  public static String getReleaseString()
+  public synchronized static String getReleaseString()
   {
     if (BuildInfo.releaseString == null)
       {
@@ -179,5 +205,25 @@ public class BuildInfo {
       }
 
     return BuildInfo.releaseString;
+  }
+
+  public synchronized static String getServerHost()
+  {
+    if (BuildInfo.serverHost == null)
+      {
+        BuildInfo.serverHost = properties.getProperty("ganymede.serverhost");
+      }
+
+    return BuildInfo.serverHost;
+  }
+
+  public synchronized  static String getServerPort()
+  {
+    if (BuildInfo.serverPort == null)
+      {
+        BuildInfo.serverPort = properties.getProperty("ganymede.serverPort");
+      }
+
+    return BuildInfo.serverPort;
   }
 }

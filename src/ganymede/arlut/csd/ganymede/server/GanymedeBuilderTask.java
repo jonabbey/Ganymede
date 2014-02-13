@@ -560,14 +560,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
             return false;
           }
 
-        if (base.getTimeStamp() == null)
-          {
-            return false;
-          }
-        else
-          {
-            return base.getTimeStamp().after(oldLastRunTime);
-          }
+        return base.getTimeStamp().after(oldLastRunTime);
       }
   }
 
