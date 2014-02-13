@@ -54,7 +54,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
-import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.BaseListTransport;
