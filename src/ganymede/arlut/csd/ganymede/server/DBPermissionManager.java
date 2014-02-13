@@ -1796,6 +1796,15 @@ public final class DBPermissionManager {
         return true;
       }
 
+    // personaMatch() may be called from custom code without going
+    // through isOwnedByUs(), so make sure that we've got the
+    // top-level object
+
+    if (obj.isEmbedded())
+      {
+        obj = dbSession.getContainingObj(object);
+      }
+
     // end users are considered to own themselves
 
     if (!isPrivileged() && this.userInvid != null && this.userInvid.equals(obj.getInvid()))
