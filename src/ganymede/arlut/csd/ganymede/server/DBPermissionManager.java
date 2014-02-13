@@ -1627,7 +1627,7 @@ public final class DBPermissionManager {
     catch (NullPointerException ex)
       {
         // "Serious error!  No default permissions object found in database!"
-        throw new RuntimeException(ts.l("rolesWereChanged.no_default_perms"), ex);
+        throw new RuntimeException(ts.l("updateDefaultRoleObj.no_default_perms"), ex);
       }
   }
 
