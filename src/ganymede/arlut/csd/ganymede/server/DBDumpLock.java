@@ -136,6 +136,13 @@ final class DBDumpLock extends DBLock {
 
     /* -- */
 
+    if (debug)
+      {
+        debug(key, "establish() entering");
+
+        Ganymede.printCallStack();
+      }
+
     synchronized (lockSync)
       {
         if (!lockSync.claimLockKey(key, this))
@@ -146,6 +153,8 @@ final class DBDumpLock extends DBLock {
         try
           {
             lockSync.incLocksWaitingCount();
+
+            if (debug) debug(key, "added myself to the DBLockSync lockHash.");
 
             this.key = key;
             this.inEstablish = true;
@@ -164,6 +173,8 @@ final class DBDumpLock extends DBLock {
 
             while (!okay)
               {
+                if (debug) debug("establish() spinning to get establish permission for " + getBaseNames(baseSet));
+
                 if (abort)
                   {
                     throw new InterruptedException("DBDumpLock (" + key + "):  establish aborting before permission granted");
@@ -175,6 +186,8 @@ final class DBDumpLock extends DBLock {
                   {
                     if (base.hasWriter())
                       {
+                        if (debug) debug("establish() blocked on base with writer: " + base.getName());
+
                         okay = false;
                         break;
                       }
@@ -219,6 +232,8 @@ final class DBDumpLock extends DBLock {
             lockSync.notifyAll();
           }
       }
+
+    if (debug) debug("establish() got the lock.");
   }
 
   /**
@@ -227,10 +242,18 @@ final class DBDumpLock extends DBLock {
 
   @Override public final void release()
   {
+    if (debug)
+      {
+        debug("release() entering");
+        Ganymede.printCallStack();
+      }
+
     synchronized (lockSync)
       {
         while (this.inEstablish)
           {
+            if (debug) debug("release() waiting for inEstablish");
+
             try
               {
                 lockSync.wait(2500); // or until notify'ed
@@ -245,6 +268,7 @@ final class DBDumpLock extends DBLock {
 
         if (!this.locked)
           {
+            if (debug) debug("release() not locked, returning");
             return;
           }
 
@@ -255,6 +279,8 @@ final class DBDumpLock extends DBLock {
 
         this.locked = false;
         lockSync.unclaimLockKey(key, this);
+
+        if (debug) debug("release() released");
 
         this.key = null;             // gc
 
@@ -280,8 +306,19 @@ final class DBDumpLock extends DBLock {
   {
     synchronized (lockSync)
       {
+        if (debug) debug("abort() aborting");
         this.abort = true;
         release();
       }
+  }
+
+  private void debug(Object key, String message)
+  {
+    System.err.println("DBDumpLock(" + key + "): " + message);
+  }
+
+  private void debug(String message)
+  {
+    System.err.println("DBDumpLock(" + this.key + "): " + message);
   }
 }

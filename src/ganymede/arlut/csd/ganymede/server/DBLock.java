@@ -359,4 +359,23 @@ public abstract class DBLock {
 
     return returnString.toString();
   }
+
+  /**
+   * Utility method used when debugging is enabled in subclasses.
+   */
+
+  String getBaseNames(List<DBObjectBase> bases)
+  {
+    StringBuilder buf = new StringBuilder();
+
+    for (DBObjectBase base: bases)
+      {
+        buf.append("\n\t\t\t");
+        buf.append(base.getName());
+      }
+
+    buf.append("\n");
+
+    return buf.toString();
+  }
 }

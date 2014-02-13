@@ -144,6 +144,13 @@ public final class DBReadLock extends DBLock {
 
     /* -- */
 
+    if (debug)
+      {
+        debug(key, "establish() enter");
+
+        Ganymede.printCallStack();
+      }
+
     synchronized (lockSync)
       {
         if (!lockSync.claimLockKey(key, this))
@@ -160,10 +167,7 @@ public final class DBReadLock extends DBLock {
 
             while (!okay)
               {
-                if (debug)
-                  {
-                    System.err.println("DBReadLock (" + key + "):  looping to get establish permission");
-                  }
+                if (debug) debug("establish() looping to get establish permission for " + getBaseNames(baseSet));
 
                 if (this.abort)
                   {
@@ -180,11 +184,7 @@ public final class DBReadLock extends DBLock {
 
                     if (base.hasWriter())
                       {
-                        if (debug)
-                          {
-                            System.err.println("DBReadLock (" + key + "):  base " +
-                                               base.getName() + " has writers queued/locked");
-                          }
+                        if (debug) debug("establish() base " + base.getName() + " has writers queued/locked");
 
                         okay = false;
                         break;
@@ -193,17 +193,11 @@ public final class DBReadLock extends DBLock {
 
                 if (!okay)
                   {
-                    if (debug)
-                      {
-                        System.err.println("DBReadLock (" + key + "):  waiting on lockSync");
-                      }
+                    if (debug) debug("establish() waiting on lockSync");
 
                     lockSync.wait(2500);
 
-                    if (debug)
-                      {
-                        System.err.println("DBReadLock (" + key + "):  done waiting on lockSync");
-                      }
+                    if (debug) debug("establish() done waiting on lockSync");
 
                     continue;
                   }
@@ -218,10 +212,7 @@ public final class DBReadLock extends DBLock {
                 this.locked = true;
                 lockSync.incLockCount();
 
-                if (debug)
-                  {
-                    System.err.println("DBReadLock (" + key + "):  read lock established");
-                  }
+                if (debug) debug("establish() read lock established");
               }
           }
         finally
@@ -262,7 +253,8 @@ public final class DBReadLock extends DBLock {
   {
     if (debug)
       {
-        System.err.println("DBReadLock (" + key + "):  attempting release");
+        debug("release() attempting release");
+        Ganymede.printCallStack();
       }
 
     synchronized (lockSync)
@@ -274,10 +266,7 @@ public final class DBReadLock extends DBLock {
 
         while (this.inEstablish)
           {
-            if (debug)
-              {
-                System.err.println("DBReadLock (" + key + "):  release() looping waiting on inEstablish");
-              }
+            if (debug) debug("release() looping waiting on inEstablish");
 
             try
               {
@@ -290,10 +279,7 @@ public final class DBReadLock extends DBLock {
 
         if (!locked)
           {
-            if (debug)
-              {
-                System.err.println("DBReadLock (" + key + "):  release() not locked, returning");
-              }
+            if (debug) debug("release() not locked, returning");
 
             return;
           }
@@ -305,12 +291,10 @@ public final class DBReadLock extends DBLock {
 
         locked = false;
         lockSync.unclaimLockKey(key, this);
-        key = null;             // for gc
 
-        if (debug)
-          {
-            System.err.println("DBReadLock (" + key + "):  release() released");
-          }
+        if (debug) debug("release() released");
+
+        this.key = null;             // for gc
 
         lockSync.decLockCount();
         lockSync.notifyAll();
@@ -339,8 +323,19 @@ public final class DBReadLock extends DBLock {
   {
     synchronized (lockSync)
       {
+        if (debug) debug("abort() aborting");
         this.abort = true;
         release();              // blocks until freed
       }
+  }
+
+  private void debug(Object key, String message)
+  {
+    System.err.println("DBReadLock(" + key + "): " + message);
+  }
+
+  private void debug(String message)
+  {
+    System.err.println("DBReadLock(" + this.key + "): " + message);
   }
 }

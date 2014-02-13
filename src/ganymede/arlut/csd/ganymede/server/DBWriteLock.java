@@ -143,25 +143,23 @@ public final class DBWriteLock extends DBLock {
 
     if (debug)
       {
-        System.err.println(key + ": DBWriteLock.establish(): enter");
-        System.err.println(key + ": DBWriteLock.establish(): baseSet vector size " + baseSet.size());
+        debug(key, "enter");
+
+        Ganymede.printCallStack();
       }
 
     synchronized (lockSync)
       {
         if (!lockSync.claimLockKey(key, this))
           {
-            throw new InterruptedException("DBWriteLock.establish(): error, lock already held for key: " + key);
+            throw new InterruptedException("DBWriteLock.establish(" + key + "): error, lock already held for key");
           }
 
         try
           {
             lockSync.incLocksWaitingCount();
 
-            if (debug)
-              {
-                System.err.println(key + ": DBWriteLock.establish(): added myself to the DBLockSync lockHash.");
-              }
+            if (debug) debug(key, "added myself to the DBLockSync lockHash.");
 
             // okay, now we've got ourselves recorded as the only lock
             // that can be in the process of establishing for this
@@ -176,6 +174,8 @@ public final class DBWriteLock extends DBLock {
 
             while (!okay)
               {
+                if (debug) debug("establish() looping to get establish permission for " + getBaseNames(baseSet));
+
                 if (this.abort)
                   {
                     throw new InterruptedException("aborted on command");
@@ -216,10 +216,9 @@ public final class DBWriteLock extends DBLock {
                       {
                         if (debug)
                           {
-                            System.err.println(this.key + ": DBWriteLock.establish(): waiting for dumpers on base " +
-                                               base.getName());
-                            System.err.println(this.key + ": DBWriteLock.establish(): dumperList size: " +
-                                               base.getWaitingDumperListSize());
+                            debug("establish() waiting for waiting / queued dumpers on base " + base.getName());
+                            debug("establish() waiting dumperList size: " + base.getWaitingDumperListSize());
+                            debug("establish() dumpLock list size: " + base.getDumpLockListSize());
                           }
 
                         okay = false;
@@ -233,10 +232,7 @@ public final class DBWriteLock extends DBLock {
                   }
               }
 
-            if (debug)
-              {
-                System.err.println(this.key + ": DBWriteLock.establish(): no dumpers queued.");
-              }
+            if (debug) debug("establish() no dumpers queued");
 
             // okay, there are no dump locks waiting to establish.
             // Add ourselves to the ObjectBase write queues.  This
@@ -253,10 +249,7 @@ public final class DBWriteLock extends DBLock {
 
             waiting = true;
 
-            if (debug)
-              {
-                System.err.println(this.key + ": DBWriteLock.establish(): added ourself to the writerList.");
-              }
+            if (debug) debug("establish() added ourselves to the writerList");
 
             // spinwait until we can get into all of the ObjectBases
             // note that since we added ourselves to the writer
@@ -268,10 +261,7 @@ public final class DBWriteLock extends DBLock {
 
             while (!okay)
               {
-                if (debug)
-                  {
-                    System.err.println(this.key + ": DBWriteLock.establish(): spinning.");
-                  }
+                if (debug) debug("establish() spinning");
 
                 if (this.abort)
                   {
@@ -294,21 +284,15 @@ public final class DBWriteLock extends DBLock {
                           {
                             if (!base.isReaderEmpty())
                               {
-                                System.err.println(this.key +
-                                                   ": DBWriteLock.establish(): " +
-                                                   "waiting for readers to release.");
+                                debug("establish() waiting for readers to release");
                               }
                             else if (!base.isDumpLockListEmpty())
                               {
-                                System.err.println(this.key +
-                                                   ": DBWriteLock.establish(): " +
-                                                   "waiting for dumpers to release.");
+                                debug("establish() waiting for dumpers to release");
                               }
                             else if (base.isWriteInProgress())
                               {
-                                System.err.println(this.key +
-                                                   ": DBWriteLock.establish(): " +
-                                                   "waiting for writer to release.");
+                                debug("establish() waiting for writer to release");
                               }
                           }
 
@@ -358,10 +342,7 @@ public final class DBWriteLock extends DBLock {
           }
       }
 
-    if (debug)
-      {
-        System.err.println(key + ": DBWriteLock.establish(): got the lock.");
-      }
+    if (debug) debug("establish() got the lock.");
   }
 
   /**
@@ -370,6 +351,12 @@ public final class DBWriteLock extends DBLock {
 
   @Override public final void release()
   {
+    if (debug)
+      {
+        debug("release() entering");
+        Ganymede.printCallStack();
+      }
+
     synchronized (lockSync)
       {
         // if we are trying to force this lock to go away on behalf of
@@ -378,6 +365,8 @@ public final class DBWriteLock extends DBLock {
 
         while (this.inEstablish)
           {
+            if (debug) debug("release() waiting for inEstablish");
+
             try
               {
                 lockSync.wait(2500);
@@ -393,6 +382,7 @@ public final class DBWriteLock extends DBLock {
 
         if (!locked)
           {
+            if (debug) debug("release() not locked, returning");
             return;
           }
 
@@ -402,9 +392,11 @@ public final class DBWriteLock extends DBLock {
           }
 
         this.locked = false;
-        lockSync.unclaimLockKey(key, this);
+        lockSync.unclaimLockKey(this.key, this);
 
-        key = null;             // gc
+        if (debug) debug("release() released");
+
+        this.key = null;        // gc
 
         lockSync.decLockCount();
         lockSync.notifyAll();   // many readers may want in
@@ -428,8 +420,19 @@ public final class DBWriteLock extends DBLock {
   {
     synchronized (lockSync)
       {
+        if (debug) debug("abort() aborting");
         abort = true;
         release();              // blocks
       }
+  }
+
+  private void debug(Object key, String message)
+  {
+    System.err.println("DBWriteLock(" + key + "): " + message);
+  }
+
+  private void debug(String message)
+  {
+    System.err.println("DBWriteLock(" + this.key + "): " + message);
   }
 }
