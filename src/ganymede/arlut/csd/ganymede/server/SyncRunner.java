@@ -1630,6 +1630,12 @@ public final class SyncRunner implements Runnable {
 
     this.needBuild.set(false);
 
+    // Make sure we can create our FileOutputStream before we create
+    // the transmitting side with the session.getDataXML() call below.
+
+    FileOutputStream fos = new FileOutputStream(this.fullStateFile);
+    BufferedOutputStream out = new BufferedOutputStream(fos);
+
     // session.getDataXML will obtain and manage another dump lock on
     // another thread, but we have ensured that DBWriteLock will not
     // allow any establishment of a DBWriteLock while the upper
@@ -1638,10 +1644,6 @@ public final class SyncRunner implements Runnable {
 
     ReturnVal retVal = session.getDataXML(this.name, true, true);
     FileTransmitter transmitter = retVal.getFileTransmitter();
-    FileOutputStream fos = new FileOutputStream(this.fullStateFile);
-    BufferedOutputStream out = null;
-
-    out = new BufferedOutputStream(fos);
 
     try
       {
@@ -1655,6 +1657,9 @@ public final class SyncRunner implements Runnable {
       }
     finally
       {
+        // in case of IOException writing to out/fos.
+        transmitter.drain();
+
         out.flush();
         fos.getFD().sync();
         out.close();
