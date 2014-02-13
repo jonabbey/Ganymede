@@ -1491,15 +1491,14 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This non-exported (server-side only) method is used to
-   * generate a comprehensive permissions matrix that applies to all
-   * objects owned by the active persona for this user.</p>
+   * <p>Sets supergash mode and/or the four PermMatrix objects that
+   * DBPermissionManager uses to track permissions.</p>
    *
    * <p>This method is synchronized, and a whole lot of operations in
    * the server need to pass through here to ensure that the effective
    * permissions for this session haven't changed.  This method is
-   * designed to return very quickly if permissions have not changed
-   * and forceUpdate is false.</p>
+   * designed to return very quickly if permissions have not
+   * changed.</p>
    */
 
   private synchronized void updatePerms()
