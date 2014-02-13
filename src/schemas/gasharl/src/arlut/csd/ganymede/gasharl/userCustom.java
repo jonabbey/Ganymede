@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -2335,7 +2335,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         // just go ahead and throw the null pointer if we didn't get our base.
 
-        if (shellChoiceStamp == null || shellChoiceStamp.before(base.getTimeStamp()))
+        if (shellChoiceStamp == null || base.changedSince(shellChoiceStamp))
           {
             if (debug)
               {

@@ -702,7 +702,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
         // just go ahead and throw the null pointer if we didn't get our base.
 
-        if (systemTypesStamp == null || systemTypesStamp.before(base.getTimeStamp()))
+        if (systemTypesStamp == null || base.changedSince(systemTypesStamp))
           {
             if (debug)
               {
