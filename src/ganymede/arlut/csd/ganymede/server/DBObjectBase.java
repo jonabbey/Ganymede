@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -3490,6 +3490,16 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
   public Date getTimeStamp()
   {
     return new Date(lastChange.getTime());
+  }
+
+  /**
+   * Returns true if any commits have been made to this DBObjectBase
+   * more recently than the comparison date.
+   */
+
+  public boolean changedSince(Date comparison)
+  {
+    return lastChange.after(comparison);
   }
 
   //

@@ -14,7 +14,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -560,7 +560,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
             return false;
           }
 
-        return base.getTimeStamp().after(oldLastRunTime);
+        return base.changedSince(oldLastRunTime);
       }
   }
 
@@ -651,7 +651,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
     // build, we don't need to worry about looking at the individual
     // fields.
 
-    if (base.getTimeStamp() == null || !base.getTimeStamp().after(oldLastRunTime))
+    if (!base.changedSince(oldLastRunTime))
       {
         return false;
       }
@@ -668,7 +668,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
       {
         DBObjectBaseField fieldDef = base.getFieldDef(idObj);
 
-        if (fieldDef != null && fieldDef.getTimeStamp().after(oldLastRunTime))
+        if (fieldDef != null && fieldDef.changedSince(oldLastRunTime))
           {
             return true;
           }
