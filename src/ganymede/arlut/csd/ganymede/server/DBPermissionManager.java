@@ -1020,6 +1020,8 @@ public final class DBPermissionManager {
         tmpInvids.add(ownerInvidItem);
       }
 
+    tmpInvids = Collections.unmodifiableList(tmpInvids);
+
     if (!this.supergashMode && !isMemberOfAllOwnerGroups(tmpInvids))
       {
         // "Error in setDefaultOwner()"
@@ -1029,7 +1031,7 @@ public final class DBPermissionManager {
                                           ts.l("setDefaultOwner.error_text2"));
       }
 
-    this.newObjectOwnerInvids = Collections.unmodifiableList(tmpInvids);
+    this.newObjectOwnerInvids = tmpInvids;
     gSession.setLastEvent("setDefaultOwner");
     return null;
   }
