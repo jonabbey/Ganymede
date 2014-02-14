@@ -739,8 +739,9 @@ public final class DBPermissionManager {
   }
 
   /**
-   * This method returns a serializable Vector of personae names
-   * available to the user logged in.
+   * Returns a serializable Vector of personae names available to the
+   * user logged in, or null if we're logged in as a non user-linked
+   * supergash persona.
    */
 
   public synchronized java.util.Vector<String> getAvailablePersonae()
