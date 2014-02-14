@@ -446,6 +446,11 @@ public final class DBPermissionManager {
       {
         this.userInvid = userObject.getInvid();
         this.username = userObject.getLabel();
+
+        if ("".equals(this.username.trim()))
+          {
+            throw new IllegalArgumentException("empty username");
+          }
       }
     else
       {
@@ -457,6 +462,11 @@ public final class DBPermissionManager {
       {
         this.personaInvid = personaObject.getInvid();
         this.personaName = personaObject.getLabel();
+
+        if ("".equals(this.personaName.trim()))
+          {
+            throw new IllegalArgumentException("empty personaName");
+          }
       }
     else
       {
@@ -609,14 +619,12 @@ public final class DBPermissionManager {
 
   public synchronized String getBaseIdentity()
   {
-    if (username != null && !username.equals(""))
+    if (username != null)
       {
         return username;
       }
-    else
-      {
-        return sessionName;
-      }
+
+    return sessionName;
   }
 
   /**
@@ -628,21 +636,12 @@ public final class DBPermissionManager {
 
   public synchronized String getIdentity()
   {
-    if (personaName == null || personaName.equals(""))
-      {
-        if (username != null && !username.equals(""))
-          {
-            return username;
-          }
-        else
-          {
-            return sessionName;
-          }
-      }
-    else
+    if (personaName != null)
       {
         return personaName;
       }
+
+    return getBaseIdentity();
   }
 
   /**
