@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -1061,7 +1061,7 @@ public final class DBQueryEngine {
    *
    * <p>This method is not synchronized for performance reasons, but
    * is only to be called from methods synchronized on this
-   * GanymedeSession.</p>
+   * DBQueryEngine.</p>
    *
    * @param obj The object to add to the query results
    * @param query The query that we are processing, used to get
