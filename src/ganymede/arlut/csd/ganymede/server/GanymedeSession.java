@@ -804,12 +804,11 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>This method may be used to set the owner groups of any objects
    * created hereafter.</p>
    *
-   * @param ownerInvids a Vector of Invid objects pointing to
-   * ownergroup objects.
+   * @param ownerInvids a Vector of Invid objects pointing to ownergroup
+   * objects.
    *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
+   * @return A ReturnVal indicating success or failure.  May be simply
+   * 'null' to indicate success if no feedback need be provided.
    *
    * @see arlut.csd.ganymede.rmi.Session
    */
