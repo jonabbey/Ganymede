@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -1182,7 +1182,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   public final boolean isVisible()
   {
     return verifyReadPermission() &&
-      getFieldDef().base().getObjectHook().canSeeField(null, this);
+      owner.getObjectHook().canSeeField(null, this);
   }
 
   /**

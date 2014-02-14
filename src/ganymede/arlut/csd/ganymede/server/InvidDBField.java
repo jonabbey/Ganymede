@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -438,7 +438,7 @@ public final class InvidDBField extends DBField implements invid_field {
             // object that we are writing out
             //
 
-            DBEditObject hook = this.owner.getBase().getObjectHook();
+            DBEditObject hook = this.owner.getObjectHook();
             String extras[] = hook.getForeignSyncKeys(invid, this.owner,
                                                       target, xmlOut.getSyncChannelName(),
                                                       xmlOut.isBeforeStateDumping());
@@ -471,7 +471,7 @@ public final class InvidDBField extends DBField implements invid_field {
             // object that we are targeting
             //
 
-            hook = target.getBase().getObjectHook();
+            hook = target.getObjectHook();
             extras = hook.getMyExtraInvidAttributes(target,
                                                     xmlOut.getSyncChannelName(),
                                                     xmlOut.isBeforeStateDumping());
@@ -3811,7 +3811,7 @@ public final class InvidDBField extends DBField implements invid_field {
                   }
                 else
                   {
-                    label = this.owner.getBase().getObjectHook().lookupLabel(object);
+                    label = this.owner.getObjectHook().lookupLabel(object);
                   }
               }
           }

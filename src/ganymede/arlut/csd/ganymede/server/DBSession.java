@@ -223,38 +223,38 @@ public final class DBSession implements QueryDescriber {
   /**
    * <p>Create a new object in the database.</p>
    *
-   * <p>This method creates a slot in the object base of the
-   * proper object type.  The created object is associated
-   * with the current transaction.  When the transaction
-   * is committed, the created object will inserted into
-   * the database, and will become visible to other
-   * sessions.</p>
+   * <p>This method creates a slot in the object base of the proper
+   * object type.  The created object is associated with the current
+   * transaction.  When the transaction is committed, the created
+   * object will inserted into the database, and will become visible
+   * to other sessions.</p>
    *
-   * <p>The created object will be given an object id.
-   * The {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} can
-   * be queried to determine its invid.</p>
+   * <p>The created object will be given an object id.  The {@link
+   * arlut.csd.ganymede.server.DBEditObject DBEditObject} can be
+   * queried to determine its invid.</p>
    *
-   * <p>The created DBEditObject will have its fields initialized
-   * by the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
-   * {@link arlut.csd.ganymede.server.DBObjectBase#objectHook objectHook}
-   * custom DBEditObject's
-   * {@link arlut.csd.ganymede.server.DBEditObject#initializeNewObject() initializeNewObject()}
-   * method.</p>
-   *
-   * <p>This method will return null if the object could
-   * not be constructed and initialized for some reason.</p>
+   * <p>The created DBEditObject will have its fields initialized by
+   * the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBObjectBase#objectHook
+   * objectHook} custom DBEditObject's {@link
+   * arlut.csd.ganymede.server.DBEditObject#initializeNewObject()
+   * initializeNewObject()} method.</p>
    *
    * @param object_type Type of the object to be created
-   * @param chosenSlot Invid to create the new object with.
-   * normally only used in internal Ganymede code in conjunction with
-   * the addition of new kinds of built-in objects during development
-   * @param owners Vector of invids for owner group objects to make initial
-   * owners for the newly created object
+   * @param chosenSlot Invid to create the new object with.  normally
+   * only used in internal Ganymede code in conjunction with the
+   * addition of new kinds of built-in objects during development
+   * @param owners List of Invids for owner group objects to make
+   * initial owners for the newly created object
+   *
+   * @return A ReturnVal that indicates the success or failure of the
+   * object creation, with a db_object reference to the created
+   * DBObject on success.
    *
    * @see arlut.csd.ganymede.server.DBStore
    */
 
-  public synchronized ReturnVal createDBObject(short object_type, Invid chosenSlot, Vector<Invid> owners)
+  public synchronized ReturnVal createDBObject(short object_type, Invid chosenSlot, List<Invid> owners)
   {
     DBObjectBase base;
     DBEditObject e_object;
@@ -505,11 +505,17 @@ public final class DBSession implements QueryDescriber {
    * for use on the server.</p>
    *
    * @param object_type Type of the object to be created
+   * @param owners List of Invids for owner group objects to make
+   * initial owners for the newly created object
+   *
+   * @return A ReturnVal that indicates the success or failure of the
+   * object creation, with a db_object reference to the created
+   * DBObject on success.
    *
    * @see arlut.csd.ganymede.server.DBStore
    */
 
-  public ReturnVal createDBObject(short object_type, Vector<Invid> owners)
+  public ReturnVal createDBObject(short object_type, List<Invid> owners)
   {
     return createDBObject(object_type, null, owners);
   }

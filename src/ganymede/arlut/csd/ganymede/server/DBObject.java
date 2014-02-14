@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -643,6 +643,16 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * Returns the non-editing DBEditObject singleton that provides
+   * management oversight to Objects of this type.
+   */
+
+  public final DBEditObject getObjectHook()
+  {
+    return objectBase.getObjectHook();
+  }
+
+  /**
    * <p>This method makes the fields in this object remotely accessible.
    * Used by GanymedeSession when it provides a DBObject to the
    * client.</p>
@@ -1018,7 +1028,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public String getEmbeddedObjectDisplayLabel()
   {
-    return objectBase.getObjectHook().getEmbeddedObjectDisplayLabelHook(this);
+    return getObjectHook().getEmbeddedObjectDisplayLabelHook(this);
   }
 
   /**
@@ -2000,7 +2010,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
                 // on how the fieldRequired method is written.  I
                 // think this is a low-level risk, but not zero.
 
-                if (objectBase.getObjectHook().fieldRequired(this, fieldDef.getID()))
+                if (getObjectHook().fieldRequired(this, fieldDef.getID()))
                   {
                     DBField field = retrieveField(fieldDef.getID());
 
@@ -2097,7 +2107,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final boolean hasEmailTarget()
   {
-    return objectBase.getObjectHook().hasEmailTarget(this);
+    return getObjectHook().hasEmailTarget(this);
   }
 
   /**
@@ -2107,7 +2117,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final List<String> getEmailTargets()
   {
-    return (List<String>) objectBase.getObjectHook().getEmailTargets(this);
+    return (List<String>) getObjectHook().getEmailTargets(this);
   }
 
   /**
@@ -2121,7 +2131,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final String getImageURL()
   {
-    return objectBase.getObjectHook().getImageURLForObject(this);
+    return getObjectHook().getImageURLForObject(this);
   }
 
   /**

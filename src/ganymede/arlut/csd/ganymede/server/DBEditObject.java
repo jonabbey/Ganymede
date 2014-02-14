@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -3355,7 +3355,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
         if (original != null)
           {
-            ReturnVal retVal2 = original.objectBase.getObjectHook().consistencyCheck(original);
+            ReturnVal retVal2 = consistencyCheck(original);
 
             if (!ReturnVal.didSucceed(retVal2))
               {
