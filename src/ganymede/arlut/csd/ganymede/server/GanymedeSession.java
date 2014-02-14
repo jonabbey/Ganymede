@@ -3360,7 +3360,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     DBObject newObj;
     ReturnVal retVal = null;
-    Vector<Invid> ownerInvids = null;
+    List<Invid> ownerInvids = null;
 
     /* -- */
 
