@@ -790,12 +790,22 @@ public final class DBPermissionManager {
   }
 
   /**
-   * This method is used to select an admin persona, changing the
-   * permissions that the user has and the objects that are accessible
-   * in the database.
+   * <p>This method is used to select an admin persona linked to the
+   * end-user connected to the linked GanymedeSession, or the
+   * unprivileged end user itself.</p>
+   *
+   * <p>If the persona is successfully changed, the linked
+   * GanymedeSession's transaction will be aborted and re-started with
+   * recalculated permissions.</p>
+   *
+   * @param label The canonical label of the persona (or end user) to change to
+   * @param password The password for the persona to change to.  May
+   * be null if label is the user's name.
+   *
+   * @return true if the persona could be changed
    */
 
-  public synchronized boolean selectPersona(String newPersona, String password)
+  public synchronized boolean selectPersona(String label, String password)
   {
     DBObject userObject = getUser();
 
@@ -804,15 +814,15 @@ public final class DBPermissionManager {
         return false;
       }
 
-    if (!findMatchingAuthenticatedPersona(userObject, newPersona, password))
+    if (!findMatchingAuthenticatedPersona(userObject, label, password))
       {
         // "Failed attempt to switch to persona {0} for user: {1}"
-        Ganymede.debug(ts.l("selectPersona.no_persona", newPersona, this.username));
+        Ganymede.debug(ts.l("selectPersona.no_persona", label, this.username));
         return false;
       }
 
     // "User {0} switched to persona {1}."
-    Ganymede.debug(ts.l("selectPersona.switched", this.username, newPersona));
+    Ganymede.debug(ts.l("selectPersona.switched", this.username, label));
 
     gSession.restartTransaction();
 
@@ -826,7 +836,7 @@ public final class DBPermissionManager {
     updatePerms();
 
     gSession.resetAdminEntry();
-    gSession.setLastEvent("selectPersona: " + newPersona);
+    gSession.setLastEvent("selectPersona: " + label);
 
     return true;
   }
