@@ -1846,6 +1846,83 @@ public final class DBPermissionManager {
         owners = arlut.csd.Util.VectorUtils.union(owners, values);
       }
 
+    return isMemberOfAnyOwnerGroups(owners);
+  }
+
+  /**
+   * Returns true if this.personaInvid is a member of the owner group
+   * pointed to by the owner Invid, or in any of the owner groups that
+   * own that owner group, transitively.
+   *
+   * @param owner An Invid pointing to an OwnerBase object
+   * @return true if a match is found
+   */
+
+  private synchronized boolean isMemberOfOwnerGroup(Invid owner)
+  {
+    return isMemberOfOwnerGroup(owner, new HashSet<Invid>());
+  }
+
+  /**
+   * Returns true if this.personaInvid is a member of the owner group
+   * pointed to by the owner Invid, or in any of the owner groups that
+   * own that owner group, transitively.
+   *
+   * @param owner An Invid pointing to an OwnerBase object
+   * @param alreadySeen A Set of owner group Invid's that have already
+   * been checked and which are known. (For infinite loop avoidance).
+   *
+   * @return true if a match is found
+   */
+
+  private synchronized boolean isMemberOfOwnerGroup(Invid owner, Set<Invid> alreadySeen)
+  {
+    if (owner == null)
+      {
+        throw new IllegalArgumentException("Null owner passed to isMemberOfOwnerGroup");
+      }
+
+    if (owner.getType() != SchemaConstants.OwnerBase)
+      {
+        throw new IllegalArgumentException("isMemberOfOwnerGroup() called with something other than an Owner Group");
+      }
+
+    if (alreadySeen.contains(owner))
+      {
+        return false;           // cycle
+      }
+
+    alreadySeen.add(owner);
+
+    DBObject ownerGroupObj = dbSession.viewDBObject(owner).getOriginal();
+
+    List<Invid> personaeInOwnerGroup = (List<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
+
+    if (personaeInOwnerGroup.contains(getPersonaInvid()))
+      {
+        return true;
+      }
+
+    // didn't find, recurse up
+
+    List<Invid> ownersOfOwnerGroup = (List<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerListField);
+
+    return isMemberOfAnyOwnerGroups(ownersOfOwnerGroup, alreadySeen);
+  }
+
+  /**
+   * Returns true if this.personaInvid is a member of any of the owner
+   * group objects whose Invids are included in the owners List, or in
+   * any of the owner groups that own those owner groups,
+   * transitively.
+   *
+   * @param owners A List of invids pointing to OwnerBase objects
+   *
+   * @return true if a match is found
+   */
+
+  private synchronized boolean isMemberOfAnyOwnerGroups(List<Invid> owners)
+  {
     return isMemberOfAnyOwnerGroups(owners, new HashSet<Invid>());
   }
 
@@ -1856,8 +1933,8 @@ public final class DBPermissionManager {
    * transitively.
    *
    * @param owners A List of invids pointing to OwnerBase objects
-   * @param alreadySeen A Set of owner group Invid's that have
-   * already been checked.  (For infinite loop avoidance).
+   * @param alreadySeen A Set of owner group Invid's that have already
+   * been checked.  (For infinite loop avoidance).
    *
    * @return true if a match is found
    */
@@ -1909,73 +1986,5 @@ public final class DBPermissionManager {
       }
 
     return true;
-  }
-
-  /**
-   * Returns true if this.personaInvid is a member of the owner group
-   * pointed to by the owner Invid, or in any of the owner groups that
-   * own that owner group, transitively.
-   *
-   * @param owner An Invid pointing to an OwnerBase object
-   * @return true if a match is found
-   */
-
-  private boolean isMemberOfOwnerGroup(Invid owner)
-  {
-    return isMemberOfOwnerGroup(owner, new HashSet<Invid>());
-  }
-
-  /**
-   * Returns true if this.personaInvid is a member of the owner group
-   * pointed to by the owner Invid, or in any of the owner groups that
-   * own that owner group, transitively.
-   *
-   * @param owner An Invid pointing to an OwnerBase object
-   * @param alreadySeen A Set of owner group Invid's that have
-   * already been checked.  (For infinite loop avoidance).
-   *
-   * @return true if a match is found
-   */
-
-  private synchronized boolean isMemberOfOwnerGroup(Invid owner, Set<Invid> alreadySeen)
-  {
-    if (owner == null)
-      {
-        throw new IllegalArgumentException("Null owner passed to isMemberOfOwnerGroup");
-      }
-
-    if (owner.getType() != SchemaConstants.OwnerBase)
-      {
-        throw new IllegalArgumentException("isMemberOfOwnerGroup() called with something other than an Owner Group");
-      }
-
-    if (alreadySeen.contains(owner))
-      {
-        return false;
-      }
-    else
-      {
-        alreadySeen.add(owner);
-      }
-
-    DBObject ownerGroupObj = dbSession.viewDBObject(owner).getOriginal();
-
-    List<Invid> personaeInOwnerGroup = (List<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
-
-    if (personaeInOwnerGroup.contains(getPersonaInvid()))
-      {
-        return true;
-      }
-
-    // didn't find, recurse up
-
-    List<Invid> ownersOfOwnerGroup = (List<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerListField);
-
-    if (isMemberOfAnyOwnerGroups(ownersOfOwnerGroup, alreadySeen))
-      {
-        return true;
-      }
-
-    return false;
   }
 }
