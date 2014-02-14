@@ -49,10 +49,12 @@
 
 package arlut.csd.ganymede.server;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
@@ -245,7 +247,7 @@ public final class DBPermissionManager {
    * <p>May change if {@link
    * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
    * String} is called or if the relevant Role Objects are changed in
-   * the database .</p>
+   * the database.</p>
    *
    * <p>If this DBPermissionManager has supergash privileges, this
    * PermMatrix will be null.</p>
@@ -259,13 +261,13 @@ public final class DBPermissionManager {
    * and which the current admin has permission to delegate to
    * subordinate roles.  This matrix is always a permissive superset
    * of {@link
-   * arlut.csd.ganymede.server.DBPermissionManager#delegatableDefaultPerms
-   * delegatableDefaultPerms}.</p>
+   * arlut.csd.ganymede.server.DBPermissionManager#delegatableUnownedObjectPerms
+   * delegatableUnownedObjectPerms}.</p>
    *
    * <p>May change if {@link
    * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
    * String} is called or if the relevant Role Objects are changed in
-   * the database .</p>
+   * the database.</p>
    *
    * <p>Used by code in {@link
    * arlut.csd.ganymede.server.PermissionMatrixDBField} to control
@@ -286,7 +288,7 @@ public final class DBPermissionManager {
    * <p>May change if {@link
    * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
    * String} is called or if the relevant Role Objects are changed in
-   * the database .</p>
+   * the database.</p>
    *
    * <p>Used by code in {@link
    * arlut.csd.ganymede.server.PermissionMatrixDBField} to control
@@ -318,35 +320,36 @@ public final class DBPermissionManager {
   private Date rolesLastCheckedTimeStamp;
 
   /**
-   * <p>This variable is a vector of object references ({@link
-   * arlut.csd.ganymede.common.Invid Invid}'s) to the owner groups
-   * that the client has requested newly created objects be placed in.
-   * While this vector is not-null, any new objects created will be
-   * owned by the list of ownergroups held here.</p>
+   * <p>This variable is a non-modifiable List of object references
+   * ({@link arlut.csd.ganymede.common.Invid Invids}) to the owner
+   * groups that the client has requested newly created objects be
+   * placed in.  While this List is not-null, any new objects created
+   * will be owned by the list of ownergroups held here.</p>
    *
    * <p>May change if {@link
-   * arlut.csd.ganymede.server.DBPermissionManager#setDefaultOwner(java.util.Vector)}
+   * arlut.csd.ganymede.server.DBPermissionManager#setDefaultOwner(java.util.List)}
    * is called.</p>
    */
 
-  private Vector<Invid> newObjectOwnerInvids;
+  private List<Invid> newObjectOwnerInvids;
 
   /**
-   * <p>This variable is a vector of object references (Invid's) to
-   * the owner groups that the client has requested the listing of
-   * objects be restricted to.  That is, the client has requested that
-   * the results of Queries and Dumps only include those objects owned
-   * by owner groups in this list.  This feature is used primarily for
+   * <p>This variable is an unmodifiable List of object references
+   * ({@link arlut.csd.ganymede.common.Invid Invids}) to the owner
+   * groups that the client has requested the listing of objects be
+   * restricted to.  That is, the client has requested that the
+   * results of Queries and Dumps only include those objects owned by
+   * owner groups in this list.  This feature is used primarily for
    * when a client is logged in with supergash privileges, but the
    * user wants to restrict the visibility of objects for
    * convenience.</p>
    *
    * <p>May change if {@link
-   * arlut.csd.ganymede.server.DBPermissionManager#filterQueries(java.util.Vector)}
+   * arlut.csd.ganymede.server.DBPermissionManager#filterQueries(java.util.List)}
    * is called.</p>
    */
 
-  private Vector<Invid> visibilityFilterInvids;
+  private List<Invid> visibilityFilterInvids;
 
   /* -- */
 
@@ -664,17 +667,17 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>Returns a Vector of Invids containing user and persona Invids
-   * for the GanymedeSession that this DBPermissionManager is attached
-   * to.</p>
+   * <p>Returns an unmodifiable List of Invids containing user and
+   * persona Invids for the GanymedeSession that this
+   * DBPermissionManager is attached to.</p>
    *
-   * <p>May return an empty Vector if this session is being run by a
+   * <p>May return an empty List if this session is being run by a
    * Ganymede server task or internal process.</p>
    */
 
-  public synchronized Vector<Invid> getIdentityInvids()
+  public synchronized List<Invid> getIdentityInvids()
   {
-    Vector<Invid> ids = new Vector<Invid>();
+    List<Invid> ids = new ArrayList<Invid>();
 
     if (userInvid != null)
       {
@@ -686,7 +689,7 @@ public final class DBPermissionManager {
         ids.add(personaInvid);
       }
 
-    return ids;
+    return Collections.unmodifiableList(ids);
   }
 
   /**
@@ -736,11 +739,11 @@ public final class DBPermissionManager {
   }
 
   /**
-   * This method returns a list of personae names available to the
-   * user logged in.
+   * This method returns a serializable Vector of personae names
+   * available to the user logged in.
    */
 
-  public synchronized Vector<String> getAvailablePersonae()
+  public synchronized java.util.Vector<String> getAvailablePersonae()
   {
     DBObject user = getUser();
 
@@ -749,8 +752,8 @@ public final class DBPermissionManager {
         return null;
       }
 
-    Vector<String> results = new Vector<String>();
-    Vector<Invid> personae = (Vector<Invid>) user.getFieldValuesLocal(SchemaConstants.UserAdminPersonae);
+    java.util.Vector<String> results = new java.util.Vector<String>();
+    java.util.Vector<Invid> personae = (java.util.Vector<Invid>) user.getFieldValuesLocal(SchemaConstants.UserAdminPersonae);
 
     for (Invid invid: personae)
       {
@@ -863,7 +866,7 @@ public final class DBPermissionManager {
         return false;
       }
 
-    Vector<Invid> personae = (Vector<Invid>) userObject.getFieldValuesLocal(SchemaConstants.UserAdminPersonae);
+    List<Invid> personae = (List<Invid>) userObject.getFieldValuesLocal(SchemaConstants.UserAdminPersonae);
 
     for (Invid invid: personae)
       {
@@ -956,27 +959,27 @@ public final class DBPermissionManager {
    * <p>This method may be used to set the owner groups of any objects
    * created hereafter.</p>
    *
-   * @param ownerInvids a Vector of Invid objects pointing to
-   * ownergroup objects.
+   * @param ownerInvids a List of Invid objects pointing to ownergroup
+   * objects.
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
    */
 
-  public synchronized ReturnVal setDefaultOwner(Vector<Invid> ownerInvids)
+  public synchronized ReturnVal setDefaultOwner(List<Invid> ownerInvids)
   {
-    Vector<Invid> tmpInvids;
+    List<Invid> tmpInvids;
 
     /* -- */
 
     if (ownerInvids == null)
       {
-        newObjectOwnerInvids = null;
+        this.newObjectOwnerInvids = null;
         return null;
       }
 
-    tmpInvids = new Vector<Invid>();
+    tmpInvids = new ArrayList<Invid>();
 
     for (Invid ownerInvidItem: ownerInvids)
       {
@@ -1019,15 +1022,15 @@ public final class DBPermissionManager {
                                           ts.l("setDefaultOwner.error_text2"));
       }
 
-    newObjectOwnerInvids = tmpInvids;
+    this.newObjectOwnerInvids = Collections.unmodifiableList(tmpInvids);
     gSession.setLastEvent("setDefaultOwner");
     return null;
   }
 
   /**
-   * <p>Returns a Vector of Invids of the owner groups that should be
-   * made owners of a newly created object by the GanymedeSession
-   * owned by this DBPermissionManager.</p>
+   * <p>Returns an unmodifiable List of Invids of the owner groups
+   * that should be made owners of a newly created object by the
+   * GanymedeSession owned by this DBPermissionManager.</p>
    *
    * <p>If an admin has authority over more than one owner group and
    * they have not previously specified the collection of owner groups
@@ -1035,7 +1038,7 @@ public final class DBPermissionManager {
    * first one in the list.</p>
    */
 
-  public synchronized Vector<Invid> getNewOwnerInvids()
+  public synchronized List<Invid> getNewOwnerInvids()
   {
     if (this.newObjectOwnerInvids != null)
       {
@@ -1047,10 +1050,10 @@ public final class DBPermissionManager {
 
     if (isSuperGash())
       {
-        return new Vector<Invid>();
+        return Collections.unmodifiableList(new ArrayList<Invid>());
       }
 
-    Vector<Invid> ownerInvids = new Vector<Invid>();
+    List<Invid> ownerInvids = new ArrayList<Invid>();
 
     QueryResult ownerList = getAvailableOwnerGroups();
 
@@ -1069,7 +1072,7 @@ public final class DBPermissionManager {
         ownerInvids.add(ownerList.getInvid(0));
       }
 
-    return ownerInvids;
+    return Collections.unmodifiableList(ownerInvids);
   }
 
   /**
@@ -1088,14 +1091,14 @@ public final class DBPermissionManager {
    * <p>Calling this method with ownerInvids set to null will turn off
    * the filtering.</p>
    *
-   * @param ownerInvids a Vector of Invid objects pointing to ownergroup objects.
+   * @param ownerInvids a List of Invid objects pointing to ownergroup objects.
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
    */
 
-  public synchronized ReturnVal filterQueries(Vector<Invid> ownerInvids)
+  public synchronized ReturnVal filterQueries(List<Invid> ownerInvids)
   {
     if (ownerInvids == null || ownerInvids.size() == 0)
       {
@@ -1113,7 +1116,8 @@ public final class DBPermissionManager {
       }
     else
       {
-        visibilityFilterInvids = ownerInvids;
+        List<Invid> copyList = new ArrayList(ownerInvids);
+        this.visibilityFilterInvids = Collections.unmodifiableList(copyList);
         gSession.setLastEvent("filterQueries");
         return null;
       }
@@ -1205,7 +1209,7 @@ public final class DBPermissionManager {
 
     /* -- */
 
-    Vector<ObjectHandle> handles = qr.getHandles();
+    List<ObjectHandle> handles = qr.getHandles();
 
     for (ObjectHandle handle: handles)
       {
@@ -1244,7 +1248,7 @@ public final class DBPermissionManager {
         return true;            // no visibility restriction, go for it
       }
 
-    Vector owners = obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
+    List owners = obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
 
     return VectorUtils.overlaps(visibilityFilterInvids, owners);
   }
@@ -1550,7 +1554,7 @@ public final class DBPermissionManager {
         // privileges granted to admins over objects owned by them must be
         // derived from a non-default role.
 
-        for (Invid role: (Vector<Invid>) this.personaObj.getFieldValuesLocal(SchemaConstants.PersonaPrivs))
+        for (Invid role: (List<Invid>) this.personaObj.getFieldValuesLocal(SchemaConstants.PersonaPrivs))
           {
             DBObject roleObj = dbSession.viewDBObject(role).getOriginal();
 
@@ -1815,7 +1819,7 @@ public final class DBPermissionManager {
         return false;
       }
 
-    Vector<Invid> owners = (Vector<Invid>) obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
+    List<Invid> owners = (List<Invid>) obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
 
     // All owner group objects are considered to be self-owning.
 
@@ -1832,7 +1836,7 @@ public final class DBPermissionManager {
 
     if (obj.getTypeID() == SchemaConstants.PersonaBase)
       {
-        Vector<Invid> values = (Vector<Invid>) obj.getFieldValuesLocal(SchemaConstants.PersonaGroupsField);
+        List<Invid> values = (List<Invid>) obj.getFieldValuesLocal(SchemaConstants.PersonaGroupsField);
 
         owners = arlut.csd.Util.VectorUtils.union(owners, values);
       }
@@ -1842,18 +1846,18 @@ public final class DBPermissionManager {
 
   /**
    * Returns true if this.personaInvid is a member of any of the owner
-   * group objects whose Invids are included in the owners Vector, or
-   * in any of the owner groups that own those owner groups,
+   * group objects whose Invids are included in the owners List, or in
+   * any of the owner groups that own those owner groups,
    * transitively.
    *
-   * @param owners A vector of invids pointing to OwnerBase objects
+   * @param owners A List of invids pointing to OwnerBase objects
    * @param alreadySeen A Set of owner group Invid's that have
    * already been checked.  (For infinite loop avoidance).
    *
    * @return true if a match is found
    */
 
-  private synchronized boolean isMemberOfAnyOwnerGroups(Vector<Invid> owners, Set<Invid> alreadySeen)
+  private synchronized boolean isMemberOfAnyOwnerGroups(List<Invid> owners, Set<Invid> alreadySeen)
   {
     if (owners == null)
       {
@@ -1878,7 +1882,7 @@ public final class DBPermissionManager {
    * an owning group.  This method depends on isMemberOfOwnerGroup().
    */
 
-  private synchronized boolean isMemberOfAllOwnerGroups(Vector<Invid> owners)
+  private synchronized boolean isMemberOfAllOwnerGroups(List<Invid> owners)
   {
     if (owners == null)
       {
@@ -1951,7 +1955,7 @@ public final class DBPermissionManager {
 
     DBObject ownerGroupObj = dbSession.viewDBObject(owner).getOriginal();
 
-    Vector<Invid> personaeInOwnerGroup = (Vector<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
+    List<Invid> personaeInOwnerGroup = (List<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
 
     if (personaeInOwnerGroup.contains(getPersonaInvid()))
       {
@@ -1960,7 +1964,7 @@ public final class DBPermissionManager {
 
     // didn't find, recurse up
 
-    Vector<Invid> ownersOfOwnerGroup = (Vector<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerListField);
+    List<Invid> ownersOfOwnerGroup = (List<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerListField);
 
     if (isMemberOfAnyOwnerGroups(ownersOfOwnerGroup, alreadySeen))
       {
