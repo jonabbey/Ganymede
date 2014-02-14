@@ -1424,14 +1424,14 @@ public final class DBPermissionManager {
         return PermEntry.fullPerms;
       }
 
-    PermEntry customPerm = object.getBase().getObjectHook().permOverride(gSession, object);
+    PermEntry customPerm = object.getObjectHook().permOverride(gSession, object);
 
     if (customPerm != null)
       {
         return customPerm;
       }
 
-    PermEntry expansionPerm = object.getBase().getObjectHook().permExpand(gSession, object);
+    PermEntry expansionPerm = object.getObjectHook().permExpand(gSession, object);
 
     if (expansionPerm == null)
       {
@@ -1470,7 +1470,7 @@ public final class DBPermissionManager {
         return PermEntry.fullPerms;
       }
 
-    PermEntry customPerm = object.getBase().getObjectHook().permOverride(gSession, object, fieldID);
+    PermEntry customPerm = object.getObjectHook().permOverride(gSession, object, fieldID);
 
     if (customPerm != null)
       {
@@ -1478,7 +1478,7 @@ public final class DBPermissionManager {
       }
 
     PermMatrix applicablePerms = ownedByUs ? ownedObjectPerms: unownedObjectPerms;
-    PermEntry expansionPerm = object.getBase().getObjectHook().permExpand(gSession, object, fieldID);
+    PermEntry expansionPerm = object.getObjectHook().permExpand(gSession, object, fieldID);
 
     if (expansionPerm == null)
       {
@@ -1752,7 +1752,7 @@ public final class DBPermissionManager {
         return true;
       }
 
-    DBEditObject objectHook = obj.getBase().getObjectHook();
+    DBEditObject objectHook = obj.getObjectHook();
 
     while (obj.isEmbedded())
       {
@@ -1770,7 +1770,7 @@ public final class DBPermissionManager {
           }
 
         obj = dbSession.viewDBObject(inv);
-        objectHook = obj.getBase().getObjectHook();
+        objectHook = obj.getObjectHook();
       }
 
     if (objectHook.grantOwnership(gSession, obj))
