@@ -251,6 +251,10 @@ public final class DBSession implements QueryDescriber {
    * @param owners Vector of invids for owner group objects to make initial
    * owners for the newly created object
    *
+   * @return A ReturnVal that indicates the success or failure of the
+   * object creation, with a db_object reference to the created
+   * DBObject on success.
+   *
    * @see arlut.csd.ganymede.server.DBStore
    */
 
@@ -505,6 +509,10 @@ public final class DBSession implements QueryDescriber {
    * for use on the server.</p>
    *
    * @param object_type Type of the object to be created
+   *
+   * @return A ReturnVal that indicates the success or failure of the
+   * object creation, with a db_object reference to the created
+   * DBObject on success.
    *
    * @see arlut.csd.ganymede.server.DBStore
    */
