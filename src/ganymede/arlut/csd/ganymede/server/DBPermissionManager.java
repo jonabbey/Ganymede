@@ -844,15 +844,14 @@ public final class DBPermissionManager {
   /**
    * Sets this.personaName and this.personaInvid and returns true if
    * the persona object linked to userObject (or the end-user itself)
-   * can be found that has the name newPersona and a password that
-   * matches pass.
+   * can be found that matches label and a password that matches pass.
    */
 
   private boolean findMatchingAuthenticatedPersona(DBObject userObject,
-                                                   String newPersona,
+                                                   String label,
                                                    String pass)
   {
-    if (userObject == null || newPersona == null)
+    if (userObject == null || label == null)
       {
         return false;
       }
@@ -860,7 +859,7 @@ public final class DBPermissionManager {
     // we don't need to check a password to switch to our end-user
     // privs
 
-    if (userObject.getLabel().equals(newPersona))
+    if (userObject.getLabel().equals(label))
       {
         this.personaInvid = null;
         this.personaName = null;
@@ -882,7 +881,7 @@ public final class DBPermissionManager {
           {
             DBObject personaObject = dbSession.viewDBObject(invid).getOriginal();
 
-            if (!newPersona.equals(personaObject.getLabel()))
+            if (!label.equals(personaObject.getLabel()))
               {
                 continue;
               }
