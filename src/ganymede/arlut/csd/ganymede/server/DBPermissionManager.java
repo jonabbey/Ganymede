@@ -1114,6 +1114,8 @@ public final class DBPermissionManager {
         return null;
       }
 
+    List<Invid> copyList = (List<Invid>) Collections.unmodifiableList(new ArrayList(ownerInvids));
+
     if (!this.supergashMode && !isMemberOfAllOwnerGroups(ownerInvids))
       {
         // "Server: Error in filterQueries()"
@@ -1122,13 +1124,10 @@ public final class DBPermissionManager {
                                           ts.l("filterQueries.error"),
                                           ts.l("setDefaultOwner.error_text2"));
       }
-    else
-      {
-        List<Invid> copyList = new ArrayList(ownerInvids);
-        this.visibilityFilterInvids = Collections.unmodifiableList(copyList);
-        gSession.setLastEvent("filterQueries");
-        return null;
-      }
+
+    this.visibilityFilterInvids = copyList;
+    gSession.setLastEvent("filterQueries");
+    return null;
   }
 
   //  Database operations
