@@ -763,8 +763,7 @@ final public class GanymedeSession implements Session, Unreferenced {
           }
       }
 
-    // permManager.selectPersona() calls abortTransaction() followed
-    // by openTransaction() to start a new transaction.
+    // permManager.selectPersona() calls restartTransaction()
 
     success = permManager.selectPersona(newPersona, password);
 
