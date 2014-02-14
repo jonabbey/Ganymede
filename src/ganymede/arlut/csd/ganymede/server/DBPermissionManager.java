@@ -1202,11 +1202,9 @@ public final class DBPermissionManager {
    *
    * <p>If the submitted QueryResult &lt;qr&gt; is null,
    * filterQueryResult() will itself return null.</p>
-   *
-   * <p>NB: This method requires no external synchronization</p>
    */
 
-  public synchronized QueryResult filterQueryResult(QueryResult qr)
+  public QueryResult filterQueryResult(QueryResult qr)
   {
     if (qr == null)
       {
@@ -1239,7 +1237,7 @@ public final class DBPermissionManager {
    * it's a simple loop-di-loop.
    */
 
-  public synchronized boolean filterMatch(Invid invid)
+  public boolean filterMatch(Invid invid)
   {
     if (invid == null)
       {
@@ -1261,7 +1259,7 @@ public final class DBPermissionManager {
    * it's a simple loop-di-loop.
    */
 
-  public synchronized boolean filterMatch(DBObject obj)
+  public boolean filterMatch(DBObject obj)
   {
     if (obj == null)
       {
