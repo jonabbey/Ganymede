@@ -1134,8 +1134,8 @@ public final class DBPermissionManager {
   //  Database operations
 
   /**
-   * <p>Returns a serialized representation of the basic category
-   * and base structure on the server.</p>
+   * Returns a serialized representation of the basic category and
+   * base structure on the server.
    *
    * @param hideNonEditables If true, the CategoryTransport returned
    * will only include those object types that are editable by the
@@ -1163,11 +1163,11 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>Returns a serialized representation of the object types
-   * defined on the server.  This BaseListTransport object will not
-   * include field information.  The client is obliged to call
+   * Returns a serialized representation of the object types defined
+   * on the server.  This BaseListTransport object will not include
+   * field information.  The client is obliged to call
    * getFieldTemplateVector() on any bases that it needs field
-   * information for.</p>
+   * information for.
    *
    * @see arlut.csd.ganymede.common.BaseListTransport
    */
