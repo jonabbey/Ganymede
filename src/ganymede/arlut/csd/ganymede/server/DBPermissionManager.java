@@ -1213,28 +1213,45 @@ public final class DBPermissionManager {
         return null;
       }
 
+    if (this.visibilityFilterInvids == null ||
+        this.visibilityFilterInvids.size() == 0)
+      {
+        return qr;
+      }
+
     QueryResult result = new QueryResult(qr.isForTransport());
 
-    /* -- */
-
-    List<ObjectHandle> handles = qr.getHandles();
-
-    for (ObjectHandle handle: handles)
+    for (ObjectHandle handle: qr.getHandles())
       {
-        Invid invid = handle.getInvid();
-
-        if (invid != null)
+        if (filterMatch(handle.getInvid()))
           {
-            DBObject obj = dbSession.viewDBObject(invid);
-
-            if (filterMatch(obj))
-              {
-                result.addRow(handle);
-              }
+            result.addRow(handle);
           }
       }
 
     return result;
+  }
+
+  /**
+   * This method returns true if the visibility filter vector allows
+   * visibility of the object in question.  The visibility vector
+   * works by direct ownership identity (i.e., no recursing up), so
+   * it's a simple loop-di-loop.
+   */
+
+  public synchronized boolean filterMatch(Invid invid)
+  {
+    if (invid == null)
+      {
+        return false;
+      }
+
+    if (visibilityFilterInvids == null || visibilityFilterInvids.size() == 0)
+      {
+        return true;
+      }
+
+    return filterMatch(dbSession.viewDBObject(invid));
   }
 
   /**
@@ -1253,7 +1270,7 @@ public final class DBPermissionManager {
 
     if (visibilityFilterInvids == null || visibilityFilterInvids.size() == 0)
       {
-        return true;            // no visibility restriction, go for it
+        return true;
       }
 
     List owners = obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
