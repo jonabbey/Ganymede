@@ -539,7 +539,7 @@ public final class DBPermissionManager {
    * internal process is running the session.</p>
    */
 
-  public synchronized DBObject getUser()
+  synchronized DBObject getUser()
   {
     if (userInvid != null)
       {
@@ -580,12 +580,10 @@ public final class DBPermissionManager {
 
   /**
    * This method gives access to the DBObject for the administrator's
-   * persona record, if any.  This is used by {@link
-   * arlut.csd.ganymede.server.DBSession DBSession} to get the label
-   * for the administrator for record keeping.
+   * persona record, if any.
    */
 
-  public synchronized DBObject getPersona()
+  synchronized DBObject getPersona()
   {
     return personaObj;
   }
