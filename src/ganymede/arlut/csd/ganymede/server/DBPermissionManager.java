@@ -1973,12 +1973,6 @@ public final class DBPermissionManager {
 
     for (Invid owner: owners)
       {
-        if (owner.getType() != SchemaConstants.OwnerBase)
-          {
-            Ganymede.debug("DBPermissionManager.isMemberOfAllOwnerGroups(): bad invid passed " + owner.toString());
-            return false;
-          }
-
         if (!isMemberOfOwnerGroup(owner))
           {
             return false;
