@@ -1369,8 +1369,8 @@ public final class DBPermissionManager {
         return PermEntry.fullPerms;
       }
 
-    PermMatrix applicablePerms = ownedByUs ? this.ownedObjectPerms : this.unownedObjectPerms;
-    PermEntry result = applicablePerms.getPerm(baseID);
+    PermMatrix pm = ownedByUs ? this.ownedObjectPerms : this.unownedObjectPerms;
+    PermEntry result = pm.getPerm(baseID);
 
     return result != null ? result : PermEntry.noPerms;
   }
@@ -1399,12 +1399,12 @@ public final class DBPermissionManager {
         return PermEntry.fullPerms;
       }
 
-    PermMatrix applicablePerms = ownedByUs ? ownedObjectPerms : unownedObjectPerms;
-    PermEntry result = applicablePerms.getPerm(baseID, fieldID);
+    PermMatrix pm = ownedByUs ? ownedObjectPerms : unownedObjectPerms;
+    PermEntry result = pm.getPerm(baseID, fieldID);
 
     if (result == null)
       {
-        result = applicablePerms.getPerm(baseID);
+        result = pm.getPerm(baseID);
       }
 
     return result != null ? result : PermEntry.noPerms;
@@ -1444,13 +1444,13 @@ public final class DBPermissionManager {
         expansionPerm = PermEntry.noPerms;
       }
 
-    PermMatrix applicablePerms = ownedByUs ? ownedObjectPerms : unownedObjectPerms;
+    PermMatrix pm = ownedByUs ? ownedObjectPerms : unownedObjectPerms;
 
     // we always union below so that we'll return PermEntry.noPerms
     // rather than null even if the applicable PermMatrix doesn't have
     // an entry for this object type.
 
-    return expansionPerm.union(applicablePerms.getPerm(object.getTypeID()));
+    return expansionPerm.union(pm.getPerm(object.getTypeID()));
   }
 
   /**
@@ -1483,7 +1483,7 @@ public final class DBPermissionManager {
         return customPerm;
       }
 
-    PermMatrix applicablePerms = ownedByUs ? ownedObjectPerms: unownedObjectPerms;
+    PermMatrix pm = ownedByUs ? ownedObjectPerms: unownedObjectPerms;
     PermEntry expansionPerm = object.getObjectHook().permExpand(gSession, object, fieldID);
 
     if (expansionPerm == null)
@@ -1492,11 +1492,11 @@ public final class DBPermissionManager {
         // if there is no explicit permission recorded for a specific
         // field
 
-        return applicablePerms.getPerm(object.getTypeID(), fieldID);
+        return pm.getPerm(object.getTypeID(), fieldID);
       }
     else
       {
-        return expansionPerm.union(applicablePerms.getPerm(object.getTypeID(), fieldID));
+        return expansionPerm.union(pm.getPerm(object.getTypeID(), fieldID));
       }
   }
 
@@ -1724,10 +1724,10 @@ public final class DBPermissionManager {
         return;
       }
 
-    PermMatrix selfPerm = permField.getMatrix();
+    PermMatrix selfPerms = permField.getMatrix();
 
-    this.ownedObjectPerms = this.ownedObjectPerms.union(selfPerm);
-    this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(selfPerm);
+    this.ownedObjectPerms = this.ownedObjectPerms.union(selfPerms);
+    this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(selfPerms);
   }
 
   /**
@@ -1758,11 +1758,9 @@ public final class DBPermissionManager {
         return true;
       }
 
-    DBEditObject objectHook = obj.getObjectHook();
-
     while (obj.isEmbedded())
       {
-        if (objectHook.grantOwnership(gSession, obj))
+        if (obj.getObjectHook().grantOwnership(gSession, obj))
           {
             return true;
           }
@@ -1776,10 +1774,9 @@ public final class DBPermissionManager {
           }
 
         obj = dbSession.viewDBObject(inv);
-        objectHook = obj.getObjectHook();
       }
 
-    if (objectHook.grantOwnership(gSession, obj))
+    if (obj.getObjectHook().grantOwnership(gSession, obj))
       {
         return true;
       }
