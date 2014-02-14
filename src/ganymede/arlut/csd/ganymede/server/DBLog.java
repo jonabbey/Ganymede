@@ -1108,10 +1108,7 @@ final public class DBLog implements java.io.Closeable {
 
     // get our list of recipients
 
-    if (event.getInvids() != null)
-      {
-        addressSet.addAll(event.getMailTargets());
-      }
+    addressSet.addAll(event.getMailTargets());
 
     if (type.addressList != null)
       {
