@@ -2844,6 +2844,72 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * <p>Shortcut method to test to see if a vector field contains a
+   * given value.</p>
+   *
+   * <p>If no such Vector field is defined on this object type, an
+   * IllegalArgumentException will be thrown.  If such a Vector field
+   * is defined on this object type but is not present in this
+   * instance, false will be returned.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final boolean containsFieldValue(short fieldID, Object val) throws GanyPermissionsException
+  {
+    DBField field = (DBField) this.getField(fieldID);
+    String fieldName = null;
+
+    if (field == null)
+      {
+        return false;
+      }
+
+    fieldName = field.getName();
+
+    if (!field.isVector())
+      {
+        // "Couldn't get vector values on scalar field {0}"
+        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
+      }
+
+    return field.containsElement(val);
+  }
+
+  /**
+   * <p>Shortcut method to test to see if a vector field contains a
+   * given value.</p>
+   *
+   * <p>If no such Vector field is defined on this object type, an
+   * IllegalArgumentException will be thrown.  If such a Vector field
+   * is defined on this object type but is not present in this
+   * instance, false will be returned.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final boolean containsFieldValueLocal(short fieldID, Object val)
+  {
+    DBField field = (DBField) this.getField(fieldID);
+    String fieldName = null;
+
+    if (field == null)
+      {
+        return false;
+      }
+
+    fieldName = field.getName();
+
+    if (!field.isVector())
+      {
+        // "Couldn't get vector values on scalar field {0}"
+        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
+      }
+
+    return field.containsElementLocal(val);
+  }
+
+  /**
    * <p>Shortcut method to retrieve a indexed value from a named
    * vector field in this object.</p>
    *

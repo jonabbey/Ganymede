@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -305,6 +305,18 @@ public interface db_object extends java.rmi.Remote {
    */
 
   public Vector getFieldValues(short fieldID) throws RemoteException;
+
+  /**
+   * <p>Shortcut method to test to see if a vector field contains a
+   * given value.</p>
+   *
+   * <p>If no such Vector field is defined on this object type, an
+   * IllegalArgumentException will be thrown.  If such a Vector field
+   * is defined on this object type but is not present in this
+   * instance, false will be returned.</p>
+   */
+
+  public boolean containsFieldValue(short fieldID, Object val) throws RemoteException;
 
   /**
    * <p>This method is used to provide a summary description of
