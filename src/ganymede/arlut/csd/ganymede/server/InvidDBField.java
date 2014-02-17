@@ -1102,7 +1102,7 @@ public final class InvidDBField extends DBField implements invid_field {
           {
             if (anonymous || getGSession().getPermManager().getPerm(remobj).isEditable())
               {
-                oldRef = (DBEditObject) session.editDBObject(oldRemote);
+                oldRef = session.editDBObject(oldRemote);
               }
             else
               {
@@ -1273,7 +1273,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
         if (anonymous2 || getGSession().getPermManager().getPerm(remobj).isEditable())
           {
-            newRef = (DBEditObject) session.editDBObject(newRemote);
+            newRef = session.editDBObject(newRemote);
           }
         else
           {
@@ -1525,7 +1525,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
         if (anonymous || getGSession().getPermManager().getPerm(remobj).isEditable())
           {
-            oldRef = (DBEditObject) session.editDBObject(remote);
+            oldRef = session.editDBObject(remote);
 
             // if we couldn't checkout the old object for editing, despite
             // having permissions, we need to see why.
