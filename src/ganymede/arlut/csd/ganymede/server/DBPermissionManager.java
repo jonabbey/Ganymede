@@ -894,7 +894,7 @@ public final class DBPermissionManager {
             continue;
           }
 
-        PasswordDBField pdbf = (PasswordDBField) personaObject.getField(SchemaConstants.PersonaPasswordField);
+        PasswordDBField pdbf = personaObject.getPassField(SchemaConstants.PersonaPasswordField);
 
         if (pdbf != null && pdbf.matchPlainText(pass))
           {
@@ -1593,7 +1593,7 @@ public final class DBPermissionManager {
 
             if (roleObj.containsField(SchemaConstants.RoleMatrix))
               {
-                PermissionMatrixDBField ownedObjsPermField = (PermissionMatrixDBField) roleObj.getField(SchemaConstants.RoleMatrix);
+                PermissionMatrixDBField ownedObjsPermField = roleObj.getPermField(SchemaConstants.RoleMatrix);
                 PermMatrix ownedMatrix = ownedObjsPermField.getMatrix();
 
                 this.ownedObjectPerms = this.ownedObjectPerms.union(ownedMatrix);
@@ -1606,7 +1606,7 @@ public final class DBPermissionManager {
 
             if (roleObj.containsField(SchemaConstants.RoleDefaultMatrix))
               {
-                PermissionMatrixDBField unownedObjsPermField = (PermissionMatrixDBField) roleObj.getField(SchemaConstants.RoleDefaultMatrix);
+                PermissionMatrixDBField unownedObjsPermField = roleObj.getPermField(SchemaConstants.RoleDefaultMatrix);
                 PermMatrix unownedMatrix = unownedObjsPermField.getMatrix();
 
                 this.ownedObjectPerms = this.ownedObjectPerms.union(unownedMatrix);
@@ -1715,7 +1715,7 @@ public final class DBPermissionManager {
 
   private synchronized void initializeDefaultPerms()
   {
-    PermissionMatrixDBField pField = (PermissionMatrixDBField) this.defaultRoleObj.getField(SchemaConstants.RoleDefaultMatrix);
+    PermissionMatrixDBField pField = this.defaultRoleObj.getPermField(SchemaConstants.RoleDefaultMatrix);
     PermMatrix defaultMatrix;
 
     if (pField != null)
@@ -1743,7 +1743,7 @@ public final class DBPermissionManager {
 
   private synchronized void configureEndUser()
   {
-    PermissionMatrixDBField permField = (PermissionMatrixDBField) this.defaultRoleObj.getField(SchemaConstants.RoleMatrix);
+    PermissionMatrixDBField permField = this.defaultRoleObj.getPermField(SchemaConstants.RoleMatrix);
 
     if (permField == null)
       {
