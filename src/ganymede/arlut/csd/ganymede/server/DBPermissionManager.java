@@ -1454,14 +1454,14 @@ public final class DBPermissionManager {
         return PermEntry.fullPerms;
       }
 
-    PermEntry customP = obj.getObjectHook().permOverride(gSession, obj);
+    PermEntry customP = obj.getHook().permOverride(gSession, obj);
 
     if (customP != null)
       {
         return customP;
       }
 
-    PermEntry expandP = obj.getObjectHook().permExpand(gSession, obj);
+    PermEntry expandP = obj.getHook().permExpand(gSession, obj);
 
     if (expandP == null)
       {
@@ -1502,7 +1502,7 @@ public final class DBPermissionManager {
         return PermEntry.fullPerms;
       }
 
-    PermEntry customP = obj.getObjectHook().permOverride(gSession, obj, fieldID);
+    PermEntry customP = obj.getHook().permOverride(gSession, obj, fieldID);
 
     if (customP != null)
       {
@@ -1510,7 +1510,7 @@ public final class DBPermissionManager {
       }
 
     PermMatrix pm = ownedByUs ? ownedObjectPerms: unownedObjectPerms;
-    PermEntry expandP = obj.getObjectHook().permExpand(gSession, obj, fieldID);
+    PermEntry expandP = obj.getHook().permExpand(gSession, obj, fieldID);
 
     if (expandP == null)
       {
@@ -1786,7 +1786,7 @@ public final class DBPermissionManager {
 
     while (obj.isEmbedded())
       {
-        if (obj.getObjectHook().grantOwnership(gSession, obj))
+        if (obj.getHook().grantOwnership(gSession, obj))
           {
             return true;
           }
@@ -1802,7 +1802,7 @@ public final class DBPermissionManager {
         obj = dbSession.viewDBObject(inv);
       }
 
-    if (obj.getObjectHook().grantOwnership(gSession, obj))
+    if (obj.getHook().grantOwnership(gSession, obj))
       {
         return true;
       }

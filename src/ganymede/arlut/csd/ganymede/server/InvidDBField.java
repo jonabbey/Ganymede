@@ -438,7 +438,7 @@ public final class InvidDBField extends DBField implements invid_field {
             // object that we are writing out
             //
 
-            DBEditObject hook = this.owner.getObjectHook();
+            DBEditObject hook = this.owner.getHook();
             String extras[] = hook.getForeignSyncKeys(invid, this.owner,
                                                       target, xmlOut.getSyncChannelName(),
                                                       xmlOut.isBeforeStateDumping());
@@ -471,7 +471,7 @@ public final class InvidDBField extends DBField implements invid_field {
             // object that we are targeting
             //
 
-            hook = target.getObjectHook();
+            hook = target.getHook();
             extras = hook.getMyExtraInvidAttributes(target,
                                                     xmlOut.getSyncChannelName(),
                                                     xmlOut.isBeforeStateDumping());
@@ -3811,7 +3811,7 @@ public final class InvidDBField extends DBField implements invid_field {
                   }
                 else
                   {
-                    label = this.owner.getObjectHook().lookupLabel(object);
+                    label = this.owner.getHook().lookupLabel(object);
                   }
               }
           }

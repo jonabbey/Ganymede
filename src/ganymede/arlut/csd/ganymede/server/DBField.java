@@ -1181,8 +1181,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
   public final boolean isVisible()
   {
-    return verifyReadPermission() &&
-      owner.getObjectHook().canSeeField(null, this);
+    return verifyReadPermission() && owner.getHook().canSeeField(null, this);
   }
 
   /**

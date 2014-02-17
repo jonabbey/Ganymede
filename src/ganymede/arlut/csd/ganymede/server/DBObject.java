@@ -647,7 +647,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * management oversight to Objects of this type.
    */
 
-  public final DBEditObject getObjectHook()
+  public final DBEditObject getHook()
   {
     return objectBase.getObjectHook();
   }
@@ -1028,7 +1028,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public String getEmbeddedObjectDisplayLabel()
   {
-    return getObjectHook().getEmbeddedObjectDisplayLabelHook(this);
+    return getHook().getEmbeddedObjectDisplayLabelHook(this);
   }
 
   /**
@@ -2010,7 +2010,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
                 // on how the fieldRequired method is written.  I
                 // think this is a low-level risk, but not zero.
 
-                if (getObjectHook().fieldRequired(this, fieldDef.getID()))
+                if (getHook().fieldRequired(this, fieldDef.getID()))
                   {
                     DBField field = retrieveField(fieldDef.getID());
 
@@ -2107,7 +2107,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final boolean hasEmailTarget()
   {
-    return getObjectHook().hasEmailTarget(this);
+    return getHook().hasEmailTarget(this);
   }
 
   /**
@@ -2117,7 +2117,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final List<String> getEmailTargets()
   {
-    return (List<String>) getObjectHook().getEmailTargets(this);
+    return (List<String>) getHook().getEmailTargets(this);
   }
 
   /**
@@ -2131,7 +2131,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final String getImageURL()
   {
-    return getObjectHook().getImageURLForObject(this);
+    return getHook().getImageURLForObject(this);
   }
 
   /**
