@@ -1353,7 +1353,7 @@ public final class DBEditSet {
     // otherwise, we always insist on the label field being present.
     // We'll check that up front.
 
-    DBField labelField = eObj.retrieveField(eObj.getLabelFieldID());
+    DBField labelField = eObj.getField(eObj.getLabelFieldID());
 
     if (labelField == null || !labelField.isDefined())
       {

@@ -297,7 +297,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
         short id = fieldDef.getID();
-        DBField originalField = original.retrieveField(id);
+        DBField originalField = original.getField(id);
         DBField copyField;
 
         if (originalField != null)
@@ -498,7 +498,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   @Override public final ReturnVal setFieldValue(short fieldID, Object value) throws GanyPermissionsException
   {
-    DBField field = retrieveField(fieldID);
+    DBField field = getField(fieldID);
 
     /* -- */
 
@@ -526,7 +526,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public final ReturnVal setFieldValueLocal(short fieldID, Object value)
   {
-    DBField field = retrieveField(fieldID);
+    DBField field = getField(fieldID);
 
     /* -- */
 
@@ -1582,7 +1582,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
       {
         if (canCloneField(session, origObj, origField))
           {
-            newField = retrieveField(origField.getID());
+            newField = getField(origField.getID());
 
             // if we already initialized this field when we were
             // constructed, don't copy over a value onto this field.
@@ -2912,7 +2912,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
         // ok, we've cleared all fields but field 0.. clear that to finish up.
 
-        DBField field = retrieveField((short) 0);
+        DBField field = getField((short) 0);
 
         if (field != null)
           {
@@ -3576,7 +3576,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   {
     for (Map.Entry<Short, Object> entry: ckpoint.entrySet())
       {
-        DBField field = retrieveField(entry.getKey().shortValue());
+        DBField field = getField(entry.getKey().shortValue());
         Object value = entry.getValue();
 
         // again, we use a reference to ourselves as a

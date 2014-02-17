@@ -604,7 +604,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
           }
         else
           {
-            DBField fieldCopy = DBField.copyField(this, original.retrieveField(fieldRec.fieldcode));
+            DBField fieldCopy = DBField.copyField(this, original.getField(fieldRec.fieldcode));
 
             if (fieldRec.addValues != null)
               {
@@ -1462,7 +1462,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       {
         for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
           {
-            field = retrieveField(fieldDef.getID());
+            field = getField(fieldDef.getID());
 
             if (field != null)
               {
@@ -1598,7 +1598,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final boolean containsField(short id)
   {
-    return (retrieveField(id) != null);
+    return (getField(id) != null);
   }
 
   /**
@@ -1609,17 +1609,24 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final boolean containsField(String fieldName)
   {
-    return (retrieveField(fieldName) != null);
+    return (getField(fieldName) != null);
   }
 
+
   /**
+   * <p>Get read-only access to a field from this object, by name.</p>
+   *
    * <p>This method retrieves a DBField from this object's fieldAry
-   * DBField array.  retrieveField() uses a hashing algorithm to try
+   * DBField array.  getField() uses a hashing algorithm to try
    * and speed up field retrieving, but we are optimizing for low
    * memory usage rather than O(1) operations.</p>
+   *
+   * @param fieldname The fieldname for the desired field of this object
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  final DBField retrieveField(short id)
+  public final DBField getField(short id)
   {
     if (fieldAry == null)
       {
@@ -1640,13 +1647,20 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * <p>Get access to a field from this object.  This method
+   * is exported to clients over RMI.</p>
+   *
    * <p>This method retrieves a DBField from this object's fieldAry
    * DBField array by field name.  This access is done slowly, using a
    * simple iteration over the values in our packed hash
    * structure.</p>
+   *
+   * @param id The field code for the desired field of this object.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  final DBField retrieveField(String fieldName)
+  public final DBField getField(String fieldName)
   {
     if (fieldAry == null)
       {
@@ -1722,33 +1736,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <p>Get access to a field from this object.  This method
-   * is exported to clients over RMI.</p>
-   *
-   * @param id The field code for the desired field of this object.
-   *
-   * @see arlut.csd.ganymede.rmi.db_object
-   */
-
-  public final DBField getField(short id)
-  {
-    return retrieveField(id);
-  }
-
-  /**
-   * <p>Get read-only access to a field from this object, by name.</p>
-   *
-   * @param fieldname The fieldname for the desired field of this object
-   *
-   * @see arlut.csd.ganymede.rmi.db_object
-   */
-
-  public final DBField getField(String fieldname)
-  {
-    return retrieveField(fieldname);
-  }
-
-  /**
    * <p>Returns the name of a field from this object.</p>
    *
    * @param id The field code for the desired field of this object.
@@ -1758,7 +1745,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final String getFieldName(short id)
   {
-    DBField field = retrieveField(id);
+    DBField field = getField(id);
 
     if (field != null)
       {
@@ -1905,8 +1892,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       }
 
     // sync on fieldAry since we are looping over our fields and since
-    // retrieveField itself sync's on fieldAry.  if we sync up front
-    // we may reduce our lock acquisition time marginally
+    // getField itself sync's on fieldAry.  if we sync up front we may
+    // reduce our lock acquisition time marginally
 
     synchronized (fieldAry)
       {
@@ -1917,7 +1904,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
         for (FieldTemplate template: fieldTemplates)
           {
-            DBField field = retrieveField(template.getID());
+            DBField field = getField(template.getID());
 
             if (field != null && field.isDefined())
               {
@@ -1986,8 +1973,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     /* -- */
 
-    // sync on fieldAry since we are looping over our fields and since retrieveField itself
-    // sync's on fieldAry
+    // sync on fieldAry since we are looping over our fields and since
+    // getField itself sync's on fieldAry
 
     if (fieldAry == null)
       {
@@ -2012,7 +1999,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
                 if (getHook().fieldRequired(this, fieldDef.getID()))
                   {
-                    DBField field = retrieveField(fieldDef.getID());
+                    DBField field = getField(fieldDef.getID());
 
                     if (field == null || !field.isDefined())
                       {
@@ -2820,7 +2807,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
         for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
           {
-            DBField field = retrieveField(fieldDef.getID());
+            DBField field = getField(fieldDef.getID());
 
             if (field != null)
               {
@@ -3074,7 +3061,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final BooleanDBField getBooleanField(short fieldID)
   {
-    return (BooleanDBField) this.retrieveField(fieldID);
+    return (BooleanDBField) this.getField(fieldID);
   }
 
   /**
@@ -3091,7 +3078,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final BooleanDBField getBooleanField(String fieldname)
   {
-    return (BooleanDBField) this.retrieveField(fieldname);
+    return (BooleanDBField) this.getField(fieldname);
   }
 
   /**
@@ -3108,7 +3095,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final DateDBField getDateField(short fieldID)
   {
-    return (DateDBField) this.retrieveField(fieldID);
+    return (DateDBField) this.getField(fieldID);
   }
 
   /**
@@ -3125,7 +3112,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final DateDBField getDateField(String fieldname)
   {
-    return (DateDBField) this.retrieveField(fieldname);
+    return (DateDBField) this.getField(fieldname);
   }
 
   /**
@@ -3142,7 +3129,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final FieldOptionDBField getFieldOptionsField(short fieldID)
   {
-    return (FieldOptionDBField) this.retrieveField(fieldID);
+    return (FieldOptionDBField) this.getField(fieldID);
   }
 
   /**
@@ -3159,7 +3146,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final FieldOptionDBField getFieldOptionsField(String fieldname)
   {
-    return (FieldOptionDBField) this.retrieveField(fieldname);
+    return (FieldOptionDBField) this.getField(fieldname);
   }
 
   /**
@@ -3176,7 +3163,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final FloatDBField getFloatField(short fieldID)
   {
-    return (FloatDBField) this.retrieveField(fieldID);
+    return (FloatDBField) this.getField(fieldID);
   }
 
   /**
@@ -3193,7 +3180,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final FloatDBField getFloatField(String fieldname)
   {
-    return (FloatDBField) this.retrieveField(fieldname);
+    return (FloatDBField) this.getField(fieldname);
   }
 
   /**
@@ -3210,7 +3197,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final InvidDBField getInvidField(short fieldID)
   {
-    return (InvidDBField) this.retrieveField(fieldID);
+    return (InvidDBField) this.getField(fieldID);
   }
 
   /**
@@ -3227,7 +3214,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final InvidDBField getInvidField(String fieldname)
   {
-    return (InvidDBField) this.retrieveField(fieldname);
+    return (InvidDBField) this.getField(fieldname);
   }
 
   /**
@@ -3244,7 +3231,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final IPDBField getIPField(short fieldID)
   {
-    return (IPDBField) this.retrieveField(fieldID);
+    return (IPDBField) this.getField(fieldID);
   }
 
   /**
@@ -3261,7 +3248,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final IPDBField getIPField(String fieldname)
   {
-    return (IPDBField) this.retrieveField(fieldname);
+    return (IPDBField) this.getField(fieldname);
   }
 
   /**
@@ -3278,7 +3265,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final NumericDBField getNumericField(short fieldID)
   {
-    return (NumericDBField) this.retrieveField(fieldID);
+    return (NumericDBField) this.getField(fieldID);
   }
 
   /**
@@ -3295,7 +3282,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final NumericDBField getNumericField(String fieldname)
   {
-    return (NumericDBField) this.retrieveField(fieldname);
+    return (NumericDBField) this.getField(fieldname);
   }
 
   /**
@@ -3312,7 +3299,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final PasswordDBField getPassField(short fieldID)
   {
-    return (PasswordDBField) this.retrieveField(fieldID);
+    return (PasswordDBField) this.getField(fieldID);
   }
 
   /**
@@ -3329,7 +3316,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final PasswordDBField getPassField(String fieldname)
   {
-    return (PasswordDBField) this.retrieveField(fieldname);
+    return (PasswordDBField) this.getField(fieldname);
   }
 
   /**
@@ -3347,7 +3334,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final PermissionMatrixDBField getPermField(short fieldID)
   {
-    return (PermissionMatrixDBField) this.retrieveField(fieldID);
+    return (PermissionMatrixDBField) this.getField(fieldID);
   }
 
   /**
@@ -3365,7 +3352,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final PermissionMatrixDBField getPermField(String fieldname)
   {
-    return (PermissionMatrixDBField) this.retrieveField(fieldname);
+    return (PermissionMatrixDBField) this.getField(fieldname);
   }
 
   /**
@@ -3382,7 +3369,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final StringDBField getStringField(short fieldID)
   {
-    return (StringDBField) this.retrieveField(fieldID);
+    return (StringDBField) this.getField(fieldID);
   }
 
   /**
@@ -3399,7 +3386,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final StringDBField getStringField(String fieldname)
   {
-    return (StringDBField) this.retrieveField(fieldname);
+    return (StringDBField) this.getField(fieldname);
   }
 
   /**
@@ -3590,7 +3577,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
       {
-        DBField field = retrieveField(fieldDef.getID());
+        DBField field = getField(fieldDef.getID());
 
         if (field != null && field.isDefined() && (local || field.isVisible()))
           {
@@ -3748,7 +3735,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public boolean has_key(Object key)
   {
-    return (retrieveField((String) key) != null);
+    return (getField((String) key) != null);
   }
 
   /**
