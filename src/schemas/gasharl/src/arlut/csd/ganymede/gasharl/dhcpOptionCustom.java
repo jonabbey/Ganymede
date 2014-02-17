@@ -960,7 +960,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
               {
                 Invid interfaceInvid = results.getInvid(0);
                 DBObject interfaceObject = object.lookupInvid(interfaceInvid);
-                DBField ipField = (DBField) interfaceObject.getField(interfaceSchema.ADDRESS);
+                DBField ipField = interfaceObject.getField(interfaceSchema.ADDRESS);
 
                 ReturnVal retVal = new ReturnVal(true, true);
                 retVal.setTransformedValueObject(ipField.getEncodingString());

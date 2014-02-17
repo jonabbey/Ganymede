@@ -933,7 +933,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
                     DBObject oldUser = (DBObject) map.get(badgeNum);
 
-                    DBField field = (DBField) oldUser.getField(userSchema.PERSONAE);
+                    DBField field = oldUser.getField(userSchema.PERSONAE);
 
                     if (field != null && field.isDefined())
                       {
@@ -1034,7 +1034,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
                     DBObject oldUser = map.get(badgeNum);
 
-                    DBField field = (DBField) oldUser.getField(userSchema.PERSONAE);
+                    DBField field = oldUser.getField(userSchema.PERSONAE);
 
                     if (field != null && field.isDefined())
                       {

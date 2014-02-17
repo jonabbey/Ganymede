@@ -1008,7 +1008,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
           {
             try
               {
-                ((DBField) getField(userSchema.CATEGORY)).setValue(category, local, true);
+                getField(userSchema.CATEGORY).setValue(category, local, true);
               }
             catch (GanyPermissionsException ex)
               {
@@ -2281,7 +2281,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
           }
         else
           {
-            name = (String) ((DBField) getField(USERNAME)).getValueLocal();
+            name = (String) getField(USERNAME).getValueLocal();
 
             if (name != null)
               {
@@ -2291,7 +2291,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         // and any aliases defined
 
-        Vector<String> values = (Vector<String>) ((DBField) getField(ALIASES)).getValuesLocal();
+        Vector<String> values = (Vector<String>) getField(ALIASES).getValuesLocal();
 
         for (String str: values)
           {

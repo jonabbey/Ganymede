@@ -142,7 +142,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
         return null;
       }
 
-    DBField field = (DBField) object.getField(fieldid);
+    DBField field = object.getField(fieldid);
 
     if (field == null)
       {

@@ -378,7 +378,7 @@ public class dhcpSubnetCustom extends DBEditObject implements SchemaConstants, d
                 StringDBField guest_range = getStringField(GUEST_RANGE);
                 result = ReturnVal.merge(result, guest_range.setValueLocal(null));
 
-                DBField guest_options = (DBField) getField(GUEST_OPTIONS);
+                DBField guest_options = getField(GUEST_OPTIONS);
 
                 try
                   {

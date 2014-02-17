@@ -406,7 +406,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
 
   public ReturnVal setQueryMembers(Set<String> users) throws NotLoggedInException
   {
-    DBField memberField = (DBField) this.getField(MEMBERS);
+    DBField memberField = this.getField(MEMBERS);
 
     Date x = new Date();
 

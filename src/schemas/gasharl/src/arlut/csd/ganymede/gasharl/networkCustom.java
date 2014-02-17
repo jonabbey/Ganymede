@@ -126,7 +126,7 @@ public class networkCustom extends DBEditObject {
 
     if (fieldid == networkSchema.NETNUMBER)
       {
-        DBField allocField = (DBField) object.getField(networkSchema.ALLOCRANGE);
+        DBField allocField = object.getField(networkSchema.ALLOCRANGE);
 
         if (allocField == null || !allocField.isDefined())
           {
@@ -139,7 +139,7 @@ public class networkCustom extends DBEditObject {
 
     if (fieldid == networkSchema.ALLOCRANGE)
       {
-        DBField netnumField = (DBField) object.getField(networkSchema.NETNUMBER);
+        DBField netnumField = object.getField(networkSchema.NETNUMBER);
 
         if (netnumField == null || !netnumField.isDefined())
           {

@@ -1178,8 +1178,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
         // and add them to our system aliases field.. we know there's no
         // overlap because they are both in the same namespace.
 
-        DBField aliasesField = (DBField) getField(systemSchema.SYSTEMALIASES);
-        DBField sourceField = (DBField) io.getField(interfaceSchema.ALIASES);
+        DBField aliasesField = getField(systemSchema.SYSTEMALIASES);
+        DBField sourceField = io.getField(interfaceSchema.ALIASES);
 
         while (sourceField.size() > 0)
           {
