@@ -887,29 +887,27 @@ public final class DBPermissionManager {
 
     for (Invid invid: personae)
       {
-        try
-          {
-            DBObject personaObject = dbSession.viewDBObject(invid).getOriginal();
+        DBObject personaObject = dbSession.viewDBObject(invid).getOriginal();
 
-            if (!label.equals(personaObject.getLabel()))
-              {
-                continue;
-              }
-
-            PasswordDBField pdbf = (PasswordDBField) personaObject.getField(SchemaConstants.PersonaPasswordField);
-
-            if (pdbf != null && pdbf.matchPlainText(pass))
-              {
-                this.personaName = personaObject.getLabel();
-                this.personaInvid = personaObject.getInvid();
-                this.personaObj = personaObject;
-
-                return true;
-              }
-          }
-        catch (NullPointerException ex)
+        if (!label.equals(personaObject.getLabel()))
           {
             continue;
+          }
+
+        PasswordDBField pdbf = (PasswordDBField) personaObject.getField(SchemaConstants.PersonaPasswordField);
+
+        if (pdbf != null && pdbf.matchPlainText(pass))
+          {
+            if (personaObject.getLabel() == null || personaObject.getInvid() == null)
+              {
+                throw new NullPointerException();
+              }
+
+            this.personaName = personaObject.getLabel();
+            this.personaInvid = personaObject.getInvid();
+            this.personaObj = personaObject;
+
+            return true;
           }
       }
 
