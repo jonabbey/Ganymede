@@ -1575,8 +1575,8 @@ public final class DBPermissionManager {
             return;
           }
 
-        if (this.personaObj.containsField(SchemaConstants.PersonaGroupsField) &&
-            this.personaObj.retrieveField(SchemaConstants.PersonaGroupsField).containsElementLocal(SUPERGASH_GROUP_INVID))
+        if (this.personaObj.containsFieldValueLocal(SchemaConstants.PersonaGroupsField,
+                                                    SUPERGASH_GROUP_INVID))
           {
             this.supergashMode = true;
             return;
