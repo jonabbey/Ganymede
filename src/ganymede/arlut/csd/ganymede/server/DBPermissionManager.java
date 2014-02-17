@@ -1437,14 +1437,14 @@ public final class DBPermissionManager {
   }
 
   /**
-   * Returns the permissions for object.
+   * Returns the permissions for obj.
    *
    * @return a non-null PermEntry
    */
 
-  private PermEntry getObjectPerm(DBObject object, boolean ownedByUs)
+  private PermEntry getObjectPerm(DBObject obj, boolean ownedByUs)
   {
-    if (object == null)
+    if (obj == null)
       {
         throw new NullPointerException();
       }
@@ -1456,18 +1456,18 @@ public final class DBPermissionManager {
         return PermEntry.fullPerms;
       }
 
-    PermEntry customPerm = object.getObjectHook().permOverride(gSession, object);
+    PermEntry customP = obj.getObjectHook().permOverride(gSession, obj);
 
-    if (customPerm != null)
+    if (customP != null)
       {
-        return customPerm;
+        return customP;
       }
 
-    PermEntry expansionPerm = object.getObjectHook().permExpand(gSession, object);
+    PermEntry expandP = obj.getObjectHook().permExpand(gSession, obj);
 
-    if (expansionPerm == null)
+    if (expandP == null)
       {
-        expansionPerm = PermEntry.noPerms;
+        expandP = PermEntry.noPerms;
       }
 
     PermMatrix pm = ownedByUs ? ownedObjectPerms : unownedObjectPerms;
@@ -1476,21 +1476,23 @@ public final class DBPermissionManager {
     // rather than null even if the applicable PermMatrix doesn't have
     // an entry for this object type.
 
-    return expansionPerm.union(pm.getPerm(object.getTypeID()));
+    return expandP.union(pm.getPerm(obj.getTypeID()));
   }
 
   /**
-   * Returns the permissions for fieldID in object, without
-   * considering object-level permissions.
+   * Returns the permissions for fieldID in obj, without considering
+   * object-level permissions.
    *
    * @return A null PermEntry if no appropriate field-level permission
    * is granted, or a non-null PermEntry if we have an explicit
    * permission recorded for this field type.
    */
 
-  private synchronized PermEntry getFieldPerm(DBObject object, short fieldID, boolean ownedByUs)
+  private synchronized PermEntry getFieldPerm(DBObject obj,
+                                              short fieldID,
+                                              boolean ownedByUs)
   {
-    if (object == null)
+    if (obj == null)
       {
         throw new NullPointerException();
       }
@@ -1502,27 +1504,27 @@ public final class DBPermissionManager {
         return PermEntry.fullPerms;
       }
 
-    PermEntry customPerm = object.getObjectHook().permOverride(gSession, object, fieldID);
+    PermEntry customP = obj.getObjectHook().permOverride(gSession, obj, fieldID);
 
-    if (customPerm != null)
+    if (customP != null)
       {
-        return customPerm;
+        return customP;
       }
 
     PermMatrix pm = ownedByUs ? ownedObjectPerms: unownedObjectPerms;
-    PermEntry expansionPerm = object.getObjectHook().permExpand(gSession, object, fieldID);
+    PermEntry expandP = obj.getObjectHook().permExpand(gSession, obj, fieldID);
 
-    if (expansionPerm == null)
+    if (expandP == null)
       {
         // unlike in the getObjectPerm case, we do want to return null
         // if there is no explicit permission recorded for a specific
         // field
 
-        return pm.getPerm(object.getTypeID(), fieldID);
+        return pm.getPerm(obj.getTypeID(), fieldID);
       }
     else
       {
-        return expansionPerm.union(pm.getPerm(object.getTypeID(), fieldID));
+        return expandP.union(pm.getPerm(obj.getTypeID(), fieldID));
       }
   }
 
