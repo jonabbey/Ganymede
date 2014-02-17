@@ -3078,6 +3078,23 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * Server-side type casting field accessor for BooleanDBFields.
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a BooleanDBField if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final BooleanDBField getBooleanField(String fieldname)
+  {
+    return (BooleanDBField) this.retrieveField(fieldname);
+  }
+
+  /**
    * Server-side type casting field accessor for DateDBField
    *
    * @param fieldID The field id to retrieve.
@@ -3092,6 +3109,23 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   public final DateDBField getDateField(short fieldID)
   {
     return (DateDBField) this.retrieveField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for DateDBField
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a DateDBField if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final DateDBField getDateField(String fieldname)
+  {
+    return (DateDBField) this.retrieveField(fieldname);
   }
 
   /**
@@ -3112,6 +3146,23 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * Server-side type casting field accessor for FieldOptionDBField
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a FieldOptionDBField if field fieldname is present and of
+   * the proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final FieldOptionDBField getFieldOptionsField(String fieldname)
+  {
+    return (FieldOptionDBField) this.retrieveField(fieldname);
+  }
+
+  /**
    * Server-side type casting field accessor for FloatDBField
    *
    * @param fieldID The field id to retrieve.
@@ -3126,6 +3177,23 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   public final FloatDBField getFloatField(short fieldID)
   {
     return (FloatDBField) this.retrieveField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for FloatDBField
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a FloatDBField if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final FloatDBField getFloatField(String fieldname)
+  {
+    return (FloatDBField) this.retrieveField(fieldname);
   }
 
   /**
@@ -3146,6 +3214,23 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * Server-side type casting field accessor for InvidDBField
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return an InvidDBField if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final InvidDBField getInvidField(String fieldname)
+  {
+    return (InvidDBField) this.retrieveField(fieldname);
+  }
+
+  /**
    * Server-side type casting field accessor for IPDBField
    *
    * @param fieldID The field id to retrieve.
@@ -3160,6 +3245,23 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   public final IPDBField getIPField(short fieldID)
   {
     return (IPDBField) this.retrieveField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for IPDBField
+   *
+   * @param fieldname The name of the field to retrieve
+   *
+   * @return an IPDBField if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final IPDBField getIPField(String fieldname)
+  {
+    return (IPDBField) this.retrieveField(fieldname);
   }
 
   /**
@@ -3180,6 +3282,23 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * Server-side type casting field accessor for NumericDBField
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a NumericDBField if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final NumericDBField getNumericField(String fieldname)
+  {
+    return (NumericDBField) this.retrieveField(fieldname);
+  }
+
+  /**
    * Server-side type casting field accessor for PasswordDBField
    *
    * @param fieldID The field id to retrieve.
@@ -3194,6 +3313,23 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   public final PasswordDBField getPassField(short fieldID)
   {
     return (PasswordDBField) this.retrieveField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for PasswordDBField
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a PasswordDBField if field fieldname is present and of
+   * the proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final PasswordDBField getPassField(String fieldname)
+  {
+    return (PasswordDBField) this.retrieveField(fieldname);
   }
 
   /**
@@ -3215,6 +3351,24 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * Server-side type casting field accessor for
+   * PermissionMatrixDBField
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a PermissionMatrixDBField if field fieldname is present
+   * and of the proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final PermissionMatrixDBField getPermField(String fieldname)
+  {
+    return (PermissionMatrixDBField) this.retrieveField(fieldname);
+  }
+
+  /**
    * Server-side type casting field accessor for StringDBField
    *
    * @param fieldID The field id to retrieve.
@@ -3229,6 +3383,23 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   public final StringDBField getStringField(short fieldID)
   {
     return (StringDBField) this.retrieveField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for StringDBField
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a StringDBField if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final StringDBField getStringField(String fieldname)
+  {
+    return (StringDBField) this.retrieveField(fieldname);
   }
 
   /**
