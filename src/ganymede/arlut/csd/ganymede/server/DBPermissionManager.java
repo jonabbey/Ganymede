@@ -447,6 +447,11 @@ public final class DBPermissionManager {
         this.userInvid = userObject.getInvid();
         this.username = userObject.getLabel();
 
+        if (this.userInvid == null || this.username == null)
+          {
+            throw new NullPointerException();
+          }
+
         if ("".equals(this.username.trim()))
           {
             throw new IllegalArgumentException("empty username");
@@ -462,6 +467,11 @@ public final class DBPermissionManager {
       {
         this.personaInvid = personaObject.getInvid();
         this.personaName = personaObject.getLabel();
+
+        if (this.personaInvid == null || this.personaName == null)
+          {
+            throw new NullPointerException();
+          }
 
         if ("".equals(this.personaName.trim()))
           {
