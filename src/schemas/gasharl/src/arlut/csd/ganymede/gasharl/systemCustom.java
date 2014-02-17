@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -263,7 +263,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     if (getGSession().enableOversight && getGSession().enableWizards)
       {
-        InvidDBField invField = (InvidDBField) getField(systemSchema.INTERFACES);
+        InvidDBField invField = getInvidField(systemSchema.INTERFACES);
 
         // we shouldn't throw a null pointer here, as we should always have the
         // INTERFACES field available
@@ -337,8 +337,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
         // create any new embedded interfaces necessary when cloning a
         // multiple interface system.
 
-        InvidDBField newInterfaces = (InvidDBField) getField(systemSchema.INTERFACES);
-        InvidDBField oldInterfaces = (InvidDBField) origObj.getField(systemSchema.INTERFACES);
+        InvidDBField newInterfaces = getInvidField(systemSchema.INTERFACES);
+        InvidDBField oldInterfaces = origObj.getInvidField(systemSchema.INTERFACES);
 
         Vector<Invid> newOnes = (Vector<Invid>) newInterfaces.getValuesLocal();
         Vector<Invid> oldOnes = (Vector<Invid>) oldInterfaces.getValuesLocal();
@@ -439,8 +439,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
         if (origObj.isDefined(systemSchema.DHCPOPTIONS))
           {
-            InvidDBField newOptions = (InvidDBField) getField(systemSchema.DHCPOPTIONS);
-            InvidDBField oldOptions = (InvidDBField) origObj.getField(systemSchema.DHCPOPTIONS);
+            InvidDBField newOptions = getInvidField(systemSchema.DHCPOPTIONS);
+            InvidDBField oldOptions = origObj.getInvidField(systemSchema.DHCPOPTIONS);
 
             oldOnes = (Vector<Invid>) oldOptions.getValuesLocal();
 

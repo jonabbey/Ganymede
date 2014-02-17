@@ -11,7 +11,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -196,7 +196,7 @@ public class groupInactivateWizard extends GanymediatorWizard {
 
   public ReturnVal processDialog0()
   {
-    homeField = (InvidDBField) groupObject.getField(groupSchema.HOMEUSERS);
+    homeField = groupObject.getInvidField(groupSchema.HOMEUSERS);
 
     StringBuffer buffer = new StringBuffer();
 
@@ -313,7 +313,7 @@ public class groupInactivateWizard extends GanymediatorWizard {
 
         userObjectHash.put(lh.getLabel(), user);
 
-        InvidDBField userGroupField = (InvidDBField) user.getField(userSchema.GROUPLIST);
+        InvidDBField userGroupField = user.getInvidField(userSchema.GROUPLIST);
         QueryResult queryr = userGroupField.encodedValues();
 
         // The list of groups will contain the current group,
@@ -423,7 +423,7 @@ public class groupInactivateWizard extends GanymediatorWizard {
             System.err.println("Setting home group for " + userName + " to " + newHomeGroup);
           }
 
-        InvidDBField ugField = (InvidDBField) usr.getField(userSchema.HOMEGROUP);
+        InvidDBField ugField = usr.getInvidField(userSchema.HOMEGROUP);
 
         try
           {

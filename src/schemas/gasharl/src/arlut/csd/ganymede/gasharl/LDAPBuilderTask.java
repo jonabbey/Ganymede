@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -382,7 +382,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
         // won't be a password.. to make sure that ldapdiff does the right
         // thing, we just won't emit a userPassword field in that case.
 
-        PasswordDBField pdbf = (PasswordDBField) user.getField(userSchema.PASSWORD);
+        PasswordDBField pdbf = user.getPassField(userSchema.PASSWORD);
 
         if (pdbf != null)
           {

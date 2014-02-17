@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -182,7 +182,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
     // need to find a global unique id (guid) for this user
 
-    StringDBField guidField = (StringDBField) getField(GUID);
+    StringDBField guidField = getStringField(GUID);
 
     if (guidField == null)
       {
@@ -226,7 +226,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
           }
       }
 
-    NumericDBField numField = (NumericDBField) getField((short) 258);
+    NumericDBField numField = getNumericField((short) 258);
 
     if (numField == null)
       {
@@ -382,7 +382,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
             // make sure that the expiration date is cleared.. we're on
             // the removal track now.
 
-            date = (DateDBField) getField(SchemaConstants.ExpirationField);
+            date = getDateField(SchemaConstants.ExpirationField);
             retVal = date.setValueLocal(null);
 
             if (retVal != null && !retVal.didSucceed())
@@ -403,7 +403,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
                 System.err.println("groupCustom.inactivate: setting removal date to: " + cal.getTime());
               }
 
-            date = (DateDBField) getField(SchemaConstants.RemovalField);
+            date = getDateField(SchemaConstants.RemovalField);
             retVal = date.setValueLocal(cal.getTime());
 
             if ((retVal == null) || (retVal.didSucceed()))
@@ -449,7 +449,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
             // non-interactive.  we can only inactivate if there are no home users
             // in this group
 
-            InvidDBField homeField = (InvidDBField) getField(groupSchema.HOMEUSERS);
+            InvidDBField homeField = getInvidField(groupSchema.HOMEUSERS);
 
             if (homeField.size() == 0)
               {

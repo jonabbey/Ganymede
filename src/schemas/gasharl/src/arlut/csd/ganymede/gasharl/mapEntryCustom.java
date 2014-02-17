@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -247,7 +247,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
         return super.obtainChoiceList(field);
       }
 
-    InvidDBField invf = (InvidDBField) getField(mapEntrySchema.MAP);
+    InvidDBField invf = getInvidField(mapEntrySchema.MAP);
 
     if (invf.getValueString().equals("auto.home.default"))
       {
@@ -410,7 +410,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
         return null;            // by default, we just ok whatever
       }
 
-    InvidDBField invf = (InvidDBField) getField(mapEntrySchema.MAP);
+    InvidDBField invf = getInvidField(mapEntrySchema.MAP);
 
     // if we aren't deleting this entry, reject any attempt to unlink
     // us from auto.home.default, if we are linked there.
@@ -480,8 +480,8 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
         return null;
       }
 
-    field = (InvidDBField) object.getField(MAP); // map name
-    field2 = (InvidDBField) object.getField(VOLUME); // volume
+    field = object.getInvidField(MAP); // map name
+    field2 = object.getInvidField(VOLUME); // volume
 
     try
       {

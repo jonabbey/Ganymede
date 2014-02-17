@@ -9,11 +9,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2014
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -73,7 +75,7 @@ import arlut.csd.ganymede.server.StringDBField;
  * fixing.<br>
  *
  * @see arlut.csd.ganymede.common.ReturnVal
- * @see arlut.csd.ganymede.rmi.Ganymediator 
+ * @see arlut.csd.ganymede.rmi.Ganymediator
  * @see arlut.csd.ganymede.gasharl.userCustom
  * @see arlut.csd.ganymede.gasharl.userSchema
  */
@@ -96,11 +98,11 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
    * Keeps track of the state of the wizard.  Each time respond() is called,
    * state is checked to see what results from the user are expected and
    * what the appropriate dialogs or actions to perform in turn are.<br>
-   * 
+   *
    * state is also used by the userCustom object to make sure that
    * we have finished our interactions with the user when we tell the
    * user object to go ahead and remove the group.  <br>
-   * 
+   *
    * <pre>
    * Values:
    *         1 - Wizard has been initialized, initial explanatory dialog
@@ -140,11 +142,11 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
    *
    */
 
-  public userReactivateWizard(GanymedeSession session, 
-			      userCustom userObject,
+  public userReactivateWizard(GanymedeSession session,
+                              userCustom userObject,
                               String ckp_label) throws RemoteException
   {
-    super(session);		// register ourselves
+    super(session);             // register ourselves
 
     this.session = session;
     this.userObject = userObject;
@@ -163,10 +165,10 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
   public ReturnVal cancel()
   {
     return fail("User Reactivation Canceled",
-		"User Reactivation Canceled",
-		"OK",
-		null,
-		"ok.gif");
+                "User Reactivation Canceled",
+                "OK",
+                null,
+                "ok.gif");
   }
 
   /**
@@ -188,13 +190,13 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
     buffer.append(userObject.getLabel());
     buffer.append("\n\nIn order to reactivate this account, you need to provide a password, ");
     buffer.append("a login shell, and a new address to send email for this account to.");
-	
+
     retVal = continueOn("User Reactivation Dialog",
-			buffer.toString(),
-			"Next",
-			"Cancel",
-			"question.gif");
-    
+                        buffer.toString(),
+                        "Next",
+                        "Cancel",
+                        "question.gif");
+
     return retVal;
   }
 
@@ -209,7 +211,7 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
   {
     if (debug)
       {
-	System.err.println("userReactivateWizard.respond(): state == 1");
+        System.err.println("userReactivateWizard.respond(): state == 1");
       }
 
     return genPhase2("Reactivate User", "");
@@ -238,19 +240,19 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 
     if (debug)
       {
-	System.err.println("userReactivateWizard.respond(): state == 2");
+        System.err.println("userReactivateWizard.respond(): state == 2");
 
-	Enumeration en = getKeys();
-	int i = 0;
+        Enumeration en = getKeys();
+        int i = 0;
 
-	while (en.hasMoreElements())
-	  {
-	    Object key = en.nextElement();
-	    Object value = getParam(key);
-		
-	    System.err.println("Item: (" + i++ + ") = " + key + ":" + value);
-	  }
-      } 
+        while (en.hasMoreElements())
+          {
+            Object key = en.nextElement();
+            Object value = getParam(key);
+
+            System.err.println("Item: (" + i++ + ") = " + key + ":" + value);
+          }
+      }
 
     forward = (String) getParam("Email Target");
     shell = (String) getParam("Shell");
@@ -258,26 +260,26 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 
     if (password == null || password.length() == 0)
       {
-	setNextState(2);	// try again
+        setNextState(2);        // try again
 
-	retVal = genPhase2("Reactivate User", "You must set a password");
+        retVal = genPhase2("Reactivate User", "You must set a password");
 
-	return retVal;
+        return retVal;
       }
 
     // and do the reactivation.. userObject will consult us for
 
     // forward, shell, and password
-	    
+
     retVal = userObject.reactivate(this, ckp_label);
 
     if (retVal == null || retVal.didSucceed())
       {
         return success("User Reactivation Performed",
-		       "User has been reactivated",
-		       "OK",
-		       null,
-		       "ok.gif").unionRescan(retVal);
+                       "User has been reactivated",
+                       "OK",
+                       null,
+                       "ok.gif").unionRescan(retVal);
       }
 
     return retVal;
@@ -290,33 +292,33 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
   private ReturnVal genPhase2(String title, String body)
   {
     ReturnVal retVal = continueOn(title,
-				  body,
-				  "OK",
-				  "Cancel",
-				  "question.gif");
-    
-    retVal.getDialog().addPassword("New Password", true);
-    
-    StringDBField stringfield = (StringDBField) userObject.getField(LOGINSHELL);
-    
-    userObject.updateShellChoiceList();
-    retVal.getDialog().addChoice("Shell", 
-				 userObject.shellChoices.getLabels(),
-				 (String) stringfield.getValueLocal());
+                                  body,
+                                  "OK",
+                                  "Cancel",
+                                  "question.gif");
 
-    StringDBField addrField = (StringDBField) userObject.getField(EMAILTARGET);
+    retVal.getDialog().addPassword("New Password", true);
+
+    StringDBField stringfield = userObject.getStringField(LOGINSHELL);
+
+    userObject.updateShellChoiceList();
+    retVal.getDialog().addChoice("Shell",
+                                 userObject.shellChoices.getLabels(),
+                                 (String) stringfield.getValueLocal());
+
+    StringDBField addrField = userObject.getStringField(EMAILTARGET);
 
     if (addrField != null && addrField.size() > 0)
       {
-	retVal.getDialog().addString("Email Target", addrField.getValueString());
+        retVal.getDialog().addString("Email Target", addrField.getValueString());
       }
     else
       {
-	retVal.getDialog().addString("Email Target");
+        retVal.getDialog().addString("Email Target");
       }
-    
+
     System.err.println("userReactivateWizard.respond(): state == 1, returning dialog");
-    
+
     return retVal;
   }
 }

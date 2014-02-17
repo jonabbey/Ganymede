@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -389,7 +389,7 @@ public class OpenNetBuilderTask extends GanymedeBuilderTask {
 
     username = (String) object.getFieldValueLocal(SchemaConstants.UserUserName);
 
-    passField = (PasswordDBField) object.getField(SchemaConstants.UserPassword);
+    passField = object.getPassField(SchemaConstants.UserPassword);
 
     if (passField != null)
       {

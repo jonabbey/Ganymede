@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -121,60 +121,60 @@ public class ExternalMailTask implements Runnable {
 
     if (error != null)
       {
-	Ganymede.debug("Deferring External Mail task - semaphore disabled: " + error);
-	return;
+        Ganymede.debug("Deferring External Mail task - semaphore disabled: " + error);
+        return;
       }
 
     try
       {
-	try
-	  {
-	    mySession = new GanymedeSession("ExternalMailTask");
-	    myDBSession = mySession.getDBSession();
-	  }
-	catch (RemoteException ex)
-	  {
-	    Ganymede.debug("ExternalMail Task: Couldn't establish session");
-	    return;
-	  }
+        try
+          {
+            mySession = new GanymedeSession("ExternalMailTask");
+            myDBSession = mySession.getDBSession();
+          }
+        catch (RemoteException ex)
+          {
+            Ganymede.debug("ExternalMail Task: Couldn't establish session");
+            return;
+          }
 
-	// we don't want no wizards
+        // we don't want no wizards
 
-	mySession.enableWizards(false);
+        mySession.enableWizards(false);
 
-	ReturnVal retVal = mySession.openTransaction(ExternalMailTask.name);
+        ReturnVal retVal = mySession.openTransaction(ExternalMailTask.name);
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    Ganymede.debug("ExternalMail Task: Couldn't open transaction");
-	    return;
-	  }
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            Ganymede.debug("ExternalMail Task: Couldn't open transaction");
+            return;
+          }
 
-	// do the stuff
+        // do the stuff
 
-	checkExpiringCredentials();
+        checkExpiringCredentials();
 
-	retVal = mySession.commitTransaction();
+        retVal = mySession.commitTransaction();
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    // if doNormalProcessing is true, the
-	    // transaction was not cleared, but was
-	    // left open for a re-try.  Abort it.
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            // if doNormalProcessing is true, the
+            // transaction was not cleared, but was
+            // left open for a re-try.  Abort it.
 
-	    if (retVal.doNormalProcessing)
-	      {
-		Ganymede.debug("ExternalMail Task: couldn't fully commit, trying to abort.");
+            if (retVal.doNormalProcessing)
+              {
+                Ganymede.debug("ExternalMail Task: couldn't fully commit, trying to abort.");
 
-		mySession.abortTransaction();
-	      }
+                mySession.abortTransaction();
+              }
 
-	    Ganymede.debug("ExternalMail Task: Couldn't successfully commit transaction");
-	  }
-	else
-	  {
-	    Ganymede.debug("ExternalMail Task: Transaction committed");
-	  }
+            Ganymede.debug("ExternalMail Task: Couldn't successfully commit transaction");
+          }
+        else
+          {
+            Ganymede.debug("ExternalMail Task: Transaction committed");
+          }
       }
     catch (InterruptedException ex)
       {
@@ -184,12 +184,12 @@ public class ExternalMailTask implements Runnable {
       }
     finally
       {
-	if (myDBSession.isTransactionOpen())
-	  {
-	    Ganymede.debug("ExternalMail Task: Forced to terminate early, aborting transaction");
-	  }
+        if (myDBSession.isTransactionOpen())
+          {
+            Ganymede.debug("ExternalMail Task: Forced to terminate early, aborting transaction");
+          }
 
-	mySession.logout();
+        mySession.logout();
       }
   }
 
@@ -213,103 +213,103 @@ public class ExternalMailTask implements Runnable {
     Enumeration en;
 
     QueryNode matchNode = new QueryAndNode(new QueryDataNode(userSchema.MAILEXPDATE,
-							     QueryDataNode.DEFINED,
-							     null),
-					   new QueryDataNode(userSchema.ALLOWEXTERNAL,
-							     QueryDataNode.DEFINED,
-							     null));
+                                                             QueryDataNode.DEFINED,
+                                                             null),
+                                           new QueryDataNode(userSchema.ALLOWEXTERNAL,
+                                                             QueryDataNode.DEFINED,
+                                                             null));
     /* -- */
 
     q = new Query(SchemaConstants.UserBase, matchNode, false);
 
     for (Result result: mySession.internalQuery(q))
       {
-	if (currentThread.isInterrupted())
-	  {
-	    throw new InterruptedException("scheduler ordering shutdown");
-	  }
+        if (currentThread.isInterrupted())
+          {
+            throw new InterruptedException("scheduler ordering shutdown");
+          }
 
-	object = myDBSession.viewDBObject(result.getInvid());
+        object = myDBSession.viewDBObject(result.getInvid());
 
-	if (object == null || object.isInactivated())
-	  {
-	    continue;
-	  }
+        if (object == null || object.isInactivated())
+          {
+            continue;
+          }
 
-	Date mailExpDate = (Date) object.getFieldValueLocal(userSchema.MAILEXPDATE);
+        Date mailExpDate = (Date) object.getFieldValueLocal(userSchema.MAILEXPDATE);
 
-	if (mailExpDate == null)
-	  {
-	    continue;
-	  }
+        if (mailExpDate == null)
+          {
+            continue;
+          }
 
-	// four weeks before expiration, assign new credentials and
-	// send mail about that.  the old credentials are kept and
-	// both are usable until the old ones are actually expired.
+        // four weeks before expiration, assign new credentials and
+        // send mail about that.  the old credentials are kept and
+        // both are usable until the old ones are actually expired.
 
-	lowerBound.setTime(currentTime);
-	lowerBound.add(Calendar.DATE, 27);
+        lowerBound.setTime(currentTime);
+        lowerBound.add(Calendar.DATE, 27);
 
-	upperBound.setTime(currentTime);
-	upperBound.add(Calendar.DATE, 28);
+        upperBound.setTime(currentTime);
+        upperBound.add(Calendar.DATE, 28);
 
-	if (mailExpDate.after(lowerBound.getTime()) && mailExpDate.before(upperBound.getTime()))
-	  {
-	    String ckpLabel = "credentialing" + object.getInvid();
+        if (mailExpDate.after(lowerBound.getTime()) && mailExpDate.before(upperBound.getTime()))
+          {
+            String ckpLabel = "credentialing" + object.getInvid();
 
-	    myDBSession.checkpoint(ckpLabel);
+            myDBSession.checkpoint(ckpLabel);
 
-	    ReturnVal retVal = assignNewCredentials(object);
+            ReturnVal retVal = assignNewCredentials(object);
 
-	    if (ReturnVal.didSucceed(retVal))
-	      {
-		myDBSession.popCheckpoint(ckpLabel);
-	      }
-	    else
-	      {
-		Ganymede.debug("External Mail Task failure in assignNewCredentials(" + object.getLabel() + ")\n" + retVal.getDialogText());
-		myDBSession.rollback(ckpLabel);
-	      }
+            if (ReturnVal.didSucceed(retVal))
+              {
+                myDBSession.popCheckpoint(ckpLabel);
+              }
+            else
+              {
+                Ganymede.debug("External Mail Task failure in assignNewCredentials(" + object.getLabel() + ")\n" + retVal.getDialogText());
+                myDBSession.rollback(ckpLabel);
+              }
 
-	    continue;
-	  }
+            continue;
+          }
 
-	// then one day before, we send a warning.
+        // then one day before, we send a warning.
 
-	lowerBound.setTime(currentTime);
+        lowerBound.setTime(currentTime);
 
-	upperBound.setTime(currentTime);
-	upperBound.add(Calendar.DATE, 1);
+        upperBound.setTime(currentTime);
+        upperBound.add(Calendar.DATE, 1);
 
-	if (mailExpDate.after(lowerBound.getTime()) && mailExpDate.before(upperBound.getTime()))
-	  {
-	    warnPasswordExpire(object);
-	    continue;
-	  }
+        if (mailExpDate.after(lowerBound.getTime()) && mailExpDate.before(upperBound.getTime()))
+          {
+            warnPasswordExpire(object);
+            continue;
+          }
 
-	// on or after the expiration date, we clear the old
-	// credentials and assign a new expiration date in the future.
+        // on or after the expiration date, we clear the old
+        // credentials and assign a new expiration date in the future.
 
-	if (mailExpDate.before(currentTime))
-	  {
-	    String ckpLabel = "clearing" + object.getInvid();
+        if (mailExpDate.before(currentTime))
+          {
+            String ckpLabel = "clearing" + object.getInvid();
 
-	    myDBSession.checkpoint(ckpLabel);
+            myDBSession.checkpoint(ckpLabel);
 
-	    ReturnVal retVal = clearOldCredentials(object);
+            ReturnVal retVal = clearOldCredentials(object);
 
-	    if (ReturnVal.didSucceed(retVal))
-	      {
-		myDBSession.popCheckpoint(ckpLabel);
-	      }
-	    else
-	      {
-		Ganymede.debug("External Mail Task failure in clearOldCredentials(" + object.getLabel() + ")\n" + retVal.getDialogText());
-		myDBSession.rollback(ckpLabel);
-	      }
+            if (ReturnVal.didSucceed(retVal))
+              {
+                myDBSession.popCheckpoint(ckpLabel);
+              }
+            else
+              {
+                Ganymede.debug("External Mail Task failure in clearOldCredentials(" + object.getLabel() + ")\n" + retVal.getDialogText());
+                myDBSession.rollback(ckpLabel);
+              }
 
-	    continue;
-	  }
+            continue;
+          }
       }
   }
 
@@ -329,75 +329,75 @@ public class ExternalMailTask implements Runnable {
   {
     try
       {
-	ReturnVal result = mySession.edit_db_object(userObject.getInvid());
+        ReturnVal result = mySession.edit_db_object(userObject.getInvid());
 
-	if (!ReturnVal.didSucceed(result))
-	  {
-	    return result;
-	  }
+        if (!ReturnVal.didSucceed(result))
+          {
+            return result;
+          }
 
-	DBEditObject editUserObject = (DBEditObject) result.getObject();
+        DBEditObject editUserObject = (DBEditObject) result.getObject();
 
-	StringDBField usernameField = (StringDBField) editUserObject.getField(userSchema.MAILUSER);
-	PasswordDBField passwordField = (PasswordDBField) editUserObject.getField(userSchema.MAILPASSWORD2);
+        StringDBField usernameField = editUserObject.getStringField(userSchema.MAILUSER);
+        PasswordDBField passwordField = editUserObject.getPassField(userSchema.MAILPASSWORD2);
 
-	String username = null;
-	String password = null;
+        String username = null;
+        String password = null;
 
-	// if we already have MAILUSER and MAILPASSWORD2 fields set,
-	// we'll need to remember those values for later
+        // if we already have MAILUSER and MAILPASSWORD2 fields set,
+        // we'll need to remember those values for later
 
-	if (editUserObject.isDefined(userSchema.MAILUSER) &&
-	    editUserObject.isDefined(userSchema.MAILPASSWORD2))
-	  {
-	    username = (String) usernameField.getValueLocal();
-	    password = passwordField.getPlainText();
-	  }
+        if (editUserObject.isDefined(userSchema.MAILUSER) &&
+            editUserObject.isDefined(userSchema.MAILPASSWORD2))
+          {
+            username = (String) usernameField.getValueLocal();
+            password = passwordField.getPlainText();
+          }
 
-	// Set new values.
+        // Set new values.
 
-	result = usernameField.setValueLocal(RandomUtils.getRandomUsername());
+        result = usernameField.setValueLocal(RandomUtils.getRandomUsername());
 
-	if (!ReturnVal.didSucceed(result))
-	  {
-	    return result;
-	  }
+        if (!ReturnVal.didSucceed(result))
+          {
+            return result;
+          }
 
-	result = ReturnVal.merge(result, passwordField.setPlainTextPass(RandomUtils.getRandomPassword(20)));
+        result = ReturnVal.merge(result, passwordField.setPlainTextPass(RandomUtils.getRandomPassword(20)));
 
-	if (!ReturnVal.didSucceed(result))
-	  {
-	    return result;
-	  }
+        if (!ReturnVal.didSucceed(result))
+          {
+            return result;
+          }
 
-	// if we had MAILUSER and MAILPASSWORD2 set when we entered,
-	// we'll load those old values into the OLDMAILUSER and
-	// OLDMAILPASSWORD2 fields for use during the interval between
-	// assigning new credentials and revoking the old ones
+        // if we had MAILUSER and MAILPASSWORD2 set when we entered,
+        // we'll load those old values into the OLDMAILUSER and
+        // OLDMAILPASSWORD2 fields for use during the interval between
+        // assigning new credentials and revoking the old ones
 
-	if (username != null && password != null)
-	  {
-	    StringDBField oldUsernameField = (StringDBField) editUserObject.getField(userSchema.OLDMAILUSER);
-	    PasswordDBField oldPasswordField = (PasswordDBField) editUserObject.getField(userSchema.OLDMAILPASSWORD2);
+        if (username != null && password != null)
+          {
+            StringDBField oldUsernameField = editUserObject.getStringField(userSchema.OLDMAILUSER);
+            PasswordDBField oldPasswordField = editUserObject.getPassField(userSchema.OLDMAILPASSWORD2);
 
-	    // Copy the (now deprecated) values to the
-	    // oldUsernameField and oldPasswordField fields
+            // Copy the (now deprecated) values to the
+            // oldUsernameField and oldPasswordField fields
 
-	    result = ReturnVal.merge(result, oldUsernameField.setValueLocal(username));
+            result = ReturnVal.merge(result, oldUsernameField.setValueLocal(username));
 
-	    if (!ReturnVal.didSucceed(result))
-	      {
-		return result;
-	      }
+            if (!ReturnVal.didSucceed(result))
+              {
+                return result;
+              }
 
-	    result = ReturnVal.merge(result, oldPasswordField.setPlainTextPass(password));
-	  }
+            result = ReturnVal.merge(result, oldPasswordField.setPlainTextPass(password));
+          }
 
-	return result;
+        return result;
       }
     catch (NotLoggedInException ex)
       {
-	return Ganymede.loginError(ex);
+        return Ganymede.loginError(ex);
       }
   }
 
@@ -413,7 +413,7 @@ public class ExternalMailTask implements Runnable {
     objVect.add(userObject.getInvid());
 
     String mailUsername = (String) userObject.getFieldValueLocal(userSchema.MAILUSER);
-    PasswordDBField mailPasswordField = (PasswordDBField) userObject.getField(userSchema.MAILPASSWORD2);
+    PasswordDBField mailPasswordField = userObject.getPassField(userSchema.MAILPASSWORD2);
     String mailPassword = mailPasswordField.getPlainText();
 
     String titleString = "Old External Email Credentials Expiring Very Soon For User " + userObject.getLabel();
@@ -443,73 +443,73 @@ public class ExternalMailTask implements Runnable {
   {
     try
       {
-	ReturnVal result = mySession.edit_db_object(userObject.getInvid());
+        ReturnVal result = mySession.edit_db_object(userObject.getInvid());
 
-	if (!ReturnVal.didSucceed(result))
-	  {
-	    return result;
-	  }
+        if (!ReturnVal.didSucceed(result))
+          {
+            return result;
+          }
 
-	DBEditObject editUserObject = (DBEditObject) result.getObject();
+        DBEditObject editUserObject = (DBEditObject) result.getObject();
 
-	DateDBField mailExpDateField = (DateDBField) editUserObject.getField(userSchema.MAILEXPDATE);
-	StringDBField oldUsernameField = (StringDBField) editUserObject.getField(userSchema.OLDMAILUSER);
-	PasswordDBField oldPasswordField = (PasswordDBField) editUserObject.getField(userSchema.OLDMAILPASSWORD2);
+        DateDBField mailExpDateField = editUserObject.getDateField(userSchema.MAILEXPDATE);
+        StringDBField oldUsernameField = editUserObject.getStringField(userSchema.OLDMAILUSER);
+        PasswordDBField oldPasswordField = editUserObject.getPassField(userSchema.OLDMAILPASSWORD2);
 
-	Calendar myCal = new GregorianCalendar();
-	myCal.add(Calendar.DATE, 168); // 24 weeks from today.
+        Calendar myCal = new GregorianCalendar();
+        myCal.add(Calendar.DATE, 168); // 24 weeks from today.
 
-	result = mailExpDateField.setValueLocal(myCal.getTime());
+        result = mailExpDateField.setValueLocal(myCal.getTime());
 
-	if (!ReturnVal.didSucceed(result))
-	  {
-	    return result;
-	  }
+        if (!ReturnVal.didSucceed(result))
+          {
+            return result;
+          }
 
-	result = ReturnVal.merge(result, oldUsernameField.setValueLocal(null));
+        result = ReturnVal.merge(result, oldUsernameField.setValueLocal(null));
 
-	if (!ReturnVal.didSucceed(result))
-	  {
-	    return result;
-	  }
+        if (!ReturnVal.didSucceed(result))
+          {
+            return result;
+          }
 
-	result = ReturnVal.merge(result, oldPasswordField.setUndefined(true));
+        result = ReturnVal.merge(result, oldPasswordField.setUndefined(true));
 
-	if (!ReturnVal.didSucceed(result))
-	  {
-	    return result;
-	  }
+        if (!ReturnVal.didSucceed(result))
+          {
+            return result;
+          }
 
-	Vector objVect = new Vector();
+        Vector objVect = new Vector();
 
-	objVect.add(userObject.getInvid());
+        objVect.add(userObject.getInvid());
 
-	String mailUsername = (String) userObject.getFieldValueLocal(userSchema.MAILUSER);
-	PasswordDBField newPasswordField = (PasswordDBField) userObject.getField(userSchema.MAILPASSWORD2);
-	String mailPassword = newPasswordField.getPlainText();
+        String mailUsername = (String) userObject.getFieldValueLocal(userSchema.MAILUSER);
+        PasswordDBField newPasswordField = userObject.getPassField(userSchema.MAILPASSWORD2);
+        String mailPassword = newPasswordField.getPlainText();
 
-	String titleString = "External Email Credentials Changed For User " + userObject.getLabel();
+        String titleString = "External Email Credentials Changed For User " + userObject.getLabel();
 
-	String messageString = "The external email credentials for User account " + userObject.getLabel() + " have been changed. \n" +
-	  "You have been granted access to laboratory email from outside the internal ARL:UT network.\n\n" +
-	  "In order to send mail from outside the laboratory, you will need to configure your external email client " +
-	  "to send email through smail.arlut.utexas.edu using TLS-encrypted SMTP.\n\n" +
-	  "The user name you should be using for external access is:\n\n" +
-	  "\tUsername: " + mailUsername + "\n\n" +
+        String messageString = "The external email credentials for User account " + userObject.getLabel() + " have been changed. \n" +
+          "You have been granted access to laboratory email from outside the internal ARL:UT network.\n\n" +
+          "In order to send mail from outside the laboratory, you will need to configure your external email client " +
+          "to send email through smail.arlut.utexas.edu using TLS-encrypted SMTP.\n\n" +
+          "The user name you should be using for external access is:\n\n" +
+          "\tUsername: " + mailUsername + "\n\n" +
           "and the new external access password for your account is:\n\n" +
-	  "\tPassword: " + mailPassword + "\n\n" +
-	  "The previously assigned external password will no longer function. \n\n" +
-	  "You should continue to use your internal email username and password for reading email from mailboxes.arlut.utexas.edu " +
-	  "via SSL-protected IMAP.";
+          "\tPassword: " + mailPassword + "\n\n" +
+          "The previously assigned external password will no longer function. \n\n" +
+          "You should continue to use your internal email username and password for reading email from mailboxes.arlut.utexas.edu " +
+          "via SSL-protected IMAP.";
 
-	Ganymede.log.sendMail(null, titleString, messageString, DBLog.MailMode.USERS, objVect);
+        Ganymede.log.sendMail(null, titleString, messageString, DBLog.MailMode.USERS, objVect);
 
-	return result;
+        return result;
 
       }
     catch (NotLoggedInException ex)
       {
-	return Ganymede.loginError(ex);
+        return Ganymede.loginError(ex);
       }
   }
 }

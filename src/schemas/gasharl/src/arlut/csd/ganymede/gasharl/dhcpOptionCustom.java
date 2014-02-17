@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -281,7 +281,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
         return null;
       }
 
-    BooleanDBField custom = (BooleanDBField) getField(dhcpOptionSchema.CUSTOMOPTION);
+    BooleanDBField custom = getBooleanField(dhcpOptionSchema.CUSTOMOPTION);
 
     return custom.setValueLocal(Boolean.TRUE);
   }
