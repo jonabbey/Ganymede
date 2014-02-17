@@ -975,7 +975,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         return true;
       }
 
-    return hasChanged((DBField) orig.getField(getID()));
+    return hasChanged(orig.getField(getID()));
   }
 
   /**

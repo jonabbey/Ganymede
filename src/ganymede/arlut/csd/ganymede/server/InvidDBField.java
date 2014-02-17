@@ -1185,25 +1185,13 @@ public final class InvidDBField extends DBField implements invid_field {
           }
         catch (ClassCastException ex)
           {
-            try
-              {
-                // "InvidDBField.bind(): Couldn''t unlink from old reference"
-                // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-                return Ganymede.createErrorDialog(this.getGSession(),
-                                                  ts.l("bind.no_unlink_sub"),
-                                                  ts.l("bind.schema_error",
-                                                       oldRef.getField(targetField).getName(),
-                                                       oldRef.getLabel()));
-              }
-            catch (RemoteException rx)
-              {
-                // "InvidDBField.bind(): Couldn''t unlink from old reference"
-                // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-                return Ganymede.createErrorDialog(this.getGSession(),
-                                                  ts.l("bind.no_unlink_sub"),
-                                                  ts.l("bind.schema_error",
-                                                       Integer.toString(targetField), oldRef.getLabel()));
-              }
+            // "InvidDBField.bind(): Couldn''t unlink from old reference"
+            // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("bind.no_unlink_sub"),
+                                              ts.l("bind.schema_error",
+                                                   oldRef.getField(targetField).getName(),
+                                                   oldRef.getLabel()));
           }
 
         if (oldRefField == null)
@@ -1369,22 +1357,11 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     catch (ClassCastException ex)
       {
-        try
-          {
-            // "InvidDBField.bind(): Couldn''t link to new reference"
-            // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-            return Ganymede.createErrorDialog(this.getGSession(),
-                                              ts.l("bind.no_new_link_sub"),
-                                              ts.l("bind.schema_error", newRef.getField(targetField).getName(), newRef.getLabel()));
-          }
-        catch (RemoteException rx)
-          {
-            // "InvidDBField.bind(): Couldn''t link to new reference"
-            // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-            return Ganymede.createErrorDialog(this.getGSession(),
-                                              ts.l("bind.no_new_link_sub"),
-                                              ts.l("bind.schema_error", Integer.toString(targetField), newRef.getLabel()));
-          }
+        // "InvidDBField.bind(): Couldn''t link to new reference"
+        // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("bind.no_new_link_sub"),
+                                          ts.l("bind.schema_error", newRef.getField(targetField).getName(), newRef.getLabel()));
       }
 
     // okay, at this point we should have oldRefField pointing to the
@@ -2110,7 +2087,7 @@ public final class InvidDBField extends DBField implements invid_field {
                   }
                 catch (ClassCastException ex)
                   {
-                    String fieldName = ((DBField) target.getField(targetField)).getName();
+                    String fieldName = target.getField(targetField).getName();
 
                     // "*** InvidDBField.test(): schema error!  back-reference field not an invid field!!\n\t>{0}:{1}, referenced from {2}:{3}"
                     Ganymede.debug(ts.l("test.bad_symmetry", target.getLabel(), fieldName, objectName, getName()));
@@ -2216,7 +2193,7 @@ public final class InvidDBField extends DBField implements invid_field {
                   }
                 catch (ClassCastException ex)
                   {
-                    String fieldName = ((DBField) target.getField(targetField)).getName();
+                    String fieldName = target.getField(targetField).getName();
 
                     Ganymede.debug(ts.l("test.bad_symmetry",  target.getLabel(), fieldName, objectName, getName()));
                     return false;

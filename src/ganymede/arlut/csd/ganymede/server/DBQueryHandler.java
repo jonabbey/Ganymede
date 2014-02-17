@@ -307,11 +307,11 @@ public class DBQueryHandler {
 
                 if (n.fieldname != null)
                   {
-                    field = (DBField) obj.getField(n.fieldname);
+                    field = obj.getField(n.fieldname);
                   }
                 else
                   {
-                    field = (DBField) obj.getField(n.fieldId);
+                    field = obj.getField(n.fieldId);
                   }
 
                 if ((field != null) && (field.isDefined()))

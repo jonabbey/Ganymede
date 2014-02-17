@@ -2553,7 +2553,7 @@ class systemEventType {
 
   private String getString(DBObject obj, short fieldId)
   {
-    f = (DBField) obj.getField(fieldId);
+    f = obj.getField(fieldId);
 
     if (f == null)
       {
@@ -2565,7 +2565,7 @@ class systemEventType {
 
   private boolean getBoolean(DBObject obj, short fieldId)
   {
-    f = (DBField) obj.getField(fieldId);
+    f = obj.getField(fieldId);
 
     if (f == null)
       {
@@ -2645,7 +2645,7 @@ class objectEventType {
 
   private String getString(DBObject obj, short fieldId)
   {
-    f = (DBField) obj.getField(fieldId);
+    f = obj.getField(fieldId);
 
     if (f == null)
       {
@@ -2657,7 +2657,7 @@ class objectEventType {
 
   private boolean getBoolean(DBObject obj, short fieldId)
   {
-    f = (DBField) obj.getField(fieldId);
+    f = obj.getField(fieldId);
 
     if (f == null)
       {
@@ -2669,7 +2669,7 @@ class objectEventType {
 
   private int getInt(DBObject obj, short fieldId)
   {
-    f = (DBField) obj.getField(fieldId);
+    f = obj.getField(fieldId);
 
     // we'll go ahead and throw a NullPointerException if
     // f isn't defined.

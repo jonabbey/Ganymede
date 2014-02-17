@@ -1093,7 +1093,7 @@ public final class xmlfield implements FieldType {
           }
         else if (fieldDef.isArray() && (fieldDef.isString() || fieldDef.isIP()))
           {
-            DBField field = (DBField) owner.objref.getField(fieldDef.getID());
+            DBField field = owner.objref.getField(fieldDef.getID());
 
             if (setValues != null)
               {

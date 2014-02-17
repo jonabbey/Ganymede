@@ -1002,7 +1002,7 @@ public final class SyncRunner implements Runnable {
                   }
                 else
                   {
-                    origField = (DBField) origObj.getField(memberField.getID());
+                    origField = origObj.getField(memberField.getID());
                   }
 
                 // created
@@ -1172,7 +1172,7 @@ public final class SyncRunner implements Runnable {
           }
         else
           {
-            origField = (DBField) origObj.getField(memberField.getID());
+            origField = origObj.getField(memberField.getID());
           }
 
         // created

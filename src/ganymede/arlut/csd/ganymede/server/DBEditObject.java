@@ -2187,7 +2187,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public QueryResult obtainChoiceList(String fieldName) throws NotLoggedInException
   {
-    return obtainChoiceList((DBField) getField(fieldName));
+    return obtainChoiceList(getField(fieldName));
   }
 
   /**
@@ -2207,7 +2207,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public QueryResult obtainChoiceList(short fieldID) throws NotLoggedInException
   {
-    return obtainChoiceList((DBField) getField(fieldID));
+    return obtainChoiceList(getField(fieldID));
   }
 
   /**
@@ -3190,22 +3190,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
           }
         catch (ClassCastException ex)
           {
-            try
-              {
-                // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
-                // "Your operation could not succeed due to an error in the server''s custom schema code.  Target field {0} in object {1} is not an Invid field."
-                return Ganymede.createErrorDialog(this.getGSession(),
-                                                  ts.l("clearBackLink.badUnlink"),
-                                                  ts.l("clearBackLink.badTarget", oldRef.getField(targetField).getName(), oldRef.getLabel()));
-              }
-            catch (RemoteException rx)
-              {
-                // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
-                // "Your operation could not succeed due to an error in the server''s custom schema code.  Target field {0} in object {1} is not an Invid field."
-                return Ganymede.createErrorDialog(this.getGSession(),
-                                                  ts.l("clearBackLink.badUnlink"),
-                                                  ts.l("clearBackLink.badTarget", Short.valueOf(targetField), oldRef.getLabel()));
-              }
+            // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
+            // "Your operation could not succeed due to an error in the server''s custom schema code.  Target field {0} in object {1} is not an Invid field."
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("clearBackLink.badUnlink"),
+                                              ts.l("clearBackLink.badTarget", oldRef.getField(targetField).getName(), oldRef.getLabel()));
           }
 
         if (oldRefField == null)
@@ -3648,8 +3637,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInDisplayOrder())
       {
-        DBField myField = (DBField) this.getField(fieldDef.getID());
-        DBField origField = (DBField) original.getField(fieldDef.getID());
+        DBField myField = this.getField(fieldDef.getID());
+        DBField origField = original.getField(fieldDef.getID());
 
         if (origField == null)
           {
@@ -3692,8 +3681,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInDisplayOrder())
       {
-        DBField myField = (DBField) this.getField(fieldDef.getID());
-        DBField origField = (DBField) original.getField(fieldDef.getID());
+        DBField myField = this.getField(fieldDef.getID());
+        DBField origField = original.getField(fieldDef.getID());
 
         if (myField == null || !myField.isDefined())
           {
@@ -3837,10 +3826,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
           }
         else
           {
-            origField = (DBField) original.getField(fieldDef.getID());
+            origField = original.getField(fieldDef.getID());
           }
 
-        currentField = (DBField) this.getField(fieldDef.getID());
+        currentField = this.getField(fieldDef.getID());
 
         if ((origField == null || !origField.isDefined()) &&
             (currentField == null || !currentField.isDefined()))

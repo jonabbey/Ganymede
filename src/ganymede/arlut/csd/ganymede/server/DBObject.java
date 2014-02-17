@@ -809,7 +809,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final PermEntry getFieldPerm(String fieldName)
   {
-    DBField f = (DBField) getField(fieldName);
+    DBField f = getField(fieldName);
 
     if (f == null)
       {
@@ -964,7 +964,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public String getLabel()
   {
-    DBField f = (DBField) getField(objectBase.getLabelField());
+    DBField f = getField(objectBase.getLabelField());
 
     if (f != null && f.isDefined())
       {
@@ -1038,7 +1038,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public final db_field getLabelField()
+  public final DBField getLabelField()
   {
     return getField(objectBase.getLabelField());
   }
@@ -1730,7 +1730,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public final db_field getField(short id)
+  public final DBField getField(short id)
   {
     return retrieveField(id);
   }
@@ -1743,7 +1743,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public final db_field getField(String fieldname)
+  public final DBField getField(String fieldname)
   {
     return retrieveField(fieldname);
   }
@@ -2144,7 +2144,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final ReturnVal setFieldValue(String fieldName, Object value) throws GanyPermissionsException
   {
-    DBField field = (DBField) getField(fieldName);
+    DBField field = getField(fieldName);
 
     if (field == null)
       {
@@ -2193,7 +2193,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Object getFieldValue(String fieldName) throws GanyPermissionsException
   {
-    return this.getFieldValue((DBField) getField(fieldName));
+    return this.getFieldValue(getField(fieldName));
   }
 
   /**
@@ -2206,7 +2206,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Object getFieldValue(short fieldID) throws GanyPermissionsException
   {
-    return this.getFieldValue((DBField) getField(fieldID));
+    return this.getFieldValue(getField(fieldID));
   }
 
   private Object getFieldValue(DBField f) throws GanyPermissionsException
@@ -2232,7 +2232,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Object getFieldValueLocal(String fieldName)
   {
-    return this.getFieldValueLocal((DBField) getField(fieldName));
+    return this.getFieldValueLocal(getField(fieldName));
   }
 
   /**
@@ -2242,7 +2242,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Object getFieldValueLocal(short fieldID)
   {
-    return this.getFieldValueLocal((DBField) getField(fieldID));
+    return this.getFieldValueLocal(getField(fieldID));
   }
 
   private Object getFieldValueLocal(DBField f)
@@ -2485,7 +2485,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final boolean isDefined(String fieldName)
   {
-    return this.isDefined((DBField) getField(fieldName));
+    return this.isDefined(getField(fieldName));
   }
 
   /**
@@ -2496,7 +2496,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final boolean isDefined(short fieldID)
   {
-    return this.isDefined((DBField) getField(fieldID));
+    return this.isDefined(getField(fieldID));
   }
 
   /**
@@ -2518,7 +2518,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final boolean isSet(String fieldName)
   {
-    return this.isSet((DBField) getField(fieldName));
+    return this.isSet(getField(fieldName));
   }
 
   /**
@@ -2531,7 +2531,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final boolean isSet(short fieldID)
   {
-    return this.isSet((DBField) getField(fieldID));
+    return this.isSet(getField(fieldID));
   }
 
   /**
@@ -2581,7 +2581,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Vector getFieldValues(String fieldName) throws GanyPermissionsException
   {
-    DBField field = (DBField) this.getField(fieldName);
+    DBField field = this.getField(fieldName);
 
     if (field == null)
       {
@@ -2646,7 +2646,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Vector getFieldValues(short fieldID) throws GanyPermissionsException
   {
-    DBField field = (DBField) this.getField(fieldID);
+    DBField field = this.getField(fieldID);
     String fieldName = null;
 
     if (field == null)
@@ -2714,7 +2714,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Vector getFieldValuesLocal(String fieldName)
   {
-    DBField field = (DBField) this.getField(fieldName);
+    DBField field = this.getField(fieldName);
 
     if (field == null)
       {
@@ -2762,7 +2762,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Vector getFieldValuesLocal(short fieldID)
   {
-    DBField field = (DBField) this.getField(fieldID);
+    DBField field = this.getField(fieldID);
     String fieldName = null;
 
     if (field == null)
@@ -2857,7 +2857,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final boolean containsFieldValue(short fieldID, Object val) throws GanyPermissionsException
   {
-    DBField field = (DBField) this.getField(fieldID);
+    DBField field = this.getField(fieldID);
     String fieldName = null;
 
     if (field == null)
@@ -2890,7 +2890,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final boolean containsFieldValueLocal(short fieldID, Object val)
   {
-    DBField field = (DBField) this.getField(fieldID);
+    DBField field = this.getField(fieldID);
     String fieldName = null;
 
     if (field == null)
@@ -2922,7 +2922,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Object getFieldElement(String fieldName, int index) throws GanyPermissionsException
   {
-    return getFieldElement((DBField) getField(fieldName), index);
+    return getFieldElement(getField(fieldName), index);
   }
 
   /**
@@ -2937,7 +2937,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Object getFieldElement(short fieldID, int index) throws GanyPermissionsException
   {
-    return getFieldElement((DBField) getField(fieldID), index);
+    return getFieldElement(getField(fieldID), index);
   }
 
   /**
@@ -2972,7 +2972,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Object getFieldElementLocal(String fieldName, int index)
   {
-    return getFieldElementLocal((DBField) getField(fieldName), index);
+    return getFieldElementLocal(getField(fieldName), index);
   }
 
   /**
@@ -2987,7 +2987,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Object getFieldElementLocal(short fieldID, int index)
   {
-    return getFieldElementLocal((DBField) getField(fieldID), index);
+    return getFieldElementLocal(getField(fieldID), index);
   }
 
   /**
@@ -3833,19 +3833,19 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     if (key instanceof PyInteger)
       {
         PyInteger pi = (PyInteger) key;
-        return (DBField) getField(Integer.valueOf(pi.getValue()).shortValue());
+        return getField(Integer.valueOf(pi.getValue()).shortValue());
       }
     else if (key instanceof Integer)
       {
-        return (DBField) getField(((Integer) key).shortValue());
+        return getField(((Integer) key).shortValue());
       }
     else if (key instanceof Short)
       {
-        return (DBField) getField(((Short) key).shortValue());
+        return getField(((Short) key).shortValue());
       }
     else if (key instanceof String)
       {
-        return (DBField) getField((String) key);
+        return getField((String) key);
       }
     return null;
   }

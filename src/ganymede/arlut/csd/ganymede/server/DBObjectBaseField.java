@@ -4376,7 +4376,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
                 for (DBObject obj: base.getObjects())
                   {
-                    lastFieldTried = (DBField) obj.getField(getID());
+                    lastFieldTried = obj.getField(getID());
 
                     if (lastFieldTried == null)
                       {
