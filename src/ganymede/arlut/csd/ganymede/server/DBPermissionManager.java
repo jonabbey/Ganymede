@@ -1593,29 +1593,27 @@ public final class DBPermissionManager {
 
             if (roleObj.containsField(SchemaConstants.RoleMatrix))
               {
-                PermissionMatrixDBField ownedObjsPermField = roleObj.getPermField(SchemaConstants.RoleMatrix);
-                PermMatrix ownedMatrix = ownedObjsPermField.getMatrix();
+                PermMatrix m = roleObj.getPermField(SchemaConstants.RoleMatrix).getMatrix();
 
-                this.ownedObjectPerms = this.ownedObjectPerms.union(ownedMatrix);
+                this.ownedObjectPerms = this.ownedObjectPerms.union(m);
 
                 if (roleObj.isSet(SchemaConstants.RoleDelegatable))
                   {
-                    this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(ownedMatrix);
+                    this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(m);
                   }
               }
 
             if (roleObj.containsField(SchemaConstants.RoleDefaultMatrix))
               {
-                PermissionMatrixDBField unownedObjsPermField = roleObj.getPermField(SchemaConstants.RoleDefaultMatrix);
-                PermMatrix unownedMatrix = unownedObjsPermField.getMatrix();
+                PermMatrix m = roleObj.getPermField(SchemaConstants.RoleDefaultMatrix).getMatrix();
 
-                this.ownedObjectPerms = this.ownedObjectPerms.union(unownedMatrix);
-                this.unownedObjectPerms = this.unownedObjectPerms.union(unownedMatrix);
+                this.ownedObjectPerms = this.ownedObjectPerms.union(m);
+                this.unownedObjectPerms = this.unownedObjectPerms.union(m);
 
                 if (roleObj.isSet(SchemaConstants.RoleDelegatable))
                   {
-                    this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(unownedMatrix);
-                    this.delegatableUnownedObjectPerms = this.delegatableUnownedObjectPerms.union(unownedMatrix);
+                    this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(m);
+                    this.delegatableUnownedObjectPerms = this.delegatableUnownedObjectPerms.union(m);
                   }
               }
           }
