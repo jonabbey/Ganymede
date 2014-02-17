@@ -1457,7 +1457,7 @@ public final class DBEditSet {
 
             if (!eObj.isEmbedded())
               {
-                df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
+                df = eObj.getDateField(SchemaConstants.CreationDateField);
 
                 // If we're processing an XML transaction and the XML
                 // transaction already specified a creation date (the
@@ -1477,7 +1477,7 @@ public final class DBEditSet {
 
                 // ditto for the creator info field.
 
-                sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
+                sf = eObj.getStringField(SchemaConstants.CreatorField);
 
                 if (!allowXMLHistoryOverride || !sf.isDefined())
                   {
@@ -1491,13 +1491,13 @@ public final class DBEditSet {
 
             if (!eObj.isEmbedded())
               {
-                df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
+                df = eObj.getDateField(SchemaConstants.ModificationDateField);
                 if (!allowXMLHistoryOverride || !df.isDefined())
                   {
                     df.value = modDate;
                   }
 
-                sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
+                sf = eObj.getStringField(SchemaConstants.ModifierField);
                 if (!allowXMLHistoryOverride || !sf.isDefined())
                   {
                     sf.value = result;

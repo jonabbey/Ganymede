@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -184,11 +184,11 @@ public class DBQueryHandler {
               {
                 if (n.fieldname != null)
                   {
-                    invidField = (InvidDBField) obj.getField(n.fieldname);
+                    invidField = obj.getInvidField(n.fieldname);
                   }
                 else if (n.fieldId != -1)
                   {
-                    invidField = (InvidDBField) obj.getField(n.fieldId);
+                    invidField = obj.getInvidField(n.fieldId);
                   }
                 else
                   {

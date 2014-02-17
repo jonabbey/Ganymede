@@ -1950,7 +1950,7 @@ final public class DBLog implements java.io.Closeable {
           {
             // get a list of owner invids for this object
 
-            InvidDBField ownersField = (InvidDBField) versionOfObject.getField(SchemaConstants.OwnerListField);
+            InvidDBField ownersField = versionOfObject.getInvidField(SchemaConstants.OwnerListField);
 
             if (ownersField == null)
               {
@@ -2592,7 +2592,7 @@ class systemEventType {
     // string list.. we use a Set here so that we don't get
     // duplicates.
 
-    strF = (StringDBField) obj.getField(SchemaConstants.EventExternalMail);
+    strF = obj.getStringField(SchemaConstants.EventExternalMail);
 
     if (strF != null)
       {
@@ -2693,7 +2693,7 @@ class objectEventType {
     // Get the list of addresses from the object's external email
     // string list.. we a Set here so that we don't get duplicates.
 
-    strF = (StringDBField) obj.getField(SchemaConstants.ObjectEventExternalMail);
+    strF = obj.getStringField(SchemaConstants.ObjectEventExternalMail);
 
     if (strF != null)
       {

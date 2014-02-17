@@ -2049,7 +2049,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Date getRemovalDate()
   {
-    DateDBField dbf = (DateDBField) getField(SchemaConstants.RemovalField);
+    DateDBField dbf = getDateField(SchemaConstants.RemovalField);
 
     if (dbf == null)
       {
@@ -2090,7 +2090,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Date getExpirationDate()
   {
-    DateDBField dbf = (DateDBField) getField(SchemaConstants.ExpirationField);
+    DateDBField dbf = getDateField(SchemaConstants.ExpirationField);
 
     if (dbf == null)
       {
@@ -3050,7 +3050,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         return null;
       }
 
-    InvidDBField field = (InvidDBField) getField(SchemaConstants.ContainerField);
+    InvidDBField field = getInvidField(SchemaConstants.ContainerField);
 
     if (field == null)
       {

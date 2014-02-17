@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -2569,7 +2569,7 @@ public final class DBStore implements JythonMap {
 
             eObj = (DBEditObject) retVal.getObject();
 
-            s = (StringDBField) eObj.getField("Name");
+            s = eObj.getStringField("Name");
             s.setValueLocal(Ganymede.rootname);
           }
 
@@ -2590,12 +2590,12 @@ public final class DBStore implements JythonMap {
 
             // set the user visible name
 
-            s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
+            s =  eObj.getStringField(SchemaConstants.PersonaNameField);
             s.setValueLocal(Ganymede.rootname);
 
             // check to make sure the invisible label field was properly set
 
-            s = (StringDBField) eObj.getField(SchemaConstants.PersonaLabelField);
+            s = eObj.getStringField(SchemaConstants.PersonaLabelField);
 
             if (!s.getValueString().equals(Ganymede.rootname))
               {
@@ -2605,13 +2605,13 @@ public final class DBStore implements JythonMap {
                 s.setValueLocal(Ganymede.rootname);
               }
 
-            p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
+            p = eObj.getPassField(SchemaConstants.PersonaPasswordField);
             p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
 
-            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
+            b = eObj.getBooleanField(SchemaConstants.PersonaAdminConsole);
             b.setValueLocal(Boolean.TRUE);
 
-            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminPower);
+            b = eObj.getBooleanField(SchemaConstants.PersonaAdminPower);
             b.setValueLocal(Boolean.TRUE);
           }
         else
@@ -2625,20 +2625,20 @@ public final class DBStore implements JythonMap {
 
             if (Ganymede.rootname != null && !Ganymede.rootname.equals(""))
               {
-                s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
+                s = eObj.getStringField(SchemaConstants.PersonaNameField);
                 s.setValueLocal(Ganymede.rootname);
               }
 
             if (Ganymede.resetadmin)
               {
-                p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
+                p = eObj.getPassField(SchemaConstants.PersonaPasswordField);
                 p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
               }
 
-            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
+            b = eObj.getBooleanField(SchemaConstants.PersonaAdminConsole);
             b.setValueLocal(Boolean.TRUE);
 
-            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminPower);
+            b = eObj.getBooleanField(SchemaConstants.PersonaAdminPower);
             b.setValueLocal(Boolean.TRUE);
           }
 
@@ -2646,7 +2646,7 @@ public final class DBStore implements JythonMap {
 
         eObj = session.editDBObject(supergash);
 
-        i = (InvidDBField) eObj.getField(SchemaConstants.PersonaGroupsField);
+        i = eObj.getInvidField(SchemaConstants.PersonaGroupsField);
 
         if (!i.containsElement(supergashOwner))
           {
@@ -2675,12 +2675,12 @@ public final class DBStore implements JythonMap {
 
             eObj = (DBEditObject) retVal.getObject();
 
-            s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
+            s = eObj.getStringField(SchemaConstants.PersonaNameField);
             s.setValueLocal(Ganymede.monitornameProperty);
 
             // check our autonomic functioning
 
-            s = (StringDBField) eObj.getField(SchemaConstants.PersonaLabelField);
+            s = eObj.getStringField(SchemaConstants.PersonaLabelField);
 
             if (!s.getValueString().equals(Ganymede.monitornameProperty))
               {
@@ -2692,7 +2692,7 @@ public final class DBStore implements JythonMap {
 
             //      s.setValueLocal(Ganymede.monitornameProperty);
 
-            p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
+            p = eObj.getPassField(SchemaConstants.PersonaPasswordField);
 
             if (Ganymede.defaultmonitorpassProperty != null)
               {
@@ -2703,10 +2703,10 @@ public final class DBStore implements JythonMap {
                 throw new NullPointerException("monitor password property not loaded, can't initialize monitor account");
               }
 
-            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
+            b = eObj.getBooleanField(SchemaConstants.PersonaAdminConsole);
             b.setValueLocal(Boolean.TRUE);
 
-            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminPower);
+            b = eObj.getBooleanField(SchemaConstants.PersonaAdminPower);
             b.setValueLocal(Boolean.FALSE);
           }
 
@@ -2725,12 +2725,12 @@ public final class DBStore implements JythonMap {
 
             eObj = (DBEditObject) retVal.getObject();
 
-            s = (StringDBField) eObj.getField(SchemaConstants.RoleName);
+            s = eObj.getStringField(SchemaConstants.RoleName);
             s.setValueLocal("Default");
 
             // what can users do with objects they own?  Includes users themselves
 
-            pm = (PermissionMatrixDBField) eObj.getField(SchemaConstants.RoleMatrix);
+            pm = eObj.getPermField(SchemaConstants.RoleMatrix);
 
             // view self, nothing else
 

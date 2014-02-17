@@ -871,7 +871,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     try
       {
-        remoteField = (InvidDBField) remobj.getField(targetField);
+        remoteField = remobj.getInvidField(targetField);
       }
     catch (ClassCastException ex)
       {
@@ -1181,7 +1181,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
         try
           {
-            oldRefField = (InvidDBField) oldRef.getField(targetField);
+            oldRefField = oldRef.getInvidField(targetField);
           }
         catch (ClassCastException ex)
           {
@@ -1356,7 +1356,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     try
       {
-        newRefField = (InvidDBField) newRef.getField(targetField);
+        newRefField = newRef.getInvidField(targetField);
 
         if (newRefField == null)
           {
@@ -1615,7 +1615,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     try
       {
-        oldRefField = (InvidDBField) oldRef.getField(targetField);
+        oldRefField = oldRef.getInvidField(targetField);
       }
     catch (ClassCastException ex)
       {
@@ -2106,7 +2106,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
                 try
                   {
-                    backField = (InvidDBField) target.getField(targetField);
+                    backField = target.getInvidField(targetField);
                   }
                 catch (ClassCastException ex)
                   {
@@ -2212,7 +2212,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
                 try
                   {
-                    backField = (InvidDBField) target.getField(targetField);
+                    backField = target.getInvidField(targetField);
                   }
                 catch (ClassCastException ex)
                   {

@@ -16,7 +16,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -750,7 +750,7 @@ public final class GanymedeServer implements Server {
     if (result != null)
       {
         DBObject user = loginSession.getDBSession().viewDBObject(result.getInvid());
-        PasswordDBField pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+        PasswordDBField pdbf = user.getPassField(SchemaConstants.UserPassword);
 
         if (pdbf != null && pdbf.matchPlainText(clientPass))
           {
@@ -781,7 +781,7 @@ public final class GanymedeServer implements Server {
     if (result != null)
       {
         DBObject personaObj = loginSession.getDBSession().viewDBObject(result.getInvid());
-        PasswordDBField pdbf = (PasswordDBField) personaObj.getField(SchemaConstants.PersonaPasswordField);
+        PasswordDBField pdbf = personaObj.getPassField(SchemaConstants.PersonaPasswordField);
 
         if (pdbf != null && pdbf.matchPlainText(clientPass))
           {

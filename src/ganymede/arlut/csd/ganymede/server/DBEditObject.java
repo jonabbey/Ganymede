@@ -3186,7 +3186,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
         try
           {
-            oldRefField = (InvidDBField) oldRef.getField(targetField);
+            oldRefField = oldRef.getInvidField(targetField);
           }
         catch (ClassCastException ex)
           {

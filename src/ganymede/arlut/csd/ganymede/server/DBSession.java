@@ -290,7 +290,7 @@ public final class DBSession implements QueryDescriber {
 
         if (!base.isEmbedded() && (owners != null))
           {
-            InvidDBField inf = (InvidDBField) e_object.getField(SchemaConstants.OwnerListField);
+            InvidDBField inf = e_object.getInvidField(SchemaConstants.OwnerListField);
 
             /* -- */
 
@@ -436,10 +436,10 @@ public final class DBSession implements QueryDescriber {
 
         // set creator info to something non-null
 
-        df = (DateDBField) e_object.getField(SchemaConstants.CreationDateField);
+        df = e_object.getDateField(SchemaConstants.CreationDateField);
         df.setValueLocal(modDate);
 
-        sf = (StringDBField) e_object.getField(SchemaConstants.CreatorField);
+        sf = e_object.getStringField(SchemaConstants.CreatorField);
 
         result = getID();
 
@@ -452,10 +452,10 @@ public final class DBSession implements QueryDescriber {
 
         // set modifier info to something non-null
 
-        df = (DateDBField) e_object.getField(SchemaConstants.ModificationDateField);
+        df = e_object.getDateField(SchemaConstants.ModificationDateField);
         df.setValueLocal(modDate);
 
-        sf = (StringDBField) e_object.getField(SchemaConstants.ModifierField);
+        sf = e_object.getStringField(SchemaConstants.ModifierField);
 
         result = getID();
 
