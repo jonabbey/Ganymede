@@ -3061,6 +3061,177 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * Server-side type casting field accessor for BooleanDBFields.
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a BooleanDBField if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final BooleanDBField getBooleanField(short fieldID)
+  {
+    return (BooleanDBField) this.retrieveField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for DateDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a DateDBField if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final DateDBField getDateField(short fieldID)
+  {
+    return (DateDBField) this.retrieveField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for FieldOptionDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a FieldOptionDBField if field fieldID is present and of
+   * the proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final FieldOptionDBField getFieldOptionsField(short fieldID)
+  {
+    return (FieldOptionDBField) this.retrieveField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for FloatDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a FloatDBField if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final FloatDBField getFloatField(short fieldID)
+  {
+    return (FloatDBField) this.retrieveField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for InvidDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return an InvidDBField if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final InvidDBField getInvidField(short fieldID)
+  {
+    return (InvidDBField) this.retrieveField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for IPDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return an IPDBField if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final IPDBField getIPField(short fieldID)
+  {
+    return (IPDBField) this.retrieveField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for NumericDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a NumericDBField if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final NumericDBField getNumericField(short fieldID)
+  {
+    return (NumericDBField) this.retrieveField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for PasswordDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a PasswordDBField if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final PasswordDBField getPassField(short fieldID)
+  {
+    return (PasswordDBField) this.retrieveField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for
+   * PermissionMatrixDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a PermissionMatrixDBField if field fieldID is present and
+   * of the proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final PermissionMatrixDBField getPermField(short fieldID)
+  {
+    return (PermissionMatrixDBField) this.retrieveField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for StringDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a StringDBField if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public final StringDBField getStringField(short fieldID)
+  {
+    return (StringDBField) this.retrieveField(fieldID);
+  }
+
+  /**
    * <p>This method returns a Vector of Invids for objects that are
    * pointed to from this object by way of non-symmetric links.  These
    * are Invids that may need to be marked as non-deletable if this
