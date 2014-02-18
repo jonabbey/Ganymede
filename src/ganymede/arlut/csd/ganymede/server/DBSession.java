@@ -1860,7 +1860,7 @@ public final class DBSession implements QueryDescriber {
     try
       {
         DBObjectBase base = Ganymede.db.getObjectBase(objType);
-        DBObjectBaseField field = base.getFieldDef(fieldType);
+        DBObjectBaseField field = base.getField(fieldType);
 
         return field.getName();
       }
@@ -1875,7 +1875,7 @@ public final class DBSession implements QueryDescriber {
     try
       {
         DBObjectBase base = Ganymede.db.getObjectBase(objTypeName);
-        DBObjectBaseField field = base.getFieldDef(fieldType);
+        DBObjectBaseField field = base.getField(fieldType);
 
         return field.getName();
       }

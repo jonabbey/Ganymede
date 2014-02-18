@@ -2358,7 +2358,7 @@ public final class DBStore implements JythonMap {
             // note that we redefined the SyncChannel type to have
             // these fields in DBStore version 2.11.
 
-            DBObjectBase syncBase = (DBObjectBase) getObjectBase(SchemaConstants.SyncChannelBase);
+            DBObjectBase syncBase = getObjectBase(SchemaConstants.SyncChannelBase);
             syncBase.setEditingMode(DBObjectBase.EditingMode.LOADING);
 
             try
@@ -2408,7 +2408,7 @@ public final class DBStore implements JythonMap {
 
         // now make sure that the Task base has the TaskOptionStrings field
 
-        DBObjectBase taskBase = (DBObjectBase) getObjectBase(SchemaConstants.TaskBase);
+        DBObjectBase taskBase = getObjectBase(SchemaConstants.TaskBase);
 
         if (taskBase.getField(SchemaConstants.TaskOptionStrings) == null)
           {
@@ -2425,7 +2425,7 @@ public final class DBStore implements JythonMap {
 
         // make sure that the ObjectEvent type has the new hidden label field
 
-        DBObjectBase objectEventBase = (DBObjectBase) getObjectBase(SchemaConstants.ObjectEventBase);
+        DBObjectBase objectEventBase = getObjectBase(SchemaConstants.ObjectEventBase);
 
         if (objectEventBase.getField(SchemaConstants.ObjectEventLabel) == null)
           {

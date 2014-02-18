@@ -2990,7 +2990,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (inUseCache == null)
       {
-        inUseCache = Boolean.valueOf(((DBObjectBase) this.getBase()).fieldInUse(this));
+        inUseCache = Boolean.valueOf(this.getBase().fieldInUse(this));
       }
 
     return inUseCache.booleanValue();
@@ -3002,7 +3002,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public synchronized Base getBase()
+  public synchronized DBObjectBase getBase()
   {
     return base;
   }
@@ -3094,7 +3094,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                                           ts.l("setName.invalid_ganymede_name", name));
       }
 
-    DBObjectBaseField otherField = (DBObjectBaseField) ((DBObjectBase) getBase()).getField(name);
+    DBObjectBaseField otherField = getBase().getField(name);
 
     if (otherField != null)
       {
@@ -4708,7 +4708,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       }
     else
       {
-        DBObjectBase b = (DBObjectBase) base.getStore().getObjectBase(baseName);
+        DBObjectBase b = base.getStore().getObjectBase(baseName);
 
         // we're loading here.. i don't expect the DBStore
         // initializeSchema() method to actually use base names, but
@@ -4840,7 +4840,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                                                        this.toString()));
               }
 
-            DBObjectBaseField bF = b.getFieldDef(val);
+            DBObjectBaseField bF = b.getField(val);
 
             if (bF == null)
               {

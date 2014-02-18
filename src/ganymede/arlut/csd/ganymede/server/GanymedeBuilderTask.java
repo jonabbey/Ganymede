@@ -666,7 +666,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     for (Short idObj: fieldIds)
       {
-        DBObjectBaseField fieldDef = base.getFieldDef(idObj);
+        DBObjectBaseField fieldDef = base.getField(idObj);
 
         if (fieldDef != null && fieldDef.changedSince(oldLastRunTime))
           {

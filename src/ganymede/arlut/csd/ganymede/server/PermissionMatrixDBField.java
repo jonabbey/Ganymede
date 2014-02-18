@@ -189,7 +189,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
         try
           {
             basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-            base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+            base = Ganymede.db.getObjectBase(basenum);
 
             if (base == null)
               {
@@ -241,7 +241,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
         try
           {
             basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-            base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+            base = Ganymede.db.getObjectBase(basenum);
 
             if (base == null)
               {
@@ -334,7 +334,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     try
       {
         basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-        base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+        base = Ganymede.db.getObjectBase(basenum);
 
         if (base == null)
           {
@@ -1419,7 +1419,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
         throw new IllegalArgumentException("bad base id");
       }
 
-    if (fieldID != -1 && base.getFieldDef(fieldID) == null)
+    if (fieldID != -1 && base.getField(fieldID) == null)
       {
         throw new IllegalArgumentException("bad field id");
       }
