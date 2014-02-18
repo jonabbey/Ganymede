@@ -64,6 +64,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
@@ -882,23 +883,22 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
-   * we write out a file that maps badge numbers to a
-   * user's primary email address and user name for the
-   * personnel office's phonebook database to use
+   * <p>we write out a file that maps badge numbers to a user's
+   * primary email address and user name for the personnel office's
+   * phonebook database to use</p>
    *
-   * This method writes lines to the maildirect2 GASH output file.
+   * <p>This method writes lines to the maildirect2 GASH output file.</p>
    *
-   * The lines in this file look like the following.
+   * <p>The lines in this file look like the following.</p>
    *
-   * 4297 jonabbey@arlut.utexas.edu broccol
-   *
+   * <p>8124 jonabbey@arlut.utexas.edu broccol</p>
    */
 
   private void writeMailDirect2()
   {
     PrintWriter out;
-    Hashtable map = new Hashtable(); // map badge numbers to DBObject
-    Hashtable results = new Hashtable(); // map badge numbers to strings
+    Map<String, DBObject> map = new HashMap<String, DBObject>(); // map badge numbers to DBObject
+    Map<String, String> results = new HashMap<String, String>(); // map badge numbers to strings
 
     /* -- */
 
@@ -931,8 +931,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                     // happen if one of the users is an GASH admin, or
                     // if one is inactivated.
 
-                    DBObject oldUser = (DBObject) map.get(badgeNum);
-
+                    DBObject oldUser = map.get(badgeNum);
                     DBField field = oldUser.getField(userSchema.PERSONAE);
 
                     if (field != null && field.isDefined())
@@ -956,11 +955,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               }
           }
 
-        Enumeration lines = results.elements();
-
-        while (lines.hasMoreElements())
+        for (String line: results.values())
           {
-            out.println((String) lines.nextElement());
+            out.println(line);
           }
       }
     finally
