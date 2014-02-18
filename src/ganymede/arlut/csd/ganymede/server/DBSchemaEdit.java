@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -478,7 +478,7 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
-  public Base getBase(short id)
+  public DBObjectBase getBase(short id)
   {
     return newBases.get(Short.valueOf(id));
   }
@@ -490,13 +490,13 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
-  public synchronized Base getBase(String baseName)
+  public synchronized DBObjectBase getBase(String baseName)
   {
     for (DBObjectBase base: newBases.values())
       {
         if (base.getName().equalsIgnoreCase(baseName))
           {
-            return (Base) base;
+            return base;
           }
       }
 
@@ -513,7 +513,7 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
-  public synchronized Base createNewBase(Category category, boolean embedded, boolean lowRange)
+  public synchronized DBObjectBase createNewBase(Category category, boolean embedded, boolean lowRange)
   {
     short id;
 
@@ -554,7 +554,7 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
    * itself.
    */
 
-  public synchronized Base createNewBase(Category category, boolean embedded, short id)
+  public synchronized DBObjectBase createNewBase(Category category, boolean embedded, short id)
   {
     DBObjectBase base;
     DBBaseCategory localCat = null;
@@ -668,7 +668,7 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     /* -- */
 
-    base = (DBObjectBase) getBase(baseName);
+    base = getBase(baseName);
 
     if (base == null)
       {

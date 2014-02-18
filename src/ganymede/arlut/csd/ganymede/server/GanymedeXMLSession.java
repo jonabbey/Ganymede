@@ -1337,9 +1337,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             // also, we'll put it in the root category just so we can
             // get things in the category tree before we resequence it
 
-            DBObjectBase _newBase = (DBObjectBase) this.editor.createNewBase(this.editor.getRootCategory(),
-                                                                             _embedded,
-                                                                             _id.shortValue());
+            DBObjectBase _newBase = this.editor.createNewBase(this.editor.getRootCategory(),
+                                                              _embedded,
+                                                              _id.shortValue());
 
             // if we failed to create the base, we'll have an
             // exception thrown.. our finally clause and higher level
@@ -1366,7 +1366,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
           {
             Integer _id = _entry.getAttrInt("id");
 
-            DBObjectBase _oldBase = (DBObjectBase) this.editor.getBase(_id.shortValue());
+            DBObjectBase _oldBase = this.editor.getBase(_id.shortValue());
 
             if (_oldBase == null)
               {
@@ -1404,7 +1404,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
           {
             Integer _id = _entry.getAttrInt("id");
 
-            DBObjectBase _oldBase = (DBObjectBase) this.editor.getBase(_id.shortValue());
+            DBObjectBase _oldBase = this.editor.getBase(_id.shortValue());
 
             if (_oldBase == null)
               {
@@ -1432,7 +1432,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
           {
             Integer _id = _entry.getAttrInt("id");
 
-            DBObjectBase _oldBase = (DBObjectBase) this.editor.getBase(_id.shortValue());
+            DBObjectBase _oldBase = this.editor.getBase(_id.shortValue());
 
             if (_oldBase == null)
               {
@@ -1755,19 +1755,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     for (Short id: deletions)
       {
-        try
-          {
-            // Base.getName() is defined to throw RemoteException
-
-            this.basesToRemove.add(this.editor.getBase(id.shortValue()).getName());
-          }
-        catch (RemoteException ex)
-          {
-            // should never ever happen
-
-            Ganymede.logError(ex);
-            throw new RuntimeException(ex.getMessage());
-          }
+        this.basesToRemove.add(this.editor.getBase(id.shortValue()).getName());
       }
 
     // now calculate basesToAdd and basesToEdit, recording the
@@ -2017,7 +2005,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
           }
         else if (_child.matches("objectdef"))
           {
-            DBObjectBase _base = (DBObjectBase) this.editor.getBase(_child.getAttrInt("id").shortValue());
+            DBObjectBase _base = this.editor.getBase(_child.getAttrInt("id").shortValue());
             _root.addNodeAfter(_base, null);
           }
       }

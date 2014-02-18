@@ -4600,7 +4600,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
         if (editor != null)
           {
-            DBObjectBase b = (DBObjectBase) editor.getBase(val);
+            DBObjectBase b = editor.getBase(val);
 
             if (b == null)
               {
@@ -4674,7 +4674,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
         // loading / initialization logic never uses names to
         // reference bases.
 
-        DBObjectBase b = (DBObjectBase) editor.getBase(baseName);
+        DBObjectBase b = editor.getBase(baseName);
 
         if (b == null)
           {
@@ -4826,7 +4826,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
         if (editor != null)
           {
-            DBObjectBase b = (DBObjectBase) editor.getBase(allowedTarget);
+            DBObjectBase b = editor.getBase(allowedTarget);
 
             // we're looking up the object that we have pre-selected.. we
             // should always set a target object before trying to set a
@@ -4931,7 +4931,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     // The schema loading and initializing logic doesn't use field
     // names, so we know editor should be defined
 
-    b = (DBObjectBase) editor.getBase(allowedTarget);
+    b = editor.getBase(allowedTarget);
 
     try
       {
