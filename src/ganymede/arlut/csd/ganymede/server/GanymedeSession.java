@@ -2037,15 +2037,14 @@ final public class GanymedeSession implements Session, Unreferenced {
         // directly manipulate the DBEditObject in the transaction
         // to get around permission enforcement.
 
-        db_object objref = new DBObject(obj, this);
-
+        DBObject objref = new DBObject(obj, this);
         ReturnVal result = new ReturnVal(true); // success
 
-        result.setInvid(((DBObject) objref).getInvid());
+        result.setInvid(objref.getInvid());
 
         if (this.exportObjects)
           {
-            exportObject((DBObject) objref);
+            exportObject(objref);
           }
 
         result.setObject(objref);
@@ -2119,7 +2118,7 @@ final public class GanymedeSession implements Session, Unreferenced {
             setLastEvent("edit:" + obj.getTypeName() + ":" + obj.getLabel());
           }
 
-        db_object objref = null;
+        DBObject objref = null;
 
         try
           {
@@ -2137,11 +2136,11 @@ final public class GanymedeSession implements Session, Unreferenced {
         if (objref != null)
           {
             ReturnVal result = new ReturnVal(true);
-            result.setInvid(((DBObject) objref).getInvid());
+            result.setInvid(objref.getInvid());
 
             if (this.exportObjects)
               {
-                exportObject((DBObject) objref);
+                exportObject(objref);
               }
 
             result.setObject(objref);
