@@ -1596,7 +1596,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>Not permission checked, server-side only.</p>
    */
 
-  public final boolean containsField(short id)
+  public final boolean hasField(short id)
   {
     return (getField(id) != null);
   }
@@ -1607,7 +1607,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>Not permission checked, server-side only.</p>
    */
 
-  public final boolean containsField(String fieldName)
+  public final boolean hasField(String fieldName)
   {
     return (getField(fieldName) != null);
   }

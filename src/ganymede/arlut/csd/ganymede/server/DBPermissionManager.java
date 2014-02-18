@@ -1591,7 +1591,7 @@ public final class DBPermissionManager {
           {
             DBObject roleObj = dbSession.viewDBObject(role).getOriginal();
 
-            if (roleObj.containsField(SchemaConstants.RoleMatrix))
+            if (roleObj.hasField(SchemaConstants.RoleMatrix))
               {
                 PermMatrix m = roleObj.getPermField(SchemaConstants.RoleMatrix).getMatrix();
 
@@ -1603,7 +1603,7 @@ public final class DBPermissionManager {
                   }
               }
 
-            if (roleObj.containsField(SchemaConstants.RoleDefaultMatrix))
+            if (roleObj.hasField(SchemaConstants.RoleDefaultMatrix))
               {
                 PermMatrix m = roleObj.getPermField(SchemaConstants.RoleDefaultMatrix).getMatrix();
 
