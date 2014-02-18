@@ -50,6 +50,8 @@ package arlut.csd.ganymede.gasharl;
 import java.rmi.RemoteException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 
@@ -116,8 +118,8 @@ public class groupInactivateWizard extends GanymediatorWizard {
    * groupCustom. They will be passed in another hash, however.
    */
 
-  Hashtable
-    userObjectHash = new Hashtable();
+  Map<String, DBObject>
+    userObjectHash = new HashMap<String, DBObject>();
 
   /**
    * Hash of group names to group object invid's.  This is used to process
@@ -416,7 +418,7 @@ public class groupInactivateWizard extends GanymediatorWizard {
             System.err.println("groupInactivateWizard: fixing up " + userName);
           }
 
-        DBObject usr = (DBObject) userObjectHash.get(userName);
+        DBObject usr = userObjectHash.get(userName);
 
         if (debug)
           {
