@@ -623,7 +623,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
             for (Invid interfaceInvid: interfaces)
               {
-                DBObject interfaceObj = (DBObject) getDBSession().viewDBObject(interfaceInvid);
+                DBObject interfaceObj = getDBSession().viewDBObject(interfaceInvid);
                 Invid netInvid = (Invid) interfaceObj.getFieldValueLocal(interfaceSchema.IPNET);
 
                 if (netInvid == null)
@@ -632,7 +632,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
                     continue;
                   }
 
-                DBObject netObj = (DBObject) getDBSession().viewDBObject(netInvid);
+                DBObject netObj = getDBSession().viewDBObject(netInvid);
                 String netLabel = netObj.getLabel();
 
                 // okay, is this network already in our choice list?

@@ -178,13 +178,8 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
           {
             try
               {
-                DBObject user;
-                Enumeration users = enumerateObjects(SchemaConstants.UserBase);
-
-                while (users.hasMoreElements())
+                for (DBObject user: getObjects(SchemaConstants.UserBase))
                   {
-                    user = (DBObject) users.nextElement();
-
                     if (user_in_netgroup(user, "IRIS-users"))
                       {
                         if (debug)
@@ -217,13 +212,8 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
               {
                 try
                   {
-                    DBObject user;
-                    Enumeration users = enumerateObjects(SchemaConstants.UserBase);
-
-                    while (users.hasMoreElements())
+                    for (DBObject user: getObjects(SchemaConstants.UserBase))
                       {
-                        user = (DBObject) users.nextElement();
-
                         if (user_in_maillist(user, "IRIS-test-users"))
                           {
                             if (debug)
