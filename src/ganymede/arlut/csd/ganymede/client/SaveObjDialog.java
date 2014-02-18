@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Contact information
@@ -405,7 +405,7 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Jse
 
     try
       {
-        date_field creation_date_field = (date_field) server_object.getField(SchemaConstants.CreationDateField);
+        date_field creation_date_field = server_object.getDateField(SchemaConstants.CreationDateField);
 
         if (creation_date_field != null)
           {

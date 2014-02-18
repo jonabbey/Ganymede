@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -520,7 +520,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
               }
             else if (id == SchemaConstants.UserBase)
               {
-                invid_field persona_field = (invid_field)getObject().getField(SchemaConstants.UserAdminPersonae);
+                invid_field persona_field = getObject().getInvidField(SchemaConstants.UserAdminPersonae);
 
                 // If the field is null, then this must be a view-only
                 // object with no persona field defined (because
@@ -555,8 +555,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
         try
           {
-            exp_field = (date_field)getObject().getField(SchemaConstants.ExpirationField);
-            rem_field = (date_field)getObject().getField(SchemaConstants.RemovalField);
+            exp_field = getObject().getDateField(SchemaConstants.ExpirationField);
+            rem_field = getObject().getDateField(SchemaConstants.RemovalField);
 
             expiration_Editable = editable && exp_field.isEditable();
             removal_Editable = editable && rem_field.isEditable();
@@ -1504,7 +1504,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     try
       {
-        notes_field = (string_field)getObject().getField(SchemaConstants.NotesField);
+        notes_field = getObject().getStringField(SchemaConstants.NotesField);
       }
     catch (Exception rx)
       {
