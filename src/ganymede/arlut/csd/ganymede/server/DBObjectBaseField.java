@@ -1283,7 +1283,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
                 if (targetObjectBase != null)
                   {
-                    DBObjectBaseField targetFieldDef = (DBObjectBaseField) targetObjectBase.getField(targetField);
+                    DBObjectBaseField targetFieldDef = targetObjectBase.getField(targetField);
 
                     if (targetFieldDef != null)
                       {

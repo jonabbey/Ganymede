@@ -884,11 +884,11 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
           {
             DBObjectBase base = obIt.next();
 
-            Vector fieldDefs = base.getFields();
+            Vector<DBObjectBaseField> fieldDefs = base.getFields();
 
             for (int i = 0; ok_to_delete && i < fieldDefs.size(); i++)
               {
-                DBObjectBaseField fieldDef = (DBObjectBaseField) fieldDefs.elementAt(i);
+                DBObjectBaseField fieldDef = fieldDefs.get(i);
 
                 if (fieldDef.getNameSpace() == space)
                   {

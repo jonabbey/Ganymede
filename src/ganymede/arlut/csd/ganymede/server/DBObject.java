@@ -785,7 +785,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final DBObjectBaseField getFieldDef(String fieldName)
   {
-    return (DBObjectBaseField) objectBase.getField(fieldName);
+    return objectBase.getField(fieldName);
   }
 
   /**
@@ -795,7 +795,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final DBObjectBaseField getFieldDef(short fieldcode)
   {
-    return (DBObjectBaseField) objectBase.getField(fieldcode);
+    return objectBase.getField(fieldcode);
   }
 
   /**

@@ -1237,7 +1237,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         return null;
       }
 
-    return (DBObjectBaseField) base.getField(fieldcode);
+    return base.getField(fieldcode);
   }
 
   /**
@@ -1253,7 +1253,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         return null;
       }
 
-    return (DBObjectBaseField) base.getField(fieldcode);
+    return base.getField(fieldcode);
   }
 
   /**

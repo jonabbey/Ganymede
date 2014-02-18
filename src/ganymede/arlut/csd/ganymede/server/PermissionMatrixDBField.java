@@ -261,7 +261,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
                       {
                         fieldnum = Short.valueOf(fieldId).shortValue();
 
-                        field = (DBObjectBaseField) base.getField(fieldnum);
+                        field = base.getField(fieldnum);
 
                         if (field == null)
                           {
@@ -350,7 +350,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
                   {
                     fieldnum = Short.valueOf(fieldId).shortValue();
 
-                    field = (DBObjectBaseField) base.getField(fieldnum);
+                    field = base.getField(fieldnum);
 
                     if (field == null)
                       {
@@ -1175,7 +1175,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
         else
           {
             DBObjectBase base = Ganymede.db.getObjectBase(baseID);
-            DBObjectBaseField field = (DBObjectBaseField) base.getField(fieldID);
+            DBObjectBaseField field = base.getField(fieldID);
 
             String baseName = base.getName();
             String fieldName = field.getName();

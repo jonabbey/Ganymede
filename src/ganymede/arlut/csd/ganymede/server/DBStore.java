@@ -2447,7 +2447,7 @@ public final class DBStore implements JythonMap {
         // somehow did not get namespace constrained on the task name
         // field
 
-        bf = (DBObjectBaseField) taskBase.getField(SchemaConstants.TaskName);
+        bf = taskBase.getField(SchemaConstants.TaskName);
 
         if (bf.getNameSpace() == null)
           {
@@ -2498,7 +2498,7 @@ public final class DBStore implements JythonMap {
           }
         else
           {
-            DBObjectBaseField labelFieldDef = (DBObjectBaseField) base.getField(base.getLabelField());
+            DBObjectBaseField labelFieldDef = base.getField(base.getLabelField());
 
             if (labelFieldDef.getNameSpace() == null)
               {

@@ -925,15 +925,15 @@ public final class DBQueryEngine {
 
     if (node.fieldId >= 0)
       {
-        fieldDef = (DBObjectBaseField) base.getField(node.fieldId);
+        fieldDef = base.getField(node.fieldId);
       }
     else if (node.fieldname != null)
       {
-        fieldDef = (DBObjectBaseField) base.getField(node.fieldname); // *sync* DBObjectBase
+        fieldDef = base.getField(node.fieldname); // *sync* DBObjectBase
       }
     else if (node.fieldId == -1)
       {
-        fieldDef = (DBObjectBaseField) base.getField(base.getLabelField()); // *sync* DBObjectBase
+        fieldDef = base.getField(base.getLabelField()); // *sync* DBObjectBase
       }
 
     if (fieldDef == null)

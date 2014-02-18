@@ -261,7 +261,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
                       {
                         fieldnum = Short.valueOf(fieldId).shortValue();
 
-                        field = (DBObjectBaseField) base.getField(fieldnum);
+                        field = base.getField(fieldnum);
 
                         if (field == null)
                           {
@@ -349,7 +349,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
                   {
                     fieldnum = Short.valueOf(fieldId).shortValue();
 
-                    field = (DBObjectBaseField) base.getField(fieldnum);
+                    field = base.getField(fieldnum);
 
                     if (field == null)
                       {

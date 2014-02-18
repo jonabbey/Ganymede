@@ -1359,7 +1359,7 @@ public final class DBEditSet {
       {
         // the label field is missing.  look it up.
 
-        DBObjectBaseField fieldDef = (DBObjectBaseField) eObj.getBase().getField(eObj.getLabelFieldID());
+        DBObjectBaseField fieldDef = eObj.getBase().getField(eObj.getLabelFieldID());
 
         missingFields.add(fieldDef.getName());
       }
