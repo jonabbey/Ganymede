@@ -2871,8 +2871,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * IllegalArgumentException will be thrown.  If such a Vector field
    * is defined on this object type but is not present in this
    * instance, false will be returned.</p>
-   *
-   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final boolean containsFieldValueLocal(short fieldID, Object val)
@@ -3057,6 +3055,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final BooleanDBField getBooleanField(short fieldID)
@@ -3074,6 +3074,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final BooleanDBField getBooleanField(String fieldname)
@@ -3091,6 +3093,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final DateDBField getDateField(short fieldID)
@@ -3108,6 +3112,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final DateDBField getDateField(String fieldname)
@@ -3125,6 +3131,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final FieldOptionDBField getFieldOptionsField(short fieldID)
@@ -3142,6 +3150,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final FieldOptionDBField getFieldOptionsField(String fieldname)
@@ -3159,6 +3169,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final FloatDBField getFloatField(short fieldID)
@@ -3176,6 +3188,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final FloatDBField getFloatField(String fieldname)
@@ -3193,6 +3207,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final InvidDBField getInvidField(short fieldID)
@@ -3210,6 +3226,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final InvidDBField getInvidField(String fieldname)
@@ -3227,6 +3245,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final IPDBField getIPField(short fieldID)
@@ -3244,6 +3264,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final IPDBField getIPField(String fieldname)
@@ -3261,6 +3283,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final NumericDBField getNumericField(short fieldID)
@@ -3278,6 +3302,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final NumericDBField getNumericField(String fieldname)
@@ -3295,6 +3321,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final PasswordDBField getPassField(short fieldID)
@@ -3312,6 +3340,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final PasswordDBField getPassField(String fieldname)
@@ -3330,6 +3360,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final PermissionMatrixDBField getPermField(short fieldID)
@@ -3348,6 +3380,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final PermissionMatrixDBField getPermField(String fieldname)
@@ -3365,6 +3399,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final StringDBField getStringField(short fieldID)
@@ -3382,6 +3418,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @throw ClassCastException if the field doesn't have the
    * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final StringDBField getStringField(String fieldname)
