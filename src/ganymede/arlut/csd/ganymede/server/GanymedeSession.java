@@ -665,7 +665,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
 
     asyncPort = new serverClientAsyncResponder();
-    return (ClientAsyncResponder) asyncPort;
+    return asyncPort;
   }
 
   /**
