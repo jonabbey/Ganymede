@@ -1495,7 +1495,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if (object instanceof DBEditObject)
       {
-        gSession = ((DBEditObject) object).getGSession();
+        gSession = object.getGSession();
       }
     else
       {
@@ -2702,9 +2702,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
             DBObject category = internalSession().getDBSession().viewDBObject(catInvid);
 
-            Boolean expDateRequired = (Boolean) category.getFieldValueLocal(userCategorySchema.EXPIRE);
-
-            if (expDateRequired.booleanValue())
+            if (category.isSet(userCategorySchema.EXPIRE))
               {
                 return Ganymede.createErrorDialog(this.getGSession(),
                                                   "Schema Error",
