@@ -80,8 +80,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /*------------------------------------------------------------------------------
@@ -105,9 +107,9 @@ import java.util.HashMap;
 
 public final class GanyQueryTransmuter {
 
-  private static HashMap op_scalar_mapping;
-  private static HashMap op_vector_mapping;
-  private static HashMap validity_mapping;
+  private static Map<String, Byte> op_scalar_mapping;
+  private static Map<String, Byte> op_vector_mapping;
+  private static Map<Integer, String[]> validity_mapping;
 
   /**
    * TranslationService object for handling string localization in the Ganymede
@@ -132,6 +134,7 @@ public final class GanyQueryTransmuter {
     op_scalar_mapping.put("starts", Byte.valueOf(QueryDataNode.STARTSWITH));
     op_scalar_mapping.put("ends", Byte.valueOf(QueryDataNode.ENDSWITH));
     op_scalar_mapping.put("defined", Byte.valueOf(QueryDataNode.DEFINED));
+    op_scalar_mapping = Collections.unmodifiableMap(op_scalar_mapping);
 
     // initialize op_vector_mapping
 
@@ -141,6 +144,7 @@ public final class GanyQueryTransmuter {
     op_vector_mapping.put("len>", Byte.valueOf(QueryDataNode.LENGTHGR));
     op_vector_mapping.put("len>=", Byte.valueOf(QueryDataNode.LENGTHGREQ));
     op_vector_mapping.put("len==", Byte.valueOf(QueryDataNode.LENGTHEQ));
+    op_vector_mapping = Collections.unmodifiableMap(op_vector_mapping);
 
     validity_mapping = new HashMap();
     validity_mapping.put(Integer.valueOf(FieldType.DATE), new String[] {"<", ">", "<=", ">=", "==", "defined"});
@@ -153,6 +157,7 @@ public final class GanyQueryTransmuter {
     validity_mapping.put(Integer.valueOf(FieldType.PASSWORD), new String[] {"defined"});
     validity_mapping.put(Integer.valueOf(FieldType.PERMISSIONMATRIX), new String[] {"defined"});
     validity_mapping.put(Integer.valueOf(FieldType.FIELDOPTIONS), new String[] {"defined"});
+    validity_mapping = Collections.unmodifiableMap(validity_mapping);
   }
 
   // ---
