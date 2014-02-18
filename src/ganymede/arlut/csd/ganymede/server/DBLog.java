@@ -1567,7 +1567,7 @@ final public class DBLog implements java.io.Closeable {
 
     for (Result entry: eventCodeList)
       {
-        objEventobj = (DBObject) gSession.getDBSession().viewDBObject(entry.getInvid());
+        objEventobj = gSession.getDBSession().viewDBObject(entry.getInvid());
         objEventItem = new objectEventType(objEventobj);
         objEventCodes.put(objEventItem.hashKey, objEventItem);
       }
