@@ -328,7 +328,7 @@ public final class DBPermissionManager {
   private Date rolesLastCheckedTimeStamp;
 
   /**
-   * When did we last check our user permissions?
+   * When did we last check our User Object?
    */
 
   private Date userTimeStamp;
