@@ -1037,14 +1037,11 @@ public final class DBPermissionManager {
 
     // otherwise, we've got to do a very little bit of legwork
 
-    for (int i = 0; i < fullOwnerList.size(); i++)
+    for (ObjectHandle handle: fullOwnerList.getHandles())
       {
-        Invid inv = fullOwnerList.getInvid(i);
-        String label = fullOwnerList.getLabel(i);
-
-        if (isMemberOfOwnerGroup(inv))
+        if (isMemberOfOwnerGroup(handle.getInvid()))
           {
-            result.addRow(inv, label, false);
+            result.addRow(handle);
           }
       }
 
