@@ -1676,7 +1676,7 @@ public final class DBPermissionManager {
         updatePermsLock = dbSession.openReadLock(Ganymede.db.getPermBases());
 
         updateDefaultRoleObj();
-        updatePersonaObj();
+        DBObject persona = updatePersonaObj();
 
         this.supergashMode = false;
 
@@ -1687,8 +1687,8 @@ public final class DBPermissionManager {
             return;
           }
 
-        if (this.personaObj.containsFieldValueLocal(SchemaConstants.PersonaGroupsField,
-                                                    SUPERGASH_GROUP_INVID))
+        if (persona.containsFieldValueLocal(SchemaConstants.PersonaGroupsField,
+                                            SUPERGASH_GROUP_INVID))
           {
             this.supergashMode = true;
             return;
@@ -1701,40 +1701,52 @@ public final class DBPermissionManager {
         // privileges granted to admins over objects owned by them must be
         // derived from a non-default role.
 
-        for (Invid role: (List<Invid>) this.personaObj.getFieldValuesLocal(SchemaConstants.PersonaPrivs))
+        List roles = persona.getFieldValuesLocal(SchemaConstants.PersonaPrivs);
+
+        for (Invid role: (List<Invid>) roles)
           {
             DBObject roleObj = dbSession.viewDBObject(role).getOriginal();
 
             if (roleObj.hasField(SchemaConstants.RoleMatrix))
               {
-                PermMatrix m = roleObj.getPermField(SchemaConstants.RoleMatrix).getMatrix();
+                PermissionMatrixDBField pmdbf =
+                  roleObj.getPermField(SchemaConstants.RoleMatrix);
+
+                PermMatrix m = pmdbf.getMatrix();
 
                 this.ownedObjectPerms = this.ownedObjectPerms.union(m);
 
                 if (roleObj.isSet(SchemaConstants.RoleDelegatable))
                   {
-                    this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(m);
+                    this.delegatableOwnedObjectPerms =
+                      this.delegatableOwnedObjectPerms.union(m);
                   }
               }
 
             if (roleObj.hasField(SchemaConstants.RoleDefaultMatrix))
               {
-                PermMatrix m = roleObj.getPermField(SchemaConstants.RoleDefaultMatrix).getMatrix();
+                PermissionMatrixDBField pmdbf =
+                  roleObj.getPermField(SchemaConstants.RoleDefaultMatrix);
+
+                PermMatrix m = pmdbf.getMatrix();
 
                 this.ownedObjectPerms = this.ownedObjectPerms.union(m);
                 this.unownedObjectPerms = this.unownedObjectPerms.union(m);
 
                 if (roleObj.isSet(SchemaConstants.RoleDelegatable))
                   {
-                    this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(m);
-                    this.delegatableUnownedObjectPerms = this.delegatableUnownedObjectPerms.union(m);
+                    this.delegatableOwnedObjectPerms =
+                      this.delegatableOwnedObjectPerms.union(m);
+
+                    this.delegatableUnownedObjectPerms =
+                      this.delegatableUnownedObjectPerms.union(m);
                   }
               }
           }
       }
     catch (InterruptedException ex)
       {
-        throw new RuntimeException("Couldn't get read lock in DBPermissionManager.updatePerms()", ex);
+        throw new RuntimeException(ex);
       }
     catch (Exception ex2)
       {
@@ -1834,7 +1846,7 @@ public final class DBPermissionManager {
    * personaWasChanged() so that we can do this part in a DBReadLock.
    */
 
-  private synchronized void updatePersonaObj()
+  private synchronized DBObject updatePersonaObj()
   {
     // get the time before we view our object, so if we get a race
     // between the date and the viewDBObject call, that will cause
@@ -1846,7 +1858,7 @@ public final class DBPermissionManager {
       {
         this.personaObj = null;
         this.personaTimeStamp = personaTime;
-        return;
+        return null;
       }
 
     DBObject currentPersonaObj = dbSession.viewDBObject(this.personaInvid);
@@ -1861,10 +1873,12 @@ public final class DBPermissionManager {
         // "Persona object {0} deleted while persona {0} logged in with session {1}"
         gSession.forceOff(ts.l("updatePersonaObj.not_logged_in", this.personaName, this.sessionName));
 
-        return;
+        return null;
       }
 
     this.personaObj = currentPersonaObj.getOriginal();
+
+    return this.personaObj;
   }
 
   /**
