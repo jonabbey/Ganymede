@@ -1208,20 +1208,21 @@ public final class DBPermissionManager {
         return null;
       }
 
-    List<Invid> copyList = (List<Invid>) Collections.unmodifiableList(new ArrayList(ownerInvids));
+    List<Invid> copyList =
+      Collections.unmodifiableList(new ArrayList<Invid>(ownerInvids));
 
-    if (!this.supergashMode && !isMemberOfAllOwnerGroups(ownerInvids))
+    if (this.supergashMode || isMemberOfAllOwnerGroups(copyList))
       {
-        // "Server: Error in filterQueries()"
-        // "Error.. ownerInvids contains invid that the persona is not a member of."
-        return Ganymede.createErrorDialog(gSession,
-                                          ts.l("filterQueries.error"),
-                                          ts.l("setDefaultOwner.error_text2"));
+        this.visibilityFilterInvids = copyList;
+        gSession.setLastEvent("filterQueries");
+        return null;
       }
 
-    this.visibilityFilterInvids = copyList;
-    gSession.setLastEvent("filterQueries");
-    return null;
+    // "Server: Error in filterQueries()"
+    // "Error.. ownerInvids contains invid that the persona is not a member of."
+    return Ganymede.createErrorDialog(gSession,
+                                      ts.l("filterQueries.error"),
+                                      ts.l("setDefaultOwner.error_text2"));
   }
 
   //  Database operations
