@@ -447,7 +447,8 @@ public final class DBPermissionManager {
     this.gSession = gSession;
     this.dbSession = gSession.getDBSession();
 
-    if (personaObject != null && personaObject.getInvid().equals(SUPERGASH_PERSONA_INVID))
+    if (personaObject != null &&
+        personaObject.getInvid().equals(SUPERGASH_PERSONA_INVID))
       {
         this.beforeversupergash = true;
         this.supergashMode = true;
@@ -788,18 +789,15 @@ public final class DBPermissionManager {
         return null;
       }
 
-    if (isEndUser())
+    if (isEndUser() && getUser() == null)
       {
-        if (getUser() == null)
-          {
-            // "Session Invalidated"
-            // "User object for user {0} deleted while user {0} logged in with session {1}"
-            return Ganymede.createErrorDialog(gSession,
-                                              ts.l("isValidSession.error"),
-                                              ts.l("isValidSession.user_deleted", this.username, this.sessionName));
-          }
-
-        return null;
+        // "Session Invalidated"
+        // "User object for user {0} deleted while user {0} logged in with session {1}"
+        return Ganymede.createErrorDialog(gSession,
+                                          ts.l("isValidSession.error"),
+                                          ts.l("isValidSession.user_deleted",
+                                               this.username,
+                                               this.sessionName));
       }
 
     if (this.personaInvid != null)
@@ -812,7 +810,9 @@ public final class DBPermissionManager {
             // "Persona object {0} deleted while persona {0} logged in with session {1}"
             return Ganymede.createErrorDialog(gSession,
                                               ts.l("isValidSession.error"),
-                                              ts.l("isValidSession.persona_deleted", this.personaName, this.sessionName));
+                                              ts.l("isValidSession.persona_deleted",
+                                                   this.personaName,
+                                                   this.sessionName));
           }
       }
 
