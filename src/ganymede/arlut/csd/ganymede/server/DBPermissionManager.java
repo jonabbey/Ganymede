@@ -792,7 +792,7 @@ public final class DBPermissionManager {
     if (isEndUser() && getUser() == null)
       {
         // "Session Invalidated"
-        // "User object for user {0} deleted while user {0} logged in with session {1}"
+        // "User object {0} deleted while logged in with session {1}"
         return Ganymede.createErrorDialog(gSession,
                                           ts.l("isValidSession.error"),
                                           ts.l("isValidSession.user_deleted",
@@ -800,20 +800,16 @@ public final class DBPermissionManager {
                                                this.sessionName));
       }
 
-    if (this.personaInvid != null)
+    if (this.personaInvid != null &&
+        dbSession.viewDBObject(this.personaInvid) == null)
       {
-        DBObject pObj = dbSession.viewDBObject(this.personaInvid);
-
-        if (pObj == null)
-          {
-            // "Session Invalidated"
-            // "Persona object {0} deleted while persona {0} logged in with session {1}"
-            return Ganymede.createErrorDialog(gSession,
-                                              ts.l("isValidSession.error"),
-                                              ts.l("isValidSession.persona_deleted",
-                                                   this.personaName,
-                                                   this.sessionName));
-          }
+        // "Session Invalidated"
+        // "Persona object {0} deleted while logged in with session {1}"
+        return Ganymede.createErrorDialog(gSession,
+                                          ts.l("isValidSession.error"),
+                                          ts.l("isValidSession.persona_deleted",
+                                               this.personaName,
+                                               this.sessionName));
       }
 
     return null;
