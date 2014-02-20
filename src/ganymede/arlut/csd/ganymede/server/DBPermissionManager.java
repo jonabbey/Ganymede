@@ -393,10 +393,14 @@ public final class DBPermissionManager {
     this.gSession = gSession;
     this.dbSession = gSession.getDBSession();
     this.sessionName = sessionName;
-    this.username = null;
-    this.userInvid = null;
+
     this.beforeversupergash = true;
     this.supergashMode = true;
+
+    this.username = null;
+    this.userInvid = null;
+    this.personaInvid = null;
+    this.personaName = null;
   }
 
   /**
@@ -772,10 +776,18 @@ public final class DBPermissionManager {
    * <p>If the user or persona connected to this session have been
    * deleted by another session, we'll return an error dialog
    * explaining that.</p>
+   *
+   * @return null if the session is valid, else a ReturnVal with an
+   * error dialog encoded.
    */
 
   public synchronized ReturnVal isValidSession()
   {
+    if (this.beforeversupergash)
+      {
+        return null;
+      }
+
     if (isEndUser())
       {
         if (getUser() == null)
@@ -790,15 +802,18 @@ public final class DBPermissionManager {
         return null;
       }
 
-    DBObject pObj = dbSession.viewDBObject(this.personaInvid);
-
-    if (pObj == null)
+    if (this.personaInvid != null)
       {
-        // "Session Invalidated"
-        // "Persona object {0} deleted while persona {0} logged in with session {1}"
-        return Ganymede.createErrorDialog(gSession,
-                                          ts.l("isValidSession.error"),
-                                          ts.l("isValidSession.persona_deleted", this.personaName, this.sessionName));
+        DBObject pObj = dbSession.viewDBObject(this.personaInvid);
+
+        if (pObj == null)
+          {
+            // "Session Invalidated"
+            // "Persona object {0} deleted while persona {0} logged in with session {1}"
+            return Ganymede.createErrorDialog(gSession,
+                                              ts.l("isValidSession.error"),
+                                              ts.l("isValidSession.persona_deleted", this.personaName, this.sessionName));
+          }
       }
 
     return null;
