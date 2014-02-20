@@ -548,7 +548,7 @@ public final class DBPermissionManager {
 
   public boolean isEndUser()
   {
-    return personaInvid == null;
+    return !isSuperGash() && userInvid != null && personaInvid == null;
   }
 
   /**
