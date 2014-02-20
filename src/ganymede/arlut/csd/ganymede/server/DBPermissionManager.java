@@ -898,7 +898,7 @@ public final class DBPermissionManager {
         return false;
       }
 
-    if (!findMatchingAuthenticatedPersona(userObject, label, password))
+    if (!findPersona(userObject, label, password))
       {
         // "Failed attempt to switch to persona {0} for user: {1}"
         Ganymede.debug(ts.l("selectPersona.no_persona", label, this.username));
@@ -933,16 +933,22 @@ public final class DBPermissionManager {
   }
 
   /**
-   * Sets this.personaName and this.personaInvid and returns true if
-   * the persona object linked to userObject (or the end-user itself)
-   * can be found that matches label and a password that matches pass.
+   * Sets this.personaName and this.personaInvid and returns true if a
+   * persona object with name matching label and password matching
+   * pass linked to the object user can be found, or if the name of
+   * the object user matches label.
+   *
+   * @param user The DBObject containing information about the user
+   * looking to change his persona
+   * @param label The name of the persona he is attempting to change to
+   * @param pass The password that he is using to try to change his
+   * persona, or null if the user is attempting to change to his
+   * unprivileged end-user privs.
    */
 
-  private boolean findMatchingAuthenticatedPersona(DBObject userObject,
-                                                   String label,
-                                                   String pass)
+  private boolean findPersona(DBObject user, String label, String pass)
   {
-    if (userObject == null || label == null)
+    if (user == null || label == null)
       {
         return false;
       }
@@ -950,7 +956,7 @@ public final class DBPermissionManager {
     // we don't need to check a password to switch to our end-user
     // privs
 
-    if (userObject.getLabel().equals(label))
+    if (user.getLabel().equals(label))
       {
         this.personaInvid = null;
         this.personaName = null;
@@ -964,29 +970,30 @@ public final class DBPermissionManager {
         return false;
       }
 
-    List<Invid> personae = (List<Invid>) userObject.getFieldValuesLocal(SchemaConstants.UserAdminPersonae);
+    List personae = user.getFieldValuesLocal(SchemaConstants.UserAdminPersonae);
 
-    for (Invid invid: personae)
+    for (Invid invid: (List<Invid>) personae)
       {
-        DBObject personaObject = dbSession.viewDBObject(invid).getOriginal();
+        DBObject persona = dbSession.viewDBObject(invid).getOriginal();
 
-        if (!label.equals(personaObject.getLabel()))
+        if (!label.equals(persona.getLabel()))
           {
             continue;
           }
 
-        PasswordDBField pdbf = personaObject.getPassField(SchemaConstants.PersonaPasswordField);
+        PasswordDBField pdbf =
+          persona.getPassField(SchemaConstants.PersonaPasswordField);
 
         if (pdbf != null && pdbf.matchPlainText(pass))
           {
-            if (personaObject.getLabel() == null || personaObject.getInvid() == null)
+            if (persona.getLabel() == null || persona.getInvid() == null)
               {
                 throw new NullPointerException();
               }
 
-            this.personaName = personaObject.getLabel();
-            this.personaInvid = personaObject.getInvid();
-            this.personaObj = personaObject;
+            this.personaName = persona.getLabel();
+            this.personaInvid = persona.getInvid();
+            this.personaObj = persona;
 
             return true;
           }
