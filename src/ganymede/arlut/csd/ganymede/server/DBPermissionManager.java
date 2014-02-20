@@ -1777,8 +1777,13 @@ public final class DBPermissionManager {
   {
     try
       {
+        // get the time before we view our object, so if we get a race
+        // between the date and the viewDBObject call, that will cause
+        // us to check again next time.
+
+        Date roleTime = new Date();
         this.defaultRoleObj = dbSession.viewDBObject(DEFAULT_ROLE_INVID).getOriginal();
-        this.rolesLastCheckedTimeStamp = new Date();
+        this.rolesLastCheckedTimeStamp = roleTime;
       }
     catch (NullPointerException ex)
       {
@@ -1823,15 +1828,22 @@ public final class DBPermissionManager {
 
   private synchronized void updatePersonaObj()
   {
-    this.personaTimeStamp = new Date();
+    // get the time before we view our object, so if we get a race
+    // between the date and the viewDBObject call, that will cause
+    // us to check again next time.
+
+    Date personaTime = new Date();
 
     if (this.personaInvid == null)
       {
         this.personaObj = null;
+        this.personaTimeStamp = personaTime;
         return;
       }
 
     DBObject currentPersonaObj = dbSession.viewDBObject(this.personaInvid);
+
+    this.personaTimeStamp = personaTime;
 
     if (currentPersonaObj == null)
       {
@@ -1882,7 +1894,11 @@ public final class DBPermissionManager {
 
   private synchronized void configureEndUser()
   {
-    this.userTimeStamp = new Date();
+    // get the time before we view our object, so if we get a race
+    // between the date and the viewDBObject call, that will cause
+    // us to check again next time.
+
+    Date userTime = new Date();
 
     if (getUser() == null)
       {
@@ -1894,6 +1910,8 @@ public final class DBPermissionManager {
 
         return;
       }
+
+    this.userTimeStamp = userTime;
 
     PermissionMatrixDBField permField = this.defaultRoleObj.getPermField(SchemaConstants.RoleMatrix);
 
