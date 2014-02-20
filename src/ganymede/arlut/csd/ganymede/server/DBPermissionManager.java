@@ -180,6 +180,13 @@ public final class DBPermissionManager {
   private boolean supergashMode = false;
 
   /**
+   * False if we've detected that the underlying user or admin persona
+   * for this DBPermissionManager has been deleted out from under us.
+   */
+
+  private boolean valid = true;
+
+  /**
    * <p>The name of the current persona, of the form
    * '&lt;username&gt;:&lt;description&gt;', for example,
    * 'broccol:GASH Admin'.  If the user is logged in with just
@@ -490,7 +497,14 @@ public final class DBPermissionManager {
         this.personaName = null;
       }
 
-    updatePerms();
+    try
+      {
+        updatePerms();
+      }
+    catch (NotLoggedInException ex)
+      {
+        throw new IllegalStateException(ex);
+      }
   }
 
   /**
@@ -883,7 +897,14 @@ public final class DBPermissionManager {
     this.delegatableUnownedObjectPerms = null;
     this.personaTimeStamp = null; // force updatePerms()
 
-    updatePerms();
+    try
+      {
+        updatePerms();
+      }
+    catch (NotLoggedInException ex)
+      {
+        return false;
+      }
 
     gSession.resetAdminEntry();
     gSession.setLastEvent("selectPersona: " + label);
@@ -1338,7 +1359,14 @@ public final class DBPermissionManager {
         throw new NullPointerException();
       }
 
-    updatePerms();
+    try
+      {
+        updatePerms();
+      }
+    catch (NotLoggedInException ex)
+      {
+        return PermEntry.noPerms;
+      }
 
     if (this.supergashMode)
       {
@@ -1362,7 +1390,14 @@ public final class DBPermissionManager {
         throw new NullPointerException();
       }
 
-    updatePerms();
+    try
+      {
+        updatePerms();
+      }
+    catch (NotLoggedInException ex)
+      {
+        return PermEntry.noPerms;
+      }
 
     boolean owned = isOwnedByUs(object);
     PermEntry objectPerm = this.getObjectPerm(object, owned);
@@ -1426,7 +1461,14 @@ public final class DBPermissionManager {
 
   synchronized PermEntry getPerm(short baseID, boolean ownedByUs)
   {
-    updatePerms();
+    try
+      {
+        updatePerms();
+      }
+    catch (NotLoggedInException ex)
+      {
+        return PermEntry.noPerms;
+      }
 
     if (this.supergashMode)
       {
@@ -1456,7 +1498,14 @@ public final class DBPermissionManager {
 
   synchronized PermEntry getPerm(short baseID, short fieldID, boolean ownedByUs)
   {
-    updatePerms();
+    try
+      {
+        updatePerms();
+      }
+    catch (NotLoggedInException ex)
+      {
+        return PermEntry.noPerms;
+      }
 
     if (this.supergashMode)
       {
@@ -1577,7 +1626,7 @@ public final class DBPermissionManager {
    * changed.</p>
    */
 
-  private synchronized void updatePerms()
+  private synchronized void updatePerms() throws NotLoggedInException
   {
     if (beforeversupergash || Ganymede.firstrun)
       {
@@ -1662,11 +1711,28 @@ public final class DBPermissionManager {
       {
         throw new RuntimeException("Couldn't get read lock in DBPermissionManager.updatePerms()", ex);
       }
+    catch (Exception ex2)
+      {
+        if (!this.valid)
+          {
+            throw new NotLoggedInException(ex2);
+          }
+      }
     finally
       {
-        if (updatePermsLock != null)
+        try
           {
-            dbSession.releaseLock(updatePermsLock);
+            if (updatePermsLock != null)
+              {
+                dbSession.releaseLock(updatePermsLock);
+              }
+          }
+        catch (Exception ex3)
+          {
+            if (this.valid)
+              {
+                throw new RuntimeException(ex3);
+              }
           }
       }
   }
@@ -1752,6 +1818,7 @@ public final class DBPermissionManager {
 
     if (currentPersonaObj == null)
       {
+        this.valid = false;
         this.personaTimeStamp = null;
 
         // "Persona object {0} deleted while persona {0} logged in with session {1}"
@@ -1803,6 +1870,7 @@ public final class DBPermissionManager {
     if (getUser() == null)
       {
         this.userTimeStamp = null;
+        this.valid = false;
 
         // "User object for user {0} deleted while user {0} logged in with session {1}"
         gSession.forceOff(ts.l("configureEndUser.not_logged_in", this.username, this.sessionName));
