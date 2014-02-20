@@ -1802,7 +1802,10 @@ public final class DBPermissionManager {
         // us to check again next time.
 
         Date roleTime = new Date();
-        this.defaultRoleObj = dbSession.viewDBObject(DEFAULT_ROLE_INVID).getOriginal();
+
+        this.defaultRoleObj =
+          dbSession.viewDBObject(DEFAULT_ROLE_INVID).getOriginal();
+
         this.rolesLastCheckedTimeStamp = roleTime;
       }
     catch (NullPointerException ex)
@@ -1871,7 +1874,8 @@ public final class DBPermissionManager {
         this.personaTimeStamp = null;
 
         // "Persona object {0} deleted while persona {0} logged in with session {1}"
-        gSession.forceOff(ts.l("updatePersonaObj.not_logged_in", this.personaName, this.sessionName));
+        gSession.forceOff(ts.l("updatePersonaObj.not_logged_in",
+                               this.personaName, this.sessionName));
 
         return null;
       }
@@ -1888,7 +1892,9 @@ public final class DBPermissionManager {
 
   private synchronized void initializeDefaultPerms()
   {
-    PermissionMatrixDBField pField = this.defaultRoleObj.getPermField(SchemaConstants.RoleDefaultMatrix);
+    PermissionMatrixDBField pField =
+      this.defaultRoleObj.getPermField(SchemaConstants.RoleDefaultMatrix);
+
     PermMatrix defaultMatrix;
 
     if (pField != null)
@@ -1928,7 +1934,8 @@ public final class DBPermissionManager {
         this.valid = false;
 
         // "User object for user {0} deleted while user {0} logged in with session {1}"
-        gSession.forceOff(ts.l("configureEndUser.not_logged_in", this.username, this.sessionName));
+        gSession.forceOff(ts.l("configureEndUser.not_logged_in",
+                               this.username, this.sessionName));
 
         return;
       }
@@ -1945,7 +1952,8 @@ public final class DBPermissionManager {
     PermMatrix selfPerms = permField.getMatrix();
 
     this.ownedObjectPerms = this.ownedObjectPerms.union(selfPerms);
-    this.delegatableOwnedObjectPerms = this.delegatableOwnedObjectPerms.union(selfPerms);
+    this.delegatableOwnedObjectPerms =
+      this.delegatableOwnedObjectPerms.union(selfPerms);
   }
 
   /**
@@ -1971,7 +1979,9 @@ public final class DBPermissionManager {
 
     // end users are considered to own themselves
 
-    if (!isPrivileged() && this.userInvid != null && this.userInvid.equals(obj.getInvid()))
+    if (!isPrivileged() &&
+        this.userInvid != null &&
+        this.userInvid.equals(obj.getInvid()))
       {
         return true;
       }
@@ -1988,7 +1998,8 @@ public final class DBPermissionManager {
         if (inv == null)
           {
             // "isOwnedByUs couldn''t find owner of embedded object {0}"
-            throw new IntegrityConstraintException(ts.l("isOwnedByUs.integrity", obj.getLabel()));
+            throw new IntegrityConstraintException(ts.l("isOwnedByUs.integrity",
+                                                        obj.getLabel()));
           }
 
         obj = dbSession.viewDBObject(inv);
@@ -2041,7 +2052,8 @@ public final class DBPermissionManager {
         return this.userInvid != null && this.userInvid.equals(obj.getInvid());
       }
 
-    List<Invid> owners = (List<Invid>) obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
+    List<Invid> owners = (List<Invid>)
+      obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
 
     // All owner group objects are considered to be self-owning.
 
@@ -2058,7 +2070,8 @@ public final class DBPermissionManager {
 
     if (obj.getTypeID() == SchemaConstants.PersonaBase)
       {
-        List<Invid> values = (List<Invid>) obj.getFieldValuesLocal(SchemaConstants.PersonaGroupsField);
+        List<Invid> values = (List<Invid>)
+          obj.getFieldValuesLocal(SchemaConstants.PersonaGroupsField);
 
         owners = arlut.csd.Util.VectorUtils.union(owners, values);
       }
@@ -2096,12 +2109,12 @@ public final class DBPermissionManager {
   {
     if (owner == null)
       {
-        throw new IllegalArgumentException("Null owner passed to isMemberOfOwnerGroup");
+        throw new IllegalArgumentException("Null owner");
       }
 
     if (owner.getType() != SchemaConstants.OwnerBase)
       {
-        throw new IllegalArgumentException("isMemberOfOwnerGroup() called with something other than an Owner Group");
+        throw new IllegalArgumentException("bad owner group");
       }
 
     if (alreadySeen.contains(owner))
@@ -2111,9 +2124,10 @@ public final class DBPermissionManager {
 
     alreadySeen.add(owner);
 
-    DBObject ownerGroupObj = dbSession.viewDBObject(owner).getOriginal();
+    DBObject ownerObj = dbSession.viewDBObject(owner).getOriginal();
 
-    List<Invid> personaeInOwnerGroup = (List<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
+    List<Invid> personaeInOwnerGroup = (List<Invid>)
+      ownerObj.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
 
     if (personaeInOwnerGroup.contains(getPersonaInvid()))
       {
@@ -2122,7 +2136,8 @@ public final class DBPermissionManager {
 
     // didn't find, recurse up
 
-    List<Invid> ownersOfOwnerGroup = (List<Invid>) ownerGroupObj.getFieldValuesLocal(SchemaConstants.OwnerListField);
+    List<Invid> ownersOfOwnerGroup = (List<Invid>)
+      ownerObj.getFieldValuesLocal(SchemaConstants.OwnerListField);
 
     return isMemberOfAnyOwnerGroups(ownersOfOwnerGroup, alreadySeen);
   }
@@ -2156,7 +2171,8 @@ public final class DBPermissionManager {
    * @return true if a match is found
    */
 
-  private synchronized boolean isMemberOfAnyOwnerGroups(List<Invid> owners, Set<Invid> alreadySeen)
+  private synchronized boolean isMemberOfAnyOwnerGroups(List<Invid> owners,
+                                                        Set<Invid> alreadySeen)
   {
     if (owners == null)
       {
