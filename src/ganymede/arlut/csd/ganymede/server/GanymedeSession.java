@@ -1363,7 +1363,7 @@ final public class GanymedeSession implements Session, Unreferenced {
         body.append(WordWrap.wrap(signature.toString(), 78, null));
         body.append("\n--------------------------------------------------------------------------------\n");
 
-        mailer.sendmsg(permManager.getIdentityReturnAddress(),
+        mailer.sendmsg(permManager.getReturnAddress(),
                        addresses,
                        "Ganymede: " + subject,
                        body.toString());
@@ -1447,7 +1447,7 @@ final public class GanymedeSession implements Session, Unreferenced {
         asciiContent.append(WordWrap.wrap(signature.toString(), 78, null));
         asciiContent.append("\n--------------------------------------------------------------------------------\n");
 
-        mailer.sendHTMLmsg(permManager.getIdentityReturnAddress(),
+        mailer.sendHTMLmsg(permManager.getReturnAddress(),
                            addresses,
                            "Ganymede: " + subject,
                            (HTMLbody != null) ? HTMLbody.toString(): null,

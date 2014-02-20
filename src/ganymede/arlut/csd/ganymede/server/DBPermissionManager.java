@@ -729,7 +729,7 @@ public final class DBPermissionManager {
    * DBPermissionManager.
    */
 
-  public synchronized String getIdentityReturnAddress()
+  public synchronized String getReturnAddress()
   {
     if (!isUserLinked())
       {
