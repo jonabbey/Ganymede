@@ -230,12 +230,6 @@ public final class DBPermissionManager {
   private Date personaTimeStamp;
 
   /**
-   * When did we last check our user permissions?
-   */
-
-  private Date userTimeStamp;
-
-  /**
    * <p>This variable stores the permission bits that are applicable to
    * objects that the current persona has ownership privilege over.
    * This matrix is always a permissive superset of {@link
@@ -331,6 +325,12 @@ public final class DBPermissionManager {
    */
 
   private Date rolesLastCheckedTimeStamp;
+
+  /**
+   * When did we last check our user permissions?
+   */
+
+  private Date userTimeStamp;
 
   /**
    * <p>This variable is a non-modifiable List of object references
