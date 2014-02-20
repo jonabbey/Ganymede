@@ -1164,6 +1164,21 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
+    /* - */
+
+    ReturnVal retVal;
+
+    /* -- */
+
+    retVal = permManager.isValidSession();
+
+    if (!ReturnVal.didSucceed(retVal))
+      {
+        forceOff(retVal.getDialogText());
+
+        return retVal;
+      }
+
     if (dbSession.editSet == null)
       {
         // "Server: Error in commitTransaction()"
@@ -1172,12 +1187,6 @@ final public class GanymedeSession implements Session, Unreferenced {
                                           ts.l("commitTransaction.error"),
                                           ts.l("commitTransaction.error_text"));
       }
-
-    /* - */
-
-    ReturnVal retVal;
-
-    /* -- */
 
     if (debug)
       {

@@ -223,6 +223,12 @@ public final class DBPermissionManager {
   private Date personaTimeStamp;
 
   /**
+   * When did we last check our user permissions?
+   */
+
+  private Date userTimeStamp;
+
+  /**
    * <p>This variable stores the permission bits that are applicable to
    * objects that the current persona has ownership privilege over.
    * This matrix is always a permissive superset of {@link
@@ -504,7 +510,7 @@ public final class DBPermissionManager {
 
   public synchronized boolean isPrivileged()
   {
-    return personaName != null || isSuperGash();
+    return personaInvid != null || isSuperGash();
   }
 
   /**
@@ -743,6 +749,40 @@ public final class DBPermissionManager {
       }
 
     return userInvid;
+  }
+
+  /**
+   * <p>Returns a successful ReturnVal if the user / persona
+   * credentials for this session are currently valid.</p>
+   *
+   * <p>If the user or persona connected to this session have been
+   * deleted by another session, we'll return an error dialog
+   * explaining that.</p>
+   */
+
+  public synchronized ReturnVal isValidSession()
+  {
+    if (isEndUser() && getUser() == null)
+      {
+        // "Session Invalidated"
+        // "User object for user {0} deleted while user {0} logged in with session {1}"
+        return Ganymede.createErrorDialog(gSession,
+                                          ts.l("isValidSession.error"),
+                                          ts.l("isValidSession.user_deleted", this.username, this.sessionName));
+      }
+
+    DBObject pObj = dbSession.viewDBObject(this.personaInvid);
+
+    if (pObj == null)
+      {
+        // "Session Invalidated"
+        // "Persona object {0} deleted while persona {0} logged in with session {1}"
+        return Ganymede.createErrorDialog(gSession,
+                                          ts.l("isValidSession.error"),
+                                          ts.l("isValidSession.persona_deleted", this.personaName, this.sessionName));
+      }
+
+    return null;
   }
 
   /**
@@ -1545,7 +1585,7 @@ public final class DBPermissionManager {
         return;
       }
 
-    if (!rolesWereChanged() && !personaWasChanged())
+    if (!rolesWereChanged() && !personaWasChanged() && !userWasChanged())
       {
         // there's a bit of a race here, as the calling getPerm()
         // method won't check for the currency of the perms we've got
@@ -1660,15 +1700,14 @@ public final class DBPermissionManager {
     catch (NullPointerException ex)
       {
         // "Serious error!  No default permissions object found in database!"
-        throw new RuntimeException(ts.l("updateDefaultRoleObj.no_default_perms"), ex);
+        throw new IllegalStateException(ts.l("updateDefaultRoleObj.no_default_perms"), ex);
       }
   }
 
   /**
-   * Updates this.personaObj and Returns true if this.personaObj has
-   * changed in the database.
+   * Returns true if this.personaObj may have changed in the database.
    *
-   * @return true if this.personaObj was changed
+   * @return true if this.personaObj may have been changed
    */
 
   private synchronized boolean personaWasChanged()
@@ -1677,6 +1716,21 @@ public final class DBPermissionManager {
             (this.personaObj != null && this.personaInvid == null) ||
             this.personaTimeStamp == null ||
             Ganymede.db.getObjectBase(SchemaConstants.PersonaBase).changedSince(this.personaTimeStamp));
+  }
+
+  /**
+   * Returns true if this session is being run by an end-user and the
+   * user linked to this session may have changed in the database.
+   *
+   * @return true if the user referenced by this.userInvid may have
+   * been changed
+   */
+
+  private synchronized boolean userWasChanged()
+  {
+    return this.isEndUser() &&
+      (this.userTimeStamp == null ||
+       Ganymede.db.getObjectBase(SchemaConstants.UserBase).changedSince(this.userTimeStamp));
   }
 
   /**
@@ -1698,9 +1752,12 @@ public final class DBPermissionManager {
 
     if (currentPersonaObj == null)
       {
-        throw new NullPointerException("Couldn't find personaObj for " +
-                                       this.personaInvid +
-                                       " in personaWasChanged()");
+        this.personaTimeStamp = null;
+
+        // "Persona object {0} deleted while persona {0} logged in with session {1}"
+        gSession.forceOff(ts.l("updatePersonaObj.not_logged_in", this.personaName, this.sessionName));
+
+        return;
       }
 
     this.personaObj = currentPersonaObj.getOriginal();
@@ -1741,6 +1798,18 @@ public final class DBPermissionManager {
 
   private synchronized void configureEndUser()
   {
+    this.userTimeStamp = new Date();
+
+    if (getUser() == null)
+      {
+        this.userTimeStamp = null;
+
+        // "User object for user {0} deleted while user {0} logged in with session {1}"
+        gSession.forceOff(ts.l("configureEndUser.not_logged_in", this.username, this.sessionName));
+
+        return;
+      }
+
     PermissionMatrixDBField permField = this.defaultRoleObj.getPermField(SchemaConstants.RoleMatrix);
 
     if (permField == null)
@@ -1805,6 +1874,11 @@ public final class DBPermissionManager {
         return true;
       }
 
+    if (!isPrivileged())
+      {
+        return false;
+      }
+
     return personaMatch(obj);
   }
 
@@ -1837,14 +1911,9 @@ public final class DBPermissionManager {
 
     // end users are considered to own themselves
 
-    if (!isPrivileged() && this.userInvid != null && this.userInvid.equals(obj.getInvid()))
+    if (!isPrivileged())
       {
-        return true;
-      }
-
-    if (this.personaInvid == null)
-      {
-        return false;
+        return this.userInvid != null && this.userInvid.equals(obj.getInvid());
       }
 
     List<Invid> owners = (List<Invid>) obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
