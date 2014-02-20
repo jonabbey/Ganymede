@@ -645,8 +645,7 @@ public final class DBPermissionManager {
   }
 
   /**
-   * This method returns the name of the user who is active (including
-   * supergash or monitor for the non-user-linked personas), or the
+   * This method returns the name of the user who is active, or the
    * name of the internal Ganymede task or process that is running the
    * session if no user is attached to this session.
    */
