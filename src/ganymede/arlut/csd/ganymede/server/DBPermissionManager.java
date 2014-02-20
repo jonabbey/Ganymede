@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
@@ -824,19 +825,19 @@ public final class DBPermissionManager {
    * supergash persona.
    */
 
-  public synchronized java.util.Vector<String> getAvailablePersonae()
+  public synchronized Vector<String> getAvailablePersonae()
   {
-    DBObject user = getUser();
+    DBObject u = getUser();
 
-    if (user == null)
+    if (u == null)
       {
         return null;
       }
 
-    java.util.Vector<String> results = new java.util.Vector<String>();
-    java.util.Vector<Invid> personae = (java.util.Vector<Invid>) user.getFieldValuesLocal(SchemaConstants.UserAdminPersonae);
+    Vector<String> results = new Vector<String>();
+    Vector personae = u.getFieldValuesLocal(SchemaConstants.UserAdminPersonae);
 
-    for (Invid invid: personae)
+    for (Invid invid: (List<Invid>) personae)
       {
         try
           {
@@ -847,7 +848,7 @@ public final class DBPermissionManager {
           }
       }
 
-    results.add(user.getLabel()); // add their 'end-user' persona
+    results.add(u.getLabel()); // add their 'end-user' persona
 
     return results;
   }
