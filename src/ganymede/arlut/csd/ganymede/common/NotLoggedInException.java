@@ -1,17 +1,19 @@
 /*
 
    NotLoggedInException.java
- 
+
    Created: 11 March 2003
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2014
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -62,6 +64,11 @@ public class NotLoggedInException extends java.rmi.RemoteException {
   public NotLoggedInException()
   {
     super();
+  }
+
+  public NotLoggedInException(Throwable t)
+  {
+    super(null, t);
   }
 
   public NotLoggedInException(String s)
