@@ -1140,15 +1140,15 @@ public final class DBEditSet {
    * This method may block indefinitely, waiting on other transactions
    * which are in the process of modifying the DBStore hashes.</p>
    *
-   * <p>Returns a Vector of DBObjectBases that we have locked if we
+   * <p>Returns a List of DBObjectBases that we have locked if we
    * succeed.</p>
    *
    * <p>Throws a CommitNonFatalException if we can't get the lock.</p>
    */
 
-  private final Vector<DBObjectBase> commit_lockBases() throws CommitNonFatalException
+  private final List<DBObjectBase> commit_lockBases() throws CommitNonFatalException
   {
-    Vector<DBObjectBase> baseSet = new Vector<DBObjectBase>();
+    List<DBObjectBase> baseSet = new ArrayList<DBObjectBase>();
 
     /* -- */
 
