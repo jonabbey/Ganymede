@@ -50,6 +50,8 @@
 
 package arlut.csd.ganymede.server;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /*------------------------------------------------------------------------------
@@ -122,7 +124,7 @@ public final class DBWriteLock extends DBLock {
   {
     super(store.lockSync);
 
-    this.baseSet = store.getBases();
+    this.baseSet = Collections.unmodifiableList(new ArrayList(store.getBases()));
   }
 
   /**
@@ -134,7 +136,7 @@ public final class DBWriteLock extends DBLock {
   {
     super(store.lockSync);
 
-    this.baseSet = baseSet;
+    this.baseSet = Collections.unmodifiableList(new ArrayList(baseSet));
   }
 
   /**

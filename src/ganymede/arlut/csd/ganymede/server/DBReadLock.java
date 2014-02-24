@@ -50,6 +50,8 @@
 
 package arlut.csd.ganymede.server;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -119,7 +121,7 @@ public final class DBReadLock extends DBLock {
    * DBObjectBases that this DBLock is/will be locked on.
    */
 
-  private List<DBObjectBase> baseSet;
+  private final List<DBObjectBase> baseSet;
 
   /**
    * Constructor to get a shared read lock on all of the server's
@@ -130,7 +132,7 @@ public final class DBReadLock extends DBLock {
   {
     super(store.lockSync);
 
-    this.baseSet = store.getBases();
+    this.baseSet = Collections.unmodifiableList(new ArrayList(store.getBases()));
   }
 
   /**
@@ -142,7 +144,7 @@ public final class DBReadLock extends DBLock {
   {
     super(store.lockSync);
 
-    this.baseSet = baseSet;
+    this.baseSet = Collections.unmodifiableList(new ArrayList(baseSet));
   }
 
   /**
