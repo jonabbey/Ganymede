@@ -230,7 +230,8 @@ public abstract class DBLock {
   abstract public boolean isAborting();
 
   /**
-   * Returns list of DBObjectBases that this lock is meant to cover.
+   * Returns immutable list of DBObjectBases that this lock is meant
+   * to cover.
    */
 
   abstract List<DBObjectBase> getBases();

@@ -163,7 +163,8 @@ final class DBDumpLock extends DBLock {
   }
 
   /**
-   * Returns list of DBObjectBases that this lock is meant to cover.
+   * Returns immutable list of DBObjectBases that this lock is meant
+   * to cover.
    */
 
   @Override final List<DBObjectBase> getBases()
