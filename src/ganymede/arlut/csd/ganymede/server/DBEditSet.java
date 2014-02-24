@@ -1174,7 +1174,7 @@ public final class DBEditSet {
       {
         wLock = session.openWriteLock(baseSet); // wait for write lock *synchronized*
       }
-    catch (InterruptedException ex)
+   catch (InterruptedException ex)
       {
         Ganymede.debug(ts.l("commit_lockBases.interrupted", String.valueOf(session.getKey())));
 
@@ -2484,7 +2484,7 @@ public final class DBEditSet {
       {
         if (wLock != null)
           {
-            if (wLock.inEstablish)
+            if (wLock.isEstablishing())
               {
                 return false;
               }

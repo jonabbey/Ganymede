@@ -95,14 +95,41 @@ public final class DBReadLock extends DBLock {
   /* -- */
 
   /**
+   * All DBLock's have an identifier key, which is used to identify
+   * the lock in the {@link arlut.csd.ganymede.server.DBStore
+   * DBStore}'s {@link arlut.csd.ganymede.server.DBLockSync
+   * DBLockSync} object.  The establish() methods in the DBLock
+   * subclasses consult the DBStore.lockSync to make sure that no
+   * {@link arlut.csd.ganymede.server.DBSession DBSession} ever
+   * possesses more than one write lock, to prevent deadlocks from
+   * occuring in the server.
+   */
+
+  private Object key;
+
+  private boolean locked = false;
+  private boolean inEstablish = false;
+  private boolean abort = false;
+
+  /**
+   * In order to prevent deadlocks, each individual lock must be
+   * established on all applicable {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} at the time
+   * the lock is initially established.  baseSet is the List of
+   * DBObjectBases that this DBLock is/will be locked on.
+   */
+
+  private List<DBObjectBase> baseSet;
+
+  /**
    * Constructor to get a shared read lock on all of the server's
    * object bases
    */
 
   public DBReadLock(DBStore store)
   {
-    this.key = null;
-    this.lockSync = store.lockSync;
+    super(store.lockSync);
+
     this.baseSet = store.getBases();
   }
 
@@ -113,9 +140,57 @@ public final class DBReadLock extends DBLock {
 
   public DBReadLock(DBStore store, List<DBObjectBase> baseSet)
   {
-    this.key = null;
-    this.lockSync = store.lockSync;
+    super(store.lockSync);
+
     this.baseSet = baseSet;
+  }
+
+  /**
+   * Returns true if this lock is locked.
+   */
+
+  @Override public final boolean isLocked()
+  {
+    return this.locked;
+  }
+
+  /**
+   * Returns true if this lock is waiting in establish()
+   */
+
+  @Override public final boolean isEstablishing()
+  {
+    return this.inEstablish;
+  }
+
+  /**
+   * Returns true if this lock is aborting
+   */
+
+  @Override public final boolean isAborting()
+  {
+    return this.abort;
+  }
+
+  /**
+   * Returns list of DBObjectBases that this lock is meant to cover.
+   */
+
+  @Override final List<DBObjectBase> getBases()
+  {
+    return this.baseSet;
+  }
+
+  @Override final Object getKey()
+  {
+    if (isLocked())
+      {
+        return key;
+      }
+    else
+      {
+        return null;
+      }
   }
 
   /**

@@ -137,75 +137,19 @@ import java.util.List;
 public abstract class DBLock {
 
   /**
-   * All DBLock's have an identifier key, which is used to identify
-   * the lock in the {@link arlut.csd.ganymede.server.DBStore
-   * DBStore}'s {@link arlut.csd.ganymede.server.DBLockSync
-   * DBLockSync} object.  The establish() methods in the DBLock
-   * subclasses consult the DBStore.lockSync to make sure that no
-   * {@link arlut.csd.ganymede.server.DBSession DBSession} ever
-   * possesses more than one write lock, to prevent deadlocks from
-   * occuring in the server.
-   */
-
-  Object key;
-
-  /**
    * All DBLock's establish() and release() methods synchronize their
    * critical sections on a singleton DBLockSync object held in the
    * Ganymede server's DBStore object in order to guarantee that all
    * lock negotiations are thread-safe.
    */
 
-  DBLockSync lockSync;
-
-  /**
-   * In order to prevent deadlocks, each individual lock must be
-   * established on all applicable {@link
-   * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} at the time
-   * the lock is initially established.  baseSet is the List of
-   * DBObjectBases that this DBLock is/will be locked on.
-   */
-
-  List<DBObjectBase> baseSet;
-
-  /**
-   * <p>Will be true if a DBLock is successfully locked.</p>
-   *
-   * <p>Should not be directly accessed outside of the DBLock class
-   * hierarchy (unfortunately Java has no support for 'accessible to
-   * subclasses only').</p>
-   */
-
-  boolean locked = false;
-
-  /**
-   * Will be true if a DBLock has had its abort() method called.  Once
-   * aborted, a lock may never be re-established; the locking code
-   * must create a new lock.
-   */
-
-  boolean abort = false;
-
-  /**
-   * Will be true while a DBLock is in the process of being
-   * established.
-   */
-
-  boolean inEstablish = false;
+  final DBLockSync lockSync;
 
   /* -- */
 
-  /**
-   * Returns true if the lock has been established and not yet aborted
-   * / released.
-   */
-
-  boolean isLocked()
+  DBLock(DBLockSync sync)
   {
-    synchronized (lockSync)
-      {
-        return locked;
-      }
+    this.lockSync = sync;
   }
 
   /**
@@ -217,12 +161,12 @@ public abstract class DBLock {
   {
     synchronized (lockSync)
       {
-        if (!locked)
+        if (!isLocked())
           {
             return false;
           }
 
-        for (DBObjectBase base: baseSet)
+        for (DBObjectBase base: getBases())
           {
             if (base == candidateBase)
               {
@@ -244,7 +188,12 @@ public abstract class DBLock {
   {
     synchronized (lockSync)
       {
-        return arlut.csd.Util.VectorUtils.difference(bases, baseSet).size() == 0;
+        if (!isLocked())
+          {
+            return false;
+          }
+
+        return arlut.csd.Util.VectorUtils.difference(bases, getBases()).size() == 0;
       }
   }
 
@@ -258,9 +207,33 @@ public abstract class DBLock {
   {
     synchronized (lockSync)
       {
-        return arlut.csd.Util.VectorUtils.overlaps(bases, baseSet);
+        return arlut.csd.Util.VectorUtils.overlaps(bases, getBases());
       }
   }
+
+  /**
+   * Returns true if this lock is locked.
+   */
+
+  abstract public boolean isLocked();
+
+  /**
+   * Returns true if this lock is waiting in establish()
+   */
+
+  abstract public boolean isEstablishing();
+
+  /**
+   * Returns true if this lock is aborting
+   */
+
+  abstract public boolean isAborting();
+
+  /**
+   * Returns list of DBObjectBases that this lock is meant to cover.
+   */
+
+  abstract List<DBObjectBase> getBases();
 
   /**
    * <p>This method waits until the lock can be established.  The
@@ -320,17 +293,7 @@ public abstract class DBLock {
    * the lock has not been established.
    */
 
-  Object getKey()
-  {
-    if (locked)
-      {
-        return key;
-      }
-    else
-      {
-        return null;
-      }
-  }
+  abstract Object getKey();
 
   /**
    * Returns a string describing this lock for use in debug messages
@@ -344,20 +307,29 @@ public abstract class DBLock {
 
     returnString.append(super.toString());
 
-    returnString.append(", key = ");
-    returnString.append(key.toString());
+    Object key = this.getKey();
 
-    if (inEstablish)
+    if (key != null)
+      {
+        returnString.append(", key = ");
+        returnString.append(key.toString());
+      }
+    else
+      {
+        returnString.append(", key = null");
+      }
+
+    if (isEstablishing())
       {
         returnString.append(", establishing");
       }
 
-    if (abort)
+    if (isAborting())
       {
         returnString.append(", aborted");
       }
 
-    if (locked)
+    if (isLocked())
       {
         returnString.append(", locked on: ");
       }
@@ -366,14 +338,16 @@ public abstract class DBLock {
         returnString.append(", currently unlocked on: ");
       }
 
-    for (int i = 0; i < baseSet.size(); i++)
+    List<DBObjectBase> bases = getBases();
+
+    for (int i = 0; i < bases.size(); i++)
       {
         if (i>0)
           {
             returnString.append(", ");
           }
 
-        returnString.append(baseSet.get(i).toString());
+        returnString.append(bases.get(i).toString());
       }
 
     return returnString.toString();
