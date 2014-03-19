@@ -4329,20 +4329,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
         // this field is associated with a namespace.
 
-        Enumeration values;
-        DBNameSpace oldNamespace, tmpNS;
+        DBNameSpace oldNamespace = namespace;
 
-        /* -- */
-
-        oldNamespace = namespace;
-
-        values = base.getStore().nameSpaces.elements();
         namespace = null;
 
-        while (values.hasMoreElements() && (namespace == null))
+        for (DBNameSpace tmpNS: base.getStore().nameSpaces)
           {
-            tmpNS = (DBNameSpace) values.nextElement();
-
             if (tmpNS.getName().equalsIgnoreCase(nameSpaceId))
               {
                 namespace = tmpNS;

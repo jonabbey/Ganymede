@@ -821,7 +821,6 @@ public final class DBStore implements JythonMap {
 
     short namespaceCount;
     DBDumpLock lock = null;
-    DBNameSpace ns;
 
     /* -- */
 

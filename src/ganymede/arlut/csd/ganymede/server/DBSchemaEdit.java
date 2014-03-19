@@ -818,7 +818,7 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     for (index = 0; index < store.nameSpaces.size(); index++)
       {
-        ns = (DBNameSpace) store.nameSpaces.elementAt(index);
+        ns = store.nameSpaces.get(index);
 
         if (ns.getName().equals(name))
           {
@@ -856,7 +856,7 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
           }
       }
 
-    store.nameSpaces.removeElementAt(index);
+    store.nameSpaces.remove(index);
 
     return null;
   }
@@ -1090,8 +1090,8 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
       {
         unexportNameSpaces();
 
-        // restore the namespace vector
-        store.nameSpaces.setSize(0);
+        // restore the namespace list
+        store.nameSpaces.clear();
         store.nameSpaces = oldNameSpaces;
 
         for (DBNameSpace ns: store.nameSpaces)
