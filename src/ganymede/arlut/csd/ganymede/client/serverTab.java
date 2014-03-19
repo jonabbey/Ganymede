@@ -56,6 +56,7 @@ import java.util.Vector;
 import java.awt.event.KeyEvent;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
