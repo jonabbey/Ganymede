@@ -4264,14 +4264,15 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     if (!isString() && !isNumeric() && !isIP())
       {
         // "Can''t set a namespace constraint on this kind of field ({0}): {1}"
-        throw new IllegalStateException(ts.l("setNameSpace.bad_type", this.getTypeDesc(), this.toString()));
+        throw new IllegalStateException(ts.l("setNameSpace.bad_type",
+                                             this.getTypeDesc(),
+                                             this.toString()));
       }
-
-    // if we are not loading, don't allow a built-in universal field
-    // to be messed with
 
     if (isEditingProtectedBuiltInField())
       {
+        // "DBObjectBaseField: Schema Editing Error"
+        // "Can''t edit system field: {0}"
         return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
                                           ts.l("global.system_field", this.toString()));
       }
