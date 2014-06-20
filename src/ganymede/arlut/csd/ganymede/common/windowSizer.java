@@ -266,7 +266,7 @@ public class windowSizer {
 
         if (!("Mac OS X".equals(System.getProperty("os.name"))))
           {
-            for (LookAndFeelInfo info: UIManager.getInstalledLookAndFeels())
+            for (UIManager.LookAndFeelInfo info: UIManager.getInstalledLookAndFeels())
               {
                 if ("Nimbus".equals(info.getName()))
                   {
