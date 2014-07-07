@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -210,9 +210,9 @@ public class QueryResultContainer implements List, Serializable {
 
   public void addRow(ObjectHandle handle, Object[] row)
   {
-    addRow(handle.invid, handle.label, row, handle.inactive,
-           handle.expirationSet, handle.removalSet,
-           handle.editable);
+    addRow(handle.getInvid(), handle.getLabel(), row, handle.isInactive(),
+           handle.isExpirationSet(), handle.isRemovalSet(),
+           handle.isEditable());
   }
 
   /**

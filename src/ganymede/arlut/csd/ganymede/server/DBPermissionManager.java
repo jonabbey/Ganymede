@@ -1307,7 +1307,7 @@ public final class DBPermissionManager {
         return qr;
       }
 
-    QueryResult result = new QueryResult(qr.isForTransport());
+    QueryResult result = new QueryResult();
 
     for (ObjectHandle handle: qr.getHandles())
       {
