@@ -442,7 +442,7 @@ public class QueryResult implements java.io.Externalizable {
 
     for (ObjectHandle handle: this.handles)
       {
-        out.writeObject(handle);
+        handle.writeExternal(out);
       }
   }
 
@@ -456,17 +456,12 @@ public class QueryResult implements java.io.Externalizable {
 
     for (int i = 0; i < size; i++)
       {
-        try
-          {
-            ObjectHandle handle = (ObjectHandle) in.readObject();
-            invidSet.add(handle.getInvid());
-            labelSet.add(handle.getLabel());
-            inserter.insert(handles, handle);
-          }
-        catch (ClassNotFoundException ex)
-          {
-            throw new RuntimeException(ex);
-          }
+        ObjectHandle handle = new ObjectHandle();
+        handle.readExternal(in);
+
+        invidSet.add(handle.getInvid());
+        labelSet.add(handle.getLabel());
+        inserter.insert(handles, handle);
       }
   }
 }

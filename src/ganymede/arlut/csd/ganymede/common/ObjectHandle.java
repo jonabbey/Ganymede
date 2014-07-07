@@ -230,14 +230,9 @@ public class ObjectHandle implements Cloneable, Externalizable {
 
     this.label = in.readUTF();
 
-    try
-      {
-        this.invid = ((Invid) in.readObject()).intern();
-      }
-    catch (ClassNotFoundException ex)
-      {
-        throw new RuntimeException(ex);
-      }
+    Invid anInvid = new Invid();
+    anInvid.readExternal(in);
+    this.invid = anInvid.intern();
   }
 
   /**
