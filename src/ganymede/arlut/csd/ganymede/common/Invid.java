@@ -265,7 +265,7 @@ public final class Invid implements java.io.Serializable {
    * redundant copy.</p>
    */
 
-  public Invid intern()
+  public synchronized Invid intern()
   {
     if (interned || allocator == null)
       {
