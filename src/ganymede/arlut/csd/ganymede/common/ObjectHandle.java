@@ -15,7 +15,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -51,6 +51,11 @@
 
 package arlut.csd.ganymede.common;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 import arlut.csd.JDataComponent.listHandle;
 
 /*------------------------------------------------------------------------------
@@ -68,16 +73,24 @@ import arlut.csd.JDataComponent.listHandle;
  * @author Jonathan Abbey
  */
 
-public class ObjectHandle implements Cloneable {
+public class ObjectHandle implements Cloneable, Externalizable {
 
-  String label;
-  Invid invid;
-  boolean editable = false;
-  boolean inactive, expirationSet, removalSet;
-
-  listHandle lHandle = null;
+  private String label;
+  private Invid invid;
+  private boolean editable = false;
+  private boolean inactive = false;
+  private boolean expirationSet = false;
+  private boolean removalSet = false;
 
   /* -- */
+
+  /**
+   * Default no-arg constructor for Externalization
+   */
+
+  public ObjectHandle()
+  {
+  }
 
   public ObjectHandle(String label, Invid invid,
                       boolean inactive,
@@ -114,11 +127,6 @@ public class ObjectHandle implements Cloneable {
   public final void setLabel(String label)
   {
     this.label = label;
-
-    if (lHandle != null)
-      {
-        lHandle.setLabel(label);
-      }
   }
 
   public final Invid getInvid()
@@ -126,18 +134,9 @@ public class ObjectHandle implements Cloneable {
     return invid;
   }
 
-  /**
-   * Various GUI components use listHandles.
-   */
-
-  public final listHandle getListHandle()
+  public final void setInvid(Invid invid)
   {
-    if (lHandle == null)
-      {
-        lHandle = new listHandle(label, invid);
-      }
-
-    return lHandle;
+    this.invid = invid;
   }
 
   public final boolean isInactive()
@@ -145,14 +144,29 @@ public class ObjectHandle implements Cloneable {
     return inactive;
   }
 
+  public void setInactive(boolean isInactive)
+  {
+    this.inactive = isInactive;
+  }
+
   public final boolean isExpirationSet()
   {
     return expirationSet;
   }
 
+  public void setExpirationSet(boolean expirationSet)
+  {
+    this.expirationSet = expirationSet;
+  }
+
   public final boolean isRemovalSet()
   {
     return removalSet;
+  }
+
+  public void setRemovalSet(boolean removalSet)
+  {
+    this.removalSet = removalSet;
   }
 
   public final boolean isEditable()
@@ -165,26 +179,70 @@ public class ObjectHandle implements Cloneable {
     this.editable = editable;
   }
 
-  public void setExpirationSet(boolean expirationSet)
+  /**
+   * Various GUI components use listHandles.
+   */
+
+  public final listHandle getListHandle()
   {
-    this.expirationSet = expirationSet;
+    return new listHandle(label, invid);
   }
 
-  public void setInactive(boolean isInactive)
+  // externalization methods
+
+  public void writeExternal(ObjectOutput out) throws IOException
   {
-    this.inactive = isInactive;
+    byte status = 0;
+
+    if (this.inactive)
+      {
+        status += 1;
+      }
+
+    if (this.expirationSet)
+      {
+        status += 2;
+      }
+
+    if (this.removalSet)
+      {
+        status += 4;
+      }
+
+    if (this.editable)
+      {
+        status += 8;
+      }
+
+    out.writeByte(status);
+    out.writeUTF(this.label);
+    out.writeObject(this.invid);
   }
 
-  public void setRemovalSet(boolean removalSet)
+  public void readExternal(ObjectInput in) throws IOException
   {
-    this.removalSet = removalSet;
+    byte status = in.readByte();
+
+    this.inactive = (status & 1) != 0;
+    this.expirationSet = (status & 2) != 0;
+    this.removalSet = (status & 4) != 0;
+    this.editable = (status & 8) != 0;
+
+    this.label = in.readUTF();
+
+    try
+      {
+        this.invid = ((Invid) in.readObject()).intern();
+      }
+    catch (ClassNotFoundException ex)
+      {
+        throw new RuntimeException(ex);
+      }
   }
 
   /**
-   *
    * toString() is not finalized, in case we get
    * wacky with subclassing.
-   *
    */
 
   public String toString()
