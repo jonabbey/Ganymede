@@ -114,8 +114,6 @@ public class QueryResult implements java.io.Externalizable {
   private Set<String> labelSet = null;
   private boolean nonEditable = false;
 
-  private VecSortInsert inserter;
-
   /* -- */
 
   public QueryResult()
@@ -452,7 +450,7 @@ public class QueryResult implements java.io.Externalizable {
   {
     this.handles = new Vector<ObjectHandle>();
 
-    inserter = new VecSortInsert(comparator);
+    VecSortInsert inserter = new VecSortInsert(comparator);
 
     int size = in.readInt();
 
