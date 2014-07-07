@@ -72,8 +72,8 @@ public class Result implements java.io.Serializable {
 
   // ---
 
-  Invid invid;  // remote reference to an object on the server
-  String label = null;
+  private Invid invid;
+  private String label;
 
   /* -- */
 
@@ -92,66 +92,6 @@ public class Result implements java.io.Serializable {
   {
     return invid;
   }
-
-  public String resultDump()
-  {
-    StringBuilder buffer = new StringBuilder();
-    char[] chars;
-
-    /* -- */
-
-    chars = invid.toString().toCharArray();
-
-    for (int j = 0; j < chars.length; j++)
-      {
-        if (chars[j] == '|')
-          {
-            buffer.append("\\|");
-          }
-        else if (chars[j] == '\n')
-          {
-            buffer.append("\\\n");
-          }
-        else if (chars[j] == '\\')
-          {
-            buffer.append("\\\\");
-          }
-        else
-          {
-            buffer.append(chars[j]);
-          }
-      }
-
-    buffer.append("|");
-
-    chars = label.toCharArray();
-
-    for (int j = 0; j < chars.length; j++)
-      {
-        if (chars[j] == '|')
-          {
-            buffer.append("\\|");
-          }
-        else if (chars[j] == '\n')
-          {
-            buffer.append("\\\n");
-          }
-        else if (chars[j] == '\\')
-          {
-            buffer.append("\\\\");
-          }
-        else
-          {
-            buffer.append(chars[j]);
-          }
-      }
-
-    buffer.append("\n");
-
-    return buffer.toString();
-  }
-
-  // and hashCode
 
   public int hashCode()
   {
