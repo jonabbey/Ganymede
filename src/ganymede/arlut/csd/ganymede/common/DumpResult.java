@@ -3,8 +3,8 @@
    DumpResult.java
 
    This class is a serializable dump result object, which conveys
-   results from a dump operation along with methods that can be
-   used to extract the results  out of the dump.
+   results from a dump operation along with methods that can be used
+   to extract the results out of the dump.
 
    Created: 25 September 1997
 
@@ -14,7 +14,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
