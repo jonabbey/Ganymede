@@ -271,23 +271,19 @@ public final class Invid implements java.io.Serializable {
       {
         return this;
       }
-    else
-      {
-        Invid result = allocator.findInvid(this);
 
-        if (result == null)
-          {
-            counter++;
-            allocator.storeInvid(this);
-            this.interned = true;
-            return this;
-          }
-        else
-          {
-            reuseCounter++;
-            return result;
-          }
+    Invid result = allocator.findInvid(this);
+
+    if (result != null)
+      {
+        reuseCounter++;
+        return result;
       }
+
+    counter++;
+    allocator.storeInvid(this);
+    this.interned = true;
+    return this;
   }
 
   // pull the values
