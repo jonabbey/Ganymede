@@ -124,19 +124,7 @@ public final class Invid implements java.io.Serializable {
       }
     else
       {
-        Invid newInvid = new Invid(type, num);
-        Invid internedInvid = newInvid.intern();
-
-        if (newInvid == internedInvid)
-          {
-            counter++;          // we're the initial creation of this invid
-          }
-        else
-          {
-            reuseCounter++;
-          }
-
-        return internedInvid;
+        return new Invid(type, num).intern();
       }
   }
 
