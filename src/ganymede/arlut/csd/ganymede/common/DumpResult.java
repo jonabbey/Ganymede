@@ -115,7 +115,8 @@ public class DumpResult implements java.io.Serializable, List {
 
   // ---
 
-  // for transport
+  // Created for us pre-serialization by
+  // arlut.csd.ganymede.server.DumpResultBuilder
 
   public StringBuffer buffer = null;
 
