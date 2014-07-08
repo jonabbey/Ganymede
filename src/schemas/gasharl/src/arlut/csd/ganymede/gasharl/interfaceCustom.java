@@ -423,12 +423,6 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
           }
       }
 
-    if (debug)
-      {
-        System.err.println("interfaceCustom: net choice for invid " + getInvid() + ":\n" +
-                           result.getBuffer());
-      }
-
     return result;
   }
 
