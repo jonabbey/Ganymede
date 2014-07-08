@@ -84,7 +84,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
   static
   {
-    eventNames = new QueryResult(true);
+    eventNames = new QueryResult();
 
     eventNames.addRow(null, "objectcreated", false);
     eventNames.addRow(null, "objectchanged", false);
@@ -210,7 +210,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
       {
         if (objectTypeList == null)
           {
-            objectTypeList = new QueryResult(true);
+            objectTypeList = new QueryResult();
 
             for (String elem: Ganymede.db.getBaseNameList())
               {

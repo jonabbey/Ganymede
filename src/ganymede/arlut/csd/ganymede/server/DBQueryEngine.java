@@ -142,7 +142,7 @@ public final class DBQueryEngine {
 
   public QueryResult queryInvids(Vector<Invid> invidVector)
   {
-    QueryResult result = new QueryResult(true); // for transport
+    QueryResult result = new QueryResult();
     DBObject obj;
     PermEntry perm;
 
@@ -624,7 +624,7 @@ public final class DBQueryEngine {
                                    boolean forTransport, DBLock extantLock,
                                    DBEditObject perspectiveObject)
   {
-    QueryResult result = new QueryResult(forTransport);
+    QueryResult result = new QueryResult();
     DBObjectBase base = null;
     Iterator<DBObject> it;
     DBObject obj;

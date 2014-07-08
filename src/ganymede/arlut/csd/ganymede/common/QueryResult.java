@@ -72,8 +72,14 @@ import arlut.csd.Util.VecSortInsert;
 
 /**
  * <p>This class is a serializable object-list result object, which
- * conveys results from a query/list operation along with methods that
- * can be used to extract the results out of the query/list.</p>
+ * conveys sorted results from a query/list operation along with
+ * methods that can be used to extract the results out of the
+ * query/list.</p>
+ *
+ * <p>The individual elements of a Query Result are labeled {@link
+ * arlut.csd.ganymede.common.Invid} references along with a set of
+ * status bits.  See {@link
+ * arlut.csd.ganymede.common.ObjectHandle}.</p>
  */
 
 public class QueryResult implements java.io.Externalizable {
@@ -129,7 +135,7 @@ public class QueryResult implements java.io.Externalizable {
    * QueryResults for transport and not.
    */
 
-  public QueryResult(boolean param)
+  @Deprecated public QueryResult(boolean param)
   {
     this();
   }

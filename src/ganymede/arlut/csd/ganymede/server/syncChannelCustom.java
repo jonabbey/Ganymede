@@ -161,7 +161,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getID() == SchemaConstants.SyncChannelTypeString)
       {
-        QueryResult syncTypes = new QueryResult(true);
+        QueryResult syncTypes = new QueryResult();
 
         syncTypes.addRow(ts.l("global.manual"));
         syncTypes.addRow(ts.l("global.incremental"));

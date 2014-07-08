@@ -126,7 +126,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
   {
     if (field.getID() == IRISListSchema.MEMBERS)
       {
-        return new QueryResult(true); // empty list
+        return new QueryResult();
       }
 
     return super.obtainChoiceList(field);

@@ -172,7 +172,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
      "next-server"
      );
 
-  private static QueryResult result = new QueryResult(true);
+  private static QueryResult result = new QueryResult();
 
   static
   {
