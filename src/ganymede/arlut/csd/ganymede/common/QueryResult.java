@@ -454,11 +454,10 @@ public class QueryResult implements java.io.Externalizable {
 
   public void readExternal(ObjectInput in) throws IOException
   {
-    this.handles = new Vector<ObjectHandle>();
-
     VecSortInsert inserter = new VecSortInsert(comparator);
 
     int size = in.readInt();
+    this.handles = new Vector<ObjectHandle>(size);
 
     for (int i = 0; i < size; i++)
       {

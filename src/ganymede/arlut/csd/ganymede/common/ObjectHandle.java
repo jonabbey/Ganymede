@@ -216,7 +216,7 @@ public class ObjectHandle implements Cloneable, Externalizable {
 
     out.writeByte(status);
     out.writeUTF(this.label);
-    out.writeObject(this.invid);
+    this.invid.writeExternal(out);
   }
 
   public void readExternal(ObjectInput in) throws IOException
