@@ -387,7 +387,7 @@ public class QueryResult implements java.io.Externalizable {
    * (for transport) QueryResult to ourself.</p>
    */
 
-  public void append(QueryResult result)
+  public synchronized void append(QueryResult result)
   {
     if (this.nonEditable)
       {
@@ -442,7 +442,7 @@ public class QueryResult implements java.io.Externalizable {
     return result;
   }
 
-  public void writeExternal(ObjectOutput out) throws IOException
+  public synchronized void writeExternal(ObjectOutput out) throws IOException
   {
     out.writeInt(this.handles.size());
 
@@ -452,7 +452,7 @@ public class QueryResult implements java.io.Externalizable {
       }
   }
 
-  public void readExternal(ObjectInput in) throws IOException
+  public synchronized void readExternal(ObjectInput in) throws IOException
   {
     VecSortInsert inserter = new VecSortInsert(comparator);
 
@@ -466,7 +466,12 @@ public class QueryResult implements java.io.Externalizable {
 
         invidSet.add(handle.getInvid());
         labelSet.add(handle.getLabel());
-        inserter.insert(handles, handle);
+        inserter.insert(this.handles, handle);
+      }
+
+    if (this.handles.size() != size)
+      {
+        throw new RuntimeException("QueryResult: bad handles size post readExternal");
       }
   }
 }
