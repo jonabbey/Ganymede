@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -450,7 +450,7 @@ public class scheduleHandle implements java.io.Serializable {
 
     this.scheduler = scheduler;
     this.lastTime = null;
-    this.startTime = time;
+    this.startTime = time != null ? new Date(time.getTime()) : null;
     this.task = task;
     this.name = name;
     this.tasktype = tasktype;

@@ -157,7 +157,7 @@ public final class DBLogEvent {
 
   public void setLogTime(Date time)
   {
-    this.time = time;
+    this.time = new Date(time.getTime());
   }
 
   public void setLogTime(long millis)
