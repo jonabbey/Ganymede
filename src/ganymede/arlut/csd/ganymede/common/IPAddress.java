@@ -2,7 +2,7 @@
 
    IPAddress.java
 
-   This is a wrapper class for the Byte array IP value representation
+   This is a wrapper class for the byte array IP value representation
    that allows IP addresses to be stored and processed in the Ganymede
    system.
 
@@ -14,7 +14,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996 - 2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
