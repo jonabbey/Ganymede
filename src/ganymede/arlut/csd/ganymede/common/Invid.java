@@ -48,8 +48,11 @@
 
 package arlut.csd.ganymede.common;
 
-import java.io.DataInput;
+import java.io.Externalizable;
 import java.io.DataOutput;
+import java.io.DataInput;
+import java.io.ObjectOutput;
+import java.io.ObjectInput;
 import java.io.IOException;
 
 /*------------------------------------------------------------------------------
@@ -75,9 +78,7 @@ import java.io.IOException;
  * @see arlut.csd.ganymede.rmi.Session
  */
 
-public final class Invid implements java.io.Serializable {
-
-  static final long serialVersionUID = 566674975372557093L;
+public final class Invid implements java.io.Externalizable {
 
   static private InvidAllocator allocator = null;
   static private int counter = 0;
@@ -124,19 +125,7 @@ public final class Invid implements java.io.Serializable {
       }
     else
       {
-        Invid newInvid = new Invid(type, num);
-        Invid internedInvid = newInvid.intern();
-
-        if (newInvid == internedInvid)
-          {
-            counter++;          // we're the initial creation of this invid
-          }
-        else
-          {
-            reuseCounter++;
-          }
-
-        return internedInvid;
+        return new Invid(type, num).intern();
       }
   }
 
@@ -186,11 +175,19 @@ public final class Invid implements java.io.Serializable {
 
   // ---
 
-  private final short type;
-  private final int num;
+  private short type;
+  private int num;
   private transient boolean interned = false;
 
   // constructor
+
+  /**
+   * Default no-arg public constructor for externalization
+   */
+
+  public Invid()
+  {
+  }
 
   /**
    * Private constructor.  Use the static createInvid factory methods
@@ -277,29 +274,25 @@ public final class Invid implements java.io.Serializable {
    * redundant copy.</p>
    */
 
-  public Invid intern()
+  public synchronized Invid intern()
   {
     if (interned || allocator == null)
       {
         return this;
       }
-    else
-      {
-        Invid result = allocator.findInvid(this);
 
-        if (result == null)
-          {
-            counter++;
-            allocator.storeInvid(this);
-            this.interned = true;
-            return this;
-          }
-        else
-          {
-            reuseCounter++;
-            return result;
-          }
+    Invid result = allocator.findInvid(this);
+
+    if (result != null)
+      {
+        reuseCounter++;
+        return result;
       }
+
+    counter++;
+    allocator.storeInvid(this);
+    this.interned = true;
+    return this;
   }
 
   // pull the values
@@ -317,6 +310,25 @@ public final class Invid implements java.io.Serializable {
   public boolean isInterned()
   {
     return this.interned;
+  }
+
+  // externalization methods
+
+  public void writeExternal(ObjectOutput out) throws IOException
+  {
+    out.writeShort(this.type);
+    out.writeInt(this.num);
+  }
+
+  public void readExternal(ObjectInput in) throws IOException
+  {
+    if (this.interned)
+      {
+        throw new RuntimeException("Can't change interned invid.");
+      }
+
+    this.type = in.readShort();
+    this.num = in.readInt();
   }
 
   /**

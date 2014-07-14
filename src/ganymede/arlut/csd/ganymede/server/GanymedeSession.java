@@ -665,7 +665,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
 
     asyncPort = new serverClientAsyncResponder();
-    return (ClientAsyncResponder) asyncPort;
+    return asyncPort;
   }
 
   /**
@@ -1164,6 +1164,21 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
+    /* - */
+
+    ReturnVal retVal;
+
+    /* -- */
+
+    retVal = permManager.isValidSession();
+
+    if (!ReturnVal.didSucceed(retVal))
+      {
+        forceOff(retVal.getDialogText());
+
+        return retVal;
+      }
+
     if (dbSession.editSet == null)
       {
         // "Server: Error in commitTransaction()"
@@ -1172,12 +1187,6 @@ final public class GanymedeSession implements Session, Unreferenced {
                                           ts.l("commitTransaction.error"),
                                           ts.l("commitTransaction.error_text"));
       }
-
-    /* - */
-
-    ReturnVal retVal;
-
-    /* -- */
 
     if (debug)
       {
@@ -1354,7 +1363,7 @@ final public class GanymedeSession implements Session, Unreferenced {
         body.append(WordWrap.wrap(signature.toString(), 78, null));
         body.append("\n--------------------------------------------------------------------------------\n");
 
-        mailer.sendmsg(permManager.getIdentityReturnAddress(),
+        mailer.sendmsg(permManager.getReturnAddress(),
                        addresses,
                        "Ganymede: " + subject,
                        body.toString());
@@ -1438,7 +1447,7 @@ final public class GanymedeSession implements Session, Unreferenced {
         asciiContent.append(WordWrap.wrap(signature.toString(), 78, null));
         asciiContent.append("\n--------------------------------------------------------------------------------\n");
 
-        mailer.sendHTMLmsg(permManager.getIdentityReturnAddress(),
+        mailer.sendHTMLmsg(permManager.getReturnAddress(),
                            addresses,
                            "Ganymede: " + subject,
                            (HTMLbody != null) ? HTMLbody.toString(): null,
@@ -2037,15 +2046,14 @@ final public class GanymedeSession implements Session, Unreferenced {
         // directly manipulate the DBEditObject in the transaction
         // to get around permission enforcement.
 
-        db_object objref = new DBObject(obj, this);
-
+        DBObject objref = new DBObject(obj, this);
         ReturnVal result = new ReturnVal(true); // success
 
-        result.setInvid(((DBObject) objref).getInvid());
+        result.setInvid(objref.getInvid());
 
         if (this.exportObjects)
           {
-            exportObject((DBObject) objref);
+            exportObject(objref);
           }
 
         result.setObject(objref);
@@ -2119,7 +2127,7 @@ final public class GanymedeSession implements Session, Unreferenced {
             setLastEvent("edit:" + obj.getTypeName() + ":" + obj.getLabel());
           }
 
-        db_object objref = null;
+        DBObject objref = null;
 
         try
           {
@@ -2137,11 +2145,11 @@ final public class GanymedeSession implements Session, Unreferenced {
         if (objref != null)
           {
             ReturnVal result = new ReturnVal(true);
-            result.setInvid(((DBObject) objref).getInvid());
+            result.setInvid(objref.getInvid());
 
             if (this.exportObjects)
               {
-                exportObject((DBObject) objref);
+                exportObject(objref);
               }
 
             result.setObject(objref);

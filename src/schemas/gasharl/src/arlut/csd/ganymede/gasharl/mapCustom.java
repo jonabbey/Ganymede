@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -444,7 +444,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
                                                       ", permissions denied to edit the user.");
                   }
 
-                InvidDBField invf = (InvidDBField) eObj.getField(userSchema.VOLUMES);
+                InvidDBField invf = eObj.getInvidField(userSchema.VOLUMES);
 
                 if (invf == null)
                   {
@@ -520,7 +520,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 
         /* -- */
 
-        iField = (InvidDBField) object.getField((short) 0); // containing object, the user
+        iField = object.getInvidField((short) 0); // containing object, the user
         tmpInvid = iField.value();
 
         if (editset != null)
@@ -536,7 +536,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
             userName = tmpInvid.toString();
           }
 
-        iField = (InvidDBField) object.getField(mapEntrySchema.VOLUME); // volume invid
+        iField = object.getInvidField(mapEntrySchema.VOLUME); // volume invid
 
         if (iField == null)
           {

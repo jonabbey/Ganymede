@@ -297,7 +297,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
         short id = fieldDef.getID();
-        DBField originalField = original.retrieveField(id);
+        DBField originalField = original.getField(id);
         DBField copyField;
 
         if (originalField != null)
@@ -498,7 +498,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   @Override public final ReturnVal setFieldValue(short fieldID, Object value) throws GanyPermissionsException
   {
-    DBField field = retrieveField(fieldID);
+    DBField field = getField(fieldID);
 
     /* -- */
 
@@ -526,7 +526,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public final ReturnVal setFieldValueLocal(short fieldID, Object value)
   {
-    DBField field = retrieveField(fieldID);
+    DBField field = getField(fieldID);
 
     /* -- */
 
@@ -1582,7 +1582,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
       {
         if (canCloneField(session, origObj, origField))
           {
-            newField = retrieveField(origField.getID());
+            newField = getField(origField.getID());
 
             // if we already initialized this field when we were
             // constructed, don't copy over a value onto this field.
@@ -2187,7 +2187,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public QueryResult obtainChoiceList(String fieldName) throws NotLoggedInException
   {
-    return obtainChoiceList((DBField) getField(fieldName));
+    return obtainChoiceList(getField(fieldName));
   }
 
   /**
@@ -2207,7 +2207,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public QueryResult obtainChoiceList(short fieldID) throws NotLoggedInException
   {
-    return obtainChoiceList((DBField) getField(fieldID));
+    return obtainChoiceList(getField(fieldID));
   }
 
   /**
@@ -2912,7 +2912,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
         // ok, we've cleared all fields but field 0.. clear that to finish up.
 
-        DBField field = retrieveField((short) 0);
+        DBField field = getField((short) 0);
 
         if (field != null)
           {
@@ -3186,26 +3186,15 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
         try
           {
-            oldRefField = (InvidDBField) oldRef.getField(targetField);
+            oldRefField = oldRef.getInvidField(targetField);
           }
         catch (ClassCastException ex)
           {
-            try
-              {
-                // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
-                // "Your operation could not succeed due to an error in the server''s custom schema code.  Target field {0} in object {1} is not an Invid field."
-                return Ganymede.createErrorDialog(this.getGSession(),
-                                                  ts.l("clearBackLink.badUnlink"),
-                                                  ts.l("clearBackLink.badTarget", oldRef.getField(targetField).getName(), oldRef.getLabel()));
-              }
-            catch (RemoteException rx)
-              {
-                // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
-                // "Your operation could not succeed due to an error in the server''s custom schema code.  Target field {0} in object {1} is not an Invid field."
-                return Ganymede.createErrorDialog(this.getGSession(),
-                                                  ts.l("clearBackLink.badUnlink"),
-                                                  ts.l("clearBackLink.badTarget", Short.valueOf(targetField), oldRef.getLabel()));
-              }
+            // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
+            // "Your operation could not succeed due to an error in the server''s custom schema code.  Target field {0} in object {1} is not an Invid field."
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("clearBackLink.badUnlink"),
+                                              ts.l("clearBackLink.badTarget", oldRef.getField(targetField).getName(), oldRef.getLabel()));
           }
 
         if (oldRefField == null)
@@ -3587,7 +3576,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   {
     for (Map.Entry<Short, Object> entry: ckpoint.entrySet())
       {
-        DBField field = retrieveField(entry.getKey().shortValue());
+        DBField field = getField(entry.getKey().shortValue());
         Object value = entry.getValue();
 
         // again, we use a reference to ourselves as a
@@ -3648,8 +3637,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInDisplayOrder())
       {
-        DBField myField = (DBField) this.getField(fieldDef.getID());
-        DBField origField = (DBField) original.getField(fieldDef.getID());
+        DBField myField = this.getField(fieldDef.getID());
+        DBField origField = original.getField(fieldDef.getID());
 
         if (origField == null)
           {
@@ -3692,8 +3681,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInDisplayOrder())
       {
-        DBField myField = (DBField) this.getField(fieldDef.getID());
-        DBField origField = (DBField) original.getField(fieldDef.getID());
+        DBField myField = this.getField(fieldDef.getID());
+        DBField origField = original.getField(fieldDef.getID());
 
         if (myField == null || !myField.isDefined())
           {
@@ -3837,10 +3826,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
           }
         else
           {
-            origField = (DBField) original.getField(fieldDef.getID());
+            origField = original.getField(fieldDef.getID());
           }
 
-        currentField = (DBField) this.getField(fieldDef.getID());
+        currentField = this.getField(fieldDef.getID());
 
         if ((origField == null || !origField.isDefined()) &&
             (currentField == null || !currentField.isDefined()))

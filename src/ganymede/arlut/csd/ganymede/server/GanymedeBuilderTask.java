@@ -666,7 +666,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     for (Short idObj: fieldIds)
       {
-        DBObjectBaseField fieldDef = base.getFieldDef(idObj);
+        DBObjectBaseField fieldDef = base.getField(idObj);
 
         if (fieldDef != null && fieldDef.changedSince(oldLastRunTime))
           {
@@ -775,7 +775,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * @return An Enumeration of {@link arlut.csd.ganymede.server.DBObject DBObject} references
    */
 
-  protected final Enumeration enumerateObjects(int baseid)
+  protected final Enumeration<DBObject> enumerateObjects(int baseid)
   {
     if (baseid < 0 || baseid > Short.MAX_VALUE)
       {

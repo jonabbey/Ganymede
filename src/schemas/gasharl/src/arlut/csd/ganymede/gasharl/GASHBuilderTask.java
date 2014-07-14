@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -64,6 +64,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
@@ -624,7 +625,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     username = (String) object.getFieldValueLocal(SchemaConstants.UserUserName);
 
-    passField = (PasswordDBField) object.getField(SchemaConstants.UserPassword);
+    passField = object.getPassField(SchemaConstants.UserPassword);
 
     if (passField != null)
       {
@@ -792,7 +793,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     username = (String) object.getFieldValueLocal(SchemaConstants.UserUserName);
 
-    passField = (PasswordDBField) object.getField(SchemaConstants.UserPassword);
+    passField = object.getPassField(SchemaConstants.UserPassword);
 
     if (passField != null)
       {
@@ -882,23 +883,22 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
-   * we write out a file that maps badge numbers to a
-   * user's primary email address and user name for the
-   * personnel office's phonebook database to use
+   * <p>we write out a file that maps badge numbers to a user's
+   * primary email address and user name for the personnel office's
+   * phonebook database to use</p>
    *
-   * This method writes lines to the maildirect2 GASH output file.
+   * <p>This method writes lines to the maildirect2 GASH output file.</p>
    *
-   * The lines in this file look like the following.
+   * <p>The lines in this file look like the following.</p>
    *
-   * 4297 jonabbey@arlut.utexas.edu broccol
-   *
+   * <p>8124 jonabbey@arlut.utexas.edu broccol</p>
    */
 
   private void writeMailDirect2()
   {
     PrintWriter out;
-    Hashtable map = new Hashtable(); // map badge numbers to DBObject
-    Hashtable results = new Hashtable(); // map badge numbers to strings
+    Map<String, DBObject> map = new HashMap<String, DBObject>(); // map badge numbers to DBObject
+    Map<String, String> results = new HashMap<String, String>(); // map badge numbers to strings
 
     /* -- */
 
@@ -931,9 +931,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                     // happen if one of the users is an GASH admin, or
                     // if one is inactivated.
 
-                    DBObject oldUser = (DBObject) map.get(badgeNum);
-
-                    DBField field = (DBField) oldUser.getField(userSchema.PERSONAE);
+                    DBObject oldUser = map.get(badgeNum);
+                    DBField field = oldUser.getField(userSchema.PERSONAE);
 
                     if (field != null && field.isDefined())
                       {
@@ -956,11 +955,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               }
           }
 
-        Enumeration lines = results.elements();
-
-        while (lines.hasMoreElements())
+        for (String line: results.values())
           {
-            out.println((String) lines.nextElement());
+            out.println(line);
           }
       }
     finally
@@ -1034,7 +1031,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
                     DBObject oldUser = map.get(badgeNum);
 
-                    DBField field = (DBField) oldUser.getField(userSchema.PERSONAE);
+                    DBField field = oldUser.getField(userSchema.PERSONAE);
 
                     if (field != null && field.isDefined())
                       {
@@ -1923,8 +1920,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     String name = (String) object.getFieldValueLocal(MailmanListSchema.NAME);
     String ownerEmail = (String) object.getFieldValueLocal(MailmanListSchema.OWNEREMAIL);
-    PasswordDBField passField = (PasswordDBField) object.getField(MailmanListSchema.PASSWORD);
-    String password = (String) passField.getPlainText();
+    PasswordDBField passField = object.getPassField(MailmanListSchema.PASSWORD);
+    String password = passField.getPlainText();
 
     Invid serverInvid = (Invid) object.getFieldValueLocal(MailmanListSchema.SERVER);
     DBObject server = getObject(serverInvid);
@@ -3707,7 +3704,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
             String username = (String) user.getFieldValueLocal(userSchema.USERNAME);
 
-            PasswordDBField passField = (PasswordDBField) user.getField(userSchema.PASSWORD);
+            PasswordDBField passField = user.getPassField(userSchema.PASSWORD);
 
             if (passField == null)
               {
@@ -3795,7 +3792,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 continue;
               }
 
-            PasswordDBField passField = (PasswordDBField) user.getField(userSchema.PASSWORD);
+            PasswordDBField passField = user.getPassField(userSchema.PASSWORD);
 
             if (passField == null)
               {
@@ -3975,7 +3972,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
             if (!user.isInactivated())
               {
-                PasswordDBField passField = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+                PasswordDBField passField = user.getPassField(SchemaConstants.UserPassword);
 
                 if (passField != null)
                   {
@@ -4057,7 +4054,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 continue;
               }
 
-            PasswordDBField passField = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+            PasswordDBField passField = user.getPassField(SchemaConstants.UserPassword);
 
             if (passField == null)
               {
@@ -4105,7 +4102,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 continue;
               }
 
-            InvidDBField usersField = (InvidDBField) group.getField(groupSchema.USERS);
+            InvidDBField usersField = group.getInvidField(groupSchema.USERS);
 
             if (usersField == null)
               {
@@ -4218,13 +4215,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                     continue;
                   }
 
-                StringDBField usernameField = (StringDBField) user.getField(userSchema.USERNAME);
+                StringDBField usernameField = user.getStringField(userSchema.USERNAME);
                 String username = (String) usernameField.getValueLocal();
 
-                StringDBField mailUsernameField = (StringDBField) user.getField(userSchema.MAILUSER);
+                StringDBField mailUsernameField = user.getStringField(userSchema.MAILUSER);
                 String mailUsername = (String) mailUsernameField.getValueLocal();
 
-                PasswordDBField mailpassField = (PasswordDBField) user.getField(userSchema.MAILPASSWORD2);
+                PasswordDBField mailpassField = user.getPassField(userSchema.MAILPASSWORD2);
                 String mailpass = mailpassField.getPlainText();
 
                 mailCredentials.print(mailUsername);
@@ -4239,10 +4236,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
                 if (user.isDefined(userSchema.OLDMAILUSER) && user.isDefined(userSchema.OLDMAILPASSWORD2))
                   {
-                    mailUsernameField = (StringDBField) user.getField(userSchema.OLDMAILUSER);
+                    mailUsernameField = user.getStringField(userSchema.OLDMAILUSER);
                     mailUsername = (String) mailUsernameField.getValueLocal();
 
-                    mailpassField = (PasswordDBField) user.getField(userSchema.OLDMAILPASSWORD2);
+                    mailpassField = user.getPassField(userSchema.OLDMAILPASSWORD2);
                     mailpass = mailpassField.getPlainText();
 
                     mailCredentials.print(mailUsername);
@@ -4313,7 +4310,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     // add users in this Netgroup to oldMembers
 
-    InvidDBField users = (InvidDBField) object.getField(userNetgroupSchema.USERS);
+    InvidDBField users = object.getInvidField(userNetgroupSchema.USERS);
 
     if (users != null)
       {
@@ -4323,7 +4320,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     // recursively add in users in any netgroups in this netgroup
 
-    InvidDBField subGroups = (InvidDBField) object.getField(userNetgroupSchema.MEMBERGROUPS);
+    InvidDBField subGroups = object.getInvidField(userNetgroupSchema.MEMBERGROUPS);
 
     if (subGroups != null)
       {
@@ -4531,8 +4528,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         try
           {
-            IPstring = ((IPDBField) interfaceObj.getField(interfaceSchema.ADDRESS)).getValueString();
-            MACstring = ((StringDBField) interfaceObj.getField(interfaceSchema.ETHERNETINFO)).getValueString();
+            IPstring = interfaceObj.getIPField(interfaceSchema.ADDRESS).getValueString();
+            MACstring = interfaceObj.getStringField(interfaceSchema.ETHERNETINFO).getValueString();
             MACstring = MACstring.replace('-',':');
           }
         catch (NullPointerException ex)
@@ -4546,7 +4543,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         try
           {
-            ownerString = ((InvidDBField) object.getField(SchemaConstants.OwnerListField)).getValueString();
+            ownerString = object.getInvidField(SchemaConstants.OwnerListField).getValueString();
           }
         catch (Exception ex)
           {
@@ -4838,7 +4835,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     // get the IP address for this interface
 
-    ipField = (IPDBField) object.getField(interfaceSchema.ADDRESS);
+    ipField = object.getIPField(interfaceSchema.ADDRESS);
 
     if (ipField == null)
       {
@@ -5158,14 +5155,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             DBObject subnetObject = getObject(subnet);
             String network_number = "";
             String network_mask = "";
-            IPDBField ipField = (IPDBField) subnetObject.getField(dhcpSubnetSchema.NETWORK_NUMBER);
+            IPDBField ipField = subnetObject.getIPField(dhcpSubnetSchema.NETWORK_NUMBER);
 
             if (ipField != null)
               {
                 network_number = (String) ipField.getEncodingString();
               }
 
-            ipField = (IPDBField) subnetObject.getField(dhcpSubnetSchema.NETWORK_MASK);
+            ipField = subnetObject.getIPField(dhcpSubnetSchema.NETWORK_MASK);
 
             if (ipField != null)
               {
@@ -5249,12 +5246,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     interfaceObj = getObject(interfaceInvids.get(0));
 
-    ipField = (IPDBField) interfaceObj.getField(interfaceSchema.ADDRESS);
+    ipField = interfaceObj.getIPField(interfaceSchema.ADDRESS);
     ipAddress = ipField.getEncodingString();
 
     if (interfaceObj.isDefined(interfaceSchema.ETHERNETINFO))
       {
-        macField = (StringDBField) interfaceObj.getField(interfaceSchema.ETHERNETINFO);
+        macField = interfaceObj.getStringField(interfaceSchema.ETHERNETINFO);
         macAddress = macField.getEncodingString();
 
         if (macAddress.equals("00:00:00:00:00:00"))

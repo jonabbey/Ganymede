@@ -1,4 +1,3 @@
-
 /*
 
    InvidPool.java
@@ -14,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Contact information

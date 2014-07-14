@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -173,13 +173,8 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
           {
             try
               {
-                DBObject entity;
-                Enumeration users = enumerateObjects(SchemaConstants.UserBase);
-
-                while (users.hasMoreElements())
+                for (DBObject entity: getObjects(SchemaConstants.UserBase))
                   {
-                    entity = (DBObject) users.nextElement();
-
                     writeLDIFUserEntry(out, entity);
                   }
               }
@@ -204,13 +199,8 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
           {
             try
               {
-                DBObject entity;
-                Enumeration groups = enumerateObjects((short) 257);
-
-                while (groups.hasMoreElements())
+                for (DBObject entity: getObjects((short) 257))
                   {
-                    entity = (DBObject) groups.nextElement();
-
                     writeLDIFGroupEntry(out, entity);
                   }
               }
@@ -265,23 +255,17 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
           {
             try
               {
-                DBObject netgroup;
-
                 // First we'll do the user netgroups
-                Enumeration netgroups = enumerateObjects((short) 270);
 
-                while (netgroups.hasMoreElements())
+                for (DBObject netgroup: getObjects((short) 270))
                   {
-                    netgroup = (DBObject) netgroups.nextElement();
                     writeLDIFNetgroupEntry(out, netgroup);
                   }
 
                 // And now for the system netgroups
-                netgroups = enumerateObjects((short) 271);
 
-                while (netgroups.hasMoreElements())
+                for (DBObject netgroup: getObjects((short) 271))
                   {
-                    netgroup = (DBObject) netgroups.nextElement();
                     writeLDIFNetgroupEntry(out, netgroup);
                   }
               }
@@ -382,7 +366,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
         // won't be a password.. to make sure that ldapdiff does the right
         // thing, we just won't emit a userPassword field in that case.
 
-        PasswordDBField pdbf = (PasswordDBField) user.getField(userSchema.PASSWORD);
+        PasswordDBField pdbf = user.getPassField(userSchema.PASSWORD);
 
         if (pdbf != null)
           {

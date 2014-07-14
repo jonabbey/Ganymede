@@ -18,7 +18,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -1762,7 +1762,7 @@ public final class Ganymede {
     /* -- */
 
     v_object = DBStore.viewDBObject(supergashinvid);
-    p = (PasswordDBField) v_object.getField(SchemaConstants.PersonaPasswordField);
+    p = v_object.getPassField(SchemaConstants.PersonaPasswordField);
 
     if (p == null || !p.matchPlainText(defaultrootpassProperty))
       {
@@ -1778,7 +1778,7 @@ public final class Ganymede {
             throw new RuntimeException(ts.l("startupHook.no_supergash", rootname));
           }
 
-        p = (PasswordDBField) e_object.getField(SchemaConstants.PersonaPasswordField);
+        p = e_object.getPassField(SchemaConstants.PersonaPasswordField);
         ReturnVal retVal = p.setPlainTextPass(defaultrootpassProperty); // default supergash password
 
         if (!ReturnVal.didSucceed(retVal))
@@ -1825,7 +1825,7 @@ public final class Ganymede {
       {
         for (DBObject object: objects)
           {
-            StringDBField labelField = (StringDBField) object.getField(SchemaConstants.ObjectEventLabel);
+            StringDBField labelField = object.getStringField(SchemaConstants.ObjectEventLabel);
 
             if (labelField == null)
               {
@@ -1911,7 +1911,7 @@ public final class Ganymede {
               {
                 prepClassMap();
 
-                StringDBField taskClassStrF = (StringDBField) object.getField(SchemaConstants.TaskClass);
+                StringDBField taskClassStrF = object.getStringField(SchemaConstants.TaskClass);
 
                 if (taskClassStrF != null)
                   {

@@ -16,7 +16,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -498,7 +498,7 @@ public final class SyncRunner implements Runnable {
         this.mode = SyncType.INCREMENTAL; // the default old behavior
       }
 
-    FieldOptionDBField f = (FieldOptionDBField) syncChannel.getField(SchemaConstants.SyncChannelFields);
+    FieldOptionDBField f = syncChannel.getFieldOptionsField(SchemaConstants.SyncChannelFields);
 
     if (f == null)
       {
@@ -1002,7 +1002,7 @@ public final class SyncRunner implements Runnable {
                   }
                 else
                   {
-                    origField = (DBField) origObj.getField(memberField.getID());
+                    origField = origObj.getField(memberField.getID());
                   }
 
                 // created
@@ -1172,7 +1172,7 @@ public final class SyncRunner implements Runnable {
           }
         else
           {
-            origField = (DBField) origObj.getField(memberField.getID());
+            origField = origObj.getField(memberField.getID());
           }
 
         // created

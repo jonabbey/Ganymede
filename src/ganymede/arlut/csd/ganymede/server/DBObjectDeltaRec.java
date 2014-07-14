@@ -16,7 +16,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -120,8 +120,8 @@ public final class DBObjectDeltaRec implements FieldType, Iterable<fieldDeltaRec
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
-        DBField origField = (DBField) oldObj.getField(fieldDef.getID());
-        DBField currentField = (DBField) newObj.getField(fieldDef.getID());
+        DBField origField = oldObj.getField(fieldDef.getID());
+        DBField currentField = newObj.getField(fieldDef.getID());
 
         if ((origField == null || !origField.isDefined()) &&
             (currentField == null || !currentField.isDefined()))
@@ -203,7 +203,7 @@ public final class DBObjectDeltaRec implements FieldType, Iterable<fieldDeltaRec
         for (int i = 0; i < fieldcount; i++)
           {
             short fieldcode = in.readShort();
-            DBObjectBaseField fieldDef = baseDef.getFieldDef(fieldcode);
+            DBObjectBaseField fieldDef = baseDef.getField(fieldcode);
 
             if (fieldDef == null)
               {
@@ -331,7 +331,7 @@ public final class DBObjectDeltaRec implements FieldType, Iterable<fieldDeltaRec
         // to verify that the schema hasn't undergone an incompatible
         // change since the journal was written.
 
-        DBObjectBaseField fieldDef = baseDef.getFieldDef(fdRec.fieldcode);
+        DBObjectBaseField fieldDef = baseDef.getField(fdRec.fieldcode);
 
         out.writeShort(fieldDef.getType());
 

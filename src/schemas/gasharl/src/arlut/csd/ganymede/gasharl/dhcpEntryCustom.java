@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -215,7 +215,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
     // Dynamically construct our custom filtered list of available
     // types for this entry
 
-    InvidDBField invf = (InvidDBField) getField(dhcpEntrySchema.TYPE);
+    InvidDBField invf = getInvidField(dhcpEntrySchema.TYPE);
 
     // ok, we are returning the list of choices for what type this
     // entry should belong to.  We don't want it to include any types
@@ -422,8 +422,8 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
         return null;
       }
 
-    typeField = (InvidDBField) object.getField(TYPE);
-    valueField = (StringDBField) object.getField(VALUE);
+    typeField = object.getInvidField(TYPE);
+    valueField = object.getStringField(VALUE);
 
     if (typeField != null)
       {
@@ -505,7 +505,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
             // we set the type after the value.  make sure the value
             // is compatible with the type.
 
-            StringDBField valueField = (StringDBField) this.getField(dhcpEntrySchema.VALUE);
+            StringDBField valueField = this.getStringField(dhcpEntrySchema.VALUE);
             String valueString = (String) valueField.getValueLocal();
 
             if (valueString != null)
@@ -528,7 +528,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
                 // we've changed to an incompatible option, clear the
                 // value field.
 
-                StringDBField valueField = (StringDBField) getField(dhcpEntrySchema.VALUE);
+                StringDBField valueField = getStringField(dhcpEntrySchema.VALUE);
 
                 result = valueField.setValueLocal("");
 

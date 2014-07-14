@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -183,7 +183,7 @@ public class dhcpGroupCustom extends DBEditObject implements SchemaConstants, dh
     try
       {
         ReturnVal retVal = null;
-        InvidDBField invf = (InvidDBField) getField(dhcpGroupSchema.OPTIONS);
+        InvidDBField invf = getInvidField(dhcpGroupSchema.OPTIONS);
 
         try
           {
@@ -303,8 +303,8 @@ public class dhcpGroupCustom extends DBEditObject implements SchemaConstants, dh
         // vector, then create any new embedded options necessary when
         // cloning a multiple option dhcp group.
 
-        InvidDBField newOptions = (InvidDBField) getField(dhcpGroupSchema.OPTIONS);
-        InvidDBField oldOptions = (InvidDBField) origObj.getField(dhcpGroupSchema.OPTIONS);
+        InvidDBField newOptions = getInvidField(dhcpGroupSchema.OPTIONS);
+        InvidDBField oldOptions = origObj.getInvidField(dhcpGroupSchema.OPTIONS);
 
         Vector<Invid> newOnes = (Vector<Invid>) newOptions.getValuesLocal();
         Vector<Invid> oldOnes = (Vector<Invid>) oldOptions.getValuesLocal();

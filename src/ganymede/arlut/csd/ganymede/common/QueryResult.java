@@ -51,9 +51,12 @@
 
 package arlut.csd.ganymede.common;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 import java.util.Comparator;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
@@ -69,13 +72,19 @@ import arlut.csd.Util.VecSortInsert;
 
 /**
  * <p>This class is a serializable object-list result object, which
- * conveys results from a query/list operation along with methods that
- * can be used to extract the results out of the query/list.</p>
+ * conveys sorted results from a query/list operation along with
+ * methods that can be used to extract the results out of the
+ * query/list.</p>
+ *
+ * <p>The individual elements of a Query Result are {@link
+ * arlut.csd.ganymede.common.ObjectHandle ObjectHandles}, which
+ * transport labeled Invids with a set of object status bits, or in
+ * the case of QueryResults returned by {@link
+ * arlut.csd.ganymede.server.StringDBField#choices()}, simply the
+ * Strings provided as valid choices for string fields.</p>
  */
 
-public class QueryResult implements java.io.Serializable {
-
-  static final long serialVersionUID = 8575279549274172762L;
+public class QueryResult implements java.io.Externalizable {
 
   static final boolean debug = false;
 
@@ -108,48 +117,29 @@ public class QueryResult implements java.io.Serializable {
 
   // ---
 
-  // for use pre-serialized
-
-  private transient HashMap<Invid, String> invidMap = null;
-  private transient Set<String> labelSet = null;
-  private boolean forTransport = true;
-  private transient boolean nonEditable = false;
-
-  // for transport
-
-  StringBuffer buffer;
-
-  // for use post-serialized
-
-  transient private boolean unpacked = false;
-
-  transient Vector<ObjectHandle> handles = null;
-  transient Vector<String> labelList = null;
-  transient Vector<Invid> invidList = null;
-
-  transient VecSortInsert inserter;
+  private Vector<ObjectHandle> handles = null;
+  private Set<Invid> invidSet = null;
+  private Set<String> labelSet = null;
+  private boolean nonEditable = false;
 
   /* -- */
 
   public QueryResult()
   {
-    buffer = new StringBuffer();
-    invidMap = new HashMap<Invid, String>();
-    labelSet = new HashSet<String>();
-    handles = new Vector<ObjectHandle>();
+    this.invidSet = new HashSet<Invid>();
+    this.labelSet = new HashSet<String>();
+    this.handles = new Vector<ObjectHandle>();
   }
 
   /**
-   * Constructor.
-   *
-   * @param forTransport If true, this QueryResult will prepare information
-   * fed into it for transport by maintaining a StringBuffer.
+   * QueryResult taking a single boolean param for backwards
+   * compatibility now that we are no longer distinguishing between
+   * QueryResults for transport and not.
    */
 
-  public QueryResult(boolean forTransport)
+  @Deprecated public QueryResult(boolean param)
   {
     this();
-    this.forTransport = forTransport;
   }
 
   /**
@@ -184,9 +174,9 @@ public class QueryResult implements java.io.Serializable {
 
   public void addRow(ObjectHandle handle)
   {
-    addRow(handle.invid, handle.label, handle.inactive,
-           handle.expirationSet, handle.removalSet,
-           handle.editable);
+    addRow(handle.getInvid(), handle.getLabel(), handle.isInactive(),
+           handle.isExpirationSet(), handle.isRemovalSet(),
+           handle.isEditable());
   }
 
   /**
@@ -219,7 +209,7 @@ public class QueryResult implements java.io.Serializable {
         System.err.println("QueryResult: addRow(" + invid + "," + label + ")");
       }
 
-    if (nonEditable)
+    if (this.nonEditable)
       {
         throw new RuntimeException("QueryResult.addRow(): non-editable QueryResult");
       }
@@ -240,85 +230,16 @@ public class QueryResult implements java.io.Serializable {
         return;
       }
 
-    handles.add(new ObjectHandle(label, invid,
-                                 inactive, expirationSet,
-                                 removalSet, editable));
-
-    if (forTransport)
-      {
-        // encode any true bits
-
-        if (inactive)
-          {
-            buffer.append("A");
-          }
-
-        if (expirationSet)
-          {
-            buffer.append("B");
-          }
-
-        if (removalSet)
-          {
-            buffer.append("C");
-          }
-
-        if (editable)
-          {
-            buffer.append("D");
-          }
-
-        buffer.append("|");
-
-        if (invid != null)
-          {
-            buffer.append(invid.toString());
-          }
-
-        buffer.append("|");
-        char[] chars = label.toCharArray();
-
-        for (int j = 0; j < chars.length; j++)
-          {
-            if (chars[j] == '|')
-              {
-                buffer.append("\\|");
-              }
-            else if (chars[j] == '\n')
-              {
-                buffer.append("\\\n");
-              }
-            else if (chars[j] == '\\')
-              {
-                buffer.append("\\\\");
-              }
-            else
-              {
-                buffer.append(chars[j]);
-              }
-          }
-
-        buffer.append("\n");
-      }
+    this.handles.add(new ObjectHandle(label, invid,
+                                      inactive, expirationSet,
+                                      removalSet, editable));
 
     if (invid != null)
       {
-        invidMap.put(invid, label);
-
-        if (invidList != null)
-          {
-            invidList.add(invid);
-          }
+        this.invidSet.add(invid);
       }
 
     labelSet.add(label);
-
-    if (labelList != null)
-      {
-        labelList.add(label);
-      }
-
-    unpacked = false;
   }
 
   // ***
@@ -329,138 +250,53 @@ public class QueryResult implements java.io.Serializable {
   //
   // ***
 
-  /**
-   * <p>This method is used by arlut.csd.ganymede.client.objectList to
-   * get access to the raw and sorted vector of ObjectHandle's
-   * post-serialization.</p>
-   *
-   * <p>Note that this method does not clone our handles vector, we'll
-   * just assume that whatever the objectList class on the client does
-   * to this vector, we're not going to disturb anyone else who will
-   * be looking at the handle list on this query result object.</p>
-   */
-
   public Vector<ObjectHandle> getHandles()
   {
-    if (forTransport && !unpacked)
+    if (this.nonEditable)
       {
-        unpackBuffer();
+        return new Vector<ObjectHandle>(this.handles);
       }
 
-    if (nonEditable)
-      {
-        Vector result = new Vector();
-        result.addAll(handles);
-
-        return result;
-      }
-    else
-      {
-        return handles;
-      }
+    return this.handles;
   }
 
   public Invid getInvid(int row)
   {
-    if (forTransport && !unpacked)
-      {
-        unpackBuffer();
-      }
-
-    return handles.get(row).getInvid();
+    return this.handles.get(row).getInvid();
   }
 
   public Vector<Invid> getInvids()
   {
-    if (forTransport && !unpacked)
+    Vector<Invid> invidList = new Vector<Invid>(handles.size());
+
+    for (ObjectHandle handle: this.handles)
       {
-        unpackBuffer();
+        invidList.add(handle.getInvid());
       }
 
-    if (nonEditable)
-      {
-        Vector<Invid> myInvidList = new Vector<Invid>();
-
-        for (ObjectHandle handle: handles)
-          {
-            myInvidList.add(handle.getInvid());
-          }
-
-        return myInvidList;
-      }
-    else
-      {
-        if (this.invidList == null)
-          {
-            this.invidList = new Vector<Invid>();
-
-            for (ObjectHandle handle: handles)
-              {
-                this.invidList.add(handle.getInvid());
-              }
-          }
-
-        return this.invidList;
-      }
+    return invidList;
   }
 
   public Vector<String> getLabels()
   {
-    if (forTransport && !unpacked)
+    Vector<String> labelList = new Vector<String>(handles.size());
+
+    for (ObjectHandle handle: this.handles)
       {
-        unpackBuffer();
+        labelList.add(handle.getLabel());
       }
 
-    if (nonEditable)
-      {
-        Vector<String> myLabelList = new Vector<String>();
-
-        for (ObjectHandle handle: handles)
-          {
-            myLabelList.add(handle.getLabel());
-          }
-
-        return myLabelList;
-      }
-    else
-      {
-        if (labelList == null)
-          {
-            labelList = new Vector<String>();
-
-            for (ObjectHandle handle: handles)
-              {
-                labelList.add(handle.getLabel());
-              }
-          }
-
-        return labelList;
-      }
+    return labelList;
   }
 
   public String getLabel(int row)
   {
-    if (forTransport && !unpacked)
-      {
-        unpackBuffer();
-      }
-
-    return handles.get(row).getLabel();
-  }
-
-  public boolean isForTransport()
-  {
-    return forTransport;
+    return this.handles.get(row).getLabel();
   }
 
   public int size()
   {
-    if (forTransport && !unpacked)
-      {
-        unpackBuffer();
-      }
-
-    return handles.size();
+    return this.handles.size();
   }
 
   /**
@@ -490,12 +326,7 @@ public class QueryResult implements java.io.Serializable {
 
     /* -- */
 
-    if (forTransport && !unpacked)
-      {
-        unpackBuffer();
-      }
-
-    for (ObjectHandle handle: handles)
+    for (ObjectHandle handle: this.handles)
       {
         if ((includeInactives || !handle.isInactive()) &&
             (includeNonEditables || handle.isEditable()))
@@ -513,12 +344,7 @@ public class QueryResult implements java.io.Serializable {
 
   public listHandle getListHandle(int row)
   {
-    if (forTransport && !unpacked)
-      {
-        unpackBuffer();
-      }
-
-    return handles.get(row).getListHandle();
+    return this.handles.get(row).getListHandle();
   }
 
   /**
@@ -527,12 +353,7 @@ public class QueryResult implements java.io.Serializable {
 
   public ObjectHandle getObjectHandle(int row)
   {
-    if (forTransport && !unpacked)
-      {
-        unpackBuffer();
-      }
-
-    return handles.get(row);
+    return this.handles.get(row);
   }
 
   // ***
@@ -549,7 +370,7 @@ public class QueryResult implements java.io.Serializable {
 
   public synchronized boolean containsInvid(Invid invid)
   {
-    return invidMap.containsKey(invid);
+    return this.invidSet.contains(invid);
   }
 
   /**
@@ -560,7 +381,7 @@ public class QueryResult implements java.io.Serializable {
 
   public synchronized boolean containsLabel(String label)
   {
-    return labelSet.contains(label);
+    return this.labelSet.contains(label);
   }
 
   /**
@@ -568,17 +389,15 @@ public class QueryResult implements java.io.Serializable {
    * (for transport) QueryResult to ourself.</p>
    */
 
-  public void append(QueryResult result)
+  public synchronized void append(QueryResult result)
   {
-    if (nonEditable)
+    if (this.nonEditable)
       {
         throw new RuntimeException("Can't append to a non-editable QueryResult");
       }
 
-    buffer.append(result.buffer.toString());
-    unpacked = false;
-
-    this.invidMap.putAll(result.invidMap);
+    this.handles.addAll(result.getHandles());
+    this.invidSet.addAll(result.invidSet);
     this.labelSet.addAll(result.labelSet);
   }
 
@@ -590,12 +409,12 @@ public class QueryResult implements java.io.Serializable {
 
   public synchronized QueryResult intersection(QueryResult operand)
   {
-    if (nonEditable)
+    if (this.nonEditable)
       {
         throw new RuntimeException("Can't intersect a non-editable QueryResult");
       }
 
-    QueryResult result = new QueryResult(forTransport);
+    QueryResult result = new QueryResult();
 
     /* -- */
 
@@ -604,7 +423,7 @@ public class QueryResult implements java.io.Serializable {
         return result;
       }
 
-    for (ObjectHandle handle: handles)
+    for (ObjectHandle handle: this.handles)
       {
         if (handle.getInvid() != null)
           {
@@ -625,149 +444,36 @@ public class QueryResult implements java.io.Serializable {
     return result;
   }
 
-  // ***
-  //
-  // private methods
-  //
-  // ***
-
-  /**
-   * <p>Private method to handle building up our datastructure on the
-   * post-serialization side.  Sorts the handles vector by label as it
-   * is extracted.</p>
-   */
-
-  private synchronized void unpackBuffer()
+  public synchronized void writeExternal(ObjectOutput out) throws IOException
   {
-    char[] chars;
-    String results = buffer.toString();
-    StringBuilder tempString = new StringBuilder();
-    int index = 0;
-    int rows = 0;
+    out.writeInt(this.handles.size());
 
-    String label;
-    Invid invid;
-    boolean inactive, expirationSet, removalSet, editable;
-
-    /* -- */
-
-    if (debug)
+    for (ObjectHandle handle: this.handles)
       {
-        System.err.println("QueryResult.unpackBuffer()");
+        handle.writeExternal(out);
       }
-
-    // prepare our handle vector
-
-    handles = new Vector();
-
-    inserter = new VecSortInsert(comparator);
-
-    // turn our serialized buffer into an array of chars for fast
-    // processing
-
-    chars = results.toCharArray();
-
-    if (debug)
-      {
-        System.err.println("*** unpacking buffer");
-      }
-
-    // now read in all the result lines
-
-    while (index < chars.length)
-      {
-        inactive = false;
-        expirationSet = false;
-        removalSet = false;
-        editable = false;
-
-        // first read in the bits
-
-        while (chars[index] != '|')
-          {
-            if (chars[index] == 'A')
-              {
-                inactive = true;
-              }
-            else if (chars[index] == 'B')
-              {
-                expirationSet = true;
-              }
-            else if (chars[index] == 'C')
-              {
-                removalSet = true;
-              }
-            else if (chars[index] == 'D')
-              {
-                editable = true;
-              }
-
-            index++;
-          }
-
-        index++;                // skip separator |
-
-        // now read in the Invid
-
-        tempString.setLength(0); // truncate the buffer
-
-        while (chars[index] != '|')
-          {
-            if (chars[index] == '\n')
-              {
-                throw new RuntimeException("parse error in row" + rows);
-              }
-
-            tempString.append(chars[index++]);
-          }
-
-        if (tempString.toString().length() != 0)
-          {
-            invid = Invid.createInvid(tempString.toString());
-          }
-        else
-          {
-            invid = null;
-          }
-
-        index++;                // skip over |
-
-        // now read in the label for this invid
-
-        tempString.setLength(0); // truncate the buffer
-
-        while (chars[index] != '\n')
-          {
-            // if we have a backslashed character, take the backslashed char
-            // as a literal
-
-            if (chars[index] == '\\')
-              {
-                index++;
-              }
-
-            tempString.append(chars[index++]);
-          }
-
-        label = tempString.toString();
-
-        inserter.insert(handles, new ObjectHandle(label, invid,
-                                                  inactive, expirationSet,
-                                                  removalSet, editable));
-
-        rows++;
-        index++; // skip newline
-      }
-
-    unpacked = true;
   }
 
-  /**
-   * For debug.
-   */
-
-  public String getBuffer()
+  public synchronized void readExternal(ObjectInput in) throws IOException
   {
-    return buffer.toString();
+    VecSortInsert inserter = new VecSortInsert(comparator);
+
+    int size = in.readInt();
+    this.handles = new Vector<ObjectHandle>(size);
+
+    for (int i = 0; i < size; i++)
+      {
+        ObjectHandle handle = new ObjectHandle();
+        handle.readExternal(in);
+
+        invidSet.add(handle.getInvid());
+        labelSet.add(handle.getLabel());
+        inserter.insert(this.handles, handle);
+      }
+
+    if (this.handles.size() != size)
+      {
+        throw new RuntimeException("QueryResult: bad handles size post readExternal");
+      }
   }
 }

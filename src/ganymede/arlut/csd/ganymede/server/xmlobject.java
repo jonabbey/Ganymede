@@ -4,8 +4,6 @@
    This class is a data holding structure that is intended to hold
    object and field data for an XML object element for xmlclient.
 
-   --
-
    Created: 2 May 2000
 
    Module By: Jonathan Abbey
@@ -14,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -67,7 +65,6 @@ import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.Session;
-import arlut.csd.ganymede.rmi.db_object;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -168,7 +165,7 @@ public final class xmlobject {
    * to it from the server.
    */
 
-  db_object objref = null;
+  DBObject objref = null;
 
   /**
    * Create only flag.  If this flag is true, this object was explicitly specified
@@ -366,21 +363,11 @@ public final class xmlobject {
         return result;
       }
 
-    objref = result.getObject();
+    objref = (DBObject) result.getObject();
 
-    try
-      {
-        Invid myInvid = objref.getInvid();
-
-        setInvid(myInvid);
-
-        xSession.rememberSeenInvid(myInvid);
-      }
-    catch (RemoteException ex)
-      {
-        Ganymede.logError(ex);
-        throw new RuntimeException(ex.getMessage());
-      }
+    Invid myInvid = objref.getInvid();
+    setInvid(myInvid);
+    xSession.rememberSeenInvid(myInvid);
 
     return null;
   }
@@ -417,7 +404,7 @@ public final class xmlobject {
 
         if (ReturnVal.didSucceed(result))
           {
-            objref = result.getObject();
+            objref = (DBObject) result.getObject();
 
             // We'll check for duplicates here.  This check is subtly
             // different from the one above, and its purpose is to make
@@ -593,8 +580,8 @@ public final class xmlobject {
         try
           {
             ReturnVal parentResult = xSession.session.view_db_object(parentInvid);
-            db_object parentObject = parentResult.getObject();
-            InvidDBField containerField = (InvidDBField) parentObject.getField(ownerField.fieldDef.getID());
+            DBObject parentObject = (DBObject) parentResult.getObject();
+            InvidDBField containerField = parentObject.getInvidField(ownerField.fieldDef.getID());
             invid = (Invid) containerField.getElementLocal(index);
           }
         catch (RemoteException ex)

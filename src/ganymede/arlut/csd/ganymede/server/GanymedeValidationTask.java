@@ -170,7 +170,7 @@ public class GanymedeValidationTask implements Runnable {
 
                 try
                   {
-                    retVal = object.getObjectHook().consistencyCheck(object);
+                    retVal = object.getHook().consistencyCheck(object);
 
                     if (!ReturnVal.didSucceed(retVal))
                       {

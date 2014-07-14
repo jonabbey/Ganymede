@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -1140,15 +1140,15 @@ public final class DBEditSet {
    * This method may block indefinitely, waiting on other transactions
    * which are in the process of modifying the DBStore hashes.</p>
    *
-   * <p>Returns a Vector of DBObjectBases that we have locked if we
+   * <p>Returns a List of DBObjectBases that we have locked if we
    * succeed.</p>
    *
    * <p>Throws a CommitNonFatalException if we can't get the lock.</p>
    */
 
-  private final Vector<DBObjectBase> commit_lockBases() throws CommitNonFatalException
+  private final List<DBObjectBase> commit_lockBases() throws CommitNonFatalException
   {
-    Vector<DBObjectBase> baseSet = new Vector<DBObjectBase>();
+    List<DBObjectBase> baseSet = new ArrayList<DBObjectBase>();
 
     /* -- */
 
@@ -1174,7 +1174,7 @@ public final class DBEditSet {
       {
         wLock = session.openWriteLock(baseSet); // wait for write lock *synchronized*
       }
-    catch (InterruptedException ex)
+   catch (InterruptedException ex)
       {
         Ganymede.debug(ts.l("commit_lockBases.interrupted", String.valueOf(session.getKey())));
 
@@ -1353,13 +1353,13 @@ public final class DBEditSet {
     // otherwise, we always insist on the label field being present.
     // We'll check that up front.
 
-    DBField labelField = eObj.retrieveField(eObj.getLabelFieldID());
+    DBField labelField = eObj.getField(eObj.getLabelFieldID());
 
     if (labelField == null || !labelField.isDefined())
       {
         // the label field is missing.  look it up.
 
-        DBObjectBaseField fieldDef = (DBObjectBaseField) eObj.getBase().getField(eObj.getLabelFieldID());
+        DBObjectBaseField fieldDef = eObj.getBase().getField(eObj.getLabelFieldID());
 
         missingFields.add(fieldDef.getName());
       }
@@ -1457,7 +1457,7 @@ public final class DBEditSet {
 
             if (!eObj.isEmbedded())
               {
-                df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
+                df = eObj.getDateField(SchemaConstants.CreationDateField);
 
                 // If we're processing an XML transaction and the XML
                 // transaction already specified a creation date (the
@@ -1477,7 +1477,7 @@ public final class DBEditSet {
 
                 // ditto for the creator info field.
 
-                sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
+                sf = eObj.getStringField(SchemaConstants.CreatorField);
 
                 if (!allowXMLHistoryOverride || !sf.isDefined())
                   {
@@ -1491,13 +1491,13 @@ public final class DBEditSet {
 
             if (!eObj.isEmbedded())
               {
-                df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
+                df = eObj.getDateField(SchemaConstants.ModificationDateField);
                 if (!allowXMLHistoryOverride || !df.isDefined())
                   {
                     df.value = modDate;
                   }
 
-                sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
+                sf = eObj.getStringField(SchemaConstants.ModifierField);
                 if (!allowXMLHistoryOverride || !sf.isDefined())
                   {
                     sf.value = result;
@@ -2160,7 +2160,7 @@ public final class DBEditSet {
                     continue;
                   }
 
-                DBField origField = (DBField) origObj.getField(fieldDef.getID());
+                DBField origField = origObj.getField(fieldDef.getID());
 
                 if (origField != null && origField.isDefined())
                   {
@@ -2484,7 +2484,7 @@ public final class DBEditSet {
       {
         if (wLock != null)
           {
-            if (wLock.inEstablish)
+            if (wLock.isEstablishing())
               {
                 return false;
               }

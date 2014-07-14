@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -255,8 +255,8 @@ public class dhcpSubnetCustom extends DBEditObject implements SchemaConstants, d
         return null;
       }
 
-    InvidDBField origField = (InvidDBField) origObject.getField(copyFieldID);
-    InvidDBField newField = (InvidDBField) getField(copyFieldID);
+    InvidDBField origField = origObject.getInvidField(copyFieldID);
+    InvidDBField newField = getInvidField(copyFieldID);
 
     StringBuilder resultBuf = new StringBuilder();
 
@@ -375,10 +375,10 @@ public class dhcpSubnetCustom extends DBEditObject implements SchemaConstants, d
 
             try
               {
-                StringDBField guest_range = (StringDBField) getField(GUEST_RANGE);
+                StringDBField guest_range = getStringField(GUEST_RANGE);
                 result = ReturnVal.merge(result, guest_range.setValueLocal(null));
 
-                DBField guest_options = (DBField) getField(GUEST_OPTIONS);
+                DBField guest_options = getField(GUEST_OPTIONS);
 
                 try
                   {

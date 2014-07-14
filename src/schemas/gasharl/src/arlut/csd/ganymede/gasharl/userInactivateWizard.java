@@ -3,16 +3,16 @@
    userInactivateWizard.java
 
    A wizard to manage step-by-step interactions for the userCustom object.
-   
+
    Created: 29 January 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Contact information
@@ -71,7 +71,7 @@ import arlut.csd.ganymede.server.StringDBField;
  * methods written for its benefit in userCustom.<br>
  *
  * @see arlut.csd.ganymede.common.ReturnVal
- * @see arlut.csd.ganymede.rmi.Ganymediator 
+ * @see arlut.csd.ganymede.rmi.Ganymediator
  * @see arlut.csd.ganymede.gasharl.userCustom
  */
 
@@ -89,11 +89,11 @@ public class userInactivateWizard extends GanymediatorWizard {
    * Keeps track of the state of the wizard.  Each time respond() is called,
    * state is checked to see what results from the user are expected and
    * what the appropriate dialogs or actions to perform in turn are.<br>
-   * 
+   *
    * state is also used by the userCustom object to make sure that
    * we have finished our interactions with the user when we tell the
    * user object to go ahead and remove the group.  <br>
-   * 
+   *
    * <pre>
    * Values:
    *         1 - Wizard has been initialized, initial explanatory dialog
@@ -127,11 +127,11 @@ public class userInactivateWizard extends GanymediatorWizard {
    *
    */
 
-  public userInactivateWizard(GanymedeSession session, 
-			      userCustom userObject,
+  public userInactivateWizard(GanymedeSession session,
+                              userCustom userObject,
                               String ckp_label) throws RemoteException
   {
-    super(session);		// ** register ourselves **
+    super(session);             // ** register ourselves **
 
     this.session = session;
     this.userObject = userObject;
@@ -156,10 +156,10 @@ public class userInactivateWizard extends GanymediatorWizard {
     userObject.finalizeInactivate(false, ckp_label);
 
     return fail("User Inactivation Canceled",
-		"User Inactivation Canceled",
-		"OK",
-		null,
-		"ok.gif");
+                "User Inactivation Canceled",
+                "OK",
+                null,
+                "ok.gif");
   }
 
   /**
@@ -182,24 +182,24 @@ public class userInactivateWizard extends GanymediatorWizard {
     buffer.append("\n\nThis user account will be rendered unusable, but will be ");
     buffer.append("kept in the database for 3 months to preserve accounting information.\n\n");
     buffer.append("It is recommended that you provide a forwarding email address for this user.");
-	
-    retVal = continueOn("User Inactivation Dialog",
-			buffer.toString(),
-			"OK",
-			"Cancel",
-			"question.gif");
 
-    StringDBField addrField = (StringDBField) userObject.getField(userSchema.EMAILTARGET);
+    retVal = continueOn("User Inactivation Dialog",
+                        buffer.toString(),
+                        "OK",
+                        "Cancel",
+                        "question.gif");
+
+    StringDBField addrField = userObject.getStringField(userSchema.EMAILTARGET);
 
     if (addrField == null || addrField.size() == 0)
       {
-	retVal.getDialog().addString("Forwarding Address");
+        retVal.getDialog().addString("Forwarding Address");
       }
     else
       {
-	retVal.getDialog().addString("Forwarding Address", addrField.getValueString());
+        retVal.getDialog().addString("Forwarding Address", addrField.getValueString());
       }
-    
+
     return retVal;
   }
 
@@ -213,38 +213,38 @@ public class userInactivateWizard extends GanymediatorWizard {
   public ReturnVal processDialog1()
   {
     ReturnVal retVal = null;
-    
+
     /* -- */
 
     String forward = (String) getParam("Forwarding Address");
 
     // and do the inactivation
-	    
+
     retVal = userObject.inactivate(forward, true, ckp_label);
 
     if (retVal == null || retVal.didSucceed())
       {
-	Date date = (Date) userObject.getFieldValueLocal(SchemaConstants.RemovalField);
+        Date date = (Date) userObject.getFieldValueLocal(SchemaConstants.RemovalField);
 
-	String message = userObject.getLabel() + 
-	  " has been inactivated, and will be removed on " +
-	  date.toString();
-	  
-	return success("User Inactivation Performed",
-		       message,
-		       "OK",
-		       null,
-		       "ok.gif").unionRescan(retVal);
+        String message = userObject.getLabel() +
+          " has been inactivated, and will be removed on " +
+          date.toString();
+
+        return success("User Inactivation Performed",
+                       message,
+                       "OK",
+                       null,
+                       "ok.gif").unionRescan(retVal);
       }
     else
       {
-	// failure.. need to do the rollback that would have
-	// originally been done for us if we hadn't gone through
-	// the wizard process.
-	
-	userObject.finalizeInactivate(false, ckp_label);
+        // failure.. need to do the rollback that would have
+        // originally been done for us if we hadn't gone through
+        // the wizard process.
+
+        userObject.finalizeInactivate(false, ckp_label);
       }
-    
+
     return retVal;
   }
 }

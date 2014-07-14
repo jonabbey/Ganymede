@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -171,7 +171,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
   private ReturnVal updateHiddenLabelNAME(String interfaceName)
   {
-    IPDBField ipfield = (IPDBField) this.getField(interfaceSchema.ADDRESS);
+    IPDBField ipfield = this.getIPField(interfaceSchema.ADDRESS);
     String IPAddress = null;
 
     if (ipfield != null)
@@ -265,7 +265,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   private ReturnVal updateHiddenLabelMACADDR(String MACAddress)
   {
     String interfaceName = (String) this.getFieldValueLocal(interfaceSchema.NAME);
-    IPDBField ipfield = (IPDBField) this.getField(interfaceSchema.ADDRESS);
+    IPDBField ipfield = this.getIPField(interfaceSchema.ADDRESS);
     String IPAddress = null;
 
     if (ipfield != null)
@@ -421,12 +421,6 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
           {
             result.addRow(handle);
           }
-      }
-
-    if (debug)
-      {
-        System.err.println("interfaceCustom: net choice for invid " + getInvid() + ":\n" +
-                           result.getBuffer());
       }
 
     return result;
@@ -731,7 +725,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
         if (value == null)
           {
-            IPDBField ipfield = (IPDBField) getField(interfaceSchema.ADDRESS);
+            IPDBField ipfield = getIPField(interfaceSchema.ADDRESS);
 
             inFinalizeNetChange = true;
             ipfield.setValueLocal(null);
@@ -760,7 +754,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
         // we've got a new IP address, go ahead and set it
 
-        IPDBField ipfield = (IPDBField) getField(interfaceSchema.ADDRESS);
+        IPDBField ipfield = getIPField(interfaceSchema.ADDRESS);
 
         // set the inFinalizeNetChange variable around the call to
         // setValueLocal() so that the recursive call to finalizeSetValue()

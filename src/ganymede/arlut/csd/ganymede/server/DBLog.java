@@ -1567,7 +1567,7 @@ final public class DBLog implements java.io.Closeable {
 
     for (Result entry: eventCodeList)
       {
-        objEventobj = (DBObject) gSession.getDBSession().viewDBObject(entry.getInvid());
+        objEventobj = gSession.getDBSession().viewDBObject(entry.getInvid());
         objEventItem = new objectEventType(objEventobj);
         objEventCodes.put(objEventItem.hashKey, objEventItem);
       }
@@ -1950,7 +1950,7 @@ final public class DBLog implements java.io.Closeable {
           {
             // get a list of owner invids for this object
 
-            InvidDBField ownersField = (InvidDBField) versionOfObject.getField(SchemaConstants.OwnerListField);
+            InvidDBField ownersField = versionOfObject.getInvidField(SchemaConstants.OwnerListField);
 
             if (ownersField == null)
               {
@@ -2553,7 +2553,7 @@ class systemEventType {
 
   private String getString(DBObject obj, short fieldId)
   {
-    f = (DBField) obj.getField(fieldId);
+    f = obj.getField(fieldId);
 
     if (f == null)
       {
@@ -2565,7 +2565,7 @@ class systemEventType {
 
   private boolean getBoolean(DBObject obj, short fieldId)
   {
-    f = (DBField) obj.getField(fieldId);
+    f = obj.getField(fieldId);
 
     if (f == null)
       {
@@ -2592,7 +2592,7 @@ class systemEventType {
     // string list.. we use a Set here so that we don't get
     // duplicates.
 
-    strF = (StringDBField) obj.getField(SchemaConstants.EventExternalMail);
+    strF = obj.getStringField(SchemaConstants.EventExternalMail);
 
     if (strF != null)
       {
@@ -2645,7 +2645,7 @@ class objectEventType {
 
   private String getString(DBObject obj, short fieldId)
   {
-    f = (DBField) obj.getField(fieldId);
+    f = obj.getField(fieldId);
 
     if (f == null)
       {
@@ -2657,7 +2657,7 @@ class objectEventType {
 
   private boolean getBoolean(DBObject obj, short fieldId)
   {
-    f = (DBField) obj.getField(fieldId);
+    f = obj.getField(fieldId);
 
     if (f == null)
       {
@@ -2669,7 +2669,7 @@ class objectEventType {
 
   private int getInt(DBObject obj, short fieldId)
   {
-    f = (DBField) obj.getField(fieldId);
+    f = obj.getField(fieldId);
 
     // we'll go ahead and throw a NullPointerException if
     // f isn't defined.
@@ -2693,7 +2693,7 @@ class objectEventType {
     // Get the list of addresses from the object's external email
     // string list.. we a Set here so that we don't get duplicates.
 
-    strF = (StringDBField) obj.getField(SchemaConstants.ObjectEventExternalMail);
+    strF = obj.getStringField(SchemaConstants.ObjectEventExternalMail);
 
     if (strF != null)
       {

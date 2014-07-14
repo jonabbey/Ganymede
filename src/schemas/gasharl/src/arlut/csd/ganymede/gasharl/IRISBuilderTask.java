@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -178,13 +178,8 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
           {
             try
               {
-                DBObject user;
-                Enumeration users = enumerateObjects(SchemaConstants.UserBase);
-
-                while (users.hasMoreElements())
+                for (DBObject user: getObjects(SchemaConstants.UserBase))
                   {
-                    user = (DBObject) users.nextElement();
-
                     if (user_in_netgroup(user, "IRIS-users"))
                       {
                         if (debug)
@@ -217,13 +212,8 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
               {
                 try
                   {
-                    DBObject user;
-                    Enumeration users = enumerateObjects(SchemaConstants.UserBase);
-
-                    while (users.hasMoreElements())
+                    for (DBObject user: getObjects(SchemaConstants.UserBase))
                       {
-                        user = (DBObject) users.nextElement();
-
                         if (user_in_maillist(user, "IRIS-test-users"))
                           {
                             if (debug)
@@ -477,7 +467,7 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
     invidString = userObject.getInvid().toString();
     badge = (String) userObject.getFieldValueLocal(userSchema.BADGE);
 
-    PasswordDBField passField = (PasswordDBField) userObject.getField(userSchema.PASSWORD);
+    PasswordDBField passField = userObject.getPassField(userSchema.PASSWORD);
 
     if (passField == null)
       {

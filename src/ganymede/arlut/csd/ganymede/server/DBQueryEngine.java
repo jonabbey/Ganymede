@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -142,7 +142,7 @@ public final class DBQueryEngine {
 
   public QueryResult queryInvids(Vector<Invid> invidVector)
   {
-    QueryResult result = new QueryResult(true); // for transport
+    QueryResult result = new QueryResult();
     DBObject obj;
     PermEntry perm;
 
@@ -624,7 +624,7 @@ public final class DBQueryEngine {
                                    boolean forTransport, DBLock extantLock,
                                    DBEditObject perspectiveObject)
   {
-    QueryResult result = new QueryResult(forTransport);
+    QueryResult result = new QueryResult();
     DBObjectBase base = null;
     Iterator<DBObject> it;
     DBObject obj;
@@ -925,15 +925,15 @@ public final class DBQueryEngine {
 
     if (node.fieldId >= 0)
       {
-        fieldDef = (DBObjectBaseField) base.getField(node.fieldId);
+        fieldDef = base.getField(node.fieldId);
       }
     else if (node.fieldname != null)
       {
-        fieldDef = (DBObjectBaseField) base.getField(node.fieldname); // *sync* DBObjectBase
+        fieldDef = base.getField(node.fieldname); // *sync* DBObjectBase
       }
     else if (node.fieldId == -1)
       {
-        fieldDef = (DBObjectBaseField) base.getField(base.getLabelField()); // *sync* DBObjectBase
+        fieldDef = base.getField(base.getLabelField()); // *sync* DBObjectBase
       }
 
     if (fieldDef == null)
@@ -1061,7 +1061,7 @@ public final class DBQueryEngine {
    *
    * <p>This method is not synchronized for performance reasons, but
    * is only to be called from methods synchronized on this
-   * GanymedeSession.</p>
+   * DBQueryEngine.</p>
    *
    * @param obj The object to add to the query results
    * @param query The query that we are processing, used to get

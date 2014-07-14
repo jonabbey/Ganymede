@@ -17,7 +17,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -191,7 +191,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
         try
           {
             basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-            base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+            base = Ganymede.db.getObjectBase(basenum);
 
             if (base == null)
               {
@@ -241,7 +241,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
         try
           {
             basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-            base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+            base = Ganymede.db.getObjectBase(basenum);
 
             if (base == null)
               {
@@ -261,7 +261,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
                       {
                         fieldnum = Short.valueOf(fieldId).shortValue();
 
-                        field = (DBObjectBaseField) base.getField(fieldnum);
+                        field = base.getField(fieldnum);
 
                         if (field == null)
                           {
@@ -333,7 +333,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     try
       {
         basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-        base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+        base = Ganymede.db.getObjectBase(basenum);
 
         if (base == null)
           {
@@ -349,7 +349,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
                   {
                     fieldnum = Short.valueOf(fieldId).shortValue();
 
-                    field = (DBObjectBaseField) base.getField(fieldnum);
+                    field = base.getField(fieldnum);
 
                     if (field == null)
                       {

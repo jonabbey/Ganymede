@@ -14,7 +14,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -79,9 +79,6 @@ import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.PermEntry;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SyncPrefEnum;
-import arlut.csd.ganymede.rmi.pass_field;
-import arlut.csd.ganymede.rmi.perm_field;
-import arlut.csd.ganymede.rmi.field_option_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -1096,7 +1093,7 @@ public final class xmlfield implements FieldType {
           }
         else if (fieldDef.isArray() && (fieldDef.isString() || fieldDef.isIP()))
           {
-            DBField field = (DBField) owner.objref.getField(fieldDef.getID());
+            DBField field = owner.objref.getField(fieldDef.getID());
 
             if (setValues != null)
               {
@@ -1173,7 +1170,7 @@ public final class xmlfield implements FieldType {
         else if (fieldDef.isPassword())
           {
             xPassword xp = (xPassword) value;
-            PasswordDBField field = (PasswordDBField) owner.objref.getField(fieldDef.getID());
+            PasswordDBField field = owner.objref.getPassField(fieldDef.getID());
 
             if (xp == null)
               {
@@ -1219,7 +1216,7 @@ public final class xmlfield implements FieldType {
               }
             else if (!fieldDef.isEditInPlace())
               {
-                InvidDBField field = (InvidDBField) owner.objref.getField(fieldDef.getID());
+                InvidDBField field = owner.objref.getInvidField(fieldDef.getID());
 
                 /* -- */
 
@@ -1299,7 +1296,7 @@ public final class xmlfield implements FieldType {
               }
             else                // *** edit in place / embedded object case ***
               {
-                InvidDBField field = (InvidDBField) owner.objref.getField(fieldDef.getID());
+                InvidDBField field = owner.objref.getInvidField(fieldDef.getID());
 
                 /* -- */
 
@@ -1373,7 +1370,7 @@ public final class xmlfield implements FieldType {
                         else
                           {
                             object.setInvid(result.getInvid());
-                            object.objref = result.getObject();
+                            object.objref = (DBObject) result.getObject();
 
                             // now that we've copied the object
                             // carrier info out, clear the return val
@@ -1506,7 +1503,7 @@ public final class xmlfield implements FieldType {
           }
         else if (fieldDef.isFieldOptions())
           {
-            field_option_field field = (field_option_field) owner.objref.getField(fieldDef.getID());
+            FieldOptionDBField field = owner.objref.getFieldOptionsField(fieldDef.getID());
 
             if (setValues != null)
               {
@@ -1570,7 +1567,7 @@ public final class xmlfield implements FieldType {
           }
         else if (fieldDef.isPermMatrix())
           {
-            perm_field field = (perm_field) owner.objref.getField(fieldDef.getID());
+            PermissionMatrixDBField field = owner.objref.getPermField(fieldDef.getID());
 
             if (setValues != null)
               {

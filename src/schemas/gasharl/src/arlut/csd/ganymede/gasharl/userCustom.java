@@ -292,7 +292,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         // need to find a global unique id (guid) for this user
 
-        StringDBField guidField = (StringDBField) getField(GUID);
+        StringDBField guidField = getStringField(GUID);
 
         if (guidField == null)
           {
@@ -312,7 +312,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         // need to find a uid for this user
 
-        NumericDBField numField = (NumericDBField) getField(UID);
+        NumericDBField numField = getNumericField(UID);
 
         if (numField == null)
           {
@@ -371,7 +371,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         // set the new user account to type 'normal'.
 
-        InvidDBField catf = (InvidDBField) getField(userSchema.CATEGORY);
+        InvidDBField catf = getInvidField(userSchema.CATEGORY);
 
         Invid normalCat = getGSession().findLabeledObject("normal", userCategorySchema.BASE);
 
@@ -384,7 +384,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         // create a volume entry for the user.
 
-        InvidDBField invf = (InvidDBField) getField(userSchema.VOLUMES);
+        InvidDBField invf = getInvidField(userSchema.VOLUMES);
 
         try
           {
@@ -422,7 +422,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
                 Result objid = results.get(0);
 
                 DBEditObject eObj = getDBSession().editDBObject(invid);
-                invf = (InvidDBField) eObj.getField(mapEntrySchema.MAP);
+                invf = eObj.getInvidField(mapEntrySchema.MAP);
 
                 retVal = invf.setValueLocal(objid.getInvid());
 
@@ -619,7 +619,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
         String expireString = null;
 
         String mailUsername = (String) getFieldValueLocal(userSchema.MAILUSER);
-        PasswordDBField mailPasswordField = (PasswordDBField) getField(userSchema.MAILPASSWORD2);
+        PasswordDBField mailPasswordField = getPassField(userSchema.MAILPASSWORD2);
         String mailPassword = mailPasswordField.getPlainText();
 
         if (mailPassword == null)
@@ -653,13 +653,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
           }
         else
           {
-            PasswordDBField oldMailPasswordField = (PasswordDBField) originalObject.getField(userSchema.MAILPASSWORD2);
+            PasswordDBField oldMailPasswordField = originalObject.getPassField(userSchema.MAILPASSWORD2);
             String oldPassword = oldMailPasswordField.getPlainText();
 
             if (!mailUsername.equals(originalObject.getFieldValueLocal(userSchema.MAILUSER)) ||
                 !mailPassword.equals(oldPassword))
               {
-                PasswordDBField myOldPasswordField = (PasswordDBField) this.getField(userSchema.OLDMAILPASSWORD2);
+                PasswordDBField myOldPasswordField = this.getPassField(userSchema.OLDMAILPASSWORD2);
                 String myOldPassword = myOldPasswordField != null ? myOldPasswordField.getPlainText(): "";
 
                 if (this.getGSession().getSessionName().equals("ExternalMailTask") && myOldPassword.equals(oldPassword))
@@ -732,7 +732,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   private ReturnVal renameEntries(String newName)
   {
     ReturnVal retVal = null;
-    InvidDBField volumeMapEntries = (InvidDBField) getField(userSchema.VOLUMES);
+    InvidDBField volumeMapEntries = getInvidField(userSchema.VOLUMES);
     Vector<Invid> values = (Vector<Invid>) volumeMapEntries.getValuesLocal();
 
     for (Invid entryInvid: values)
@@ -1008,7 +1008,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
           {
             try
               {
-                ((DBField) getField(userSchema.CATEGORY)).setValue(category, local, true);
+                getField(userSchema.CATEGORY).setValue(category, local, true);
               }
             catch (GanyPermissionsException ex)
               {
@@ -1025,8 +1025,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         // and clone the embedded objects
 
-        InvidDBField newVolumes = (InvidDBField) getField(userSchema.VOLUMES);
-        InvidDBField oldVolumes = (InvidDBField) origObj.getField(userSchema.VOLUMES);
+        InvidDBField newVolumes = getInvidField(userSchema.VOLUMES);
+        InvidDBField oldVolumes = origObj.getInvidField(userSchema.VOLUMES);
 
         Vector<Invid> newOnes = (Vector<Invid>) newVolumes.getValuesLocal();
         Vector<Invid> oldOnes = (Vector<Invid>) oldVolumes.getValuesLocal();
@@ -1247,7 +1247,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     StringDBField deliveryAddresses = null;
     Vector<String> values = null;
 
-    deliveryAddresses = (StringDBField) object.getField(userSchema.EMAILTARGET);
+    deliveryAddresses = object.getStringField(userSchema.EMAILTARGET);
 
     if (deliveryAddresses == null)
       {
@@ -1495,7 +1495,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if (object instanceof DBEditObject)
       {
-        gSession = ((DBEditObject) object).getGSession();
+        gSession = object.getGSession();
       }
     else
       {
@@ -1755,7 +1755,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
         // ok, we want to null the password field and set the
         // removal time to current time + 3 months.
 
-        passfield = (PasswordDBField) getField(userSchema.PASSWORD);
+        passfield = getPassField(userSchema.PASSWORD);
         retVal = passfield.setCryptPass(null); // we know our schema uses crypted pass'es
 
         if (retVal != null && !retVal.didSucceed())
@@ -1776,7 +1776,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
           {
             // set the shell to /bin/false
 
-            stringfield = (StringDBField) getField(LOGINSHELL);
+            stringfield = getStringField(LOGINSHELL);
             retVal = stringfield.setValueLocal("/bin/false");
 
             if (retVal != null && !retVal.didSucceed())
@@ -1794,7 +1794,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         if (forward != null && !forward.equals(""))
           {
-            stringfield = (StringDBField) getField(EMAILTARGET);
+            stringfield = getStringField(EMAILTARGET);
 
             while (stringfield.size() > 0)
               {
@@ -1822,7 +1822,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         // and set the removal date
 
-        date = (DateDBField) getField(SchemaConstants.RemovalField);
+        date = getDateField(SchemaConstants.RemovalField);
         retVal = date.setValueLocal(cal.getTime());
 
         if (retVal != null && !retVal.didSucceed())
@@ -1838,7 +1838,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
         // make sure that the expiration date is cleared.. we're on
         // the removal track now.
 
-        date = (DateDBField) getField(SchemaConstants.ExpirationField);
+        date = getDateField(SchemaConstants.ExpirationField);
         retVal = date.setValueLocal(null);
 
         if (retVal != null && !retVal.didSucceed())
@@ -1996,7 +1996,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         if (reactivateWizard.password != null && reactivateWizard.password.length() != 0)
           {
-            passfield = (PasswordDBField) getField(userSchema.PASSWORD);
+            passfield = getPassField(userSchema.PASSWORD);
             retVal = passfield.setPlainTextPass(reactivateWizard.password);
 
             if (retVal != null && !retVal.didSucceed())
@@ -2015,7 +2015,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         if (reactivateWizard.shell != null)
           {
-            stringfield = (StringDBField) getField(LOGINSHELL);
+            stringfield = getStringField(LOGINSHELL);
 
             try
               {
@@ -2038,7 +2038,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         if (reactivateWizard.forward != null && !reactivateWizard.forward.equals(""))
           {
-            stringfield = (StringDBField) getField(EMAILTARGET);
+            stringfield = getStringField(EMAILTARGET);
 
             while (stringfield.size() > 0)
               {
@@ -2060,7 +2060,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         // make sure that the removal date is cleared..
 
-        date = (DateDBField) getField(SchemaConstants.RemovalField);
+        date = getDateField(SchemaConstants.RemovalField);
         retVal = date.setValueLocal(null);
 
         if (retVal != null && !retVal.didSucceed())
@@ -2124,7 +2124,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   @Override public ReturnVal remove()
   {
-    StringDBField deliveryAddresses = (StringDBField) this.getField(userSchema.EMAILTARGET);
+    StringDBField deliveryAddresses = this.getStringField(userSchema.EMAILTARGET);
     Vector<String> values = (Vector<String>) deliveryAddresses.getValuesLocal();
 
     for (String x: values)
@@ -2281,7 +2281,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
           }
         else
           {
-            name = (String) ((DBField) getField(USERNAME)).getValueLocal();
+            name = (String) getField(USERNAME).getValueLocal();
 
             if (name != null)
               {
@@ -2291,7 +2291,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         // and any aliases defined
 
-        Vector<String> values = (Vector<String>) ((DBField) getField(ALIASES)).getValuesLocal();
+        Vector<String> values = (Vector<String>) getField(ALIASES).getValuesLocal();
 
         for (String str: values)
           {
@@ -2515,7 +2515,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         Date maxDate = getMaxPasswordExtension();
 
-        DateDBField passDateField = (DateDBField) getField(userSchema.PASSWORDCHANGETIME);
+        DateDBField passDateField = getDateField(userSchema.PASSWORDCHANGETIME);
 
         if (passDateField != null)
           {
@@ -2624,7 +2624,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
         // the password is being changed, update the time that it will need to
         // be changed again
 
-        DateDBField dateField = (DateDBField) getField(userSchema.PASSWORDCHANGETIME);
+        DateDBField dateField = getDateField(userSchema.PASSWORDCHANGETIME);
 
         if (dateField != null)
           {
@@ -2702,9 +2702,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
             DBObject category = internalSession().getDBSession().viewDBObject(catInvid);
 
-            Boolean expDateRequired = (Boolean) category.getFieldValueLocal(userCategorySchema.EXPIRE);
-
-            if (expDateRequired.booleanValue())
+            if (category.isSet(userCategorySchema.EXPIRE))
               {
                 return Ganymede.createErrorDialog(this.getGSession(),
                                                   "Schema Error",
@@ -2761,13 +2759,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
             // signature alias field will need to be rescanned
 
-            sf = (StringDBField) getField(USERNAME); // old user name
+            sf = getStringField(USERNAME); // old user name
 
             oldName = (String) sf.getValueLocal();
 
             if (oldName != null)
               {
-                sf = (StringDBField) getField(SIGNATURE); // signature alias
+                sf = getStringField(SIGNATURE); // signature alias
 
                 // if the signature alias was the user's name, we'll want
                 // to continue that.
@@ -2791,14 +2789,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
             if (homedir != null && homedir.length() != 0)
               {
-                sf = (StringDBField) getField(HOMEDIR);
+                sf = getStringField(HOMEDIR);
 
                 sf.setValueLocal(homedir + (String) value);     // ** ARL
               }
 
             // if we don't have a signature set, set it to the username.
 
-            sf = (StringDBField) getField(SIGNATURE);
+            sf = getStringField(SIGNATURE);
 
             String sigVal = (String) sf.getValueLocal();
 
@@ -2810,7 +2808,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
             // update the email target field.  We want to look for
             // oldName@arlut.utexas.edu and replace it if we find it.
 
-            sf = (StringDBField) getField(EMAILTARGET);
+            sf = getStringField(EMAILTARGET);
 
             if (mailsuffix == null)
               {
@@ -2834,7 +2832,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
                 sf.addElementLocal(value + mailsuffix);
               }
 
-            inv = (InvidDBField) getField(PERSONAE);
+            inv = getInvidField(PERSONAE);
 
             if (inv == null)
               {
@@ -3127,9 +3125,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
             if (Boolean.TRUE.equals(param1))
               {
-                StringDBField usernameField = (StringDBField) getField(userSchema.MAILUSER);
-                PasswordDBField passField = (PasswordDBField) getField(userSchema.MAILPASSWORD2);
-                DateDBField dateField = (DateDBField) getField(userSchema.MAILEXPDATE);
+                StringDBField usernameField = getStringField(userSchema.MAILUSER);
+                PasswordDBField passField = getPassField(userSchema.MAILPASSWORD2);
+                DateDBField dateField = getDateField(userSchema.MAILEXPDATE);
 
                 result = ReturnVal.merge(result, usernameField.setValueLocal(RandomUtils.getRandomUsername()));
 
@@ -3605,7 +3603,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     // get the volumes defined for the user on auto.home.default
 
-    InvidDBField mapEntries = (InvidDBField) getField(userSchema.VOLUMES);
+    InvidDBField mapEntries = getInvidField(userSchema.VOLUMES);
     Vector<Invid> entries = (Vector<Invid>) mapEntries.getValuesLocal();
 
     if (entries.size() < 1)
@@ -3881,7 +3879,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     DBObject obj = getOriginal();
 
-    InvidDBField mapEntries = (InvidDBField) obj.getField(userSchema.VOLUMES);
+    InvidDBField mapEntries = obj.getInvidField(userSchema.VOLUMES);
     Vector<Invid> entries = (Vector<Invid>) mapEntries.getValuesLocal();
 
     if (entries.size() < 1)

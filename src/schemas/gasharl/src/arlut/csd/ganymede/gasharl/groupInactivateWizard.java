@@ -11,7 +11,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -50,6 +50,8 @@ package arlut.csd.ganymede.gasharl;
 import java.rmi.RemoteException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 
@@ -116,8 +118,8 @@ public class groupInactivateWizard extends GanymediatorWizard {
    * groupCustom. They will be passed in another hash, however.
    */
 
-  Hashtable
-    userObjectHash = new Hashtable();
+  Map<String, DBObject>
+    userObjectHash = new HashMap<String, DBObject>();
 
   /**
    * Hash of group names to group object invid's.  This is used to process
@@ -196,7 +198,7 @@ public class groupInactivateWizard extends GanymediatorWizard {
 
   public ReturnVal processDialog0()
   {
-    homeField = (InvidDBField) groupObject.getField(groupSchema.HOMEUSERS);
+    homeField = groupObject.getInvidField(groupSchema.HOMEUSERS);
 
     StringBuffer buffer = new StringBuffer();
 
@@ -313,7 +315,7 @@ public class groupInactivateWizard extends GanymediatorWizard {
 
         userObjectHash.put(lh.getLabel(), user);
 
-        InvidDBField userGroupField = (InvidDBField) user.getField(userSchema.GROUPLIST);
+        InvidDBField userGroupField = user.getInvidField(userSchema.GROUPLIST);
         QueryResult queryr = userGroupField.encodedValues();
 
         // The list of groups will contain the current group,
@@ -416,14 +418,14 @@ public class groupInactivateWizard extends GanymediatorWizard {
             System.err.println("groupInactivateWizard: fixing up " + userName);
           }
 
-        DBObject usr = (DBObject) userObjectHash.get(userName);
+        DBObject usr = userObjectHash.get(userName);
 
         if (debug)
           {
             System.err.println("Setting home group for " + userName + " to " + newHomeGroup);
           }
 
-        InvidDBField ugField = (InvidDBField) usr.getField(userSchema.HOMEGROUP);
+        InvidDBField ugField = usr.getInvidField(userSchema.HOMEGROUP);
 
         try
           {

@@ -1283,7 +1283,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
                 if (targetObjectBase != null)
                   {
-                    DBObjectBaseField targetFieldDef = (DBObjectBaseField) targetObjectBase.getField(targetField);
+                    DBObjectBaseField targetFieldDef = targetObjectBase.getField(targetField);
 
                     if (targetFieldDef != null)
                       {
@@ -2990,7 +2990,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (inUseCache == null)
       {
-        inUseCache = Boolean.valueOf(((DBObjectBase) this.getBase()).fieldInUse(this));
+        inUseCache = Boolean.valueOf(this.getBase().fieldInUse(this));
       }
 
     return inUseCache.booleanValue();
@@ -3002,7 +3002,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public synchronized Base getBase()
+  public synchronized DBObjectBase getBase()
   {
     return base;
   }
@@ -3094,7 +3094,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                                           ts.l("setName.invalid_ganymede_name", name));
       }
 
-    DBObjectBaseField otherField = (DBObjectBaseField) ((DBObjectBase) getBase()).getField(name);
+    DBObjectBaseField otherField = getBase().getField(name);
 
     if (otherField != null)
       {
@@ -4264,14 +4264,15 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     if (!isString() && !isNumeric() && !isIP())
       {
         // "Can''t set a namespace constraint on this kind of field ({0}): {1}"
-        throw new IllegalStateException(ts.l("setNameSpace.bad_type", this.getTypeDesc(), this.toString()));
+        throw new IllegalStateException(ts.l("setNameSpace.bad_type",
+                                             this.getTypeDesc(),
+                                             this.toString()));
       }
-
-    // if we are not loading, don't allow a built-in universal field
-    // to be messed with
 
     if (isEditingProtectedBuiltInField())
       {
+        // "DBObjectBaseField: Schema Editing Error"
+        // "Can''t edit system field: {0}"
         return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
                                           ts.l("global.system_field", this.toString()));
       }
@@ -4329,20 +4330,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
         // this field is associated with a namespace.
 
-        Enumeration values;
-        DBNameSpace oldNamespace, tmpNS;
+        DBNameSpace oldNamespace = namespace;
 
-        /* -- */
-
-        oldNamespace = namespace;
-
-        values = base.getStore().nameSpaces.elements();
         namespace = null;
 
-        while (values.hasMoreElements() && (namespace == null))
+        for (DBNameSpace tmpNS: base.getStore().nameSpaces)
           {
-            tmpNS = (DBNameSpace) values.nextElement();
-
             if (tmpNS.getName().equalsIgnoreCase(nameSpaceId))
               {
                 namespace = tmpNS;
@@ -4376,7 +4369,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
                 for (DBObject obj: base.getObjects())
                   {
-                    lastFieldTried = (DBField) obj.getField(getID());
+                    lastFieldTried = obj.getField(getID());
 
                     if (lastFieldTried == null)
                       {
@@ -4600,7 +4593,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
         if (editor != null)
           {
-            DBObjectBase b = (DBObjectBase) editor.getBase(val);
+            DBObjectBase b = editor.getBase(val);
 
             if (b == null)
               {
@@ -4674,7 +4667,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
         // loading / initialization logic never uses names to
         // reference bases.
 
-        DBObjectBase b = (DBObjectBase) editor.getBase(baseName);
+        DBObjectBase b = editor.getBase(baseName);
 
         if (b == null)
           {
@@ -4708,7 +4701,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       }
     else
       {
-        DBObjectBase b = (DBObjectBase) base.getStore().getObjectBase(baseName);
+        DBObjectBase b = base.getStore().getObjectBase(baseName);
 
         // we're loading here.. i don't expect the DBStore
         // initializeSchema() method to actually use base names, but
@@ -4826,7 +4819,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
         if (editor != null)
           {
-            DBObjectBase b = (DBObjectBase) editor.getBase(allowedTarget);
+            DBObjectBase b = editor.getBase(allowedTarget);
 
             // we're looking up the object that we have pre-selected.. we
             // should always set a target object before trying to set a
@@ -4840,7 +4833,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                                                        this.toString()));
               }
 
-            DBObjectBaseField bF = b.getFieldDef(val);
+            DBObjectBaseField bF = b.getField(val);
 
             if (bF == null)
               {
@@ -4931,7 +4924,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     // The schema loading and initializing logic doesn't use field
     // names, so we know editor should be defined
 
-    b = (DBObjectBase) editor.getBase(allowedTarget);
+    b = editor.getBase(allowedTarget);
 
     try
       {

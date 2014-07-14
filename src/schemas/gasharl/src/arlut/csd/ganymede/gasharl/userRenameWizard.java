@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -222,7 +222,7 @@ public class userRenameWizard extends GanymediatorWizard {
     // One thing we need to check is whether the new name that they
     // are wanting is already an alias for them..
 
-    StringDBField aliases = (StringDBField) userObject.getField(userSchema.ALIASES);
+    StringDBField aliases = userObject.getStringField(userSchema.ALIASES);
 
     if (aliases != null)
       {

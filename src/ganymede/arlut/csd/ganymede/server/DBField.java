@@ -975,7 +975,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         return true;
       }
 
-    return hasChanged((DBField) orig.getField(getID()));
+    return hasChanged(orig.getField(getID()));
   }
 
   /**
@@ -1181,8 +1181,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
   public final boolean isVisible()
   {
-    return verifyReadPermission() &&
-      owner.getObjectHook().canSeeField(null, this);
+    return verifyReadPermission() && owner.getHook().canSeeField(null, this);
   }
 
   /**
@@ -1238,7 +1237,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         return null;
       }
 
-    return (DBObjectBaseField) base.getField(fieldcode);
+    return base.getField(fieldcode);
   }
 
   /**
@@ -1254,7 +1253,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         return null;
       }
 
-    return (DBObjectBaseField) base.getField(fieldcode);
+    return base.getField(fieldcode);
   }
 
   /**
@@ -1528,22 +1527,27 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     // be the last thing we do.. if it returns true, nothing
     // should stop us from running the change to completion
 
-    retVal = ReturnVal.merge(retVal, eObj.finalizeSetValue(this, submittedValue));
+    boolean setValue = false;
 
-    if (ReturnVal.didSucceed(retVal))
+    try
       {
-        this.value = submittedValue;
-      }
-    else
-      {
-        // our owner disapproved of the operation,
-        // undo the namespace manipulations, if any,
-        // and finish up.
+        retVal = ReturnVal.merge(retVal, eObj.finalizeSetValue(this, submittedValue));
 
-        if (ns != null)
+        if (ReturnVal.didSucceed(retVal))
           {
-            unmark(submittedValue);
-            mark(this.value);
+            this.value = submittedValue;
+            setValue = true;
+          }
+      }
+    finally
+      {
+        if (!setValue)
+          {
+            if (ns != null)
+              {
+                unmark(submittedValue);
+                mark(this.value);
+              }
           }
       }
 
@@ -1888,36 +1892,41 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
           }
       }
 
+    boolean setValue = false;
+
     // check our owner, do it.  Checking our owner should be the last
     // thing we do.. if it returns true, nothing should stop us from
     // running the change to completion
 
-    retVal = ReturnVal.merge(retVal, eObj.finalizeSetElement(this, index, submittedValue));
-
-    if (ReturnVal.didSucceed(retVal))
+    try
       {
-        values.set(index, submittedValue);
-      }
-    else
-      {
-        // our owner disapproved of the operation,
-        // undo the namespace manipulations, if any,
-        // and finish up.
+        retVal = ReturnVal.merge(retVal, eObj.finalizeSetElement(this, index, submittedValue));
 
-        if (ns != null)
+        if (ReturnVal.didSucceed(retVal))
           {
-            // values is in its final state.. if the submittedValue
-            // isn't in it anywhere, unmark it in the namespace
-
-            if (!values.contains(submittedValue))
+            values.set(index, submittedValue);
+            setValue = true;
+          }
+      }
+    finally
+      {
+        if (!setValue)
+          {
+            if (ns != null)
               {
-                unmark(submittedValue);
+                // values is in its final state.. if the submittedValue
+                // isn't in it anywhere, unmark it in the namespace
+
+                if (!values.contains(submittedValue))
+                  {
+                    unmark(submittedValue);
+                  }
+
+                // mark the old value.. we can always do this safely, even
+                // if the value was already marked
+
+                mark(values.get(index));
               }
-
-            // mark the old value.. we can always do this safely, even
-            // if the value was already marked
-
-            mark(values.get(index));
           }
       }
 
@@ -2138,23 +2147,32 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
           }
       }
 
-    retVal = ReturnVal.merge(retVal, eObj.finalizeAddElement(this, submittedValue));
+    boolean addedValue = false;
 
-    if (ReturnVal.didSucceed(retVal))
+    try
       {
-        getVectVal().add(submittedValue);
-      }
-    else
-      {
-        if (ns != null)
+        retVal = ReturnVal.merge(retVal, eObj.finalizeAddElement(this, submittedValue));
+
+        if (ReturnVal.didSucceed(retVal))
           {
-            // if the value that we were going to add is not
-            // left in our vector, unmark the to-be-added
-            // value
-
-            if (!getVectVal().contains(submittedValue))
+            getVectVal().add(submittedValue);
+            addedValue = true;
+          }
+      }
+    finally
+      {
+        if (!addedValue)
+          {
+            if (ns != null)
               {
-                unmark(submittedValue); // *sync* DBNameSpace
+                // if the value that we were going to add is not
+                // left in our vector, unmark the to-be-added
+                // value
+
+                if (!getVectVal().contains(submittedValue))
+                  {
+                    unmark(submittedValue); // *sync* DBNameSpace
+                  }
               }
           }
       }
@@ -2556,66 +2574,75 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     // okay, see if the DBEditObject is willing to allow all of these
     // elements to be added
 
-    retVal = ReturnVal.merge(retVal, eObj.finalizeAddElements(this, approvedValues));
+    boolean addedValues = false;
 
-    if (ReturnVal.didSucceed(retVal))
+    try
       {
-        // okay, we're allowed to do it, so we add them all
+        retVal = ReturnVal.merge(retVal, eObj.finalizeAddElements(this, approvedValues));
 
-        getVectVal().addAll(approvedValues);
-
-        if (retVal == null)
+        if (ReturnVal.didSucceed(retVal))
           {
-            retVal = ReturnVal.success();
-          }
+            // okay, we're allowed to do it, so we add them all
 
-        // if we were not able to copy some of the values (and we
-        // had copyFieldMode set), encode a description of what
-        // happened along with the success code
+            getVectVal().addAll(approvedValues);
+            addedValues = true;
 
-        if (errorBuf.length() != 0)
-          {
-            // "Warning"
-            retVal.setDialog(new JDialogBuff(ts.l("addElements.warning"),
-                                                errorBuf.toString(),
-                                                Ganymede.OK, // localized
-                                                null,
-                                                "ok.gif"));
-          }
+            if (retVal == null)
+              {
+                retVal = ReturnVal.success();
+              }
 
-        if (transformed)
-          {
-            // one or more of the values we were given to add was
-            // canonicalized or otherwise transformed.  let the client
-            // know it will need to ask us for the final state of the
-            // field.
+            // if we were not able to copy some of the values (and we
+            // had copyFieldMode set), encode a description of what
+            // happened along with the success code
 
-            retVal.requestRefresh(owner.getInvid(), this.getID());
+            if (errorBuf.length() != 0)
+              {
+                // "Warning"
+                retVal.setDialog(new JDialogBuff(ts.l("addElements.warning"),
+                                                 errorBuf.toString(),
+                                                 Ganymede.OK, // localized
+                                                 null,
+                                                 "ok.gif"));
+              }
+
+            if (transformed)
+              {
+                // one or more of the values we were given to add was
+                // canonicalized or otherwise transformed.  let the client
+                // know it will need to ask us for the final state of the
+                // field.
+
+                retVal.requestRefresh(owner.getInvid(), this.getID());
+              }
           }
       }
-    else
+    finally
       {
-        if (ns != null)
+        if (!addedValues)
           {
-            // for each value that we were going to add (and which we
-            // marked in our namespace above), we need to unmark it if
-            // it is not contained in our vector at this point.
-
-            for (Object item: VectorUtils.difference(approvedValues, getVectVal()))
+            if (ns != null)
               {
-                if (!ns.unmark(editset, item, this))
-                  {
-                    // "Error encountered attempting to dissociate
-                    // reserved value {0} from field {1}.  This
-                    // may be due to a server error, or it may be
-                    // due to a non-interactive transaction
-                    // currently at work trying to shuffle
-                    // namespace values between multiple objects.
-                    // In the latter case, you may be able to
-                    // succeed at this operation after the
-                    // non-interactive transaction gives up."
+                // for each value that we were going to add (and which we
+                // marked in our namespace above), we need to unmark it if
+                // it is not contained in our vector at this point.
 
-                    throw new RuntimeException(ts.l("global.bad_unmark", item, this));
+                for (Object item: VectorUtils.difference(approvedValues, getVectVal()))
+                  {
+                    if (!ns.unmark(editset, item, this))
+                      {
+                        // "Error encountered attempting to dissociate
+                        // reserved value {0} from field {1}.  This
+                        // may be due to a server error, or it may be
+                        // due to a non-interactive transaction
+                        // currently at work trying to shuffle
+                        // namespace values between multiple objects.
+                        // In the latter case, you may be able to
+                        // succeed at this operation after the
+                        // non-interactive transaction gives up."
+
+                        throw new RuntimeException(ts.l("global.bad_unmark", item, this));
+                      }
                   }
               }
           }

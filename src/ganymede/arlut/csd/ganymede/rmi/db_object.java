@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -305,6 +305,300 @@ public interface db_object extends java.rmi.Remote {
    */
 
   public Vector getFieldValues(short fieldID) throws RemoteException;
+
+  /**
+   * <p>Shortcut method to test to see if a vector field contains a
+   * given value.</p>
+   *
+   * <p>If no such Vector field is defined on this object type, an
+   * IllegalArgumentException will be thrown.  If such a Vector field
+   * is defined on this object type but is not present in this
+   * instance, false will be returned.</p>
+   */
+
+  public boolean containsFieldValue(short fieldID, Object val) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for boolean_field.
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a boolean_field if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public boolean_field getBooleanField(short fieldID) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for BooleanDBFields.
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a BooleanDBField if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public boolean_field getBooleanField(String fieldname) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for date_field.
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a date_field if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public date_field getDateField(short fieldID) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for date_field.
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a date_field if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public date_field getDateField(String fieldname) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for field_option_field.
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a field_option_field if field fieldID is present and of
+   * the proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public field_option_field getFieldOptionsField(short fieldID) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for field_option_field.
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a field_option_field if field fieldname is present and of
+   * the proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public field_option_field getFieldOptionsField(String fieldname) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for float_field.
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a float_field if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public float_field getFloatField(short fieldID) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for float_field.
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a float_field if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public float_field getFloatField(String fieldname) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for invid_field.
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return an invid_field if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public invid_field getInvidField(short fieldID) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for invid_field.
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return an invid_field if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public invid_field getInvidField(String fieldname) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for ip_field.
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return an ip_field if field fieldID is present and of the proper
+   * type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public ip_field getIPField(short fieldID) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for ip_field.
+   *
+   * @param fieldname The name of the field to retrieve
+   *
+   * @return an ip_field if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public ip_field getIPField(String fieldname) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for num_field.
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a num_field if field fieldID is present and of the proper
+   * type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public num_field getNumericField(short fieldID) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for num_field.
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a num_field if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public num_field getNumericField(String fieldname) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for pass_field.
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a pass_field if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public pass_field getPassField(short fieldID) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for pass_field.
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a pass_field if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public pass_field getPassField(String fieldname) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for perm_field.
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a perm_field if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public perm_field getPermField(short fieldID) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for perm_field.
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a perm_field if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public perm_field getPermField(String fieldname) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for string_field
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a string_field if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public string_field getStringField(short fieldID) throws RemoteException;
+
+  /**
+   * Server-side type casting field accessor for string_field.
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a string_field if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   */
+
+  public string_field getStringField(String fieldname) throws RemoteException;
 
   /**
    * <p>This method is used to provide a summary description of

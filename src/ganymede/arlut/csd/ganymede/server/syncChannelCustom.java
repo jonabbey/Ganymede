@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -125,7 +125,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 
     // a newly created Sync Channel object have its type set to manual
 
-    StringDBField typeField = (StringDBField) getField(SchemaConstants.SyncChannelTypeString);
+    StringDBField typeField = getStringField(SchemaConstants.SyncChannelTypeString);
 
     typeField.setValueLocal(ts.l("global.manual"));
 
@@ -161,7 +161,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getID() == SchemaConstants.SyncChannelTypeString)
       {
-        QueryResult syncTypes = new QueryResult(true);
+        QueryResult syncTypes = new QueryResult();
 
         syncTypes.addRow(ts.l("global.manual"));
         syncTypes.addRow(ts.l("global.incremental"));
@@ -271,7 +271,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == SchemaConstants.SyncChannelTypeString)
       {
-        NumericDBField indexField = (NumericDBField) getField(SchemaConstants.SyncChannelTypeNum);
+        NumericDBField indexField = getNumericField(SchemaConstants.SyncChannelTypeNum);
 
         String type = (String) value;
 
