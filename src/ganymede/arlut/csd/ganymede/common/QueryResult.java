@@ -76,10 +76,12 @@ import arlut.csd.Util.VecSortInsert;
  * methods that can be used to extract the results out of the
  * query/list.</p>
  *
- * <p>The individual elements of a Query Result are labeled {@link
- * arlut.csd.ganymede.common.Invid} references along with a set of
- * status bits.  See {@link
- * arlut.csd.ganymede.common.ObjectHandle}.</p>
+ * <p>The individual elements of a Query Result are {@link
+ * arlut.csd.ganymede.common.ObjectHandle ObjectHandles}, which
+ * transport labeled Invids with a set of object status bits, or in
+ * the case of QueryResults returned by {@link
+ * arlut.csd.ganymede.server.StringDBField#choices()}, simply the
+ * Strings provided as valid choices for string fields.</p>
  */
 
 public class QueryResult implements java.io.Externalizable {
