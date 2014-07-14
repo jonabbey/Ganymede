@@ -288,7 +288,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
   /**
    * Equality test.  This IPAddress can be compared to either
-   * another IPAddress object or to an array of Bytes.
+   * another IPAddress object or to an array of bytes.
    */
 
   @Override public boolean equals(Object value)
