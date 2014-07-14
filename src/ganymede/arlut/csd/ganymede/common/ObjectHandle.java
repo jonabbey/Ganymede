@@ -65,12 +65,20 @@ import arlut.csd.JDataComponent.listHandle;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class is used to group information about objects.  It is
- * used in the {@link arlut.csd.ganymede.common.QueryResult
- * QueryResult} class to keep things organized, and on the client to
- * keep track of the status of objects on the server.</p>
+ * <p>This class is used to hold serializable label, Invid and object
+ * status information.</p>
  *
- * @author Jonathan Abbey
+ * <p>ObjectHandles are collected in {@link
+ * arlut.csd.ganymede.common.QueryResult QueryResults}, which are
+ * returned by certain query operations in {@link
+ * arlut.csd.ganymede.server.DBQueryEngine} and by the choices()
+ * method in the {@link arlut.csd.ganymede.server.StringDBField} and
+ * {@link arlut.csd.ganymede.server.InvidDBField} classes.</p>
+ *
+ * <p>Because QueryResult is also used to return string choices from
+ * the StringDBField.choices() method, ObjectHandles may have null
+ * Invids, in which case they are just used for transporting
+ * Strings.</p>
  */
 
 public class ObjectHandle implements Cloneable, Externalizable {
