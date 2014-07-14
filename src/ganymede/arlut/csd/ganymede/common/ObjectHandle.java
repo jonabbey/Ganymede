@@ -214,9 +214,18 @@ public class ObjectHandle implements Cloneable, Externalizable {
         status += 8;
       }
 
+    if (this.invid == null)
+      {
+        status += 16;
+      }
+
     out.writeByte(status);
     out.writeUTF(this.label);
-    this.invid.writeExternal(out);
+
+    if (this.invid != null)
+      {
+        this.invid.writeExternal(out);
+      }
   }
 
   public void readExternal(ObjectInput in) throws IOException
@@ -229,6 +238,12 @@ public class ObjectHandle implements Cloneable, Externalizable {
     this.editable = (status & 8) != 0;
 
     this.label = in.readUTF();
+
+    if ((status & 16) != 0)
+      {
+        this.invid = null;
+        return;
+      }
 
     Invid anInvid = new Invid();
     anInvid.readExternal(in);
