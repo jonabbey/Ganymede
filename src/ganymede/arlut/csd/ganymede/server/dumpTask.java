@@ -10,10 +10,10 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Contact information
@@ -59,7 +59,7 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Runnable class to do a journal sync.  Issued by the 
+ * <p>Runnable class to do a journal sync.  Issued by the
  * {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.</p>
  */
 
@@ -88,7 +88,7 @@ class dumpTask implements Runnable {
           }
 
         String error = GanymedeServer.lSemaphore.increment();
-        
+
         if (error != null)
           {
             Ganymede.debug(ts.l("semaphore_disabled", error));
@@ -100,7 +100,7 @@ class dumpTask implements Runnable {
           }
 
         started = true;
-        Ganymede.debug(ts.l("running", Integer.valueOf(Ganymede.db.journal.transactionsInJournal)));
+        Ganymede.debug(ts.l("running", Integer.valueOf(Ganymede.db.journal.getTransactionsInJournal())));
 
         try
           {

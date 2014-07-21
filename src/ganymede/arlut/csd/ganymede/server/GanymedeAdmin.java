@@ -15,7 +15,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -738,7 +738,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   private void doUpdateTransCount() throws RemoteException
   {
-    asyncPort.setTransactionsInJournal(Ganymede.db.journal.transactionsInJournal);
+    asyncPort.setTransactionsInJournal(Ganymede.db.journal.getTransactionsInJournal());
   }
 
   /**

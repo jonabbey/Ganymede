@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -133,18 +133,18 @@ public final class DBJournal implements ObjectStatus {
 
   private final DBStore store;
 
-  String filename;
-  RandomAccessFile jFile = null;
-  boolean dirty = false;        // dirty is true if the journal has any
-                                // transactions written out
+  private String filename;
+  private RandomAccessFile jFile = null;
+  private boolean dirty = false;        // dirty is true if the journal has any
+                                        // transactions written out
 
-  short file_major_version = -1;
-  short file_minor_version = -1;
+  private short file_major_version = -1;
+  private short file_minor_version = -1;
 
-  short file_dbstore_major_version = -1;
-  short file_dbstore_minor_version = -1;
+  private short file_dbstore_major_version = -1;
+  private short file_dbstore_minor_version = -1;
 
-  int transactionsInJournal = 0;
+  private int transactionsInJournal = 0;
 
   private DBJournalTransaction incompleteTransaction = null;
 
@@ -869,6 +869,19 @@ public final class DBJournal implements ObjectStatus {
   public boolean isClean()
   {
     return !dirty;
+  }
+
+  /**
+   * <p>Returns the number of transactions currently recorded in the
+   * on-disk journal file.</p>
+   *
+   * <p>The precise value is not critical, so this is
+   * unsynchronized</p>
+   */
+
+  public int getTransactionsInJournal()
+  {
+    return this.transactionsInJournal;
   }
 
   /**
