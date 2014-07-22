@@ -54,8 +54,9 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Vector;
+import java.util.List;
 
 import arlut.csd.Util.StringUtils;
 import arlut.csd.Util.TranslationService;
@@ -405,7 +406,7 @@ public final class DBJournal implements ObjectStatus {
     Date transactionDate = null;
     int object_count = 0;
     boolean EOFok = true;
-    Vector<JournalEntry> entries = null;
+    List<JournalEntry> entries = null;
     byte operation;
     short obj_type, obj_id;
     DBObjectBase base;
@@ -414,7 +415,7 @@ public final class DBJournal implements ObjectStatus {
     int nextTransactionNumber = 0;
     /* - */
 
-    entries = new Vector<JournalEntry>();
+    entries = new ArrayList<JournalEntry>();
 
     // skip past the journal header block
     readHeaders();
@@ -619,7 +620,7 @@ public final class DBJournal implements ObjectStatus {
               }
 
             // clear the entries we've now processed
-            entries.setSize(0);
+            entries.clear();
 
             EOFok = true;
           }
