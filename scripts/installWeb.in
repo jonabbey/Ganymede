@@ -35,6 +35,7 @@ chdir($rootdir);
          "HTMLINSTALL" => "/sample/apache/html/ganymede",
          "WEBURL" => "/ganymede",
 	 "XMLPATH" => "/ganymede-client/bin",
+	 "RESPONSIBLEEMAIL" => "example@example.com",
 	 "DOCS" => "yes",
 	 "ANT" => "/usr/bin/ant");
 
@@ -43,6 +44,7 @@ chdir($rootdir);
             "HTMLINSTALL" => "Where should the web access files be installed?",
             "WEBURL" => "What URL path will resolve to the Ganymede web access directory?",
 	    "XMLPATH" => "Where will the Ganymede client binaries be installed?",
+	    "RESPONSIBLEEMAIL" => "Who should receive email about Ganymede at your site?",
 	    "DOCS" => "Do you want the Ganymede documentation installed in this directory as well?",
 	    "ANT" => "Where is Apache Ant installed?");
 
@@ -135,6 +137,14 @@ foreach $step (@steps) {
 	}
     }
 
+    if ($step eq "RESPONSIBLEEMAIL") {
+      if ($vars{$step} !~ /@/) {
+	print "Email address is missing an @\n";
+	$vars{$step} = $old;
+	$success = 0;
+      }
+    }
+
     if ($step eq "WEBURL" && $vars{"WEBURL"} !~ /^https?:\/\//) {
       print "*Please provide a fully qualified URL.\n";
       $success = 0;
@@ -188,8 +198,6 @@ copy_file("webforms/ganymede_splash.png", "$installdir/ganymede_splash.png");
 # Customize and copy the client web pages
 
 install_file("webforms/index.html", "$installdir/index.html");
-install_file("webforms/client_native.html", "$installdir/client_native.html");
-install_file("webforms/console_native.html", "$installdir/console_native.html");
 install_file("webforms/ganypass.pl", "$installdir/ganypass.pl");
 install_file("webforms/gany_query.pl", "$installdir/gany_query.pl");
 install_file("webforms/client.jnlp", "$installdir/client.jnlp");
@@ -331,6 +339,7 @@ sub install_file{
       s/#SERVERHOST/$vars{"SYSTEMNAME"}/g;
       s/#REGISTRYPORT/$vars{"REGISTRYPORT"}/g;
       s/<#XMLPATH#>/$vars{"XMLPATH"}/g;
+      s/#RESPONSIBLEEMAIL/$vars{"RESPONSIBLEEMAIL"}/g;
       s/<##PERLEXE##>/$perlloc/g;
       s/#WEBROOT/$vars{"WEBURL"}/g;
       print OUTPUT $_;
