@@ -6,7 +6,7 @@
 
 # Ganymede is likely to write files that are security sensitive, so by
 # default, we won't let Ganymede create files or directories readable
-# by other users,.
+# by other users..
 
 umask 077;
 
