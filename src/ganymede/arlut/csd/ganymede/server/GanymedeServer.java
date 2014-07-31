@@ -639,6 +639,9 @@ public final class GanymedeServer implements Server {
                                                        null));
           }
 
+        // "Bad console attach attempt by: {0} from host {1}"
+        Ganymede.debug(ts.l("admin.badlogevent", clientName, clientHost));
+
         // "Login Failure"
         // "Bad username and/or password for admin console"
         return Ganymede.createErrorDialog(ts.l("admin.badlogin"),
