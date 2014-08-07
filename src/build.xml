@@ -6,6 +6,8 @@
 
 <project name="ganymede" default="build" basedir=".">
 
+  <property name="antversion.required" value="1.8"/>
+
   <!--
     Project-wide settings. All directories are relative to the project
     directories.
@@ -193,7 +195,10 @@
 
       http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/no_redeploy.html
 
-      for details. -->
+      for details.
+
+      NOTE: The <hostinfo/> element requires Ant 1.8.0 or later. -->
+
   <hostinfo/>
 
   <!-- Include the JarBundler task so that we can do Mac OS X specific
@@ -260,6 +265,14 @@ total         - Complete strip and rebuild
 
 
   <target name="prepare">
+    <antversion property="antversion.running" />
+    <fail message="FATAL ERROR: The running Ant version, ${antversion.running} is too old.  You should be running ${antversion.required} or later.">
+      <condition>
+	<not>
+	  <antversion atleast="${antversion.required}"/>
+	</not>
+      </condition>
+    </fail>
     <mkdir dir="${build.dir}"/>
     <mkdir dir="${build.lib}"/>
     <mkdir dir="${build.doc}"/>
