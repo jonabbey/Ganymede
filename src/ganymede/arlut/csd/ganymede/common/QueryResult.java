@@ -126,9 +126,7 @@ public class QueryResult implements java.io.Externalizable {
 
   public QueryResult()
   {
-    this.invidSet = new HashSet<Invid>();
-    this.labelSet = new HashSet<String>();
-    this.handles = new Vector<ObjectHandle>();
+    this.clear();
   }
 
   /**
@@ -140,6 +138,33 @@ public class QueryResult implements java.io.Externalizable {
   @Deprecated public QueryResult(boolean param)
   {
     this();
+  }
+
+  /**
+   * Initializes this QueryResult to its empty state.
+   */
+
+  public synchronized void clear()
+  {
+    this.invidSet = new HashSet<Invid>();
+    this.labelSet = new HashSet<String>();
+    this.handles = new Vector<ObjectHandle>();
+  }
+
+  /**
+   * Returns a private copy of this QueryResult that will not be
+   * affected if this QueryResult is subsequently modified.
+   */
+
+  public synchronized QueryResult getCopy()
+  {
+    QueryResult copy = new QueryResult();
+
+    copy.invidSet = new HashSet<Invid>(this.invidSet);
+    copy.labelSet = new HashSet<String>(this.labelSet);
+    copy.handles = new Vector<ObjectHandle>(this.handles);
+
+    return copy;
   }
 
   /**
@@ -310,13 +335,14 @@ public class QueryResult implements java.io.Externalizable {
   }
 
   /**
-   * Returns a (possibly filtered) {@link arlut.csd.JDataComponent.listHandle listHandle}
-   * Vector representation of the results included in this QueryResult.
+   * Returns a (possibly filtered) {@link
+   * arlut.csd.JDataComponent.listHandle listHandle} Vector
+   * representation of the results included in this QueryResult.
    *
-   * @param includeInactives if false, inactive objects' handles won't be included
-   * in the returned vector
-   * @param includeNonEditables if false, non-editable objects' handles won't be included
-   * in the returned vector
+   * @param includeInactives if false, inactive objects' handles won't
+   * be included in the returned vector
+   * @param includeNonEditables if false, non-editable objects'
+   * handles won't be included in the returned vector
    */
 
   public synchronized Vector<listHandle> getListHandles(boolean includeInactives,
@@ -443,6 +469,8 @@ public class QueryResult implements java.io.Externalizable {
 
     return result;
   }
+
+  // externalization methods
 
   public synchronized void writeExternal(ObjectOutput out) throws IOException
   {
