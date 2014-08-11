@@ -65,8 +65,8 @@ import arlut.csd.JDataComponent.listHandle;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class is used to hold serializable label, Invid and object
- * status information.</p>
+ * <p>This immutable class is used to hold serializable label, Invid
+ * and object status information.</p>
  *
  * <p>ObjectHandles are collected in {@link
  * arlut.csd.ganymede.common.QueryResult QueryResults}, which are
@@ -83,6 +83,7 @@ import arlut.csd.JDataComponent.listHandle;
 
 public class ObjectHandle implements Cloneable, Externalizable {
 
+  private boolean externalizing;
   private String label;
   private Invid invid;
   private boolean editable = false;
@@ -94,10 +95,15 @@ public class ObjectHandle implements Cloneable, Externalizable {
 
   /**
    * Default no-arg constructor for Externalization
+   *
+   * When this constructor is called, readExternal() can be called to
+   * load state into this object.  After readExternal() returns, no
+   * further modifications to this object can be made.
    */
 
   public ObjectHandle()
   {
+    this.externalizing = true;
   }
 
   public ObjectHandle(String label, Invid invid,
@@ -112,6 +118,23 @@ public class ObjectHandle implements Cloneable, Externalizable {
     this.expirationSet = expirationSet;
     this.removalSet = removalSet;
     this.editable = editable;
+    this.externalizing = false;
+  }
+
+  /**
+   * Relabel copy constructor
+   */
+
+  public ObjectHandle(ObjectHandle original,
+                      String newLabel)
+  {
+    this.label = newLabel;
+    this.invid = original.invid;
+    this.inactive = original.inactive;
+    this.expirationSet = original.expirationSet;
+    this.removalSet = original.removalSet;
+    this.editable = original.editable;
+    this.externalizing = false;
   }
 
   public Object clone()
@@ -132,19 +155,9 @@ public class ObjectHandle implements Cloneable, Externalizable {
     return label;
   }
 
-  public final void setLabel(String label)
-  {
-    this.label = label;
-  }
-
   public final Invid getInvid()
   {
     return invid;
-  }
-
-  public final void setInvid(Invid invid)
-  {
-    this.invid = invid;
   }
 
   public final boolean isInactive()
@@ -152,19 +165,9 @@ public class ObjectHandle implements Cloneable, Externalizable {
     return inactive;
   }
 
-  public void setInactive(boolean isInactive)
-  {
-    this.inactive = isInactive;
-  }
-
   public final boolean isExpirationSet()
   {
     return expirationSet;
-  }
-
-  public void setExpirationSet(boolean expirationSet)
-  {
-    this.expirationSet = expirationSet;
   }
 
   public final boolean isRemovalSet()
@@ -172,19 +175,9 @@ public class ObjectHandle implements Cloneable, Externalizable {
     return removalSet;
   }
 
-  public void setRemovalSet(boolean removalSet)
-  {
-    this.removalSet = removalSet;
-  }
-
   public final boolean isEditable()
   {
     return editable;
-  }
-
-  public final void setEditable(boolean editable)
-  {
-    this.editable = editable;
   }
 
   /**
@@ -238,6 +231,11 @@ public class ObjectHandle implements Cloneable, Externalizable {
 
   public void readExternal(ObjectInput in) throws IOException
   {
+    if (!this.externalizing)
+      {
+        throw new RuntimeException("Invalid double de-externalization");
+      }
+
     byte status = in.readByte();
 
     this.inactive = (status & 1) != 0;
@@ -256,6 +254,8 @@ public class ObjectHandle implements Cloneable, Externalizable {
     Invid anInvid = new Invid();
     anInvid.readExternal(in);
     this.invid = anInvid.intern();
+
+    this.externalizing = false;
   }
 
   /**
