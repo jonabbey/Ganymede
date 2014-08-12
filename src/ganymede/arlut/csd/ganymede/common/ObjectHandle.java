@@ -236,26 +236,31 @@ public class ObjectHandle implements Cloneable, Externalizable {
         throw new RuntimeException("Invalid double de-externalization");
       }
 
-    byte status = in.readByte();
-
-    this.inactive = (status & 1) != 0;
-    this.expirationSet = (status & 2) != 0;
-    this.removalSet = (status & 4) != 0;
-    this.editable = (status & 8) != 0;
-
-    this.label = in.readUTF();
-
-    if ((status & 16) != 0)
+    try
       {
-        this.invid = null;
-        return;
+        byte status = in.readByte();
+
+        this.inactive = (status & 1) != 0;
+        this.expirationSet = (status & 2) != 0;
+        this.removalSet = (status & 4) != 0;
+        this.editable = (status & 8) != 0;
+
+        this.label = in.readUTF();
+
+        if ((status & 16) != 0)
+          {
+            this.invid = null;
+            return;
+          }
+
+        Invid anInvid = new Invid();
+        anInvid.readExternal(in);
+        this.invid = anInvid.intern();
       }
-
-    Invid anInvid = new Invid();
-    anInvid.readExternal(in);
-    this.invid = anInvid.intern();
-
-    this.externalizing = false;
+    finally
+      {
+        this.externalizing = false;
+      }
   }
 
   /**
