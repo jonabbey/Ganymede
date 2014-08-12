@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -80,7 +80,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
    * names to choose from.
    */
 
-  static QueryResult eventNames = null;
+  static private QueryResult eventNames = null;
 
   static
   {
@@ -223,7 +223,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == SchemaConstants.ObjectEventToken)
       {
-        return eventNames;
+        return eventNames.getCopy();
       }
 
     return super.obtainChoiceList(field);
