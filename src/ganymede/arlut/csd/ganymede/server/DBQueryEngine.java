@@ -884,7 +884,8 @@ public final class DBQueryEngine {
   /**
    * <p>If we can do a direct lookup, either because query is asking
    * for an Invid, or because we're doing a direct equality test on a
-   * namespace controlled field, we'll return true.</p>
+   * namespace controlled field, we'll return true after calling
+   * addResultRow() to add the answer to the QueryResult param.</p>
    *
    * <p>Otherwise, we'll return false, and queryDispatch() will need
    * to do an iteration over the objectbase to check the objects one
