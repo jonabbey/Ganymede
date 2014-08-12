@@ -163,9 +163,9 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
       {
         QueryResult syncTypes = new QueryResult();
 
-        syncTypes.addRow(ts.l("global.manual"));
-        syncTypes.addRow(ts.l("global.incremental"));
-        syncTypes.addRow(ts.l("global.fullstate"));
+        syncTypes.addRow(ts.l("global.manual")); // "Manual"
+        syncTypes.addRow(ts.l("global.incremental")); // "Automatic Incremental"
+        syncTypes.addRow(ts.l("global.fullstate")); // "Automatic Full State"
 
         return syncTypes;
       }
