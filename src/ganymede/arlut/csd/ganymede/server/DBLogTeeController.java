@@ -95,7 +95,7 @@ public class DBLogTeeController implements DBLogController {
 
   public synchronized void removeController(DBLogController controller)
   {
-    if (!controllers.contains(controller))
+    if (!this.controllers.contains(controller))
       {
         throw new IllegalArgumentException("No such controller");
       }
