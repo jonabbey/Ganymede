@@ -23,7 +23,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -200,7 +200,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
   public adminAsyncMessage[] getNextMsgs()
   {
     adminAsyncMessage event;
-    Vector items = new Vector();
+    Vector<adminAsyncMessage> items = new Vector<adminAsyncMessage>();
 
     /* -- */
 
@@ -225,7 +225,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
         while (ebSz > 0)
           {
             event = dequeue();
-            items.addElement(event);
+            items.add(event);
           }
       }
 
@@ -233,7 +233,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
 
     for (int i = 0; i < events.length; i++)
       {
-        events[i] = (adminAsyncMessage) items.elementAt(i);
+        events[i] = items.get(i);
       }
 
     return events;
