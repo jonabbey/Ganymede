@@ -743,6 +743,29 @@ public class StringUtils {
           }
       }
 
+    results = StringUtils.split("...", ".");
+
+    if (results.length == 4)
+      {
+        System.out.println("Pass split test 1");
+      }
+    else
+      {
+        System.out.println("Fail split test 1");
+      }
+
+    for (int i = 0; i < results.length; i++)
+      {
+        if (results[i] == null)
+          {
+            System.out.println("Fail split test 2 [" + i + "]");
+          }
+        else
+          {
+            System.out.println("Pass split test 2 [" + i + "]");
+          }
+      }
+
     System.out.println("\n-------------------- containsOnly() Tests --------------------\n");
 
 
@@ -780,6 +803,53 @@ public class StringUtils {
     else
       {
         System.out.println("Fail test 4");
+      }
+
+    System.out.println("\n-------------------- containsAll() Tests --------------------\n");
+
+    if (StringUtils.containsAll("test", null))
+      {
+        System.out.println("Pass test 5");
+      }
+    else
+      {
+        System.out.println("Fail test 5");
+      }
+
+    if (StringUtils.containsAll("test", ""))
+      {
+        System.out.println("Pass test 6");
+      }
+    else
+      {
+        System.out.println("Fail test 6");
+      }
+
+    if (StringUtils.containsAll("test", "t"))
+      {
+        System.out.println("Pass test 7");
+      }
+    else
+      {
+        System.out.println("Fail test 7");
+      }
+
+    if (StringUtils.containsAll("test", "tset"))
+      {
+        System.out.println("Pass test 8");
+      }
+    else
+      {
+        System.out.println("Fail test 8");
+      }
+
+    if (!StringUtils.containsAll("test", "test!"))
+      {
+        System.out.println("Pass test 9");
+      }
+    else
+      {
+        System.out.println("Fail test 9");
       }
   }
 }
