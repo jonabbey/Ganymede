@@ -189,6 +189,39 @@ public class StringUtils {
   }
 
   /**
+   * <p>Returns true if inputString contains each and every character
+   * in searchChars.</p>
+   *
+   * <p>Note that containsAll will always return true if searchChars
+   * is null or empty.</p>
+   */
+
+  public static boolean containsAll(String inputString, String searchChars)
+  {
+    if (searchChars == null || searchChars.length() == 0)
+      {
+        return true;
+      }
+
+    if (inputString == null || inputString.length() == 0)
+      {
+        return false;
+      }
+
+    for (int i = 0; i < searchChars.length(); i++)
+      {
+        char c = searchChars.charAt(i);
+
+        if (inputString.indexOf(c) == -1)
+          {
+            return false;
+          }
+      }
+
+    return true;
+  }
+
+  /**
    * <p>This method takes an inputString and counts the number of times
    * that patternString occurs within it.</p>
    */
