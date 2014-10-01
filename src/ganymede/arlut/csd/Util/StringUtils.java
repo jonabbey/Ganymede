@@ -391,36 +391,9 @@ public class StringUtils {
 
   public static String[] split(String inputString, String splitString)
   {
-    int index;
-    int count = StringUtils.count(inputString, splitString);
-    int upperBound = inputString.length();
-    String results[] = new String[count+1];
+    Pattern splitPat = Pattern.compile(Pattern.quote(splitString));
 
-    /* -- */
-
-    index = 0;
-    count = 0;
-
-    while (index < upperBound)
-      {
-        int nextIndex = inputString.indexOf(splitString, index);
-
-        if (nextIndex == -1)
-          {
-            results[count++] = inputString.substring(index);
-            return results;
-          }
-        else
-          {
-            results[count++] = inputString.substring(index, nextIndex);
-          }
-
-        index = nextIndex + splitString.length();
-      }
-
-    // we should never get here
-
-    return results;
+    return splitPat.split(inputString, -1);
   }
 
   /**
