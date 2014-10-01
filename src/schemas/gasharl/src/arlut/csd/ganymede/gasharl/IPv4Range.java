@@ -11,7 +11,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -230,13 +230,19 @@ public class IPv4Range {
 
         for (int j = 0; j < octets.length; j++)
           {
+            if (octets[j].length() == 0)
+              {
+                throw new IllegalArgumentException("Error, line '" + lines[i] +
+                                                   "' has an empty string in byte " + j);
+              }
+
             if (!StringUtils.containsOnly(octets[j], "0123456789[-]"))
               {
                 throw new IllegalArgumentException("Error, line '" + lines[i] +
                                                    "' contains invalid characters in byte " + j);
               }
 
-            if (octets[j].indexOf("[") == -1 && octets[j].indexOf("]") == -1 && octets[j].indexOf("-") == -1)
+            if (StringUtils.containsOnly(octets[j], "0123456789"))
               {
                 // simple fixed value
 
@@ -249,11 +255,12 @@ public class IPv4Range {
 
                 _range[i][j][0] = IPAddress.u2s(val);
                 _range[i][j][1] = _range[i][j][0];
-              }
-            else
-              {
-                // assume a bracketed byte range
 
+                continue;
+              }
+
+            if (StringUtils.containsAll(octets[j], "[-]"))
+              {
                 if (!(octets[j].charAt(0) == '[' && octets[j].charAt(octets[j].length()-1) == ']'))
                   {
                     throw new IllegalArgumentException("Error, line '" + lines[i] +
@@ -282,7 +289,12 @@ public class IPv4Range {
 
                     _range[i][j][k] = IPAddress.u2s(val);
                   }
+
+                continue;
               }
+
+            throw new IllegalArgumentException("Error, line '" + lines[i] +
+                                               "' contains an invalid element in byte " + j);
           }
       }
 
