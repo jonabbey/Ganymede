@@ -159,8 +159,8 @@ public class StringUtils {
    * no characters not contained within legalChars, containsOnly() will
    * return true, otherwise it will return false.</p>
    *
-   * <p>Note that containsOnly will always return true if inputString is
-   * null.</p>
+   * <p>Note that containsOnly will always return true if inputString
+   * is null or empty.</p>
    */
 
   public static boolean containsOnly(String inputString, String legalChars)
