@@ -371,7 +371,17 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   public Base[] getBases(boolean embedded)
   {
-    return (Base[]) this.getDBBases(embedded);
+    // In RMI (at least in Java 8), we can't just cast an array of a
+    // concrete type and then expect the RMI system to properly create
+    // proxies on the client side.  We have to actually create an
+    // array of the RMI interface type and return that directly.
+
+    DBObjectBase[] bases = this.getDBBases(embedded);
+    Base[] result = new Base[bases.length];
+
+    System.arraycopy(bases, 0, result, 0, bases.length);
+
+    return result;
   }
 
   /**
@@ -446,7 +456,17 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   public Base[] getBases()
   {
-    return (Base[]) this.getDBBases();
+    // In RMI (at least in Java 8), we can't just cast an array of a
+    // concrete type and then expect the RMI system to properly create
+    // proxies on the client side.  We have to actually create an
+    // array of the RMI interface type and return that directly.
+
+    DBObjectBase[] bases = this.getDBBases();
+    Base[] result = new Base[bases.length];
+
+    System.arraycopy(bases, 0, result, 0, bases.length);
+
+    return result;
   }
 
   /**
