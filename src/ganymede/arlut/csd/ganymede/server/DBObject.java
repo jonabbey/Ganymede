@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -96,82 +96,95 @@ import arlut.csd.ganymede.rmi.db_object;
  * database.  DBObjects can be exported via RMI for remote access by
  * remote clients. Clients directly access instances of DBObject for
  * viewing or editing in the form of a {@link
- * arlut.csd.ganymede.rmi.db_object db_object} RMI interface type passed
- * as return value in calls made on the {@link
+ * arlut.csd.ganymede.rmi.db_object db_object} RMI interface type
+ * passed as return value in calls made on the {@link
  * arlut.csd.ganymede.rmi.Session Session} remote interface.</p>
  *
  * <p>A DBObject is identified by a unique identifier called an {@link
  * arlut.csd.ganymede.common.Invid Invid} and contains a set of {@link
- * arlut.csd.ganymede.server.DBField DBField} objects which hold the actual
- * data values held in the object.  The client typically interacts
- * with the fields held in this object directly using the {@link
- * arlut.csd.ganymede.rmi.db_field db_field} remote interface which is
- * returned by the DBObject getField methods.  DBObject is not
- * directly involved in the client's interaction with the DBFields,
- * although the DBFields will call methods on the owning DBObject to
- * consult about permissions and the like.  Clients that call the
- * GanymedeSession's {@link
+ * arlut.csd.ganymede.server.DBField DBField} objects which hold the
+ * actual data values held in the object.  The client typically
+ * interacts with the fields held in this object directly using the
+ * {@link arlut.csd.ganymede.rmi.db_field db_field} remote interface
+ * which is returned by the DBObject getField methods.  DBObject is
+ * not directly involved in the client's interaction with the
+ * DBFields, although the DBFields will call methods on the owning
+ * DBObject to consult about permissions and the like.  Clients that
+ * call the GanymedeSession's {@link
  * arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid)
  * view_db_object()} method to view a DBObject actually interact with
  * a copy of the DBObject created by the view_db_object() method to
  * enforce appropriate read permissions.</p>
  *
- * <p>A plain DBObject is not editable;  all value-changing calls to DBFields contained
- * in a plain DBObject will reject any change requests.  In order to edit a DBObject,
- * a client must get access to a {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}
- * object derived from the DBObject.  This is typically done by calling
- * {@link arlut.csd.ganymede.rmi.Session#edit_db_object(arlut.csd.ganymede.common.Invid) edit_db_object}
- * on the server's {@link arlut.csd.ganymede.rmi.Session Session} remote interface.</p>
+ * <p>A plain DBObject is not editable; all value-changing calls to
+ * DBFields contained in a plain DBObject will reject any change
+ * requests.  In order to edit a DBObject, a client must get access to
+ * a {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}
+ * object derived from the DBObject.  This is typically done by
+ * calling {@link
+ * arlut.csd.ganymede.rmi.Session#edit_db_object(arlut.csd.ganymede.common.Invid)
+ * edit_db_object} on the server's {@link
+ * arlut.csd.ganymede.rmi.Session Session} remote interface.</p>
  *
- * <p>The DBStore contains a single read-only DBObject in its database for each Invid.
- * In order to change a DBObject, that DBObject must have its
- * {@link arlut.csd.ganymede.server.DBObject#createShadow(arlut.csd.ganymede.server.DBEditSet) createShadow}
- * method called.  This is a synchronized method which attaches a new DBEditObject
- * to the DBObject.  Only one DBEditObject can be created from a single DBObject at
- * a time, and it must be created in the context of a
- * {@link arlut.csd.ganymede.server.DBEditSet DBEditSet} transaction object.  Once the DBEditObject
- * is created, that transaction has exclusive right to make changes to the DBEditObject.  When
- * the transaction is committed, a new DBObject is created from the values held in the
- * DBEditObject.  That DBObject is then placed back into the DBStore, replacing the
- * original DBObject.  If instead the transaction is aborted, the DBObject forgets about
- * the DBEditObject that had been attached to it and the DBObject is once again available
- * for other transactions to edit.</p>
+ * <p>The DBStore contains a single read-only DBObject in its database
+ * for each Invid.  In order to change a DBObject, that DBObject must
+ * have its {@link
+ * arlut.csd.ganymede.server.DBObject#createShadow(arlut.csd.ganymede.server.DBEditSet)
+ * createShadow} method called.  This is a synchronized method which
+ * attaches a new DBEditObject to the DBObject.  Only one DBEditObject
+ * can be created from a single DBObject at a time, and it must be
+ * created in the context of a {@link
+ * arlut.csd.ganymede.server.DBEditSet DBEditSet} transaction object.
+ * Once the DBEditObject is created, that transaction has exclusive
+ * right to make changes to the DBEditObject.  When the transaction is
+ * committed, a new DBObject is created from the values held in the
+ * DBEditObject.  That DBObject is then placed back into the DBStore,
+ * replacing the original DBObject.  If instead the transaction is
+ * aborted, the DBObject forgets about the DBEditObject that had been
+ * attached to it and the DBObject is once again available for other
+ * transactions to edit.</p>
  *
- * <p>Actually, the above picture is a bit too simple.  The server's DBStore object does
- * not directly contain DBObjects, but instead contains
- * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects, which define a type
- * of DBObject, and contain all DBObjects of that type in turn.  The DBObjectBase
- * is responsible for making sure that each DBObject has its own unique Invid based
- * on the DBObjectBase's type id and a unique number for the individual DBObject.</p>
+ * <p>Actually, the above picture is a bit too simple.  The server's
+ * DBStore object does not directly contain DBObjects, but instead
+ * contains {@link arlut.csd.ganymede.server.DBObjectBase
+ * DBObjectBase} objects, which define a type of DBObject, and contain
+ * all DBObjects of that type in turn.  The DBObjectBase is
+ * responsible for making sure that each DBObject has its own unique
+ * Invid based on the DBObjectBase's type id and a unique number for
+ * the individual DBObject.</p>
  *
- * <p>In terms of type definition, the DBObjectBase object acts as a template for
- * objects of the type.  Each DBObjectBase contains a set of
- * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} objects which
- * define the names and types of DBFields that a DBObject of that type is
- * meant to store.</p>
+ * <p>In terms of type definition, the DBObjectBase object acts as a
+ * template for objects of the type.  Each DBObjectBase contains a set
+ * of {@link arlut.csd.ganymede.server.DBObjectBaseField
+ * DBObjectBaseField} objects which define the names and types of
+ * DBFields that a DBObject of that type is meant to store.</p>
  *
- * <p>In addition, each DBObjectBase can be linked to a custom DBEditObject subclass
- * that oversees all kinds of operations on DBObjects of this kind.  Custom
- * DBEditObject subclasses can define special logic for object creation, viewing,
- * and editing, including custom object linking logic, acceptable value constraints,
- * and even step-by-step wizard dialog sequences to oversee certain kinds of
+ * <p>In addition, each DBObjectBase can be linked to a custom
+ * DBEditObject subclass that oversees all kinds of operations on
+ * DBObjects of this kind.  Custom DBEditObject subclasses can define
+ * special logic for object creation, viewing, and editing, including
+ * custom object linking logic, acceptable value constraints, and even
+ * step-by-step wizard dialog sequences to oversee certain kinds of
  * operations.</p>
  *
- * <p>All DBObjects have a certain number of DBFields pre-defined, including an
- * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} listing the owner groups
- * that this DBObject belongs to, a number of {@link arlut.csd.ganymede.server.StringDBField StringDBField}s
- * that contain information about the last admin to modify this DBObject,
- * {@link arlut.csd.ganymede.server.DateDBField DateDBField}s recording the creation and
- * last modification dates of this object, and so on.  See
- * {@link arlut.csd.ganymede.common.SchemaConstants SchemaConstants} for details on the
- * built-in field types.</p>
+ * <p>All DBObjects have a certain number of DBFields pre-defined,
+ * including an {@link arlut.csd.ganymede.server.InvidDBField
+ * InvidDBField} listing the owner groups that this DBObject belongs
+ * to, a number of {@link arlut.csd.ganymede.server.StringDBField
+ * StringDBField}s that contain information about the last admin to
+ * modify this DBObject, {@link arlut.csd.ganymede.server.DateDBField
+ * DateDBField}s recording the creation and last modification dates of
+ * this object, and so on.  See {@link
+ * arlut.csd.ganymede.common.SchemaConstants SchemaConstants} for
+ * details on the built-in field types.</p>
  *
- * <p>DBObject has had its synchronization revised so that only the createShadow,
- * clearShadow, getFieldPerm, receive, and emitXML methods are sync'ed on
- * the DBObject itself.  Everything else syncs on the field table held within
- * the DBObject.  createShadow() and clearShadow() in particular must remain
- * sync'ed on the same monitor, but for most things we want to sync on the
- * interior fieldAry.</p>
+ * <p>DBObject has had its synchronization revised so that only the
+ * createShadow, clearShadow, getFieldPerm, receive, and emitXML
+ * methods are sync'ed on the DBObject itself.  Everything else syncs
+ * on the field table held within the DBObject.  createShadow() and
+ * clearShadow() in particular must remain sync'ed on the same
+ * monitor, but for most things we want to sync on the interior
+ * fieldAry.</p>
  *
  * <p>Is all this clear?  Good!</p>
  *
@@ -471,7 +484,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
             if (typeDefinition.getField(field.getID()) != null && field.isDefined())
               {
-                this.fieldAry[i++] = field;
+                // we have to make a new copy of each field to make
+                // sure the final owner reference points back to us.
+
+                this.fieldAry[i++] = field.getCopy(this);
               }
           }
       }
@@ -489,15 +505,14 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public DBObject(DBObject original, GanymedeSession gSession)
   {
-    this.gSession = gSession;
-    this.myInvid = original.myInvid;
-    this.objectBase = original.objectBase;
-
     if (original == null || original.fieldAry == null)
       {
         throw new NullPointerException(ts.l("global.pseudostatic_constructor"));
       }
 
+    this.gSession = gSession;
+    this.myInvid = original.myInvid;
+    this.objectBase = original.objectBase;
     this.permCacheAry = new PermEntry[original.fieldAry.length];
 
     synchronized (original.fieldAry)
@@ -602,17 +617,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
           }
         else
           {
-            DBField fieldCopy = DBField.copyField(this, original.retrieveField(fieldRec.fieldcode));
+            DBField fieldCopy = DBField.copyField(this, original.getField(fieldRec.fieldcode));
 
             if (fieldRec.addValues != null)
               {
                 for (Object value: fieldRec.addValues)
                   {
-                    if (value instanceof IPwrap)
-                      {
-                        value = ((IPwrap) value).address;
-                      }
-
                     fieldCopy.getVectVal().add(value);
                   }
               }
@@ -621,11 +631,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
               {
                 for (Object value: fieldRec.delValues)
                   {
-                    if (value instanceof IPwrap)
-                      {
-                        value = ((IPwrap) value).address;
-                      }
-
                     fieldCopy.getVectVal().remove(value);
                   }
               }
@@ -648,6 +653,16 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
         fieldAry[i++] = field;
       }
+  }
+
+  /**
+   * Returns the non-editing DBEditObject singleton that provides
+   * management oversight to Objects of this type.
+   */
+
+  public final DBEditObject getHook()
+  {
+    return objectBase.getObjectHook();
   }
 
   /**
@@ -680,9 +695,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 
   /**
-   * <p>This method pulls the fields in this object from remote accessibility through
-   * RMI, possibly improving our security posture and reducing the memory loading
-   * on the RMI system.</p>
+   * <p>This method pulls the fields in this object from remote
+   * accessibility through RMI, possibly improving our security
+   * posture and reducing the memory loading on the RMI system.</p>
    */
 
   public final void unexportFields()
@@ -766,13 +781,24 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * Returns the original version of the object that we were created
+   * to edit.  If we are a newly created object, this method will
+   * return null.
+   */
+
+  public DBObject getOriginal()
+  {
+    return this;
+  }
+
+  /**
    * <p>Returns the field definition for the given field code, or null
    * if that field code is not registered with this object type.</p>
    */
 
   public final DBObjectBaseField getFieldDef(String fieldName)
   {
-    return (DBObjectBaseField) objectBase.getField(fieldName);
+    return objectBase.getField(fieldName);
   }
 
   /**
@@ -782,7 +808,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final DBObjectBaseField getFieldDef(short fieldcode)
   {
-    return (DBObjectBaseField) objectBase.getField(fieldcode);
+    return objectBase.getField(fieldcode);
   }
 
   /**
@@ -796,7 +822,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final PermEntry getFieldPerm(String fieldName)
   {
-    DBField f = (DBField) getField(fieldName);
+    DBField f = getField(fieldName);
 
     if (f == null)
       {
@@ -951,7 +977,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public String getLabel()
   {
-    DBField f = (DBField) getField(objectBase.getLabelField());
+    DBField f = getField(objectBase.getLabelField());
 
     if (f != null && f.isDefined())
       {
@@ -980,6 +1006,29 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * <p>If this object is not embedded, returns the label of this
+   * object in the same way that getLabel() does.</p>
+   *
+   * <p>If this object is embedded, returns a /-separated label
+   * containing the name of all containing objects followed by this
+   * object's label.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final String getPathLabel()
+  {
+    if (!isEmbedded())
+      {
+        return this.getLabel();
+      }
+    else
+      {
+        return getParentObj().getPathLabel() + "/" + this.getLabel();
+      }
+  }
+
+  /**
    * <p>If this object type is embedded, this method will return the
    * desired display label for the embedded object.</p>
    *
@@ -992,7 +1041,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public String getEmbeddedObjectDisplayLabel()
   {
-    return objectBase.getObjectHook().getEmbeddedObjectDisplayLabelHook(this);
+    return getHook().getEmbeddedObjectDisplayLabelHook(this);
   }
 
   /**
@@ -1002,7 +1051,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public final db_field getLabelField()
+  public final DBField getLabelField()
   {
     return getField(objectBase.getLabelField());
   }
@@ -1426,7 +1475,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       {
         for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
           {
-            field = retrieveField(fieldDef.getID());
+            field = getField(fieldDef.getID());
 
             if (field != null)
               {
@@ -1555,13 +1604,42 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <p>This method retrieves a DBField from this object's fieldAry
-   * DBField array.  retrieveField() uses a hashing algorithm to try
-   * and speed up field retrieving, but we are optimizing for low
-   * memory usage rather than O(1) operations.</p>
+   * <p>Returns true if this object contains the given field id.</p>
+   *
+   * <p>Not permission checked, server-side only.</p>
    */
 
-  final DBField retrieveField(short id)
+  public final boolean hasField(short id)
+  {
+    return (getField(id) != null);
+  }
+
+  /**
+   * <p>Returns true if this object contains the given field id.</p>
+   *
+   * <p>Not permission checked, server-side only.</p>
+   */
+
+  public final boolean hasField(String fieldName)
+  {
+    return (getField(fieldName) != null);
+  }
+
+
+  /**
+   * <p>Get read-only access to a field from this object, by name.</p>
+   *
+   * <p>This method retrieves a DBField from this object's fieldAry
+   * DBField array.  getField() uses a hashing algorithm to try
+   * and speed up field retrieving, but we are optimizing for low
+   * memory usage rather than O(1) operations.</p>
+   *
+   * @param fieldname The fieldname for the desired field of this object
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final DBField getField(short id)
   {
     if (fieldAry == null)
       {
@@ -1582,13 +1660,20 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * <p>Get access to a field from this object.  This method
+   * is exported to clients over RMI.</p>
+   *
    * <p>This method retrieves a DBField from this object's fieldAry
    * DBField array by field name.  This access is done slowly, using a
    * simple iteration over the values in our packed hash
    * structure.</p>
+   *
+   * @param id The field code for the desired field of this object.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  final DBField retrieveField(String fieldName)
+  public final DBField getField(String fieldName)
   {
     if (fieldAry == null)
       {
@@ -1664,33 +1749,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <p>Get access to a field from this object.  This method
-   * is exported to clients over RMI.</p>
-   *
-   * @param id The field code for the desired field of this object.
-   *
-   * @see arlut.csd.ganymede.rmi.db_object
-   */
-
-  public final db_field getField(short id)
-  {
-    return retrieveField(id);
-  }
-
-  /**
-   * <p>Get read-only access to a field from this object, by name.</p>
-   *
-   * @param fieldname The fieldname for the desired field of this object
-   *
-   * @see arlut.csd.ganymede.rmi.db_object
-   */
-
-  public final db_field getField(String fieldname)
-  {
-    return retrieveField(fieldname);
-  }
-
-  /**
    * <p>Returns the name of a field from this object.</p>
    *
    * @param id The field code for the desired field of this object.
@@ -1700,7 +1758,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final String getFieldName(short id)
   {
-    DBField field = retrieveField(id);
+    DBField field = getField(id);
 
     if (field != null)
       {
@@ -1847,8 +1905,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       }
 
     // sync on fieldAry since we are looping over our fields and since
-    // retrieveField itself sync's on fieldAry.  if we sync up front
-    // we may reduce our lock acquisition time marginally
+    // getField itself sync's on fieldAry.  if we sync up front we may
+    // reduce our lock acquisition time marginally
 
     synchronized (fieldAry)
       {
@@ -1859,7 +1917,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
         for (FieldTemplate template: fieldTemplates)
           {
-            DBField field = retrieveField(template.getID());
+            DBField field = getField(template.getID());
 
             if (field != null && field.isDefined())
               {
@@ -1928,8 +1986,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     /* -- */
 
-    // sync on fieldAry since we are looping over our fields and since retrieveField itself
-    // sync's on fieldAry
+    // sync on fieldAry since we are looping over our fields and since
+    // getField itself sync's on fieldAry
 
     if (fieldAry == null)
       {
@@ -1952,9 +2010,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
                 // on how the fieldRequired method is written.  I
                 // think this is a low-level risk, but not zero.
 
-                if (objectBase.getObjectHook().fieldRequired(this, fieldDef.getID()))
+                if (getHook().fieldRequired(this, fieldDef.getID()))
                   {
-                    DBField field = retrieveField(fieldDef.getID());
+                    DBField field = getField(fieldDef.getID());
 
                     if (field == null || !field.isDefined())
                       {
@@ -1991,7 +2049,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Date getRemovalDate()
   {
-    DateDBField dbf = (DateDBField) getField(SchemaConstants.RemovalField);
+    DateDBField dbf = getDateField(SchemaConstants.RemovalField);
 
     if (dbf == null)
       {
@@ -2032,7 +2090,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Date getExpirationDate()
   {
-    DateDBField dbf = (DateDBField) getField(SchemaConstants.ExpirationField);
+    DateDBField dbf = getDateField(SchemaConstants.ExpirationField);
 
     if (dbf == null)
       {
@@ -2049,7 +2107,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final boolean hasEmailTarget()
   {
-    return objectBase.getObjectHook().hasEmailTarget(this);
+    return getHook().hasEmailTarget(this);
   }
 
   /**
@@ -2059,7 +2117,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final List<String> getEmailTargets()
   {
-    return (List<String>) objectBase.getObjectHook().getEmailTargets(this);
+    return (List<String>) getHook().getEmailTargets(this);
   }
 
   /**
@@ -2073,7 +2131,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final String getImageURL()
   {
-    return objectBase.getObjectHook().getImageURLForObject(this);
+    return getHook().getImageURLForObject(this);
   }
 
   /**
@@ -2086,7 +2144,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final ReturnVal setFieldValue(String fieldName, Object value) throws GanyPermissionsException
   {
-    DBField field = (DBField) getField(fieldName);
+    DBField field = getField(fieldName);
 
     if (field == null)
       {
@@ -2135,7 +2193,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Object getFieldValue(String fieldName) throws GanyPermissionsException
   {
-    return this.getFieldValue((DBField) getField(fieldName));
+    return this.getFieldValue(getField(fieldName));
   }
 
   /**
@@ -2148,7 +2206,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Object getFieldValue(short fieldID) throws GanyPermissionsException
   {
-    return this.getFieldValue((DBField) getField(fieldID));
+    return this.getFieldValue(getField(fieldID));
   }
 
   private Object getFieldValue(DBField f) throws GanyPermissionsException
@@ -2174,7 +2232,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Object getFieldValueLocal(String fieldName)
   {
-    return this.getFieldValueLocal((DBField) getField(fieldName));
+    return this.getFieldValueLocal(getField(fieldName));
   }
 
   /**
@@ -2184,7 +2242,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Object getFieldValueLocal(short fieldID)
   {
-    return this.getFieldValueLocal((DBField) getField(fieldID));
+    return this.getFieldValueLocal(getField(fieldID));
   }
 
   private Object getFieldValueLocal(DBField f)
@@ -2427,7 +2485,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final boolean isDefined(String fieldName)
   {
-    return this.isDefined((DBField) getField(fieldName));
+    return this.isDefined(getField(fieldName));
   }
 
   /**
@@ -2438,7 +2496,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final boolean isDefined(short fieldID)
   {
-    return this.isDefined((DBField) getField(fieldID));
+    return this.isDefined(getField(fieldID));
   }
 
   /**
@@ -2460,7 +2518,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final boolean isSet(String fieldName)
   {
-    return this.isSet((DBField) getField(fieldName));
+    return this.isSet(getField(fieldName));
   }
 
   /**
@@ -2473,7 +2531,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final boolean isSet(short fieldID)
   {
-    return this.isSet((DBField) getField(fieldID));
+    return this.isSet(getField(fieldID));
   }
 
   /**
@@ -2523,7 +2581,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Vector getFieldValues(String fieldName) throws GanyPermissionsException
   {
-    DBField field = (DBField) this.getField(fieldName);
+    DBField field = this.getField(fieldName);
 
     if (field == null)
       {
@@ -2588,7 +2646,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Vector getFieldValues(short fieldID) throws GanyPermissionsException
   {
-    DBField field = (DBField) this.getField(fieldID);
+    DBField field = this.getField(fieldID);
     String fieldName = null;
 
     if (field == null)
@@ -2656,7 +2714,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Vector getFieldValuesLocal(String fieldName)
   {
-    DBField field = (DBField) this.getField(fieldName);
+    DBField field = this.getField(fieldName);
 
     if (field == null)
       {
@@ -2704,7 +2762,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Vector getFieldValuesLocal(short fieldID)
   {
-    DBField field = (DBField) this.getField(fieldID);
+    DBField field = this.getField(fieldID);
     String fieldName = null;
 
     if (field == null)
@@ -2762,7 +2820,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
         for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
           {
-            DBField field = retrieveField(fieldDef.getID());
+            DBField field = getField(fieldDef.getID());
 
             if (field != null)
               {
@@ -2786,6 +2844,70 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * <p>Shortcut method to test to see if a vector field contains a
+   * given value.</p>
+   *
+   * <p>If no such Vector field is defined on this object type, an
+   * IllegalArgumentException will be thrown.  If such a Vector field
+   * is defined on this object type but is not present in this
+   * instance, false will be returned.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final boolean containsFieldValue(short fieldID, Object val) throws GanyPermissionsException
+  {
+    DBField field = this.getField(fieldID);
+    String fieldName = null;
+
+    if (field == null)
+      {
+        return false;
+      }
+
+    fieldName = field.getName();
+
+    if (!field.isVector())
+      {
+        // "Couldn't get vector values on scalar field {0}"
+        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
+      }
+
+    return field.containsElement(val);
+  }
+
+  /**
+   * <p>Shortcut method to test to see if a vector field contains a
+   * given value.</p>
+   *
+   * <p>If no such Vector field is defined on this object type, an
+   * IllegalArgumentException will be thrown.  If such a Vector field
+   * is defined on this object type but is not present in this
+   * instance, false will be returned.</p>
+   */
+
+  public final boolean containsFieldValueLocal(short fieldID, Object val)
+  {
+    DBField field = this.getField(fieldID);
+    String fieldName = null;
+
+    if (field == null)
+      {
+        return false;
+      }
+
+    fieldName = field.getName();
+
+    if (!field.isVector())
+      {
+        // "Couldn't get vector values on scalar field {0}"
+        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
+      }
+
+    return field.containsElementLocal(val);
+  }
+
+  /**
    * <p>Shortcut method to retrieve a indexed value from a named
    * vector field in this object.</p>
    *
@@ -2798,7 +2920,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Object getFieldElement(String fieldName, int index) throws GanyPermissionsException
   {
-    return getFieldElement((DBField) getField(fieldName), index);
+    return getFieldElement(getField(fieldName), index);
   }
 
   /**
@@ -2813,7 +2935,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Object getFieldElement(short fieldID, int index) throws GanyPermissionsException
   {
-    return getFieldElement((DBField) getField(fieldID), index);
+    return getFieldElement(getField(fieldID), index);
   }
 
   /**
@@ -2848,7 +2970,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Object getFieldElementLocal(String fieldName, int index)
   {
-    return getFieldElementLocal((DBField) getField(fieldName), index);
+    return getFieldElementLocal(getField(fieldName), index);
   }
 
   /**
@@ -2863,7 +2985,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Object getFieldElementLocal(short fieldID, int index)
   {
-    return getFieldElementLocal((DBField) getField(fieldID), index);
+    return getFieldElementLocal(getField(fieldID), index);
   }
 
   /**
@@ -2926,7 +3048,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         return null;
       }
 
-    InvidDBField field = (InvidDBField) getField(SchemaConstants.ContainerField);
+    InvidDBField field = getInvidField(SchemaConstants.ContainerField);
 
     if (field == null)
       {
@@ -2934,6 +3056,388 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       }
 
     return field.getValueString();
+  }
+
+  /**
+   * Server-side type casting field accessor for BooleanDBFields.
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a BooleanDBField if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final BooleanDBField getBooleanField(short fieldID)
+  {
+    return (BooleanDBField) this.getField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for BooleanDBFields.
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a BooleanDBField if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final BooleanDBField getBooleanField(String fieldname)
+  {
+    return (BooleanDBField) this.getField(fieldname);
+  }
+
+  /**
+   * Server-side type casting field accessor for DateDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a DateDBField if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final DateDBField getDateField(short fieldID)
+  {
+    return (DateDBField) this.getField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for DateDBField
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a DateDBField if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final DateDBField getDateField(String fieldname)
+  {
+    return (DateDBField) this.getField(fieldname);
+  }
+
+  /**
+   * Server-side type casting field accessor for FieldOptionDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a FieldOptionDBField if field fieldID is present and of
+   * the proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final FieldOptionDBField getFieldOptionsField(short fieldID)
+  {
+    return (FieldOptionDBField) this.getField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for FieldOptionDBField
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a FieldOptionDBField if field fieldname is present and of
+   * the proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final FieldOptionDBField getFieldOptionsField(String fieldname)
+  {
+    return (FieldOptionDBField) this.getField(fieldname);
+  }
+
+  /**
+   * Server-side type casting field accessor for FloatDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a FloatDBField if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final FloatDBField getFloatField(short fieldID)
+  {
+    return (FloatDBField) this.getField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for FloatDBField
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a FloatDBField if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final FloatDBField getFloatField(String fieldname)
+  {
+    return (FloatDBField) this.getField(fieldname);
+  }
+
+  /**
+   * Server-side type casting field accessor for InvidDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return an InvidDBField if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final InvidDBField getInvidField(short fieldID)
+  {
+    return (InvidDBField) this.getField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for InvidDBField
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return an InvidDBField if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final InvidDBField getInvidField(String fieldname)
+  {
+    return (InvidDBField) this.getField(fieldname);
+  }
+
+  /**
+   * Server-side type casting field accessor for IPDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return an IPDBField if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final IPDBField getIPField(short fieldID)
+  {
+    return (IPDBField) this.getField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for IPDBField
+   *
+   * @param fieldname The name of the field to retrieve
+   *
+   * @return an IPDBField if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final IPDBField getIPField(String fieldname)
+  {
+    return (IPDBField) this.getField(fieldname);
+  }
+
+  /**
+   * Server-side type casting field accessor for NumericDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a NumericDBField if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final NumericDBField getNumericField(short fieldID)
+  {
+    return (NumericDBField) this.getField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for NumericDBField
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a NumericDBField if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final NumericDBField getNumericField(String fieldname)
+  {
+    return (NumericDBField) this.getField(fieldname);
+  }
+
+  /**
+   * Server-side type casting field accessor for PasswordDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a PasswordDBField if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final PasswordDBField getPassField(short fieldID)
+  {
+    return (PasswordDBField) this.getField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for PasswordDBField
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a PasswordDBField if field fieldname is present and of
+   * the proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final PasswordDBField getPassField(String fieldname)
+  {
+    return (PasswordDBField) this.getField(fieldname);
+  }
+
+  /**
+   * Server-side type casting field accessor for
+   * PermissionMatrixDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a PermissionMatrixDBField if field fieldID is present and
+   * of the proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final PermissionMatrixDBField getPermField(short fieldID)
+  {
+    return (PermissionMatrixDBField) this.getField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for
+   * PermissionMatrixDBField
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a PermissionMatrixDBField if field fieldname is present
+   * and of the proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final PermissionMatrixDBField getPermField(String fieldname)
+  {
+    return (PermissionMatrixDBField) this.getField(fieldname);
+  }
+
+  /**
+   * Server-side type casting field accessor for StringDBField
+   *
+   * @param fieldID The field id to retrieve.
+   *
+   * @return a StringDBField if field fieldID is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final StringDBField getStringField(short fieldID)
+  {
+    return (StringDBField) this.getField(fieldID);
+  }
+
+  /**
+   * Server-side type casting field accessor for StringDBField
+   *
+   * @param fieldname The name of the field to retrieve.
+   *
+   * @return a StringDBField if field fieldname is present and of the
+   * proper type, or null if it does not exist.
+   *
+   * @throw ClassCastException if the field doesn't have the
+   * appropriate type.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final StringDBField getStringField(String fieldname)
+  {
+    return (StringDBField) this.getField(fieldname);
   }
 
   /**
@@ -3124,7 +3628,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
       {
-        DBField field = retrieveField(fieldDef.getID());
+        DBField field = getField(fieldDef.getID());
 
         if (field != null && field.isDefined() && (local || field.isVisible()))
           {
@@ -3282,7 +3786,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public boolean has_key(Object key)
   {
-    return (retrieveField((String) key) != null);
+    return (getField((String) key) != null);
   }
 
   /**
@@ -3367,19 +3871,19 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     if (key instanceof PyInteger)
       {
         PyInteger pi = (PyInteger) key;
-        return (DBField) getField(Integer.valueOf(pi.getValue()).shortValue());
+        return getField(Integer.valueOf(pi.getValue()).shortValue());
       }
     else if (key instanceof Integer)
       {
-        return (DBField) getField(((Integer) key).shortValue());
+        return getField(((Integer) key).shortValue());
       }
     else if (key instanceof Short)
       {
-        return (DBField) getField(((Short) key).shortValue());
+        return getField(((Short) key).shortValue());
       }
     else if (key instanceof String)
       {
-        return (DBField) getField((String) key);
+        return getField((String) key);
       }
     return null;
   }

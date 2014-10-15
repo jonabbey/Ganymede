@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -87,9 +87,9 @@ public class AdminEntry implements java.io.Serializable {
     this.personaName = personaName;
     this.hostname = hostname;
     this.status = status;
-    this.connecttime = connecttime;
+    this.connecttime = connecttime != null ? new Date(connecttime.getTime()) : null;
     this.event = event;
-    this.eventtime = eventtime;
+    this.eventtime = eventtime != null ? new Date(eventtime.getTime()) : null;
     this.objectsCheckedOut = objectsCheckedOut;
   }
 }

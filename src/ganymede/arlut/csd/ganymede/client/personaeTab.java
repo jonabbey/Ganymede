@@ -4,16 +4,16 @@
 
    This class manages the admin personae tab (for User objects) in the
    Ganymede client.
-   
+
    Created: 21 June 2005
 
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2008
+
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Contact information
@@ -94,7 +94,7 @@ public class personaeTab extends clientTab {
   {
     try
       {
-        persona_field = (invid_field) parent.getObject().getField(SchemaConstants.UserAdminPersonae);
+        persona_field = parent.getObject().getInvidField(SchemaConstants.UserAdminPersonae);
         pP = new personaPanel(persona_field, parent.isEditable(), parent);
         contentPane.setLayout(new BorderLayout());
         contentPane.add("Center", pP);

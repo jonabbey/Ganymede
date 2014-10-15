@@ -70,7 +70,7 @@ import arlut.csd.Util.VectorUtils;
  * @see arlut.csd.ganymede.server.DBField
  */
 
-class fieldDeltaRec {
+final class fieldDeltaRec {
 
   short fieldcode;
   boolean vector;
@@ -110,6 +110,19 @@ class fieldDeltaRec {
   }
 
   /**
+   * This method is used to record a vector of values that have been
+   * added to this vector field.
+   */
+
+  void addValues(Vector values)
+  {
+    for (Object value: values)
+      {
+        this.addValue(value);
+      }
+  }
+
+  /**
    * This method is used to record a value that has been added
    * to this vector field.
    */
@@ -126,18 +139,26 @@ class fieldDeltaRec {
         addValues = new Vector();
       }
 
-    if (value instanceof Byte[])
-      {
-        value = new IPwrap((Byte []) value);
-      }
-
     if (delValues != null && delValues.contains(value))
       {
         delValues.removeElement(value);
       }
     else if (!addValues.contains(value))
       {
-        addValues.addElement(value);
+        addValues.add(value);
+      }
+  }
+
+  /**
+   * This method is used to record a vector of values that have been
+   * removed to this vector field.
+   */
+
+  void delValues(Vector values)
+  {
+    for (Object value: values)
+      {
+        this.delValue(value);
       }
   }
 
@@ -158,18 +179,13 @@ class fieldDeltaRec {
         delValues = new Vector();
       }
 
-    if (value instanceof Byte[])
-      {
-        value = new IPwrap((Byte []) value);
-      }
-
     if (addValues != null && addValues.contains(value))
       {
         addValues.removeElement(value);
       }
     else if (!delValues.contains(value))
       {
-        delValues.addElement(value);
+        delValues.add(value);
       }
   }
 

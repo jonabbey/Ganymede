@@ -55,16 +55,20 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.rmi.RemoteException;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -79,6 +83,7 @@ import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.ganymede.common.FieldInfo;
 import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.IPAddress;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.db_field;
 import arlut.csd.ganymede.rmi.db_object;
@@ -119,7 +124,7 @@ import arlut.csd.Util.TranslationService;
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
-public class vectorPanel extends JPanel implements JsetValueCallback, ActionListener, MouseListener, Runnable {
+public class vectorPanel extends JPanel implements JsetValueCallback, ActionListener, MouseListener, FocusListener, Runnable {
 
   /**
    * TranslationService object for handling string localization in the
@@ -167,7 +172,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
    * Button used to add a new element to the vector
    */
 
-  JButton
+  final JButton
     addB;
 
   /**
@@ -275,6 +280,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     // "Add {0}" button.
     name = template.getName();
     addB = new JButton(ts.l("init.add_button", name));
+    addB.addFocusListener(this);
 
     // Set up pop up menu
     //
@@ -350,7 +356,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
                 JIPField ipf = new JIPField(editable,
                                             ipfield.v6Allowed());
 
-                ipf.setValue((Byte[]) ipfield.getElement(i));
+                ipf.setValue((IPAddress) ipfield.getElement(i));
                 ipf.setCallback(this);
 
                 addElement(ipf, false);
@@ -829,15 +835,15 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
         if (my_field instanceof invid_field)
           {
             Invid invid = null;
-            Hashtable serverInvids = new Hashtable();
-            Hashtable localInvids = new Hashtable();
+            Hashtable<Invid, Integer> serverInvids = new Hashtable<Invid, Integer>();
+            HashSet<Invid> localInvids = new HashSet<Invid>();
             containerPanel cp = null;
 
             // figure out what invids are currently in my_field
             // on the server, save them so we can scratch them off
             // as we sync this vector panel
 
-            Vector serverValues = my_field.getValues();
+            Vector<Invid> serverValues = (Vector<Invid>) my_field.getValues();
 
             if (debug)
               {
@@ -846,7 +852,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
             for (int i = 0; i < serverValues.size(); i++)
               {
-                invid = (Invid) serverValues.elementAt(i);
+                invid = serverValues.get(i);
 
                 serverInvids.put(invid, Integer.valueOf(i));
               }
@@ -855,13 +861,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
             for (int i = 0; i < compVector.size(); i++)
               {
-                cp = (containerPanel) compVector.elementAt(i);
+                cp = (containerPanel) compVector.get(i);
 
                 if (cp != null)
                   {
                     invid = cp.getObjectInvid();
 
-                    localInvids.put(invid, invid);
+                    localInvids.add(invid);
                   }
               }
 
@@ -872,7 +878,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
             while (localInvids.size() > 0)
               {
-                cp = (containerPanel) compVector.elementAt(localIndex);
+                cp = (containerPanel) compVector.get(localIndex);
                 invid = cp.getObjectInvid();
 
                 if (serverInvids.containsKey(invid))
@@ -978,9 +984,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
               {
                 if (i < compVector.size())
                   {
-                    JIPField ipf = (JIPField) compVector.elementAt(i);
+                    JIPField ipf = (JIPField) compVector.get(i);
 
-                    ipf.setValue((Byte[])my_field.getElement(i));
+                    ipf.setValue((IPAddress)my_field.getElement(i));
 
                     elementWrapper ew = ewHash.get(ipf);
 
@@ -993,7 +999,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
                     JIPField ipf = new JIPField(editable,
                                                 ipfield.v6Allowed());
 
-                    ipf.setValue((Byte[]) ipfield.getElement(i));
+                    ipf.setValue((IPAddress) ipfield.getElement(i));
                     ipf.setCallback(this);
 
                     addElement(ipf, false);
@@ -1014,7 +1020,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
             for (int i = fieldCount; i >= size; i--)
               {
-                removeElement(ewHash.get(compVector.elementAt(i)));
+                removeElement(ewHash.get(compVector.get(i)));
               }
           }
         else
@@ -1260,7 +1266,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
               {
                 try
                   {
-                    returnValue = changeElement((Byte[])v.getValue(), index);
+                    returnValue = changeElement((IPAddress)v.getValue(), index);
                   }
                 catch (Exception rx)
                   {
@@ -1390,6 +1396,17 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   public void mouseReleased(MouseEvent e) {}
   public void mouseEntered(MouseEvent e) {}
   public void mouseExited(MouseEvent e) {}
+
+  // FocusListener methods ------------------------------------------------------
+
+  public void focusLost(FocusEvent e)
+  {
+  }
+
+  public void focusGained(FocusEvent e)
+  {
+    addB.scrollRectToVisible(addB.getBounds());
+  }
 
   // convenience stuff
 

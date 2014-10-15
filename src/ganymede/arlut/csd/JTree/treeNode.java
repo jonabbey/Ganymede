@@ -10,8 +10,10 @@
 
    -----------------------------------------------------------------------
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -102,7 +104,7 @@ public class treeNode implements Cloneable {
    * @param menu Popup menu to attach to this node
    *
    */
-  
+
   public treeNode(treeNode parent, String text, treeNode insertAfter,
                   boolean expandable, int openImage, int closedImage, treeMenu menu)
   {
@@ -125,16 +127,14 @@ public class treeNode implements Cloneable {
   }
 
   /**
-   *
    * @param parent Parent node to insert this node under, null if this is the root node
    * @param text Content of this node
    * @param insertAfter sibling to insert this node after, null if this is the root node
    * @param expandable this node is a folder node, and should always have a +/- box
    * @param openImage Index of treeCanvas image used to display this node if it is expanded
    * @param closedImage Index of treeCanvas image used to display this node if it is not expanded
-   *
    */
-  
+
   public treeNode(treeNode parent, String text, treeNode insertAfter,
                   boolean expandable, int openImage, int closedImage)
   {
@@ -142,27 +142,21 @@ public class treeNode implements Cloneable {
   }
 
   /**
-   *
    * @param parent Parent node to insert this node under, null if this is the root node
    * @param text Content of this node
    * @param insertAfter sibling to insert this node after, null if this is the root node
    * @param expandable this node is a folder node, and should always have a +/- box
-   *
    */
-  
+
   public treeNode(treeNode parent, String text, treeNode insertAfter, boolean expandable)
   {
     this(parent, text, insertAfter, expandable, -1, -1, null);
   }
 
   /**
-   *
-   * This method does a full clone of this object.  Code that clones a
-   * treeNode may want to call resetNode() on the result to prepare
-   * the node for re-insertion into the tree.
-   *
-   * @see arlut.csd.JTree.treeControl#moveNode(arlut.csd.JTree.treeNode, arlut.csd.JTree.treeNode,, arlut.csd.JTree.treeNode,, boolean)
-   *
+   * <p>This method does a full clone of this object.  Code that
+   * clones a treeNode may want to call resetNode() on the result to
+   * prepare the node for re-insertion into the tree.</p>
    */
 
   public Object clone()
@@ -178,12 +172,8 @@ public class treeNode implements Cloneable {
   }
 
   /**
-   *
-   * This clears this node's fields relating to the node's state and
-   * position in the tree.
-   *
-   * @see arlut.csd.JTree.treeControl#moveNode(arlut.csd.JTree.treeNode, arlut.csd.JTree.treeNode,, arlut.csd.JTree.treeNode,, boolean)
-   *
+   * <p>This clears this node's fields relating to the node's state and
+   * position in the tree.</p>
    */
 
   public void resetNode()
@@ -211,10 +201,10 @@ public class treeNode implements Cloneable {
   }
 
   /**
+   * <p>This method allows you to change the popup menu
+   * on a tree node.</p>
    *
-   * This method allows you to change the popup menu
-   * on a tree node.
-   *
+   * @param menu The popup menu to connect to this node.
    */
 
   public void setMenu(treeMenu menu)
@@ -231,7 +221,7 @@ public class treeNode implements Cloneable {
         tree.canvas.add(menu);
       }
   }
-  
+
   // Variety of methods to change the images
 
   public void setImages(int openImage, int closedImage)
@@ -276,10 +266,8 @@ public class treeNode implements Cloneable {
   }
 
   /**
-   *
-   * Returns the child node with name 'key',
-   * if there is any such.
-   *
+   * @param key The node to search for
+   * @return The child node of the given name
    */
 
   public treeNode getChild(String key)

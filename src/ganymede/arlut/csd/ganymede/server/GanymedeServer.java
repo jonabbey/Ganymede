@@ -16,7 +16,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -110,6 +110,14 @@ public final class GanymedeServer implements Server {
    */
 
   static GanymedeServer server = null;
+
+  /**
+   * <p>You may want to change this if you don't want to let the
+   * monitor account do unprivileged (Default role equivalent) queries
+   * on the client.</p>
+   */
+
+  static private final boolean ALLOW_MONITOR_CLIENT_USE = true;
 
   /**
    * <p>Vector of {@link arlut.csd.ganymede.server.GanymedeSession
@@ -324,13 +332,13 @@ public final class GanymedeServer implements Server {
   }
 
   /**
-   * <p>This internal method handles the client login logic for both the normal
-   * interactive client and the xml batch client.</p>
+   * <p>This internal method handles the client login logic for both
+   * the normal interactive client and the xml batch client.</p>
    *
    * @param clientName The user/persona name to be logged in
    * @param clientPass The password (in plaintext) to authenticate with
-   * @param directSession If true, the GanymedeSession returned be
-   * published for remote RMI access.
+   * @param directSession If true, the GanymedeSession returned will
+   * be published for remote RMI access.
    * @param exportObjects If true, the DBObjects viewed and edited by
    * the GanymedeSession will be exported for remote RMI access.
    */
@@ -381,16 +389,23 @@ public final class GanymedeServer implements Server {
 
         return reportSuccessLogin(session);
       }
+    catch (Throwable ex)
+      {
+        Ganymede.logError(ex, ts.l("processLogin.failure"));
+
+        return reportFailedLogin(clientName);
+      }
     finally
       {
         if (!success)
           {
-            GanymedeServer.lSemaphore.decrement();
-
             // notify the consoles after decrementing the login
             // semaphore so the notify won't show the transient
             // semaphore increment
 
+            GanymedeServer.lSemaphore.decrement();
+
+            // "Bad login attempt for username: {0} from host {1}"
             Ganymede.debug(ts.l("reportFailedLogin.badlogevent", clientName, GanymedeServer.getClientHost()));
           }
       }
@@ -624,6 +639,9 @@ public final class GanymedeServer implements Server {
                                                        null));
           }
 
+        // "Bad console attach attempt by: {0} from host {1}"
+        Ganymede.debug(ts.l("admin.badlogevent", clientName, clientHost));
+
         // "Login Failure"
         // "Bad username and/or password for admin console"
         return Ganymede.createErrorDialog(ts.l("admin.badlogin"),
@@ -697,13 +715,14 @@ public final class GanymedeServer implements Server {
         return this.validateUserLogin(name, clientPass);
       }
 
-    // don't let the monitor account login to the client
-    //
-    //    if (personaObj.getInvid().equals(Invid.createInvid(SchemaConstants.PersonaBase,
-    //                                                       SchemaConstants.PersonaMonitorObj)))
-    //      {
-    //        return null;
-    //      }
+    if (!ALLOW_MONITOR_CLIENT_USE)
+      {
+        if (personaObj.getInvid().equals(Invid.createInvid(SchemaConstants.PersonaBase,
+                                                           SchemaConstants.PersonaMonitorObj)))
+          {
+            return null;
+          }
+      }
 
     DBObject userObj = getUserFromPersona(personaObj);
 
@@ -734,7 +753,7 @@ public final class GanymedeServer implements Server {
     if (result != null)
       {
         DBObject user = loginSession.getDBSession().viewDBObject(result.getInvid());
-        PasswordDBField pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+        PasswordDBField pdbf = user.getPassField(SchemaConstants.UserPassword);
 
         if (pdbf != null && pdbf.matchPlainText(clientPass))
           {
@@ -765,7 +784,7 @@ public final class GanymedeServer implements Server {
     if (result != null)
       {
         DBObject personaObj = loginSession.getDBSession().viewDBObject(result.getInvid());
-        PasswordDBField pdbf = (PasswordDBField) personaObj.getField(SchemaConstants.PersonaPasswordField);
+        PasswordDBField pdbf = personaObj.getPassField(SchemaConstants.PersonaPasswordField);
 
         if (pdbf != null && pdbf.matchPlainText(clientPass))
           {

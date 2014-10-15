@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -299,7 +299,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 
         /* -- */
 
-        iField = (InvidDBField) object.getField(mapEntrySchema.MAP); // map invid
+        iField = object.getInvidField(mapEntrySchema.MAP); // map invid
         tmpInvid = iField.value();
 
         if (editset != null)
@@ -315,8 +315,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
             mapName = tmpInvid.toString();
           }
 
-        iField = (InvidDBField) object.getField(mapEntrySchema.CONTAININGUSER); // containing object, the user
-        tmpInvid = iField.value();
+        tmpInvid = object.getParentInvid();
 
         if (editset != null)
           {
@@ -502,7 +501,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 
             DBObject vObj = getDBSession().viewDBObject(invid); // should be a mapEntry object
 
-            InvidDBField invf = (InvidDBField) vObj.getField(mapEntrySchema.MAP);
+            InvidDBField invf = vObj.getInvidField(mapEntrySchema.MAP);
 
             String mapName = invf.getValueString();
 
@@ -523,7 +522,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 
                 // we need to get the user
 
-                Invid user = (Invid) vObj.getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
+                Invid user = vObj.getParentInvid();
 
                 // and we need to edit the user.. we'll want to check permissions
                 // for this, so we'll use edit_db_object()
@@ -539,7 +538,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
                                                       ", permissions denied to edit the user.");
                   }
 
-                invf = (InvidDBField) eObj.getField(userSchema.VOLUMES);
+                invf = eObj.getInvidField(userSchema.VOLUMES);
 
                 if (invf == null)
                   {

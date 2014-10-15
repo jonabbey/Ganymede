@@ -16,7 +16,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -62,6 +62,7 @@ import java.util.Vector;
 
 import arlut.csd.ganymede.common.FieldType;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.IPAddress;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -119,8 +120,8 @@ public final class DBObjectDeltaRec implements FieldType, Iterable<fieldDeltaRec
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
-        DBField origField = (DBField) oldObj.getField(fieldDef.getID());
-        DBField currentField = (DBField) newObj.getField(fieldDef.getID());
+        DBField origField = oldObj.getField(fieldDef.getID());
+        DBField currentField = newObj.getField(fieldDef.getID());
 
         if ((origField == null || !origField.isDefined()) &&
             (currentField == null || !currentField.isDefined()))
@@ -202,7 +203,7 @@ public final class DBObjectDeltaRec implements FieldType, Iterable<fieldDeltaRec
         for (int i = 0; i < fieldcount; i++)
           {
             short fieldcode = in.readShort();
-            DBObjectBaseField fieldDef = baseDef.getFieldDef(fieldcode);
+            DBObjectBaseField fieldDef = baseDef.getField(fieldcode);
 
             if (fieldDef == null)
               {
@@ -257,15 +258,7 @@ public final class DBObjectDeltaRec implements FieldType, Iterable<fieldDeltaRec
                         break;
 
                       case IP:
-                        byte bytelength = in.readByte();
-                        Byte[] bytes = new Byte[bytelength];
-
-                        for (int k = 0; k < bytelength; k++)
-                          {
-                            bytes[k] = Byte.valueOf(in.readByte());
-                          }
-
-                        value = bytes;
+                        value = IPAddress.readIPAddr(in);
                       }
 
                     fieldRec.addValue(value);
@@ -286,15 +279,7 @@ public final class DBObjectDeltaRec implements FieldType, Iterable<fieldDeltaRec
                         break;
 
                       case IP:
-                        byte bytelength = in.readByte();
-                        Byte[] bytes = new Byte[bytelength];
-
-                        for (int k = 0; k < bytelength; k++)
-                          {
-                            bytes[k] = Byte.valueOf(in.readByte());
-                          }
-
-                        value = bytes;
+                        value = IPAddress.readIPAddr(in);
                       }
 
                     fieldRec.delValue(value);
@@ -346,7 +331,7 @@ public final class DBObjectDeltaRec implements FieldType, Iterable<fieldDeltaRec
         // to verify that the schema hasn't undergone an incompatible
         // change since the journal was written.
 
-        DBObjectBaseField fieldDef = baseDef.getFieldDef(fdRec.fieldcode);
+        DBObjectBaseField fieldDef = baseDef.getField(fdRec.fieldcode);
 
         out.writeShort(fieldDef.getType());
 
@@ -380,16 +365,9 @@ public final class DBObjectDeltaRec implements FieldType, Iterable<fieldDeltaRec
                   {
                     ((Invid) value).emit(out);
                   }
-                else if (value instanceof IPwrap)
+                else if (value instanceof IPAddress)
                   {
-                    Byte[] bytes = ((IPwrap) value).address;
-
-                    out.writeByte(bytes.length);
-
-                    for (int i = 0; i < bytes.length; i++)
-                      {
-                        out.writeByte(bytes[i].byteValue());
-                      }
+                    ((IPAddress) value).emit(out);
                   }
                 else
                   {
@@ -416,21 +394,11 @@ public final class DBObjectDeltaRec implements FieldType, Iterable<fieldDeltaRec
                   }
                 else if (value instanceof Invid)
                   {
-                    Invid invid = (Invid) value;
-
-                    out.writeShort(invid.getType());
-                    out.writeInt(invid.getNum());
+                    ((Invid) value).emit(out);
                   }
-                else if (value instanceof IPwrap)
+                else if (value instanceof IPAddress)
                   {
-                    Byte[] bytes = ((IPwrap) value).address;
-
-                    out.writeByte(bytes.length);
-
-                    for (int i = 0; i < bytes.length; i++)
-                      {
-                        out.writeByte(bytes[i].byteValue());
-                      }
+                    ((IPAddress) value).emit(out);
                   }
               }
           }

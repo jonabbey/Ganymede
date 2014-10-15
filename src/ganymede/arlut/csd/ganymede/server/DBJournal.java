@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -54,8 +54,9 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Vector;
+import java.util.List;
 
 import arlut.csd.Util.StringUtils;
 import arlut.csd.Util.TranslationService;
@@ -104,7 +105,6 @@ import arlut.csd.ganymede.rmi.db_field;
 public final class DBJournal implements ObjectStatus {
 
   static boolean debug = false;
-  static DBStore store = null;
 
   public static void setDebug(boolean val)
   {
@@ -132,24 +132,26 @@ public final class DBJournal implements ObjectStatus {
 
   // instance variables
 
-  String filename;
-  RandomAccessFile jFile = null;
-  boolean dirty = false;        // dirty is true if the journal has any
-                                // transactions written out
+  private final DBStore store;
 
-  short file_major_version = -1;
-  short file_minor_version = -1;
+  private String filename;
+  private RandomAccessFile jFile = null;
+  private boolean dirty = false;        // dirty is true if the journal has any
+                                        // transactions written out
 
-  short file_dbstore_major_version = -1;
-  short file_dbstore_minor_version = -1;
+  private short file_major_version = -1;
+  private short file_minor_version = -1;
 
-  int transactionsInJournal = 0;
+  private short file_dbstore_major_version = -1;
+  private short file_dbstore_minor_version = -1;
+
+  private int transactionsInJournal = 0;
 
   private DBJournalTransaction incompleteTransaction = null;
 
   /* -- */
 
-  static void initialize(DataOutput out) throws IOException
+  static void initialize(DataOutput out, DBStore store) throws IOException
   {
     out.writeUTF(DBJournal.id_string);
     out.writeShort(DBJournal.major_version);
@@ -206,7 +208,7 @@ public final class DBJournal implements ObjectStatus {
         // "Writing DBStore Journal header"
         debug(ts.l("init.writing"));
 
-        initialize(jFile);
+        initialize(jFile, this.store);
 
         dirty = false;
       }
@@ -364,7 +366,7 @@ public final class DBJournal implements ObjectStatus {
     debug(ts.l("reset.freshness", filename));
 
     jFile = new RandomAccessFile(filename, "rw");
-    initialize(jFile);
+    initialize(jFile, this.store);
     jFile.getFD().sync();
 
     dirty = false;
@@ -404,7 +406,7 @@ public final class DBJournal implements ObjectStatus {
     Date transactionDate = null;
     int object_count = 0;
     boolean EOFok = true;
-    Vector<JournalEntry> entries = null;
+    List<JournalEntry> entries = null;
     byte operation;
     short obj_type, obj_id;
     DBObjectBase base;
@@ -413,7 +415,7 @@ public final class DBJournal implements ObjectStatus {
     int nextTransactionNumber = 0;
     /* - */
 
-    entries = new Vector<JournalEntry>();
+    entries = new ArrayList<JournalEntry>();
 
     // skip past the journal header block
     readHeaders();
@@ -618,7 +620,7 @@ public final class DBJournal implements ObjectStatus {
               }
 
             // clear the entries we've now processed
-            entries.setSize(0);
+            entries.clear();
 
             EOFok = true;
           }
@@ -868,6 +870,19 @@ public final class DBJournal implements ObjectStatus {
   public boolean isClean()
   {
     return !dirty;
+  }
+
+  /**
+   * <p>Returns the number of transactions currently recorded in the
+   * on-disk journal file.</p>
+   *
+   * <p>The precise value is not critical, so this is
+   * unsynchronized</p>
+   */
+
+  public int getTransactionsInJournal()
+  {
+    return this.transactionsInJournal;
   }
 
   /**

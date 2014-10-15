@@ -1,9 +1,15 @@
 *.class
 *.jar
+*.jks
+*.truststore
 *~
 src/build/classes/
 src/build/crypto/
 src/build/doc/
+src/resources/arlut/csd/ganymede/common/build.properties
+src/build/crypto/crypto.properties
+src/build/crypto/console/
+src/build/crypto/client/
 doc/javadoc/
 installServer
 installWeb

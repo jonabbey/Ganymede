@@ -197,13 +197,13 @@ public class StringDBField extends DBField implements string_field {
   {
     if (isVector())
       {
-        Vector values = getVectVal();
+        Vector<String> values = (Vector<String>) getVectVal();
 
         int count = 0;
 
-        for (int i = 0; i < values.size(); i++)
+        for (String item: values)
           {
-            if (!values.elementAt(i).equals(""))
+            if (!item.equals(""))
               {
                 count++;
               }
@@ -211,11 +211,11 @@ public class StringDBField extends DBField implements string_field {
 
         out.writeInt(count);
 
-        for (int i = 0; i < values.size(); i++)
+        for (String item: values)
           {
-            if (!values.elementAt(i).equals(""))
+            if (!item.equals(""))
               {
-                out.writeUTF((String) values.elementAt(i));
+                out.writeUTF(item);
               }
           }
       }
@@ -244,11 +244,11 @@ public class StringDBField extends DBField implements string_field {
 
         value = new Vector(count);
 
-        Vector values = (Vector) value;
+        Vector<String> values = (Vector<String>) value;
 
         for (int i = 0; i < count; i++)
           {
-            values.addElement(in.readUTF().intern());
+            values.add(in.readUTF().intern());
           }
       }
     else
@@ -272,14 +272,14 @@ public class StringDBField extends DBField implements string_field {
       }
     else
       {
-        Vector values = getVectVal();
+        Vector<String> values = (Vector<String>) getVectVal();
 
-        for (int i = 0; i < values.size(); i++)
+        for (String item: values)
           {
             xmlOut.indentOut();
             xmlOut.indent();
             xmlOut.indentIn();
-            emitStringXML(xmlOut, (String) values.elementAt(i));
+            emitStringXML(xmlOut, item);
           }
 
         xmlOut.indent();
@@ -318,7 +318,7 @@ public class StringDBField extends DBField implements string_field {
         throw new IllegalArgumentException("vector accessor called on scalar");
       }
 
-    return (String) getVectVal().elementAt(index);
+    return (String) getVectVal().get(index);
   }
 
   /**
@@ -338,13 +338,13 @@ public class StringDBField extends DBField implements string_field {
 
   @Override public synchronized String getValueString()
   {
+    if (value == null)
+      {
+        return "";
+      }
+
     if (!isVector())
       {
-        if (value == null)
-          {
-            return "null";
-          }
-
         return this.value();
       }
 
@@ -379,14 +379,15 @@ public class StringDBField extends DBField implements string_field {
 
     StringBuilder result = new StringBuilder();
 
-    for (int i = 0; i < entries.length; i++)
+    result.append(entries[0]);
+
+    if (entries.length > 1)
       {
-        if (i > 0)
+        for (int i = 1; i < entries.length; i++)
           {
             result.append(",");
+            result.append(entries[i]);
           }
-
-        result.append(entries[i]);
       }
 
     return result.toString();
@@ -415,86 +416,20 @@ public class StringDBField extends DBField implements string_field {
 
   @Override public synchronized String getDiffString(DBField orig)
   {
-    StringBuilder result = new StringBuilder();
-    StringDBField origS;
-
-    /* -- */
-
     if (!(orig instanceof StringDBField))
       {
         throw new IllegalArgumentException("bad field comparison");
       }
 
-    origS = (StringDBField) orig;
+    if (orig == this)
+      {
+        return null;
+      }
 
     if (isVector())
       {
-        Vector
-          added = new Vector(),
-          deleted = new Vector();
-
-        Vector values = getVectVal();
-        Vector origValues = origS.getVectVal();
-
-        Enumeration en;
-
-        String elementA, elementB;
-
-        boolean found = false;
-
-        /* -- */
-
-        // find elements in the orig field that aren't in our present field
-
-        en = origValues.elements();
-
-        while (en.hasMoreElements())
-          {
-            elementA = (String) en.nextElement();
-
-            found = false;
-
-            for (int i = 0; !found && i < values.size(); i++)
-              {
-                elementB = (String) values.elementAt(i);
-
-                if (elementA.equals(elementB))
-                  {
-                    found = true;
-                  }
-              }
-
-            if (!found)
-              {
-                deleted.addElement(elementA);
-              }
-          }
-
-        // find elements in present our field that aren't in the orig field
-
-        en = values.elements();
-
-        while (en.hasMoreElements())
-          {
-            elementA = (String) en.nextElement();
-
-            found = false;
-
-            for (int i = 0; !found && i < origValues.size(); i++)
-              {
-                elementB = (String) origValues.elementAt(i);
-
-                if (elementA.equals(elementB))
-                  {
-                    found = true;
-                  }
-              }
-
-            if (!found)
-              {
-                added.addElement(elementA);
-              }
-          }
+        Vector<String> added = VectorUtils.difference(getVectVal(), orig.getVectVal());
+        Vector<String> deleted = VectorUtils.difference(orig.getVectVal(), getVectVal());
 
         // were there any changes at all?
 
@@ -504,40 +439,18 @@ public class StringDBField extends DBField implements string_field {
           }
         else
           {
+            StringBuilder result = new StringBuilder();
+
             if (deleted.size() != 0)
               {
-                StringBuilder itemList = new StringBuilder();
-
-                for (int i = 0; i < deleted.size(); i++)
-                  {
-                    if (i > 0)
-                      {
-                        itemList.append(", ");
-                      }
-
-                    itemList.append((String) deleted.elementAt(i));
-                  }
-
                 // "\tDeleted: {0}\n"
-                result.append(ts.l("getDiffString.deleted", itemList.toString()));
+                result.append(ts.l("getDiffString.deleted", VectorUtils.vectorString(deleted, ", ")));
               }
 
             if (added.size() != 0)
               {
-                StringBuilder itemList = new StringBuilder();
-
-                for (int i = 0; i < added.size(); i++)
-                  {
-                    if (i > 0)
-                      {
-                        itemList.append(", ");
-                      }
-
-                    itemList.append((String) added.elementAt(i));
-                  }
-
                 // "\tAdded: {0}\n"
-                result.append(ts.l("getDiffString.added", itemList.toString()));
+                result.append(ts.l("getDiffString.added", VectorUtils.vectorString(added, ", ")));
               }
 
             return result.toString();
@@ -545,20 +458,20 @@ public class StringDBField extends DBField implements string_field {
       }
     else
       {
-        if (origS.value().equals(this.value()))
+        if (orig.value.equals(this.value))
           {
             return null;
           }
-        else
-          {
-            // "\tOld: {0}\n"
-            result.append(ts.l("getDiffString.old", origS.value()));
 
-            // "\tNew: {0}\n"
-            result.append(ts.l("getDiffString.new", this.value()));
+        StringBuilder result = new StringBuilder();
 
-            return result.toString();
-          }
+        // "\tOld: {0}\n"
+        result.append(ts.l("getDiffString.old", orig.value));
+
+        // "\tNew: {0}\n"
+        result.append(ts.l("getDiffString.new", this.value));
+
+        return result.toString();
       }
   }
 

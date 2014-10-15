@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -54,7 +54,6 @@ import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.rmi.FileTransmitter;
-import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.BigPipedInputStream;
 import arlut.csd.Util.TranslationService;
 
@@ -62,7 +61,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.PipedOutputStream;
 import java.rmi.RemoteException;
-import java.util.Vector;
 
 import com.jclark.xml.output.UTF8XMLWriter;
 
@@ -207,13 +205,9 @@ public final class XMLTransmitter implements FileTransmitter {
 
               DBSession dbSession = mySession.getDBSession();
 
-              Vector invids = myRows.getInvids();
-
-              for (int i = 0; i < invids.size(); i++)
+              for (Invid invid: myRows.getInvids())
                 {
-                  Invid invid = (Invid) invids.elementAt(i);
-                  DBObject vobj = dbSession.viewDBObject(invid);
-                  vobj.emitXML(xmlOut);
+                  dbSession.viewDBObject(invid).emitXML(xmlOut);
                 }
 
               xmlOut.indentIn();
@@ -353,6 +347,23 @@ public final class XMLTransmitter implements FileTransmitter {
                 Ganymede.logError(ex);
               }
           }
+      }
+  }
+
+  /**
+   * Consumes everything sent through the XMLTransmitter until the
+   * writer side has finished.  This method will block if necessary
+   * until the data is ready to be consumed..
+   */
+
+  public synchronized void drain()
+  {
+    try
+      {
+        while (getNextChunk() != null);
+      }
+    catch (Exception ex)
+      {
       }
   }
 

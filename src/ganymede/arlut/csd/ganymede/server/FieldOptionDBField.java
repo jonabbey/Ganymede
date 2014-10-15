@@ -17,7 +17,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -191,7 +191,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
         try
           {
             basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-            base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+            base = Ganymede.db.getObjectBase(basenum);
 
             if (base == null)
               {
@@ -241,7 +241,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
         try
           {
             basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-            base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+            base = Ganymede.db.getObjectBase(basenum);
 
             if (base == null)
               {
@@ -261,7 +261,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
                       {
                         fieldnum = Short.valueOf(fieldId).shortValue();
 
-                        field = (DBObjectBaseField) base.getField(fieldnum);
+                        field = base.getField(fieldnum);
 
                         if (field == null)
                           {
@@ -333,7 +333,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     try
       {
         basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-        base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+        base = Ganymede.db.getObjectBase(basenum);
 
         if (base == null)
           {
@@ -349,7 +349,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
                   {
                     fieldnum = Short.valueOf(fieldId).shortValue();
 
-                    field = (DBObjectBaseField) base.getField(fieldnum);
+                    field = base.getField(fieldnum);
 
                     if (field == null)
                       {
@@ -443,7 +443,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   // ---
 
-  Map<String, SyncPrefEnum> matrix;
+  private Map<String, SyncPrefEnum> matrix;
 
   /* -- */
 
@@ -671,9 +671,12 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     // The field option matrix strings generally become invalid after
     // schema editing.  Since normally the database/schema needs to be
     // dumped after changing the schema, this is an appropriate place
-    // to do the cleanup.
+    // to always do the cleanup.
 
-    clean();
+    if (DBSchemaEdit.schemaEditedSinceStartup)
+      {
+        this.clean();
+      }
 
     // now actually emit stuff.
 
@@ -809,8 +812,6 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     /* -- */
 
-    clean();
-
     for (Map.Entry<String, SyncPrefEnum> entry: matrix.entrySet())
       {
         result.append(decodeBaseName(entry.getKey()) + " " + decodeFieldName(entry.getKey()) +
@@ -848,24 +849,24 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   @Override public String getDiffString(DBField orig)
   {
-    StringBuilder result = new StringBuilder();
-    FieldOptionDBField origFO;
-
-    /* -- */
-
     if (!(orig instanceof FieldOptionDBField))
       {
         throw new IllegalArgumentException("bad field comparison");
       }
 
-    clean();
+    if (this == orig)
+      {
+        return null;
+      }
 
-    origFO = (FieldOptionDBField) orig;
+    FieldOptionDBField origFO = (FieldOptionDBField) orig;
 
     if (origFO.equals(this))
       {
         return null;
       }
+
+    StringBuilder result = new StringBuilder();
 
     Set<String> myKeys = new HashSet<String>(matrix.keySet());
     Set<String> newKeys = new HashSet<String>(myKeys);
@@ -921,6 +922,11 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     return result.toString();
   }
 
+  public synchronized HashMap<String, SyncPrefEnum> getInternalsCopy()
+  {
+    return new HashMap<String, SyncPrefEnum>(this.matrix);
+  }
+
   /**
    * Return a serializable, read-only copy of this field's field
    * option matrix
@@ -928,7 +934,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public FieldOptionMatrix getMatrix()
+  public synchronized FieldOptionMatrix getMatrix()
   {
     return new FieldOptionMatrix(this.matrix);
   }
@@ -941,7 +947,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public SyncPrefEnum getOption(short baseID, short fieldID)
+  public synchronized SyncPrefEnum getOption(short baseID, short fieldID)
   {
     return matrix.get(matrixEntry(baseID, fieldID));
   }
@@ -953,7 +959,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public SyncPrefEnum getOption(short baseID)
+  public synchronized SyncPrefEnum getOption(short baseID)
   {
     return matrix.get(matrixEntry(baseID));
   }
@@ -965,7 +971,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public SyncPrefEnum getOption(Base base, BaseField field)
+  public synchronized SyncPrefEnum getOption(Base base, BaseField field)
   {
     try
       {
@@ -984,7 +990,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public SyncPrefEnum getOption(Base base)
+  public synchronized SyncPrefEnum getOption(Base base)
   {
     try
       {
@@ -1005,7 +1011,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * on permissions failure.</p>
    */
 
-  public ReturnVal resetOptions()
+  public synchronized ReturnVal resetOptions()
   {
     if (isEditable())
       {
@@ -1312,6 +1318,6 @@ class FieldOptionMatrixCkPoint {
 
   public FieldOptionMatrixCkPoint(FieldOptionDBField field)
   {
-    this.matrix = new HashMap<String, SyncPrefEnum>(field.matrix);
+    this.matrix = field.getInternalsCopy();
   }
 }

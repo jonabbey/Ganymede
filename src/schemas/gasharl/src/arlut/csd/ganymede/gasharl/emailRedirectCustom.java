@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Contact information
@@ -277,7 +277,7 @@ public class emailRedirectCustom extends DBEditObject implements SchemaConstants
 
   private boolean fitsInNIS(Vector<String> newItemVect)
   {
-    StringDBField targets = (StringDBField) getField(emailRedirectSchema.TARGETS);
+    StringDBField targets = getStringField(emailRedirectSchema.TARGETS);
 
     int totalLength = targets.getValueString().length();
 

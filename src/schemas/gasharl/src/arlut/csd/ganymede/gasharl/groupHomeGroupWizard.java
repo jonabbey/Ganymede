@@ -145,16 +145,7 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
         System.err.println("groupHomeGroupWizard: creating start dialog.");
       }
 
-    int size = 0;
-
-    try
-      {
-        size = user.getField(userSchema.GROUPLIST).size();
-      }
-    catch (RemoteException rx)
-      {
-        throw new RuntimeException("could not get the size. " + rx);
-      }
+    int size = user.getField(userSchema.GROUPLIST).size();
 
     // If size is less than one, then there won't be any other groups to change to.
 

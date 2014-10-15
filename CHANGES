@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-24 April 2013
+29 October 2013
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 24 April 2013
+RELEASE DATE: 29 October 2013
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1170,7 +1170,7 @@ you'd see a ton of login/logout events if that user happened to be a
 Ganymede administrator, or even an end-user change his password
 through Ganymede.
 
-We're not filtering out this event spam from the retrieveHistory
+We're now filtering out this event spam from the retrieveHistory
 method on the DBLog, so that it will be easier to see actual changes
 committed against a user object.
 
@@ -2175,6 +2175,74 @@ I went through and made a bunch of previously unprotected methods
 final, and have added the @Override annotation to intentionally
 overridden methods in the arlut.csd.ganymede.server and
 arlut.csd.ganymede.schemas.gasharl packages.
+
+In addition, a great deal more of DBObject's state is now private to
+improve encapsulation and security.
+
+162. [SERVER, CLIENT, SCHEMA CODE] Reworked internal representation of IPDBField
+
+Previously, all IP Addresses in Ganymede were held in IPDBField
+objects as Byte[] objects, and getting and setting these values left
+the (server-side) caller with a reference to the Byte[] held in the
+IPDBField after setting, with the ability to randomly mess with the IP
+data at a later time, possibly breaking security checks in the schema
+code.
+
+Now, the new arlut.csd.ganymede.common.IPAddress class is used as the
+value stored in IPDBField objects.  The on-disk representation of the
+IPDBField objects have not changed, so this is a backwards-compatible
+change with regards to ganymede.db and journal files, but any custom
+schema code that is configured to get callbacks when IPDBField values
+are changed will now be called with IPAddress objects instead of
+Byte[] objects.
+
+As such, this is an **incompatible** change with previous schema code
+that ever deals with the old Byte[] representation, and such code may
+throw a ClassCastException if not changed to use the new IPAddress
+object type.
+
+The good news it that the IPAddress object is serializable, final and
+immutable, so whenever you create or pass around an IPAddress you can
+be sure that nothing will ever mess with its contents post-creation.
+
+I've also moved all the standard IPv4 and IPv6 serialization /
+deserialization logic to the IPAddress class, and any classes in the
+Ganymede server or client that previously had code for creating a
+Byte[] out of an IPv4 or IPv6 string representation now depends on
+IPAddress to do that work.
+
+163. [BUILD, CLIENTS] Added Permission and Codebase to client/admin console jars
+
+As of Java 7u25, Oracle has added support for a couple of new
+attributes in the jar manifest to provide limits on what sort of
+environment a given jar was built to run in.
+
+We have modified build.xml so that the Ganymede client and admin
+console jar files now declare where they are expecting to be run from.
+
+As a consequence of this change, the Ganymede client and admin
+consoles will now refuse to run on Java 7u25 or later if they are
+built on a different domain from that which they are downloaded from.
+
+See
+
+  http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/no_redeploy.html
+
+for details.
+
+164. [BUILD] Improved build.xml with instructions on how to sign jars
+
+As of Java 7u40 and later, the JRE will no longer passively accept
+self-signed certificates for jar files.  In response to this, I have
+modified the build.xml script in src to allow the necessary pieces for
+signing the jars with a private / public key pair signed by a
+certificate from a Certificate Authority recognized by the Java
+Runtime Environment to be held outside of the Git repository.
+
+Now, all of the sensitive pieces for signing are held in an external
+src/build/crypto/crypto.properties file which is listed in .gitignore
+to prevent that material from being accidentally included in a Git
+repository.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 

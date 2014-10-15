@@ -53,9 +53,13 @@ import arlut.csd.ganymede.common.FieldInfo;
 
 import java.util.Vector;
 
+import java.awt.event.KeyEvent;
+import javax.swing.InputMap;
 import javax.swing.JComponent;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.KeyStroke;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -101,7 +105,20 @@ public class serverTab extends clientTab {
 
   public void initialize()
   {
-    contentPane.getVerticalScrollBar().setUnitIncrement(15);
+    JScrollBar vertical = contentPane.getVerticalScrollBar();
+
+    vertical.setUnitIncrement(15);
+
+    InputMap im = vertical.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+
+    im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "negativeUnitIncrement");
+    im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "positiveUnitIncrement");
+
+    im.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0), "negativeBlockIncrement");
+    im.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0), "positiveBlockIncrement");
+
+    im.put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0), "minScroll");
+    im.put(KeyStroke.getKeyStroke(KeyEvent.VK_END, 0), "maxScroll");
 
     cp = new containerPanel(parent.getObject(), parent.getObjectInvid(), parent.isEditable(),
                             parent.getgclient(), parent.getWindowPanel(), parent, parent.progressBar,

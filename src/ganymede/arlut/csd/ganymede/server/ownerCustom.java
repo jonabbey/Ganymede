@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996 - 2012
+   Copyright (C) 1996 - 2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -143,7 +143,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
     // do we have any external addresses?
 
-    externalAddresses = (StringDBField) ownerGroup.getField(SchemaConstants.OwnerExternalMail);
+    externalAddresses = ownerGroup.getStringField(SchemaConstants.OwnerExternalMail);
 
     if (externalAddresses != null)
       {

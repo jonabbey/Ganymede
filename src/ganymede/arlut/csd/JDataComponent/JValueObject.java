@@ -1,5 +1,5 @@
-
 /*
+
    JValueObject.java
 
    Base class for a new hierarchy of classes used to pass
@@ -14,18 +14,20 @@
 
    Created: 28 Feb 1997
 
-
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin.
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -64,18 +66,17 @@ import java.awt.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * <p>A client-side message object used to pass status updates from
  * GUI components in the arlut.csd.JDataComponent package to their
- * containers.  JValueObject supports passing information about
- * scalar and vector value change operations, as well as pop-up
- * menus and error messages.</p>
+ * containers.  JValueObject supports passing information about scalar
+ * and vector value change operations, as well as pop-up menus and
+ * error messages.</p>
  *
- * <p>Base class for a new hierarchy of classes used to pass
- * callback data in the arlut.csd.JDataComponent package.</p>
+ * <p>Base class for a new hierarchy of classes used to pass callback
+ * data in the arlut.csd.JDataComponent package.</p>
  *
- * <p>Formerly, this class was an all-in-one class that tried to encode a
- * bunch of different operations, with a mess of different
+ * <p>Formerly, this class was an all-in-one class that tried to
+ * encode a bunch of different operations, with a mess of different
  * constructors and interpretations of parameters.</p>
  *
  * <p>Now this class will serve as a base class, and all of the actual
@@ -83,9 +84,8 @@ import java.awt.*;
  *
  * <p>Note that we came up with this message type before Sun introduced
  * the 1.1 AWT event model.  Great minds... ;-)</p>
- *   
- * @version $Revision$ $Date$ $Name:  $
- * @author Navin Manohar 
+ *
+ * @author Navin Manohar
  */
 
 public abstract class JValueObject {

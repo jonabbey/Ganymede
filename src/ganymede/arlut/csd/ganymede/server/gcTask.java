@@ -11,11 +11,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -58,14 +60,15 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Runnable class to do a synchronous garbage collection run.  Issued
- * by the {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.</p>
+ * <p>Runnable class to do a synchronous garbage collection run.
+ * Issued by the {@link arlut.csd.ganymede.server.GanymedeScheduler
+ * GanymedeScheduler}.</p>
  *
- * <p>I'm not sure that there is any point to having a synchronous garbage
- * collection task.. the idea was that we could schedule a full gc when
- * the server was likely not to be busy so as to keep things trim for when
- * the server was busy, but the main() entry point isn't yet scheduling this
- * for a particularly good time.</p>
+ * <p>There's not really any point to having a garbage collection
+ * task, other than for playing around on the admin console out of
+ * curiosity.  As such, this task is just registered as a manual task,
+ * and will not be run unless an admin triggers it on purpose from the
+ * admin console.</p>
  */
 
 class gcTask implements Runnable {
@@ -87,7 +90,7 @@ class gcTask implements Runnable {
   public void run()
   {
     Ganymede.debug(ts.l("running"));
-    System.gc();
+    System.gc();                // (I know, FindBugs, I know.)
     Ganymede.debug(ts.l("completed"));
     GanymedeAdmin.updateMemState(Runtime.getRuntime().freeMemory(),
                                  Runtime.getRuntime().totalMemory());

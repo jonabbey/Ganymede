@@ -197,6 +197,23 @@ $javadir = $ENV{GJAVA};
 removelastslash($javadir);
 $ant = $ENV{GANT};
 
+$ant_version_str = `$ant -version`;
+
+if ($ant_version_str =~ /^Apache Ant.*version ([\d\.]+) compiled/) {
+  $ant_version_sub_str = $1;
+
+  if ($ant_version_sub_str =~ /^(\d+)\.(\d+)/) {
+    $ant_major_version = $1;
+    $ant_minor_version = $2;
+
+    if ($ant_major_version < 2 && $ant_minor_version < 8) {
+      print "\nError, you need a newer version of Ant (1.8 or later) to install Ganymede.\n";
+      print "\nYou are currently running $ant, which is Ant $ant_version_sub_str\n";
+      exit 1;
+    }
+  }
+}
+
 if (!-f "$rootdir/jars/ganymedeServer.jar") {
   chdir("$rootdir/src");
 

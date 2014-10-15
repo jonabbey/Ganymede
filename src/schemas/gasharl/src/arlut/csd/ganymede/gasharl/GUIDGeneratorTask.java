@@ -4,16 +4,16 @@
 
    This task is a simple one-shot intended to create GUID's in users
    that do not have them.
-   
+
    Created: 25 September 2002
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2012
+
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -109,92 +109,92 @@ public class GUIDGeneratorTask implements Runnable {
     Ganymede.debug("GUIDGenerator Task: Starting");
 
     String error = GanymedeServer.checkEnabled();
-	
+
     if (error != null)
       {
-	Ganymede.debug("Deferring GUIDGenerator task - semaphore disabled: " + error);
-	return;
+        Ganymede.debug("Deferring GUIDGenerator task - semaphore disabled: " + error);
+        return;
       }
 
     try
       {
-	try
-	  {
-	    mySession = new GanymedeSession("GUIDGeneratorTask");
-	  }
-	catch (RemoteException ex)
-	  {
-	    Ganymede.debug("GUIDGenerator Task: Couldn't establish session");
-	    return;
-	  }
+        try
+          {
+            mySession = new GanymedeSession("GUIDGeneratorTask");
+          }
+        catch (RemoteException ex)
+          {
+            Ganymede.debug("GUIDGenerator Task: Couldn't establish session");
+            return;
+          }
 
-	// we don't want interactive handholding
+        // we don't want interactive handholding
 
-	mySession.enableWizards(false);
+        mySession.enableWizards(false);
 
-	// and we want forced required fields oversight..
+        // and we want forced required fields oversight..
 
-	mySession.enableOversight(true);
-	
-	ReturnVal retVal = mySession.openTransaction("GUIDGenerator conversion task");
+        mySession.enableOversight(true);
 
-	if (retVal != null && !retVal.didSucceed())
-	  {
-	    Ganymede.debug("GUIDGenerator Task: Couldn't open transaction");
-	    return;
-	  }
+        ReturnVal retVal = mySession.openTransaction("GUIDGenerator conversion task");
 
-	transactionOpen = true;
-	
-	// do the stuff
+        if (retVal != null && !retVal.didSucceed())
+          {
+            Ganymede.debug("GUIDGenerator Task: Couldn't open transaction");
+            return;
+          }
 
-	if (!createGUIDs())
-	  {
-	    Ganymede.debug("Create GUIDs bailed");
+        transactionOpen = true;
 
-	    mySession.abortTransaction();
-	    return;
-	  }
+        // do the stuff
 
-	retVal = mySession.commitTransaction();
+        if (!createGUIDs())
+          {
+            Ganymede.debug("Create GUIDs bailed");
 
-	if (retVal != null && !retVal.didSucceed())
-	  {
-	    // if doNormalProcessing is true, the
-	    // transaction was not cleared, but was
-	    // left open for a re-try.  Abort it.
+            mySession.abortTransaction();
+            return;
+          }
 
-	    if (retVal.doNormalProcessing)
-	      {
-		Ganymede.debug("GUIDGenerator Task: couldn't fully commit, trying to abort.");
+        retVal = mySession.commitTransaction();
 
-		mySession.abortTransaction();
-	      }
+        if (retVal != null && !retVal.didSucceed())
+          {
+            // if doNormalProcessing is true, the
+            // transaction was not cleared, but was
+            // left open for a re-try.  Abort it.
 
-	    Ganymede.debug("GUIDGenerator Task: Couldn't successfully commit transaction");
-	  }
-	else
-	  {
-	    Ganymede.debug("GUIDGenerator Task: Transaction committed");
-	  }
+            if (retVal.doNormalProcessing)
+              {
+                Ganymede.debug("GUIDGenerator Task: couldn't fully commit, trying to abort.");
 
-	transactionOpen = false;
+                mySession.abortTransaction();
+              }
+
+            Ganymede.debug("GUIDGenerator Task: Couldn't successfully commit transaction");
+          }
+        else
+          {
+            Ganymede.debug("GUIDGenerator Task: Transaction committed");
+          }
+
+        transactionOpen = false;
       }
     catch (NotLoggedInException ex)
       {
       }
     catch (Throwable ex)
       {
-	Ganymede.debug("Caught " + ex.getMessage());
+        Ganymede.debug("Caught " + ex.getMessage());
       }
     finally
       {
-	if (transactionOpen)
-	  {
-	    Ganymede.debug("GUIDGenerator Task: Forced to terminate early, aborting transaction");
-	  }
+        if (transactionOpen)
+          {
+            Ganymede.debug("GUIDGenerator Task: Forced to terminate early, aborting transaction");
+          }
 
-	mySession.logout();
+        mySession.logout();
       }
   }
 
@@ -206,83 +206,83 @@ public class GUIDGeneratorTask implements Runnable {
     boolean success = true;
 
     /* -- */
-    
+
     for (DBObject user: users)
       {
-	if (user.isDefined(userSchema.GUID))
-	  {
-	    continue;
-	  }
+        if (user.isDefined(userSchema.GUID))
+          {
+            continue;
+          }
 
-	if (!user.isValid())
-	  {
-	    Ganymede.debug("Skipping user " + user + " due to pre-existing inconsistency.");
-	    continue;
-	  }
+        if (!user.isValid())
+          {
+            Ganymede.debug("Skipping user " + user + " due to pre-existing inconsistency.");
+            continue;
+          }
 
-	Invid invid = user.getInvid();
+        Invid invid = user.getInvid();
 
-	ReturnVal retVal = mySession.edit_db_object(invid);
+        ReturnVal retVal = mySession.edit_db_object(invid);
 
-	if (retVal != null && retVal.didSucceed())
-	  {
-	    DBEditObject eo = (DBEditObject) retVal.getObject();
+        if (retVal != null && retVal.didSucceed())
+          {
+            DBEditObject eo = (DBEditObject) retVal.getObject();
 
-	    StringDBField guidField = (StringDBField) eo.getField(userSchema.GUID);
+            StringDBField guidField = eo.getStringField(userSchema.GUID);
 
-	    if (!guidField.isDefined())
-	      {
-		org.doomdark.uuid.UUID uuid = gen.generateTimeBasedUUID(myAddress);
-		String uuidString = uuid.toString();
+            if (!guidField.isDefined())
+              {
+                org.doomdark.uuid.UUID uuid = gen.generateTimeBasedUUID(myAddress);
+                String uuidString = uuid.toString();
 
-		retVal = guidField.setValueLocal(uuidString);
+                retVal = guidField.setValueLocal(uuidString);
 
-		if (retVal != null && !retVal.didSucceed())
-		  {
-		    success = false;
-		  }
-	      }
-	  }
+                if (retVal != null && !retVal.didSucceed())
+                  {
+                    success = false;
+                  }
+              }
+          }
       }
 
     List<DBObject> groups = mySession.getDBSession().getTransactionalObjects((short) 257);
 
     for (DBObject group: groups)
       {
-	if (group.isDefined(groupSchema.GUID))
-	  {
-	    continue;
-	  }
+        if (group.isDefined(groupSchema.GUID))
+          {
+            continue;
+          }
 
-	if (!group.isValid())
-	  {
-	    Ganymede.debug("Skipping group " + group + " due to pre-existing inconsistency.");
-	    continue;
-	  }
+        if (!group.isValid())
+          {
+            Ganymede.debug("Skipping group " + group + " due to pre-existing inconsistency.");
+            continue;
+          }
 
-	Invid invid = group.getInvid();
+        Invid invid = group.getInvid();
 
-	ReturnVal retVal = mySession.edit_db_object(invid);
+        ReturnVal retVal = mySession.edit_db_object(invid);
 
-	if (retVal != null && retVal.didSucceed())
-	  {
-	    DBEditObject eo = (DBEditObject) retVal.getObject();
+        if (retVal != null && retVal.didSucceed())
+          {
+            DBEditObject eo = (DBEditObject) retVal.getObject();
 
-	    StringDBField guidField = (StringDBField) eo.getField(groupSchema.GUID);
+            StringDBField guidField = eo.getStringField(groupSchema.GUID);
 
-	    if (!guidField.isDefined())
-	      {
-		org.doomdark.uuid.UUID uuid = gen.generateTimeBasedUUID(myAddress);
-		String uuidString = uuid.toString();
+            if (!guidField.isDefined())
+              {
+                org.doomdark.uuid.UUID uuid = gen.generateTimeBasedUUID(myAddress);
+                String uuidString = uuid.toString();
 
-		retVal = guidField.setValueLocal(uuidString);
+                retVal = guidField.setValueLocal(uuidString);
 
-		if (retVal != null && !retVal.didSucceed())
-		  {
-		    success = false;
-		  }
-	      }
-	  }
+                if (retVal != null && !retVal.didSucceed())
+                  {
+                    success = false;
+                  }
+              }
+          }
       }
 
     return success;

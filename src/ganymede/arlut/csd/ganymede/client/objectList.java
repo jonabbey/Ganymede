@@ -430,7 +430,7 @@ public class objectList {
         return;                 // throw exception?
       }
 
-    handle.setLabel(newLabel);
+    handle = new ObjectHandle(handle, newLabel);
 
     addObjectHandle(handle);
   }

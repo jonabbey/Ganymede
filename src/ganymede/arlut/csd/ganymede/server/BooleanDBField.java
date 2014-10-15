@@ -245,7 +245,7 @@ public class BooleanDBField extends DBField implements boolean_field {
   {
     if (value == null)
       {
-        return "null";
+        return "";
       }
 
     return (this.value() ? trueStr: falseStr);

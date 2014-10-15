@@ -14,7 +14,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -560,14 +560,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
             return false;
           }
 
-        if (base.getTimeStamp() == null)
-          {
-            return false;
-          }
-        else
-          {
-            return base.getTimeStamp().after(oldLastRunTime);
-          }
+        return base.changedSince(oldLastRunTime);
       }
   }
 
@@ -658,7 +651,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
     // build, we don't need to worry about looking at the individual
     // fields.
 
-    if (base.getTimeStamp() == null || !base.getTimeStamp().after(oldLastRunTime))
+    if (!base.changedSince(oldLastRunTime))
       {
         return false;
       }
@@ -673,9 +666,9 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     for (Short idObj: fieldIds)
       {
-        DBObjectBaseField fieldDef = base.getFieldDef(idObj);
+        DBObjectBaseField fieldDef = base.getField(idObj);
 
-        if (fieldDef != null && fieldDef.getTimeStamp().after(oldLastRunTime))
+        if (fieldDef != null && fieldDef.changedSince(oldLastRunTime))
           {
             return true;
           }
@@ -782,7 +775,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * @return An Enumeration of {@link arlut.csd.ganymede.server.DBObject DBObject} references
    */
 
-  protected final Enumeration enumerateObjects(int baseid)
+  protected final Enumeration<DBObject> enumerateObjects(int baseid)
   {
     if (baseid < 0 || baseid > Short.MAX_VALUE)
       {
@@ -905,13 +898,13 @@ public abstract class GanymedeBuilderTask implements Runnable {
    *
    * <p>This method runs with a dumpLock obtained for the builder task.</p>
    *
-   * <p>Code run in builderPhase1() can call enumerateObjects() and
-   * baseChanged().  Note that the Enumeration of objects returned
-   * by enumerateObjects() is only valid and should only be consulted
-   * while builderPhase1 is running.. as soon as builderPhase1 returns,
-   * the dumpLock used to make the enumerateObjects() call safe to
-   * use is relinquished, and any Enumerations obtained will then
-   * be unsafe to depend on.</p>
+   * <p>Code run in builderPhase1() can call enumerateObjects(),
+   * getObjects(), and baseChanged().  Note that the Enumeration of
+   * objects returned by enumerateObjects() (or the Iterable returned
+   * by getObjects()) is only valid and should only be consulted while
+   * builderPhase1 is running.. as soon as builderPhase1 returns, the
+   * dumpLock used to make the enumeration or iterable safe to use is
+   * relinquished.</p>
    *
    * @return true if builderPhase1 made changes necessitating the
    * execution of builderPhase2.

@@ -54,8 +54,10 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PipedOutputStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,7 +94,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * overflowing the XMLReader's internal buffer.</p>
  */
 
-public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Runnable {
+public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Runnable, java.io.Closeable {
 
   public final static boolean debug = false;
 
@@ -143,7 +145,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
   public XMLReader(String xmlFilename, int bufferSize, boolean skipWhiteSpace) throws IOException
   {
-    this(xmlFilename, bufferSize, skipWhiteSpace, new PrintWriter(System.err));
+    this(xmlFilename, bufferSize, skipWhiteSpace, new PrintWriter(new OutputStreamWriter(System.err, "UTF-8")));
   }
 
   /**
@@ -157,7 +159,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
   public XMLReader(File xmlFile, int bufferSize, boolean skipWhiteSpace) throws IOException
   {
-    this(xmlFile, bufferSize, skipWhiteSpace, new PrintWriter(System.err));
+    this(xmlFile, bufferSize, skipWhiteSpace, new PrintWriter(new OutputStreamWriter(System.err, "UTF-8")));
   }
 
   /**
@@ -260,7 +262,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   public XMLReader(PipedOutputStream sourcePipe, int bufferSize,
                    boolean skipWhiteSpace) throws IOException
   {
-    this(sourcePipe, bufferSize, skipWhiteSpace, new PrintWriter(System.err));
+    this(sourcePipe, bufferSize, skipWhiteSpace, new PrintWriter(new OutputStreamWriter(System.err, "UTF-8")));
   }
 
   /**
@@ -532,8 +534,8 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
   /**
    * <p>This method is intended to be called in the situation where we
-   * have some text between an open and close tag, as in '<open>Some
-   * string</open>'.</p>
+   * have some text between an open and close tag, as in
+   * '&lt;open&gt;Some string&lt;/open&gt;'.</p>
    *
    * <p>getFollowingString() does not expect there to be any other XML
    * elements between the open and close element in the stream.</p>

@@ -29,8 +29,8 @@ $pass_advice = "<table><td>
     <li>easy to remember</li>
     <li>$minlength characters long</li>
     <li>not easily generated from a dictionary</li>
-    <li>contain at least one punctuation character</li>
-    <li>contain uppercase, lowercase, and numeric characters</li>
+    <li>contain at least one numeric, whitespace, or punctuation character</li>
+    <li>contain both uppercase and lowercase letters</li>
 </ul>
 </td></table>";
 

@@ -6,11 +6,13 @@
    Module By: Navin Manohar, Jonathan Abbey, Michael Mulvaney
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -53,7 +55,7 @@ import arlut.csd.Util.TranslationService;
 
 /**
  * This class defines an entry field that is capable of handling
- * integers.  The maximum and minimum bounds for the range of 
+ * integers.  The maximum and minimum bounds for the range of
  * integers that can be entered into this JnumberField can also
  * be preset.
  */
@@ -89,13 +91,14 @@ public class JnumberField extends JentryField {
 
  /**
    * Base constructor for JnumberField
-   * 
+   *
    * @param columns number of colums in the JnumberField
    * @param iseditable true if this JnumberField is editable
    * @param islimited true if there is a restriction on the range of values
    * @param minsize the minimum limit on the range of values
    * @param maxsize the maximum limit on the range of values
-   */ 
+   */
+
   public JnumberField(int columns,
                       boolean iseditable,
                       boolean islimited,
@@ -103,15 +106,15 @@ public class JnumberField extends JentryField {
                       int maxsize)
   {
     super(columns);
-    
+
     if (islimited)
       {
         limited = true;
-        
+
         maxSize = maxsize;
         minSize = minsize;
       }
-    
+
     setEditable(iseditable);  // will this JnumberField be editable or not?
   }
 
@@ -136,11 +139,11 @@ public class JnumberField extends JentryField {
   {
     this(JnumberField.DEFAULT_COLS);
   }
- 
+
  /**
   * Constructor that allows for the creation of a JnumberField
   * that knows about its parent and can invoke a callback method.
-  *  
+  *
   * @param columns number of colums in the JnumberField
   * @param iseditable true if this JnumberField is editable
   * @param islimited true if there is a restriction on the range of values
@@ -149,8 +152,8 @@ public class JnumberField extends JentryField {
   * @param parent the container within which this JnumberField is contained
   *        (This container will implement an interface that will utilize the
   *         data contained within this JnumberField.)
-  *
-  */ 
+  */
+
   public JnumberField(int columns,
                      boolean iseditable,
                      boolean islimited,
@@ -159,7 +162,7 @@ public class JnumberField extends JentryField {
                      JsetValueCallback parent)
   {
     this(columns,iseditable,islimited,minsize,maxsize);
-    
+
     setCallback(parent);
   }
 
@@ -167,12 +170,10 @@ public class JnumberField extends JentryField {
   ///////////////////
   // Class Methods //
   ///////////////////
- 
+
   /**
-   * returns true if <c> is a valid numerical
-   * digit.
-   *
    * @param c the character to check
+   * @return True if c is a valid numerical digit
    */
 
   public boolean isAllowed(char c)
@@ -191,12 +192,11 @@ public class JnumberField extends JentryField {
   }
 
   /**
-   * returns the value of this JnumberField as an Integer object
-   *
-   * If this field is empty, will return null. If this field is
+   * <p>If this field is empty, will return null. If this field is
    * not empty and has a non-numeric string, will throw a
-   * NumberFormatException.
+   * NumberFormatException.</p>
    *
+   * @return the value of this JnumberField as an Integer object
    */
 
   public Integer getValue() throws NumberFormatException
@@ -212,14 +212,14 @@ public class JnumberField extends JentryField {
   }
 
   /**
-   * sets the value of this JnumberField to num
+   * <p>Sets the value of this JnumberField to num</p>
    *
-   * This method does not trigger a callback to our container.. we
+   * <p>This method does not trigger a callback to our container.. we
    * only callback as a result of loss-of-focus brought on by the
-   * user.
+   * user.</p>
    *
    * @param num the number to use
-   */ 
+   */
 
   public void setValue(int num)
   {
@@ -227,11 +227,12 @@ public class JnumberField extends JentryField {
   }
 
   /**
-   * sets the value of this JnumberField using an Integer object.
+   * <p>Sets the value of this JnumberField using an Integer
+   * object.</p>
    *
-   * This method does not trigger a callback to our container.. we
+   * <p>This method does not trigger a callback to our container.. we
    * only callback as a result of loss-of-focus brought on by the
-   * user.
+   * user.</p>
    *
    * @param num the Integer object to use
    */
@@ -271,10 +272,9 @@ public class JnumberField extends JentryField {
   }
 
   /**
-   * Sets the limited/non-limited status of this JnumberField
-   * If setLimited is given a true value as a parameter, then
-   * certain bounds will be imposed on the range of possible 
-   * values.
+   * <p>Sets the limited/non-limited status of this JnumberField If
+   * setLimited is given a true value as a parameter, then certain
+   * bounds will be imposed on the range of possible values.</p>
    *
    * @param bool true if a limit is to be set on the range of values
    */
@@ -285,22 +285,24 @@ public class JnumberField extends JentryField {
   }
 
   /**
-   *  sets the maximum value in the range of possible values.
+   * <p>Sets the maximum value in the range of possible values.</p>
    *
    * @param n the number to use when setting the maximum value
    */
+
   public void setMaxValue(int n)
   {
     limited = true;
 
     maxSize = n;
   }
-  
+
   /**
-   *  sets the minimum value in the range of possible values.
+   * <p>Sets the minimum value in the range of possible values.</p>
    *
    * @param n the number to use when setting the minimum value
    */
+
   public void setMinValue(int n)
   {
     limited = true;
@@ -309,39 +311,42 @@ public class JnumberField extends JentryField {
   }
 
   /**
-   * returns true if there is a bound on the range of values that
-   * can be entered into this JnumberField
+   * @return True if there is a bound on the range of values that can
+   * be entered into this JnumberField
    */
+
   public boolean isLimited()
   {
     return limited;
   }
 
   /**
-   * returns the maximum value in the range of valid values for this
+   * @return The maximum value in the range of valid values for this
    * JnumberField
    */
+
   public int getMaxValue()
   {
     return maxSize;
   }
 
   /**
-   * returns the minimum value in the range of valid values for this
+   * @return The minimum value in the range of valid values for this
    * JnumberField
    */
+
   public int getMinValue()
   {
     return minSize;
   }
 
   /**
-   * overrides JentryField.sendCallback().
+   * <p>overrides JentryField.sendCallback().</p>
    *
-   * This is called when the number field loses focus.
+   * <p>This is called when the number field loses focus.</p>
    *
-   * sendCallback is called when focus is lost, or when we are otherwise
-   * triggered.
+   * <p>sendCallback is called when focus is lost, or when we are
+   * otherwise triggered.</p>
    *
    * @return -1 on change rejected, 0 on no change required, 1 on change approved
    */
@@ -358,7 +363,7 @@ public class JnumberField extends JentryField {
           {
             return -1;
           }
-        
+
         processingCallback = true;
       }
 
@@ -479,6 +484,10 @@ public class JnumberField extends JentryField {
   /**
    * <p>This private helper method relays a descriptive error message to
    * our callback interface.</p>
+   *
+   * @param errorString A descriptive error message that will be
+   * passed to our callback in a {@link
+   * arlut.csd.JDataComponent.JErrorValueObject JErrorValueObject}.
    */
 
   private void reportError(String errorString)
@@ -500,13 +509,18 @@ public class JnumberField extends JentryField {
   }
 
   /**
-   * This method is intended to be called if the setValuePerformed()
-   * callback that we call out to decides that it wants to substitute
-   * a replacement value for the value that we asked to have
-   * validated.
+   * <p>This method is intended to be called if the
+   * setValuePerformed() callback that we call out to decides that it
+   * wants to substitute a replacement value for the value that we
+   * asked to have validated.</p>
    *
-   * This is used to allow the server to reformat/canonicalize data
-   * that we passed to it.
+   * <p>This is used to allow the server to reformat/canonicalize data
+   * that we passed to it.</p>
+   *
+   * @param callback The JsetValueCallback that is ordering us to
+   * translate the value we sent to the callback
+   * @param replacementValue The Integer that the callback wishes to
+   * have us rewrite ourselves with
    */
 
   public void substituteValueByCallBack(JsetValueCallback callback, Integer replacementValue)

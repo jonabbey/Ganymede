@@ -5,17 +5,19 @@
    This class is intended to provide a serializable object that
    can be used to bulk-dump a static description of the category
    and base structures on the server to the client.
-   
+
    Created: 12 February 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -57,16 +59,14 @@ package arlut.csd.ganymede.common;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * This class is intended to provide a serializable object that
  * can be used to bulk-dump a static description of the category
  * and base structures on the server to the client.
- *
  */
 
 public class CategoryTransport implements java.io.Serializable {
 
-  /* XXX static final long serialVersionUID = 4104856725462391453L; */
+  static final long serialVersionUID = 3428227875010080755L;
 
   // ---
 
@@ -92,7 +92,7 @@ public class CategoryTransport implements java.io.Serializable {
   /**
    * <p>This method is provided so that server-side code can add chunks of data for serialization.
    * In the CategoryTransport case, the
-   * {@link arlut.csd.ganymede.server.DBBaseCategory#addCategoryToTransport(arlut.csd.ganymede.common.CategoryTransport,arlut.csd.ganymede.server.GanymedeSession, boolean)} 
+   * {@link arlut.csd.ganymede.server.DBBaseCategory#addCategoryToTransport(arlut.csd.ganymede.common.CategoryTransport,arlut.csd.ganymede.server.GanymedeSession, boolean)}
    * method is responsible for calling addChunk to build
    * 'this' up for serialization.</p>
    */
@@ -121,7 +121,7 @@ public class CategoryTransport implements java.io.Serializable {
         buffer.append("|");
         return;
       }
-        
+
     for (int j = 0; j < chars.length; j++)
       {
         if (chars[j] == '|')

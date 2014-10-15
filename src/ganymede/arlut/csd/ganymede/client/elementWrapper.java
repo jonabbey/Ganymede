@@ -2,10 +2,10 @@
 
    elementWrapper.java
 
-   This class will be used as a wrapper for each of the elements in
-   the vector.  It contains plus and minus buttons that will allow a
-   component to be deleted or a component to be added to the vector
-   being displayed.
+   This class will be used as a wrapper for each of the elements in an
+   edit-in-place vector.  It contains plus and minus buttons that will
+   allow a component to be deleted or a component to be added to the
+   vector being displayed.
 
    Created: 16 October 1997
 
@@ -15,8 +15,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996 - 2012
+   Copyright (C) 1996 - 2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -55,10 +57,13 @@ import java.awt.Component;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.rmi.RemoteException;
 
+import javax.swing.JComponent;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -85,7 +90,7 @@ import arlut.csd.ganymede.common.Invid;
  * themselves contain GUI elements from embedded objects.
  */
 
-class elementWrapper extends JPanel implements ActionListener, MouseListener {
+class elementWrapper extends JPanel implements ActionListener, MouseListener, FocusListener {
 
   /**
    * TranslationService object for handling string localization in the
@@ -113,7 +118,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     expand,
     remove;
 
-  vectorPanel
+  final vectorPanel
     vp;
 
   boolean
@@ -171,15 +176,16 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     if (editable)
       {
         remove = new JButton(vp.wp.removeImageIcon);
-        remove.setBorderPainted(false);
         remove.setOpaque(false);
-        remove.setFocusPainted(false);
         remove.setMargin(new Insets(0,0,0,0));
+        remove.setBorder(vp.wp.eWrapperButtonBorder);
+        remove.setBorderPainted(false);
 
         // "Delete this element"
         remove.setToolTipText(ts.l("init.remove_tooltip"));
         remove.setContentAreaFilled(false);
         remove.addActionListener(this);
+        remove.addFocusListener(this);
       }
 
     if (comp instanceof containerPanel)
@@ -199,13 +205,15 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
         expand = new JButton(vp.wp.closeIcon);
         expand.setPressedIcon(vp.wp.closePressedIcon);
+        expand.setMargin(new Insets(0,0,0,0));
+        expand.setBorder(vp.wp.eWrapperButtonBorder);
+        expand.setBorderPainted(false);
 
         // "Expand this element"
         expand.setToolTipText(ts.l("global.expand_tooltip"));
         expand.setOpaque(false);
-        expand.setBorderPainted(false);
-        expand.setFocusPainted(false);
         expand.addActionListener(this);
+        expand.addFocusListener(this);
         expand.setContentAreaFilled(false);
 
         buttonPanel.add("West", expand);
@@ -416,6 +424,8 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     vp.wp.getgclient().setNormalCursor();
   }
 
+  // ActionListener methods ------------------------------------------------------
+
   public void actionPerformed(ActionEvent evt)
   {
     if (debug)
@@ -440,6 +450,8 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
       }
   }
 
+  // MouseListener methods ------------------------------------------------------
+
   public void mouseClicked(MouseEvent e)
   {
     if (e.getWhen() - lastClick < 500)
@@ -452,10 +464,66 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     lastClick = e.getWhen();
   }
 
-  public void mouseEntered(MouseEvent e) {}
-  public void mouseExited(MouseEvent e) {}
-  public void mousePressed(MouseEvent e) {}
-  public void mouseReleased(MouseEvent e) {}
+  public void mouseEntered(MouseEvent e)
+  {
+  }
 
+  public void mouseExited(MouseEvent e)
+  {
+  }
 
+  public void mousePressed(MouseEvent e)
+  {
+  }
+
+  public void mouseReleased(MouseEvent e)
+  {
+  }
+
+  // FocusListener methods ------------------------------------------------------
+
+  public void focusLost(FocusEvent e)
+  {
+    JButton trigger = null;
+
+    try
+      {
+        trigger = (JButton) e.getSource();
+      }
+    catch (ClassCastException ex)
+      {
+        return;
+      }
+
+    trigger.setBorderPainted(false);
+    trigger.invalidate();
+    repaint();
+  }
+
+  public void focusGained(FocusEvent e)
+  {
+    JButton trigger = null;
+
+    try
+      {
+        trigger = (JButton) e.getSource();
+      }
+    catch (ClassCastException ex)
+      {
+        return;
+      }
+
+    if (expanded)
+      {
+        vp.scrollRectToVisible(trigger.getBounds());
+      }
+    else
+      {
+        vp.scrollRectToVisible(this.getBounds());
+      }
+
+    trigger.setBorderPainted(true);
+    trigger.invalidate();
+    repaint();
+  }
 }

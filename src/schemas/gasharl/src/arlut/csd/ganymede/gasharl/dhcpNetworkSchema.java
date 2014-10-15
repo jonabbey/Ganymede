@@ -1,18 +1,18 @@
 /*
 
-   dhcpNetworkSchema.java
+   dhcpSubnetNetwork.java
 
-   An interface defining constants to be used by the DHCP Option code.
-   
+   An interface defining constants to be used by the DHCP Network code.
+
    Created: 8 October 2007
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Contact information
@@ -46,17 +46,14 @@
 
 package arlut.csd.ganymede.gasharl;
 
-
 /*------------------------------------------------------------------------------
                                                                        interface
-                                                                dhcpNetworkSchema
+                                                               dhcpNetworkSchema
 
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * An interface defining constants to be used by the DHCP Network code.
- *
  */
 
 public interface dhcpNetworkSchema {
@@ -64,10 +61,6 @@ public interface dhcpNetworkSchema {
   final static short BASE=268;
 
   final static short NAME=256;
-  final static short NETWORK_NUMBER=257;
-  final static short NETWORK_MASK=258;
   final static short OPTIONS=259;
-  final static short ALLOW_REGISTERED_GUESTS=260;
-  final static short GUEST_RANGE=261;
-  final static short GUEST_OPTIONS=262;
+  final static short SUBNETS=271;
 }

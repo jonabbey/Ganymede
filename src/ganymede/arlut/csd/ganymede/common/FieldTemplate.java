@@ -4,17 +4,19 @@
 
    This class is a serializable object to return all the static
    information defining a field.
-   
+
    Created: 5 November 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -60,20 +62,21 @@ import arlut.csd.ganymede.rmi.BaseField;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class is a serializable object used to return all the static information
- * the client's {@link arlut.csd.ganymede.client.containerPanel containerPanel}
- * needs to render a specific kind of field.  A FieldTemplate is basically a summary
- * of the information that can be retrieved through the {@link arlut.csd.ganymede.rmi.BaseField}
- * remote interface.</p>
+ * <p>This class is a serializable object used to return all the
+ * static information the client's {@link
+ * arlut.csd.ganymede.client.containerPanel containerPanel} needs to
+ * render a specific kind of field.  A FieldTemplate is basically a
+ * summary of the information that can be retrieved through the {@link
+ * arlut.csd.ganymede.rmi.BaseField} remote interface.</p>
  *
- * <p>The {@link arlut.csd.ganymede.common.FieldInfo FieldInfo} object is used to return
- * the value information associated with an actual instance of a field.</p>
- *
- * @version $Id$
- * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
+ * <p>The {@link arlut.csd.ganymede.common.FieldInfo FieldInfo} object
+ * is used to return the value information associated with an actual
+ * instance of a field.</p>
  */
 
 public class FieldTemplate implements java.io.Serializable, FieldType {
+
+  static final long serialVersionUID = -4052464245469186312L;
 
   // ---
 
@@ -203,7 +206,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    *
    * Returns the object type number for the object containing this
    * field.
-   * 
+   *
    */
 
   public short getBaseID()
@@ -214,7 +217,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   /**
    *
    * Returns the name of this field.
-   * 
+   *
    */
 
   public String getName()
@@ -225,7 +228,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   /**
    *
    * Returns a description of this field suitable for a tooltip.
-   *  
+   *
    */
 
   public String getComment()
@@ -258,7 +261,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   // type identification convenience methods
 
   /**
-   * 
+   *
    * Returns true if this field is of boolean type
    *
    * @see arlut.csd.ganymede.rmi.BaseField
@@ -270,7 +273,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   }
 
   /**
-   * 
+   *
    * Returns true if this field is of numeric type
    *
    * @see arlut.csd.ganymede.rmi.BaseField
@@ -282,7 +285,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   }
 
   /**
-   * 
+   *
    * Returns true if this field is of date type
    *
    * @see arlut.csd.ganymede.rmi.BaseField
@@ -294,7 +297,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   }
 
   /**
-   * 
+   *
    * Returns true if this field is of string type
    *
    * @see arlut.csd.ganymede.rmi.BaseField
@@ -306,7 +309,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   }
 
   /**
-   * 
+   *
    * Returns true if this field is of invid type
    *
    * @see arlut.csd.ganymede.rmi.BaseField
@@ -318,7 +321,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   }
 
   /**
-   * 
+   *
    * Returns true if this field is of permission matrix type
    *
    * @see arlut.csd.ganymede.rmi.BaseField
@@ -330,7 +333,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   }
 
   /**
-   * 
+   *
    * Returns true if this field is of password type
    *
    * @see arlut.csd.ganymede.rmi.BaseField
@@ -342,8 +345,8 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   }
 
   /**
-   * 
-   * Returns true if this field is of IP type 
+   *
+   * Returns true if this field is of IP type
    *
    * @see arlut.csd.ganymede.rmi.BaseField
    */
@@ -354,8 +357,8 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   }
 
   /**
-   * 
-   * Returns true if this field is of float type 
+   *
+   * Returns true if this field is of float type
    *
    * @see arlut.csd.ganymede.rmi.BaseField
    */
@@ -366,8 +369,8 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   }
 
   /**
-   * 
-   * Returns true if this field is of field option type 
+   *
+   * Returns true if this field is of field option type
    *
    * @see arlut.csd.ganymede.rmi.BaseField
    */
@@ -434,9 +437,9 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    *
    * If this field is a STRING, returns the minimum acceptable length
    * for this field.
-   * 
+   *
    */
-  
+
   public short getMinLength()
   {
     return minLength;
@@ -446,7 +449,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    *
    * If this field is a STRING, returns the maximum acceptable length
    * for this field.
-   * 
+   *
    */
 
   public short getMaxLength()
@@ -458,7 +461,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    *
    * If this field is a STRING and a limited set of characters are
    * acceptable in this field, returns those characters.
-   * 
+   *
    */
 
   public String getOKChars()
@@ -470,7 +473,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    *
    * If this field is a STRING and a limited set of characters are
    * not acceptable in this field, returns those characters.
-   * 
+   *
    */
 
   public String getBadChars()
@@ -483,7 +486,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    * If this field is a STRING and a regular expression has been
    * set to limit acceptable strings in this field, returns the
    * regexp patter string.
-   * 
+   *
    */
 
   public String getRegexpPat()
@@ -495,7 +498,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    *
    * If this field is a STRING and this field has been configured to
    * be a multiline string field, this method will return true.
-   * 
+   *
    */
 
   public boolean isMultiLine()
@@ -519,7 +522,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    *
    * If this field is an INVID and is configured to point to an object
    * of a certain type, returns the object type this field points to.<br><br>
-   * 
+   *
    * This method will return a negative value if this field can point
    * to objects of differing types.
    *

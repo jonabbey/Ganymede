@@ -4,17 +4,19 @@
 
    This class is a serializable object to return all the information
    the container panel needs to render a field.
-   
+
    Created: 4 November 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -61,23 +63,26 @@ import arlut.csd.ganymede.server.PasswordDBField;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class is a serializable object used to return all the value information
- * the client's {@link arlut.csd.ganymede.client.containerPanel containerPanel}
- * needs to render a specific field instance, including the current value held
- * in this field and the current editability/visibility this field has with respect
- * to the user's {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}..</p>
+ * <p>This class is a serializable object used to return all the value
+ * information the client's {@link
+ * arlut.csd.ganymede.client.containerPanel containerPanel} needs to
+ * render a specific field instance, including the current value held
+ * in this field and the current editability/visibility this field has
+ * with respect to the user's {@link
+ * arlut.csd.ganymede.server.GanymedeSession GanymedeSession}..</p>
  *
- * <p>The {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate} object is used to return
- * the invariant (during the client's connection) type information associated
- * with the field generically across all objects of the type containing this field.</p>
+ * <p>The {@link arlut.csd.ganymede.common.FieldTemplate
+ * FieldTemplate} object is used to return the invariant (during the
+ * client's connection) type information associated with the field
+ * generically across all objects of the type containing this
+ * field.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
 public class FieldInfo implements java.io.Serializable {
 
-  static final long serialVersionUID = -3986768111784239002L;
+  static final long serialVersionUID = -4457805568492289591L;
 
   // ---
 
@@ -114,7 +119,7 @@ public class FieldInfo implements java.io.Serializable {
         defined = field.isDefined();
         editable = field.isEditable();
         visible = field.isVisible();
-        
+
         ID = field.getID();
 
         if (field instanceof PasswordDBField)
@@ -131,11 +136,11 @@ public class FieldInfo implements java.io.Serializable {
           }
         else if (!field.isVector())
           {
-            value = field.getValue(); // can throw IllegalArgumentException on perms failure
+            value = field.getValue(); // can throw GanyPermissionsException on perms failure
           }
         else
           {
-            value = field.getValues();// can throw IllegalArgumentException on perms failure
+            value = field.getValues();// can throw GanyPermissionsException on perms failure
           }
       }
     catch (GanyPermissionsException ex)

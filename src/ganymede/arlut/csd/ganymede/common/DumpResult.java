@@ -3,8 +3,8 @@
    DumpResult.java
 
    This class is a serializable dump result object, which conveys
-   results from a dump operation along with methods that can be
-   used to extract the results  out of the dump.
+   results from a dump operation along with methods that can be used
+   to extract the results out of the dump.
 
    Created: 25 September 1997
 
@@ -14,8 +14,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2014
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -64,37 +66,43 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class is a serializable transport object, used to transmit the results
- * of a data dump query to the client.  DumpResult objects are created by the
- * {@link arlut.csd.ganymede.server.DumpResultBuilder DumpResultBuilder} factory class.</p>
+ * <p>This class is a serializable transport object, used to transmit
+ * the results of a data dump query to the client.  DumpResult objects
+ * are created by the {@link
+ * arlut.csd.ganymede.server.DumpResultBuilder DumpResultBuilder}
+ * factory class.</p>
  *
  * <p>The way it works is that DumpResultBuilder creates the
  * DumpResult objects, which is transmitted through RMI to the client.
  * The client can then call the various accessor methods to access the
  * serialized query results.</p>
  *
- * <p>DumpResult encodes a list of field headers by name, a list of field types
- * encoded as {@link java.lang.Short Shorts} coded with the
- * values enumerated in the {@link arlut.csd.ganymede.common.FieldType FieldType}
- * interface, and a list of object rows, each of which contains a Vector of
- * encoded field values.</p>
+ * <p>DumpResult encodes a list of field headers by name, a list of
+ * field types encoded as {@link java.lang.Short Shorts} coded with
+ * the values enumerated in the {@link
+ * arlut.csd.ganymede.common.FieldType FieldType} interface, and a
+ * list of object rows, each of which contains a Vector of encoded
+ * field values.</p>
  *
  * <p>Field values are encoded as follows:</p>
  *
- * <p>Date fields as {@link java.util.Date Date} objects<br/>
- * Float fields as {@link java.lang.Double Double} objects<br/>
- * Numeric fields as {@link java.lang.Integer Integer} objects<br/></p>
+ * <ul>
+ * <li>Date fields as {@link java.util.Date Date} objects</li>
+ * <li>Float fields as {@link java.lang.Double Double} objects</li>
+ * <li>Numeric fields as {@link java.lang.Integer Integer} objects</li>
+ * </ul>
  *
  * <p>And Strings for everything else.</p>
  *
- * <p>The GUI client uses this object to generate its query result tables.</p>
+ * <p>The GUI client uses this object to generate its query result
+ * tables.</p>
  *
  * <p>Later Note:</p>
  *
- * <p>Yes, I know how utterly horrifying this is.  It's something I did
- * very early on during development, and it worked well for high
+ * <p>Yes, I know how utterly horrifying this is.  It's something I
+ * did very early on during development, and it worked well for high
  * speed data dumping, so I just kept it.  Mea culpa, mea maxima
- * culpa.</pp>
+ * culpa.</p>
  *
  * <p>Yet, it works.</p>
  */
@@ -107,7 +115,8 @@ public class DumpResult implements java.io.Serializable, List {
 
   // ---
 
-  // for transport
+  // Created for us pre-serialization by
+  // arlut.csd.ganymede.server.DumpResultBuilder
 
   public StringBuffer buffer = null;
 
@@ -118,10 +127,10 @@ public class DumpResult implements java.io.Serializable, List {
 
   transient private boolean unpacked = false;
 
-  transient Vector headerObjects = null;
-  transient Vector headers = null;
-  transient Vector invids = null;
-  transient Vector rows = null;
+  transient Vector<DumpResultCol> headerObjects = null;
+  transient Vector<String> headers = null;
+  transient Vector<Invid> invids = null;
+  transient Vector<Map<String, Object>> rows = null;
 
   /* -- */
 
@@ -135,42 +144,43 @@ public class DumpResult implements java.io.Serializable, List {
    * java.util.Vector Vector} of field names, used to generate the
    * list of column headers in the GUI client.</p>
    *
-   * <p>Note: The Vector returned is "live", and should not be modified
-   * by the caller, at the risk of surprising behavior.</p>
+   * <p>Note: The Vector returned is "live", and should not be
+   * modified by the caller, at the risk of surprising behavior.</p>
    */
 
-  public synchronized Vector getHeaders()
+  public synchronized Vector<String> getHeaders()
   {
     checkBuffer();
 
     if (headers == null)
       {
-        headers = new Vector(headerObjects.size());
+        headers = new Vector<String>(headerObjects.size());
 
-        for (int i = 0; i < headerObjects.size(); i++)
+        for (DumpResultCol drc: headerObjects)
           {
-            headers.addElement(((DumpResultCol) headerObjects.elementAt(i)).getName());
+            headers.add(drc.getName());
           }
       }
 
-    return headers;
+    return new Vector(headers);
   }
 
   /**
-   * <p>This method can be called on the client to obtain an independent
-   * Vector of {@link arlut.csd.ganymede.common.DumpResultCol
-   * DumpResultCol} objects, which define the field name, field id,
-   * and field type for each column in this DumpResult.</p>
+   * <p>This method can be called on the client to obtain an
+   * independent Vector of {@link
+   * arlut.csd.ganymede.common.DumpResultCol DumpResultCol} objects,
+   * which define the field name, field id, and field type for each
+   * column in this DumpResult.</p>
    *
-   * <p>Note: The Vector returned is "live", and should not be modified
-   * by the caller, at the risk of surprising behavior.</p>
+   * <p>Note: The Vector returned is "live", and should not be
+   * modified by the caller, at the risk of surprising behavior.</p>
    */
 
-  public Vector getHeaderObjects()
+  public synchronized Vector<DumpResultCol> getHeaderObjects()
   {
     checkBuffer();
 
-    return headerObjects;
+    return new Vector(headerObjects);
   }
 
   /**
@@ -178,13 +188,11 @@ public class DumpResult implements java.io.Serializable, List {
    * DumpResult.</p>
    */
 
-  public String getFieldName(int col)
+  public synchronized String getFieldName(int col)
   {
     checkBuffer();
 
-    DumpResultCol headerObj = (DumpResultCol) headerObjects.elementAt(col);
-
-    return headerObj.getName();
+    return headerObjects.get(col).getName();
   }
 
   /**
@@ -192,13 +200,11 @@ public class DumpResult implements java.io.Serializable, List {
    * DumpResult.</p>
    */
 
-  public short getFieldId(int col)
+  public synchronized short getFieldId(int col)
   {
     checkBuffer();
 
-    DumpResultCol headerObj = (DumpResultCol) headerObjects.elementAt(col);
-
-    return headerObj.getFieldId();
+    return headerObjects.get(col).getFieldId();
   }
 
   /**
@@ -210,26 +216,24 @@ public class DumpResult implements java.io.Serializable, List {
    * arlut.csd.ganymede.common.FieldType FieldType} interface.</p>
    */
 
-  public short getFieldType(int col)
+  public synchronized short getFieldType(int col)
   {
     checkBuffer();
 
-    DumpResultCol headerObj = (DumpResultCol) headerObjects.elementAt(col);
-
-    return headerObj.getFieldType();
+    return headerObjects.get(col).getFieldType();
   }
 
   /**
    * <p>This method can be called on the client to obtain a {@link
-   * java.util.Vector Vector} of {@link arlut.csd.ganymede.common.Invid
-   * Invids}, identifying the objects that are being returned in the
-   * DumpResult.</p>
+   * java.util.Vector Vector} of {@link
+   * arlut.csd.ganymede.common.Invid Invids}, identifying the objects
+   * that are being returned in the DumpResult.</p>
    *
-   * <p>Note: The Vector returned is "live", and should not be modified
-   * by the caller, at the risk of surprising behavior.</p>
+   * <p>Note: The Vector returned is "live", and should not be
+   * modified by the caller, at the risk of surprising behavior.</p>
    */
 
-  public Vector getInvids()
+  public synchronized Vector<Invid> getInvids()
   {
     checkBuffer();
 
@@ -242,25 +246,27 @@ public class DumpResult implements java.io.Serializable, List {
    * given result row.</p>
    */
 
-  public Invid getInvid(int row)
+  public synchronized Invid getInvid(int row)
   {
     checkBuffer();
 
-    return (Invid) invids.elementAt(row);
+    return invids.get(row);
   }
 
   /**
    * <p>This method can be called on the client to obtain a {@link
-   * java.util.Vector Vector} of Vectors, each of which contains
-   * the data values returned for each object, in field order matching
-   * the field names and types returned by {@link arlut.csd.ganymede.common.DumpResult#getHeaders getHeaders()}
-   * and {@link arlut.csd.ganymede.common.DumpResult#getHeaderObjects getHeaderObjects()}.</p>
+   * java.util.Vector Vector} of Vectors, each of which contains the
+   * data values returned for each object, in field order matching the
+   * field names and types returned by {@link
+   * arlut.csd.ganymede.common.DumpResult#getHeaders getHeaders()} and
+   * {@link arlut.csd.ganymede.common.DumpResult#getHeaderObjects
+   * getHeaderObjects()}.</p>
    *
-   * <p>Note: The Vector returned is "live", and should not be modified
-   * by the caller, at the risk of surprising behavior.</p>
+   * <p>Note: The Vector returned is "live", and should not be
+   * modified by the caller, at the risk of surprising behavior.</p>
    */
 
-  public Vector getRows()
+  public synchronized Vector<Map<String,Object>> getRows()
   {
     checkBuffer();
 
@@ -277,19 +283,16 @@ public class DumpResult implements java.io.Serializable, List {
    * getHeaderObjects()}.</p>
    */
 
-  public Vector getFieldRow(int rowNumber)
+  public synchronized Vector<Object> getFieldRow(int rowNumber)
   {
     checkBuffer();
 
-    Map rowMap = (Map) rows.get(rowNumber);
-    Vector row = new Vector(headerObjects.size());
-    Iterator iter;
-    String currentHeader;
+    Map<String, Object> rowMap = rows.get(rowNumber);
+    Vector<Object> row = new Vector(headerObjects.size());
 
-    for (iter = headerObjects.iterator(); iter.hasNext();)
+    for (DumpResultCol drc: headerObjects)
       {
-        currentHeader = ((DumpResultCol) iter.next()).getName();
-        row.add(rowMap.get(currentHeader));
+        row.add(rowMap.get(drc.getName()));
       }
 
     return row;
@@ -298,17 +301,18 @@ public class DumpResult implements java.io.Serializable, List {
   /**
    * <p>This method can be called on the client to obtain an Object
    * encoding the result value for the <i>col</i>th field in the
-   * <i>row</i>th object.  These Objects may be a {@link java.lang.Double Double}
-   * for Float fields, an {@link java.lang.Integer Integer} for Numeric fields,
-   * a {@link java.util.Date Date} for Date fields, or a String for other
+   * <i>row</i>th object.  These Objects may be a {@link
+   * java.lang.Double Double} for Float fields, an {@link
+   * java.lang.Integer Integer} for Numeric fields, a {@link
+   * java.util.Date Date} for Date fields, or a String for other
    * fields.</p>
    */
 
-  public Object getResult(int row, int col)
+  public synchronized Object getResult(int row, int col)
   {
     checkBuffer();
 
-    return (getFieldRow(row)).elementAt(col);
+    return getFieldRow(row).get(col);
   }
 
   /**
@@ -316,7 +320,7 @@ public class DumpResult implements java.io.Serializable, List {
    * number of objects encoded in this DumpResult.</p>
    */
 
-  public int resultSize()
+  public synchronized int resultSize()
   {
     checkBuffer();
 
@@ -325,7 +329,8 @@ public class DumpResult implements java.io.Serializable, List {
 
   /**
    * <p>This method takes care of deserializing the StringBuffer we
-   * contain, to crack out the data we are interested in conveying.</p>
+   * contain, to crack out the data we are interested in
+   * conveying.</p>
    */
 
   private synchronized void checkBuffer()
@@ -338,15 +343,15 @@ public class DumpResult implements java.io.Serializable, List {
     char[] chars = buffer.toString().toCharArray();;
     arlut.csd.Util.SharedStringBuffer tempString = new arlut.csd.Util.SharedStringBuffer();
     int index = 0;
-    Map rowMap;
+    Map<String,Object> rowMap;
     short currentFieldType = -1;
     String currentHeader;
 
     /* -- */
 
-    headerObjects = new Vector();
-    invids = new Vector();
-    rows = new Vector();
+    headerObjects = new Vector<DumpResultCol>();
+    invids = new Vector<Invid>();
+    rows = new Vector<Map<String,Object>>();
 
     // read in the header definition line
 
@@ -433,7 +438,7 @@ public class DumpResult implements java.io.Serializable, List {
 
         fieldType = Short.valueOf(tempString.toString()).shortValue();
 
-        headerObjects.addElement(new DumpResultCol(fieldName, fieldId, fieldType));
+        headerObjects.add(new DumpResultCol(fieldName, fieldId, fieldType));
       }
 
     index++;                    // skip past \n
@@ -470,7 +475,7 @@ public class DumpResult implements java.io.Serializable, List {
 
         // now read in the fields for this invid
 
-        rowMap = new HashMap(headerObjects.size());
+        rowMap = new HashMap<String,Object>(headerObjects.size());
 
         while (chars[index] != '\n')
           {
@@ -496,7 +501,7 @@ public class DumpResult implements java.io.Serializable, List {
 
             index++;            // skip |
 
-            DumpResultCol header = (DumpResultCol) headerObjects.elementAt(rowMap.size());
+            DumpResultCol header = headerObjects.get(rowMap.size());
 
             currentFieldType = header.getFieldType();
             currentHeader = header.getName();
@@ -574,7 +579,7 @@ public class DumpResult implements java.io.Serializable, List {
               }
           }
 
-        rows.addElement(rowMap);
+        rows.add(rowMap);
 
         index++; // skip newline
       }
@@ -583,35 +588,35 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * <p>This method breaks apart the data structures held
-   * by this DumpResult.. it is intended to speed garbage
-   * collection when the contents of this DumpResult buffer
-   * have been processed and are no longer needed on the client.</p>
+   * <p>This method breaks apart the data structures held by this
+   * DumpResult.. it is intended to speed garbage collection when the
+   * contents of this DumpResult buffer have been processed and are no
+   * longer needed on the client.</p>
    */
 
-  public void dissociate()
+  public synchronized void dissociate()
   {
     if (headerObjects != null)
       {
-        headerObjects.removeAllElements();
+        headerObjects.clear();
         headerObjects = null;
       }
 
     if (headers != null)
       {
-        headers.removeAllElements();
+        headers.clear();
         headers = null;
       }
 
     if (invids != null)
       {
-        invids.removeAllElements();
+        invids.clear();
         invids = null;
       }
 
     if (rows != null)
       {
-        rows.removeAllElements();
+        rows.clear();
         rows = null;
       }
   }

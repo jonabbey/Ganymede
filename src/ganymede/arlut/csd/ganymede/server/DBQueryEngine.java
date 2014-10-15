@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -55,6 +55,7 @@ import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.DumpResult;
 import arlut.csd.ganymede.common.GanyParseException;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.IPAddress;
 import arlut.csd.ganymede.common.ObjectHandle;
 import arlut.csd.ganymede.common.ObjectStatus;
 import arlut.csd.ganymede.common.PermEntry;
@@ -141,7 +142,7 @@ public final class DBQueryEngine {
 
   public QueryResult queryInvids(Vector<Invid> invidVector)
   {
-    QueryResult result = new QueryResult(true); // for transport
+    QueryResult result = new QueryResult();
     DBObject obj;
     PermEntry perm;
 
@@ -392,15 +393,7 @@ public final class DBQueryEngine {
   public DumpResult dump(Query query)
   {
     DumpResultBuilder resultBuilder;
-
-    /**
-     *
-     * What base is the query being done on?
-     *
-     */
-
     DBObjectBase base = null;
-
     boolean embedded;
 
     /* -- */
@@ -631,7 +624,7 @@ public final class DBQueryEngine {
                                    boolean forTransport, DBLock extantLock,
                                    DBEditObject perspectiveObject)
   {
-    QueryResult result = new QueryResult(forTransport);
+    QueryResult result = new QueryResult();
     DBObjectBase base = null;
     Iterator<DBObject> it;
     DBObject obj;
@@ -891,7 +884,8 @@ public final class DBQueryEngine {
   /**
    * <p>If we can do a direct lookup, either because query is asking
    * for an Invid, or because we're doing a direct equality test on a
-   * namespace controlled field, we'll return true.</p>
+   * namespace controlled field, we'll return true after calling
+   * addResultRow() to add the answer to the QueryResult param.</p>
    *
    * <p>Otherwise, we'll return false, and queryDispatch() will need
    * to do an iteration over the objectbase to check the objects one
@@ -932,15 +926,15 @@ public final class DBQueryEngine {
 
     if (node.fieldId >= 0)
       {
-        fieldDef = (DBObjectBaseField) base.getField(node.fieldId);
+        fieldDef = base.getField(node.fieldId);
       }
     else if (node.fieldname != null)
       {
-        fieldDef = (DBObjectBaseField) base.getField(node.fieldname); // *sync* DBObjectBase
+        fieldDef = base.getField(node.fieldname); // *sync* DBObjectBase
       }
     else if (node.fieldId == -1)
       {
-        fieldDef = (DBObjectBaseField) base.getField(base.getLabelField()); // *sync* DBObjectBase
+        fieldDef = base.getField(base.getLabelField()); // *sync* DBObjectBase
       }
 
     if (fieldDef == null)
@@ -976,11 +970,11 @@ public final class DBQueryEngine {
 
             if (fieldDef.isIP() && node.value instanceof String)
               {
-                Byte[] ipBytes = null;
+                IPAddress ipBytes = null;
 
                 try
                   {
-                    ipBytes = IPDBField.genIPV4bytes((String) node.value);
+                    ipBytes = new IPAddress((String) node.value);
                   }
                 catch (IllegalArgumentException ex)
                   {
@@ -989,27 +983,6 @@ public final class DBQueryEngine {
                 if (ipBytes != null)
                   {
                     resultfield = ns.lookupMyValue(gSession, ipBytes);
-                  }
-
-                // it's hard to tell here whether any fields of
-                // this type will accept IPv6 bytes, so if we
-                // don't find it as an IPv4 address, look for it
-                // as an IPv6 address
-
-                if (resultfield == null)
-                  {
-                    try
-                      {
-                        ipBytes = IPDBField.genIPV6bytes((String) node.value);
-                      }
-                    catch (IllegalArgumentException ex)
-                      {
-                      }
-
-                    if (ipBytes != null)
-                      {
-                        resultfield = ns.lookupMyValue(gSession, ipBytes);
-                      }
                   }
               }
             else
@@ -1089,7 +1062,7 @@ public final class DBQueryEngine {
    *
    * <p>This method is not synchronized for performance reasons, but
    * is only to be called from methods synchronized on this
-   * GanymedeSession.</p>
+   * DBQueryEngine.</p>
    *
    * @param obj The object to add to the query results
    * @param query The query that we are processing, used to get

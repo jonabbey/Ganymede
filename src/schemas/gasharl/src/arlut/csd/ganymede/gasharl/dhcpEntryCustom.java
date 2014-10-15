@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -215,7 +215,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
     // Dynamically construct our custom filtered list of available
     // types for this entry
 
-    InvidDBField invf = (InvidDBField) getField(dhcpEntrySchema.TYPE);
+    InvidDBField invf = getInvidField(dhcpEntrySchema.TYPE);
 
     // ok, we are returning the list of choices for what type this
     // entry should belong to.  We don't want it to include any types
@@ -256,7 +256,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
 
   private boolean ownedBySystem(DBObject object)
   {
-    return object.getParentInvid().getType() == (short) 263;
+    return object.getParentInvid().getType() == systemSchema.BASE;
   }
 
   private boolean ownedByDHCPGroup()
@@ -266,7 +266,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
 
   private boolean ownedByDHCPGroup(DBObject object)
   {
-    return object.getParentInvid().getType() == (short) 262;
+    return object.getParentInvid().getType() == dhcpGroupSchema.BASE;
   }
 
   private boolean ownedByDHCPNetwork()
@@ -276,7 +276,17 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
 
   private boolean ownedByDHCPNetwork(DBObject object)
   {
-    return object.getParentInvid().getType() == (short) 268;
+    return object.getParentInvid().getType() == dhcpNetworkSchema.BASE;
+  }
+
+  private boolean ownedByDHCPSubnet()
+  {
+    return this.ownedByDHCPSubnet(this);
+  }
+
+  private boolean ownedByDHCPSubnet(DBObject object)
+  {
+    return object.getParentInvid().getType() == dhcpSubnetSchema.BASE;
   }
 
   private Vector<Invid> getSiblingInvids()
@@ -299,9 +309,23 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
           {
             result = optionsVect;
           }
-        else if (getParentObj().isDefined(dhcpNetworkSchema.GUEST_OPTIONS))
+
+        if (result == null)
           {
-            Vector<Invid> guestOptionsVect = (Vector<Invid>) getParentObj().getFieldValuesLocal(dhcpNetworkSchema.GUEST_OPTIONS);
+            throw new RuntimeException("couldn't find our own invid in parent dhcp network fields.");
+          }
+      }
+    else if (ownedByDHCPSubnet())
+      {
+        Vector<Invid> optionsVect = (Vector<Invid>) getParentObj().getFieldValuesLocal(dhcpSubnetSchema.OPTIONS);
+
+        if (optionsVect.contains(getInvid()))
+          {
+            result = optionsVect;
+          }
+        else if (getParentObj().isDefined(dhcpSubnetSchema.GUEST_OPTIONS))
+          {
+            Vector<Invid> guestOptionsVect = (Vector<Invid>) getParentObj().getFieldValuesLocal(dhcpSubnetSchema.GUEST_OPTIONS);
 
             if (guestOptionsVect.contains(getInvid()))
               {
@@ -311,7 +335,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
 
         if (result == null)
           {
-            throw new RuntimeException("couldn't find our own invid in parent dhcp network fields.");
+            throw new RuntimeException("couldn't find our own invid in parent dhcp subnet fields.");
           }
       }
 
@@ -398,8 +422,8 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
         return null;
       }
 
-    typeField = (InvidDBField) object.getField(TYPE);
-    valueField = (StringDBField) object.getField(VALUE);
+    typeField = object.getInvidField(TYPE);
+    valueField = object.getStringField(VALUE);
 
     if (typeField != null)
       {
@@ -481,7 +505,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
             // we set the type after the value.  make sure the value
             // is compatible with the type.
 
-            StringDBField valueField = (StringDBField) this.getField(dhcpEntrySchema.VALUE);
+            StringDBField valueField = this.getStringField(dhcpEntrySchema.VALUE);
             String valueString = (String) valueField.getValueLocal();
 
             if (valueString != null)
@@ -504,7 +528,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
                 // we've changed to an incompatible option, clear the
                 // value field.
 
-                StringDBField valueField = (StringDBField) getField(dhcpEntrySchema.VALUE);
+                StringDBField valueField = getStringField(dhcpEntrySchema.VALUE);
 
                 result = valueField.setValueLocal("");
 
@@ -522,6 +546,9 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
               }
           }
       }
+
+    // make the client refresh the displayed label for this embedded
+    // dhcpEntry if the TYPE or VALUE has been changed
 
     if (field.getID() == TYPE || field.getID() == VALUE)
       {
@@ -558,20 +585,36 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
   }
 
   /**
-   * <p>This method provides a hook that can be used to check any values
-   * to be set in any field in this object.  Subclasses of
-   * DBEditObject should override this method, implementing basically
-   * a large switch statement to check for any given field whether the
-   * submitted value is acceptable given the current state of the
+   * <p>Provides a hook that can be used to approve, disapprove,
+   * and/or transform any values to be set in any field in this
    * object.</p>
    *
-   * <p>Question: what synchronization issues are going to be needed
-   * between DBEditObject and DBField to insure that we can have
-   * a reliable verifyNewValue method here?</p>
+   * <p>verifyNewValue can be used to canonicalize a
+   * submitted value.  The verifyNewValue method may call
+   * {@link arlut.csd.ganymede.common.ReturnVal#setTransformedValueObject(java.lang.Object, arlut.csd.ganymede.common.Invid, short) setTransformedValue()}
+   * on the ReturnVal returned in order to substitute a new value for
+   * the provided value prior to any other processing on the server.</p>
    *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
+   * <p>This method is called before any NameSpace checking is done, before the
+   * {@link arlut.csd.ganymede.server.DBEditObject#wizardHook(arlut.csd.ganymede.server.DBField,int,java.lang.Object,java.lang.Object) wizardHook()}
+   * method, and before the appropriate
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeSetValue(arlut.csd.ganymede.server.DBField, Object) finalizeSetValue()},
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeSetElement(arlut.csd.ganymede.server.DBField, int, Object) finalizeSetElement()},
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeAddElement(arlut.csd.ganymede.server.DBField, java.lang.Object) finalizeAddElement()},
+   * or {@link arlut.csd.ganymede.server.DBEditObject#finalizeAddElements(arlut.csd.ganymede.server.DBField, java.util.Vector) finalizeAddElements()}
+   * method is called.</p>
+   *
+   * @param field The DBField contained within this object whose value
+   * is being changed
+   * @param value The value that is being proposed to go into field.
+   *
+   * @return A ReturnVal indicating success or failure.  May be simply
+   * 'null' to indicate success if no feedback need be provided.  If
+   * {@link arlut.csd.ganymede.common.ReturnVal#hasTransformedValue() hasTransformedValue()}
+   * returns true when callled on the returned ReturnVal, the value
+   * returned by {@link arlut.csd.ganymede.common.ReturnVal#getTransformedValueObject() getTransformedValueObject()}
+   * will be used for all further processing in the server, and will
+   * be the value actually saved in the DBStore.
    */
 
   @Override public ReturnVal verifyNewValue(DBField field, Object value)

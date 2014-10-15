@@ -16,7 +16,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -74,7 +74,6 @@ import java.lang.reflect.Constructor;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -102,10 +101,25 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * object (using the {@link
  * arlut.csd.ganymede.server.syncChannelCustom} DBEditObject subclass
  * for management) is created in the Ganymede data store.  This
- * <code>Sync Channel</code> object provides all of the configuration
- * controls which determine where the XML synchronization files are
- * written, what external program should be used to process the files,
- * and what data needs to be written out for synchronization.</p>
+ * <code>Sync Channel</code> object typically provides all of the
+ * configuration controls which determine where the XML
+ * synchronization files are written, what external program should be
+ * used to process the files, and what data needs to be written out
+ * for synchronization.</p>
+ *
+ * <p>Because there are times when a direct dump of Ganymede field
+ * information may not provide enough context for a given Sync
+ * Channel, it is possible to register a custom {@link
+ * arlut.csd.ganymede.server.SyncMaster} implementation with a
+ * <code>Sync Channel</code> object to bring in additional objects and
+ * fields as necessary.  It is also possible to use the {@link
+ * arlut.csd.ganymede.server.DBEditObject#getForeignSyncKeys(arlut.csd.ganymede.common.Invid,arlut.csd.ganymede.server.DBObject,arlut.csd.ganymede.server.DBObject,java.lang.String,boolean) getForeignSyncKeys()}
+ * and {@link
+ * arlut.csd.ganymede.server.DBEditObject#getMyExtraInvidAttributes(arlut.csd.ganymede.server.DBObject,java.lang.String,boolean) getMyExtraInvidAttributes()}
+ * methods on an object type's custom {@link
+ * arlut.csd.ganymede.server.DBEditObject} class to synthesize
+ * additional information specific to a given external Sync Channel
+ * handler.</p>
  *
  * <p>Every time a transaction is committed, the Ganymede server
  * compares all objects involved in the transaction against every
@@ -134,13 +148,14 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * XML files to the proper output directory.  If a problem prevents
  * any of the SyncRunners from successfully writing its XML files, the
  * transaction will be aborted as if it never happened.  All of this
- * is done with proper ACID transactional guarantees.  The SyncRunner
- * implementation is designed so that the Ganymede server can be
- * killed at any time without leaving a transaction partially
- * committed between the Sync Channels and the Ganymede journal file.
- * Either a transaction is successfully recorded to all relevant Sync
- * Channels and the journal, or it will not be recorded to any of
- * them.</p>
+ * is done with proper ACID transactional guarantees.  The {@link
+ * arlut.csd.ganymede.server.DBJournal} is not updated to record that
+ * a transaction was successfully committed until all updates are
+ * written to all registered Sync Channels.  If the server is killed
+ * during the process of writing a transaction to the Sync Channels,
+ * it will delete the non-finalized transaction record from all Sync
+ * Channels on startup as part of the process of rolling back the
+ * non-finalized transaction.</p>
  *
  * <p>Whenever any transaction is successfully committed, each
  * incremental Sync Channel Runner is scheduled for execution by the
@@ -184,8 +199,8 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * the Ganymede scheduler.  When the full-state sync channel is
  * serviced by the scheduler, the full state of the system (as
  * filtered by the requirements of the Sync Channel object at the time
- * the scheduler runs) the XML file is generated and the service
- * program is run immediately therafter.</p>
+ * the scheduler runs) is written into the XML file generated and the
+ * service program is run immediately therafter.</p>
  *
  * <p>Incremental sync channels can be more efficient, as only changed
  * data need be written to the Sync Channel, but not all types of data
@@ -209,7 +224,7 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * you want looks like</p>
  *
  * <pre>
- *   xmlclient -dumpdata sync=Users > full_users_sync.xml
+ *   xmlclient -dumpdata sync=Users &gt; full_users_sync.xml
  * </pre>
  *
  * <p>The effect of this command is to dump all data in the server
@@ -232,8 +247,11 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * expensive process of reconciliation to bring the directory service
  * target into compliance with the data in the Ganymede server.</p>
  *
- * <p>See the <a href="../../../../../synchronization/index.html" target="_top">Ganymede
- * synchronization guide</a> for more details on all of this.</p>
+ * <p>See the <a href="../../../../../synchronization/index.html"
+ * target="_top">Ganymede synchronization guide</a> for more details
+ * on all of this.</p>
+ *
+ * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  */
 
 public final class SyncRunner implements Runnable {
@@ -480,7 +498,7 @@ public final class SyncRunner implements Runnable {
         this.mode = SyncType.INCREMENTAL; // the default old behavior
       }
 
-    FieldOptionDBField f = (FieldOptionDBField) syncChannel.getField(SchemaConstants.SyncChannelFields);
+    FieldOptionDBField f = syncChannel.getFieldOptionsField(SchemaConstants.SyncChannelFields);
 
     if (f == null)
       {
@@ -488,7 +506,7 @@ public final class SyncRunner implements Runnable {
       }
     else
       {
-        this.matrix = new HashMap<String, SyncPrefEnum>(f.matrix);
+        this.matrix = f.getInternalsCopy();
       }
   }
 
@@ -869,8 +887,8 @@ public final class SyncRunner implements Runnable {
   /**
    * <p>If we go to commit a transaction and we find that we can't
    * write a sync to its sync channel for some reason, we'll need to
-   * go back and erase the sync files that we did write out.  This method
-   * is responsible for wielding the axe.</p>
+   * go back and erase the sync files that we did write out.  This
+   * method is responsible for wielding the axe.</p>
    *
    * @param transRecord A transaction description record describing
    * the transaction we are clearing from this sync channel
@@ -984,7 +1002,7 @@ public final class SyncRunner implements Runnable {
                   }
                 else
                   {
-                    origField = (DBField) origObj.getField(memberField.getID());
+                    origField = origObj.getField(memberField.getID());
                   }
 
                 // created
@@ -1154,7 +1172,7 @@ public final class SyncRunner implements Runnable {
           }
         else
           {
-            origField = (DBField) origObj.getField(memberField.getID());
+            origField = origObj.getField(memberField.getID());
           }
 
         // created
@@ -1612,6 +1630,12 @@ public final class SyncRunner implements Runnable {
 
     this.needBuild.set(false);
 
+    // Make sure we can create our FileOutputStream before we create
+    // the transmitting side with the session.getDataXML() call below.
+
+    FileOutputStream fos = new FileOutputStream(this.fullStateFile);
+    BufferedOutputStream out = new BufferedOutputStream(fos);
+
     // session.getDataXML will obtain and manage another dump lock on
     // another thread, but we have ensured that DBWriteLock will not
     // allow any establishment of a DBWriteLock while the upper
@@ -1620,10 +1644,6 @@ public final class SyncRunner implements Runnable {
 
     ReturnVal retVal = session.getDataXML(this.name, true, true);
     FileTransmitter transmitter = retVal.getFileTransmitter();
-    FileOutputStream fos = new FileOutputStream(this.fullStateFile);
-    BufferedOutputStream out = null;
-
-    out = new BufferedOutputStream(fos);
 
     try
       {
@@ -1637,6 +1657,9 @@ public final class SyncRunner implements Runnable {
       }
     finally
       {
+        // in case of IOException writing to out/fos.
+        transmitter.drain();
+
         out.flush();
         fos.getFD().sync();
         out.close();

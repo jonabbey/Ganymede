@@ -6,17 +6,19 @@
    database queries.
 
    Result is serializable.
-   
-   Created: 21 October 1996 
+
+   Created: 21 October 1996
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2014
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -57,21 +59,21 @@ package arlut.csd.ganymede.common;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>The Result class is effectively a serializable, labeled
- * {@link arlut.csd.ganymede.common.Invid Invid} that can be passed from the server
- * to the client.  The client uses Results to load labeled items into the
- * client tree, or to provide a list of labeled object handles in Invid
- * chooser fields.</P>
+ * <p>The Result class is effectively a serializable, labeled {@link
+ * arlut.csd.ganymede.common.Invid Invid} that can be passed from the
+ * server to the client.  The client uses Results to load labeled
+ * items into the client tree, or to provide a list of labeled object
+ * handles in Invid chooser fields.</p>
  */
 
 public class Result implements java.io.Serializable {
 
-  static final long serialVersionUID = -8417751229367613063L;
+  static final long serialVersionUID = -9016358861157235903L;
 
   // ---
-  
-  Invid invid;  // remote reference to an object on the server
-  String label = null;
+
+  private Invid invid;
+  private String label;
 
   /* -- */
 
@@ -90,66 +92,6 @@ public class Result implements java.io.Serializable {
   {
     return invid;
   }
-
-  public String resultDump()
-  {
-    StringBuilder buffer = new StringBuilder();
-    char[] chars;
-
-    /* -- */
-
-    chars = invid.toString().toCharArray();
-    
-    for (int j = 0; j < chars.length; j++)
-      {
-        if (chars[j] == '|')
-          {
-            buffer.append("\\|");
-          }
-        else if (chars[j] == '\n')
-          {
-            buffer.append("\\\n");
-          }
-        else if (chars[j] == '\\')
-          {
-            buffer.append("\\\\");
-          }
-        else
-          {
-            buffer.append(chars[j]);
-          }
-      }
-
-    buffer.append("|");
-
-    chars = label.toCharArray();
-    
-    for (int j = 0; j < chars.length; j++)
-      {
-        if (chars[j] == '|')
-          {
-            buffer.append("\\|");
-          }
-        else if (chars[j] == '\n')
-          {
-            buffer.append("\\\n");
-          }
-        else if (chars[j] == '\\')
-          {
-            buffer.append("\\\\");
-          }
-        else
-          {
-            buffer.append(chars[j]);
-          }
-      }
-
-    buffer.append("\n");
-
-    return buffer.toString();
-  }
-
-  // and hashCode
 
   public int hashCode()
   {

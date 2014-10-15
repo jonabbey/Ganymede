@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -57,6 +57,7 @@ import java.util.regex.Pattern;
 
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.IPAddress;
 import arlut.csd.ganymede.common.GanyParseException;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.QueryResult;
@@ -171,7 +172,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
      "next-server"
      );
 
-  private static QueryResult result = new QueryResult(true);
+  private static QueryResult result = new QueryResult();
 
   static
   {
@@ -280,7 +281,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
         return null;
       }
 
-    BooleanDBField custom = (BooleanDBField) getField(dhcpOptionSchema.CUSTOMOPTION);
+    BooleanDBField custom = getBooleanField(dhcpOptionSchema.CUSTOMOPTION);
 
     return custom.setValueLocal(Boolean.TRUE);
   }
@@ -677,20 +678,36 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
   }
 
   /**
-   * <p>This method provides a hook that can be used to check any values
-   * to be set in any field in this object.  Subclasses of
-   * DBEditObject should override this method, implementing basically
-   * a large switch statement to check for any given field whether the
-   * submitted value is acceptable given the current state of the
+   * <p>Provides a hook that can be used to approve, disapprove,
+   * and/or transform any values to be set in any field in this
    * object.</p>
    *
-   * <p>Question: what synchronization issues are going to be needed
-   * between DBEditObject and DBField to insure that we can have
-   * a reliable verifyNewValue method here?</p>
+   * <p>verifyNewValue can be used to canonicalize a
+   * submitted value.  The verifyNewValue method may call
+   * {@link arlut.csd.ganymede.common.ReturnVal#setTransformedValueObject(java.lang.Object, arlut.csd.ganymede.common.Invid, short) setTransformedValue()}
+   * on the ReturnVal returned in order to substitute a new value for
+   * the provided value prior to any other processing on the server.</p>
    *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
+   * <p>This method is called before any NameSpace checking is done, before the
+   * {@link arlut.csd.ganymede.server.DBEditObject#wizardHook(arlut.csd.ganymede.server.DBField,int,java.lang.Object,java.lang.Object) wizardHook()}
+   * method, and before the appropriate
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeSetValue(arlut.csd.ganymede.server.DBField, Object) finalizeSetValue()},
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeSetElement(arlut.csd.ganymede.server.DBField, int, Object) finalizeSetElement()},
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeAddElement(arlut.csd.ganymede.server.DBField, java.lang.Object) finalizeAddElement()},
+   * or {@link arlut.csd.ganymede.server.DBEditObject#finalizeAddElements(arlut.csd.ganymede.server.DBField, java.util.Vector) finalizeAddElements()}
+   * method is called.</p>
+   *
+   * @param field The DBField contained within this object whose value
+   * is being changed
+   * @param value The value that is being proposed to go into field.
+   *
+   * @return A ReturnVal indicating success or failure.  May be simply
+   * 'null' to indicate success if no feedback need be provided.  If
+   * {@link arlut.csd.ganymede.common.ReturnVal#hasTransformedValue() hasTransformedValue()}
+   * returns true when callled on the returned ReturnVal, the value
+   * returned by {@link arlut.csd.ganymede.common.ReturnVal#getTransformedValueObject() getTransformedValueObject()}
+   * will be used for all further processing in the server, and will
+   * be the value actually saved in the DBStore.
    */
 
   @Override public ReturnVal verifyNewValue(DBField field, Object value)
@@ -869,11 +886,11 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
 
   private static ReturnVal validateIP(DBObject object, String ipOrHost)
   {
-    Byte[] parsedAddress = null;
+    IPAddress parsedAddress = null;
 
     try
       {
-        parsedAddress = IPDBField.genIPV4bytes(ipOrHost);
+        parsedAddress = new IPAddress(ipOrHost);
       }
     catch (IllegalArgumentException ex)
       {
@@ -943,7 +960,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
               {
                 Invid interfaceInvid = results.getInvid(0);
                 DBObject interfaceObject = object.lookupInvid(interfaceInvid);
-                DBField ipField = (DBField) interfaceObject.getField(interfaceSchema.ADDRESS);
+                DBField ipField = interfaceObject.getField(interfaceSchema.ADDRESS);
 
                 ReturnVal retVal = new ReturnVal(true, true);
                 retVal.setTransformedValueObject(ipField.getEncodingString());
@@ -960,7 +977,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
       }
 
     ReturnVal retVal = new ReturnVal(true, true);
-    retVal.setTransformedValueObject(IPDBField.genIPV4string(parsedAddress));
+    retVal.setTransformedValueObject(parsedAddress.toString());
 
     return retVal;
   }

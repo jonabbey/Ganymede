@@ -411,7 +411,29 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
           }
         else
           {
-            return java.lang.System.getProperty(configKey);
+            String property = java.lang.System.getProperty(configKey);
+
+            // Starting with Java 7u45, we can't just bring random
+            // properties from an unsigned JNLP file.
+            //
+            // See if the serverhost and registryport information was
+            // slipped to us through the
+            // arlut/csd/ganymede/common/build.properties resource
+            // file in our Jar file.
+
+            if (property == null)
+              {
+                if (configKey.equals("ganymede.serverhost"))
+                  {
+                    return arlut.csd.ganymede.common.BuildInfo.getServerHost();
+                  }
+                else if (configKey.equals("ganymede.registryPort"))
+                  {
+                    return arlut.csd.ganymede.common.BuildInfo.getServerPort();
+                  }
+              }
+
+            return property;
           }
       }
   }

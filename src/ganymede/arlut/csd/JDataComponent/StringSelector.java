@@ -2,7 +2,8 @@
 
    StringSelector.java
 
-   A two list box for adding strings to lists.
+   A two list box for adding strings to and/or removing strings from
+   lists.
 
    Created: 10 October 1997
 
@@ -12,8 +13,8 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
-   The University of Texas at Austinb
+   Copyright (C) 1996-2013
+   The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
 
@@ -50,12 +51,15 @@
 package arlut.csd.JDataComponent;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -65,14 +69,19 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -115,7 +124,7 @@ import arlut.csd.Util.VectorUtils;
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
-public class StringSelector extends JPanel implements ActionListener, JsetValueCallback {
+public class StringSelector extends JPanel implements ActionListener, JsetValueCallback, FocusListener {
 
   static final boolean debug = false;
 
@@ -139,6 +148,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     in,
     out = null;
 
+  JScrollPane
+    inScrollPane = null,
+    outScrollPane = null;
+
   JPanel
     inPanel = new JPanel(),
     outPanel = new JPanel();
@@ -159,6 +172,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
   Container
     parent;
+
+  Border
+    focusedBorder = new LineBorder(Color.black, 1),
+    unfocusedBorder = BorderFactory.createEmptyBorder(1,1,1,1);
 
   private boolean
     replacingValue = false,
@@ -216,6 +233,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     in = new JstringListBox();
     in.setCallback(this);
+    in.addFocusListener(this);
 
     this.currentRows = in.getVisibleRowCount();
 
@@ -225,12 +243,14 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     inPanel.setBorder(bborder);
     inPanel.setLayout(new BorderLayout());
 
-    inPanel.add("Center", new JScrollPane(in));
+    inScrollPane = new JScrollPane(in);
+    inScrollPane.setViewportBorder(unfocusedBorder);
+
+    inPanel.add("Center", inScrollPane);
 
     inTitle.setText(org_in.concat(" : 0"));
-    //    inTitle.setHorizontalAlignment( SwingConstants.LEFT );
-    //    inTitle.setMargin( new Insets(0,0,0,0) );
     inTitle.addActionListener(this);
+    inTitle.addFocusListener(this);
 
     inPanel.add("North", inTitle);
 
@@ -251,6 +271,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
         remove.setOpaque(true);
         remove.setActionCommand("Remove");
         remove.addActionListener(this);
+        remove.addFocusListener(this);
         inPanel.add("South", remove);
       }
 
@@ -275,9 +296,14 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
         //      outTitle.setHorizontalAlignment( SwingConstants.LEFT );
         //      outTitle.setMargin( new Insets(0,0,0,0) );
         outTitle.addActionListener(this);
+        outTitle.addFocusListener(this);
 
         out = new JstringListBox();
         out.setCallback(this);
+        out.addFocusListener(this);
+
+        outScrollPane = new JScrollPane(out);
+        outScrollPane.setViewportBorder(unfocusedBorder);
 
         // "<< Add"
         add = new JButton(ts.l("global.add_choice_button"));
@@ -285,10 +311,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
         add.setOpaque(true);
         add.setActionCommand("Add");
         add.addActionListener(this);
+        add.addFocusListener(this);
 
         outPanel.setBorder(bborder);
         outPanel.setLayout(new BorderLayout());
-        outPanel.add("Center", new JScrollPane(out));
+        outPanel.add("Center", outScrollPane);
         outPanel.add("North", outTitle);
         outPanel.add("South", add);
 
@@ -308,7 +335,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     if (editable)
       {
         custom = new JstringField();
-        custom.setBorder(new EmptyBorder(new Insets(0,0,0,4)));
+        custom.transferFocusOnEntry = false;
         custom.addActionListener(new ActionListener()
                                  {
                                    public void actionPerformed(ActionEvent e)
@@ -316,6 +343,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
                                        addCustom.doClick();
                                      }
                                  });
+        custom.addFocusListener(this);
 
         JPanel customP = new JPanel();
         customP.setLayout(new BorderLayout());
@@ -328,6 +356,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
             addCustom.setEnabled(false);
             addCustom.setActionCommand("AddNewString");
             addCustom.addActionListener(this);
+            addCustom.addFocusListener(this);
             customP.add("West", addCustom);
 
             // we only want this add button to be active when the user
@@ -477,8 +506,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   /**
    * <p>This method sets the width of the in and out rows.</p>
    *
-   * @param width How many columns wide should each box be?  If <= 0, the
-   * StringSelector will auto-size the columns
+   * @param width How many columns wide should each box be?  If &lt;=
+   * 0, the StringSelector will auto-size the columns
    */
 
   public void setCellWidth(int width)
@@ -738,11 +767,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    * <li>{@link arlut.csd.JDataComponent.JErrorValueObject} Something went wrong.  Value is the error message to be displayed to the user in whatever
    * fashion is appropriate.</li>
    * </ul>
-   * </p>
    *
    * @see JsetValueCallback
    * @see JValueObject
-   *
    */
 
   public void setCallback(JsetValueCallback parent)
@@ -945,6 +972,47 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     return false;  // should never really get here.
+  }
+
+  // FocusListener methods ------------------------------------------------------
+
+  public void focusLost(FocusEvent e)
+  {
+    Object source = e.getSource();
+
+    if (source == in)
+      {
+        inScrollPane.setViewportBorder(unfocusedBorder);
+        this.repaint();
+      }
+    else if (source == out)
+      {
+        outScrollPane.setViewportBorder(unfocusedBorder);
+        this.repaint();
+      }
+  }
+
+  public void focusGained(FocusEvent e)
+  {
+    Object source = e.getSource();
+
+    if (source == in)
+      {
+        inScrollPane.setViewportBorder(focusedBorder);
+        this.repaint();
+      }
+    else if (source == out)
+      {
+        outScrollPane.setViewportBorder(focusedBorder);
+        this.repaint();
+      }
+
+    JComponent parent = (JComponent) this.getParent();
+
+    if (parent != null)
+      {
+        parent.scrollRectToVisible(this.getBounds());
+      }
   }
 
   // Private methods ------------------------------------------------------------
@@ -1570,6 +1638,15 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     if (currentRows != lowerBound)
       {
         setVisibleRowCount(lowerBound, false);
+      }
+
+    in.setFocusable(in.getSizeOfList() > 0);
+    inTitle.setFocusable(in.getSizeOfList() > 0);
+
+    if (out != null)
+      {
+        out.setFocusable(out.getSizeOfList() > 0);
+        outTitle.setFocusable(out.getSizeOfList() > 0);
       }
   }
 

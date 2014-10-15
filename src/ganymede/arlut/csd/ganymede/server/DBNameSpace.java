@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -114,8 +114,7 @@ import arlut.csd.ganymede.rmi.NameSpace;
  * either case sensitive or case insensitive.  The DBNameSpace class
  * uses the {@link arlut.csd.ganymede.server.GHashtable GHashtable}
  * class to handle the representational issues in the unique value
- * hash for this, as well as for things like IP address
- * representation.</p>
+ * hash for this.</p>
  */
 
 public final class DBNameSpace implements NameSpace {
@@ -505,7 +504,7 @@ public final class DBNameSpace implements NameSpace {
    * being held by an object in the transaction, reserve() will return
    * false.</p>
    *
-   * @param editSet The transaction claiming the unique value <value>
+   * @param editSet The transaction claiming the unique value &lt;value&gt;
    * @param value The unique value that transaction editset is attempting to claim
    *
    * @return true if the value could be reserved in the given editSet.
@@ -581,7 +580,7 @@ public final class DBNameSpace implements NameSpace {
    * reserve() will return true, even though a subsequent mark()
    * attempt would fail unless the value is first unmarked.</p>
    *
-   * @param editSet The transaction claiming the unique value <value>
+   * @param editSet The transaction claiming the unique value &lt;value&gt;
    * @param value The unique value that transaction editset is
    * attempting to claim
    * @param onlyUnused If true, reserve() will return false if the
@@ -1950,7 +1949,7 @@ class DBNameSpaceHandle implements Cloneable {
             return null;
           }
 
-        return (DBField) _obj.getField(persistentFieldId);
+        return _obj.getField(persistentFieldId);
       }
     else
       {
@@ -1963,7 +1962,7 @@ class DBNameSpaceHandle implements Cloneable {
             return null;
           }
 
-        return (DBField) _obj.getField(persistentFieldId);
+        return _obj.getField(persistentFieldId);
       }
   }
 

@@ -10,11 +10,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2014
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -65,20 +67,28 @@ import java.rmi.RemoteException;
 public interface FileTransmitter extends Remote {
 
   /**
-   * This method pulls down the next sequence of bytes from the
+   * <p>This method pulls down the next sequence of bytes from the
    * FileTransmitter.  This method will block if necessary until the
-   * data is ready to be transmitted.
+   * data is ready to be transmitted.</p>
    *
-   * This method returns null on end of file, and will throw an
-   * exception if it is called again after null is returned.
+   * <p>This method returns null on end of file, and will throw an
+   * exception if it is called again after null is returned.</p>
    */
 
   public byte[] getNextChunk() throws RemoteException;
 
   /**
+   * Consumes everything sent through the XMLTransmitter until the
+   * writer side has finished.  This method will block if necessary
+   * until the data is ready to be consumed..
+   */
+
+  public void drain() throws RemoteException;
+
+  /**
    * This method is called to notify the FileTransmitter that no
    * more of the file will be pulled.
    */
-  
+
   public void end() throws RemoteException;
 }

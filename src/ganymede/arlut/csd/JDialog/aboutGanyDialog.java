@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -129,7 +129,7 @@ public class aboutGanyDialog extends JDialog {
     tabPane = new JTabbedPane();
 
     addTab(ts.l("init.about_tab"), ts.l("init.aboutText",
-                                        arlut.csd.Util.SVNVersion.getReleaseString()));
+                                        arlut.csd.ganymede.common.BuildInfo.getReleaseString()));
 
     gbc.anchor = GridBagConstraints.NORTHWEST;
     gbc.fill = GridBagConstraints.NONE;
@@ -169,48 +169,49 @@ public class aboutGanyDialog extends JDialog {
 
   private void addTab(String title, String text)
   {
-    try {
-      JEditorPane textbox = new JEditorPane("text/html",text);
-      textbox.setOpaque(true);
-      textbox.setEditable(false);
-      textbox.addHyperlinkListener(new HyperlinkListener()
-        {
-          @Override
-          public void hyperlinkUpdate(HyperlinkEvent e)
+    try
+      {
+        JEditorPane textbox = new JEditorPane("text/html",text);
+        textbox.setCaretPosition(0);
+        textbox.setOpaque(true);
+        textbox.setEditable(false);
+        textbox.addHyperlinkListener(new HyperlinkListener()
           {
-            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
-              {
-                try {
-                  Desktop.getDesktop().browse(e.getURL().toURI());
-                } catch (Exception e1) {
-
-                  new StringDialog(new JFrame(),
-                                   ts.l("global.linkErrorTitle"), // "Error Opening Link"
-                                   ts.l("global.linkErrorMsg"), // "Error Opening Link"
-                                   ts.l("global.linkErrorOKButton"), // "Ok"
-                                   null,
-                                   StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent e)
+            {
+              if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
+                {
+                  try
+                    {
+                      Desktop.getDesktop().browse(e.getURL().toURI());
+                    }
+                  catch (Exception e1)
+                    {
+                      new StringDialog(new JFrame(),
+                                       ts.l("global.linkErrorTitle"), // "Error Opening Link"
+                                       ts.l("global.linkErrorMsg"), // "Error Opening Link"
+                                       ts.l("global.linkErrorOKButton"), // "Ok"
+                                       null,
+                                       StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
+                    }
                 }
-              }
-          }
-        });
+            }
+          });
 
-      JScrollPane scrollpane = new JScrollPane(textbox,
-                                               JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                               JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-      scrollpane.setBorder(null);
-      scrollpane.setViewportBorder(null);
-      scrollpane.getViewport().setOpaque(true);
+        JScrollPane scrollpane = new JScrollPane(textbox,
+                                                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                                                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollpane.setBorder(null);
+        scrollpane.setViewportBorder(null);
+        scrollpane.getViewport().setOpaque(true);
 
-      tabPane.addTab(title, null, scrollpane);
-
-
-    }
+        tabPane.addTab(title, null, scrollpane);
+      }
     catch (Exception ex)
       {
         throw new RuntimeException("Error creating addTab" + ex);
       }
-
   }
 
   public void setVisible(boolean state)

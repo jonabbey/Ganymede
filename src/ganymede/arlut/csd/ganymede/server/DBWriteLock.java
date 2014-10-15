@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -50,7 +50,9 @@
 
 package arlut.csd.ganymede.server;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -88,35 +90,111 @@ public final class DBWriteLock extends DBLock {
   /* -- */
 
   /**
-   * <p>Constructor to get a write lock on all the object bases</p>
+   * All DBLock's have an identifier key, which is used to identify
+   * the lock in the {@link arlut.csd.ganymede.server.DBStore
+   * DBStore}'s {@link arlut.csd.ganymede.server.DBLockSync
+   * DBLockSync} object.  The establish() methods in the DBLock
+   * subclasses consult the DBStore.lockSync to make sure that no
+   * {@link arlut.csd.ganymede.server.DBSession DBSession} ever
+   * possesses more than one write lock, to prevent deadlocks from
+   * occuring in the server.
+   */
+
+  private Object key;
+
+  private boolean locked = false;
+  private boolean inEstablish = false;
+  private boolean abort = false;
+
+  /**
+   * In order to prevent deadlocks, each individual lock must be
+   * established on all applicable {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} at the time
+   * the lock is initially established.  baseSet is the List of
+   * DBObjectBases that this DBLock is/will be locked on.
+   */
+
+  private List<DBObjectBase> baseSet;
+
+  /**
+   * Constructor to get a write lock on all the object bases
    */
 
   public DBWriteLock(DBStore store)
   {
-    this.key = null;
-    this.lockSync = store.lockSync;
-    this.baseSet = store.getBases();
+    super(store.lockSync);
+
+    this.baseSet = Collections.unmodifiableList(new ArrayList(store.getBases()));
   }
 
   /**
-   * <p>Constructor to get a write lock on a subset of the server's
-   * object bases.</p>
+   * Constructor to get a write lock on a subset of the server's
+   * object bases.
    */
 
-  public DBWriteLock(DBStore store, Vector<DBObjectBase> baseSet)
+  public DBWriteLock(DBStore store, List<DBObjectBase> baseSet)
   {
-    this.key = null;
-    this.lockSync = store.lockSync;
-    this.baseSet = baseSet;
+    super(store.lockSync);
+
+    this.baseSet = Collections.unmodifiableList(new ArrayList(baseSet));
+  }
+
+  /**
+   * Returns true if this lock is locked.
+   */
+
+  @Override public final boolean isLocked()
+  {
+    return this.locked;
+  }
+
+  /**
+   * Returns true if this lock is waiting in establish()
+   */
+
+  @Override public final boolean isEstablishing()
+  {
+    return this.inEstablish;
+  }
+
+  /**
+   * Returns true if this lock is aborting
+   */
+
+  @Override public final boolean isAborting()
+  {
+    return this.abort;
+  }
+
+  /**
+   * Returns immutable list of DBObjectBases that this lock is meant
+   * to cover.
+   */
+
+  @Override final List<DBObjectBase> getBases()
+  {
+    return this.baseSet;
+  }
+
+  @Override final Object getKey()
+  {
+    if (isLocked())
+      {
+        return key;
+      }
+    else
+      {
+        return null;
+      }
   }
 
   /**
    * <p>A thread that calls establish() will be suspended (waiting on
-   * the server's {@link arlut.csd.ganymede.server.DBStore DBStore}
-   * until all DBObjectBases listed in this DBWriteLock's constructor
-   * are available to be locked.  At that point, the thread blocking
-   * on establish() will wake up possessing a write lock on the
-   * requested DBObjectBases.</p>
+   * the server's {@link arlut.csd.ganymede.server.DBLockSync
+   * DBLockSync} until all DBObjectBases listed in this DBWriteLock's
+   * constructor are available to be locked.  At that point, the
+   * thread blocking on establish() will wake up possessing an
+   * exclusive write lock on the requested DBObjectBases.</p>
    *
    * <p>It is possible for the establish() to fail completely.. the
    * admin console may reject a client whose thread is blocking on
@@ -126,12 +204,17 @@ public final class DBWriteLock extends DBLock {
    * which case establish() will throw an InterruptedException, and
    * the lock will not be established.</p>
    *
+   * <p>The possessors of DBLocks are identified by a key Object that
+   * is provided on the call to {@link
+   * arlut.csd.ganymede.server.DBLock#establish(java.lang.Object)}.  A
+   * given key may only have one DBWriteLock established at a time,
+   * but it may have multiple concurrent DBDumpLocks and DBReadLocks
+   * established if there are no DBWriteLocks held by that key or
+   * locked with DBObjectBases that overlap this lock request.</p>
+   *
    * @param key An object used in the server to uniquely identify the
    * entity internal to Ganymede that is attempting to obtain the
-   * lock, typically a {@link
-   * arlut.csd.ganymede.server.GanymedeSession GanymedeSession} or a
-   * {@link arlut.csd.ganymede.server.GanymedeBuilderTask
-   * GanymedeBuilderTask}.
+   * lock, typically a unique String.
    */
 
   @Override public final void establish(Object key) throws InterruptedException
@@ -143,25 +226,23 @@ public final class DBWriteLock extends DBLock {
 
     if (debug)
       {
-        System.err.println(key + ": DBWriteLock.establish(): enter");
-        System.err.println(key + ": DBWriteLock.establish(): baseSet vector size " + baseSet.size());
+        debug(key, "enter");
+
+        Ganymede.printCallStack();
       }
 
     synchronized (lockSync)
       {
         if (!lockSync.claimLockKey(key, this))
           {
-            throw new InterruptedException("DBWriteLock.establish(): error, lock already held for key: " + key);
+            throw new InterruptedException("DBWriteLock.establish(" + key + "): error, lock already held for key");
           }
 
         try
           {
             lockSync.incLocksWaitingCount();
 
-            if (debug)
-              {
-                System.err.println(key + ": DBWriteLock.establish(): added myself to the DBLockSync lockHash.");
-              }
+            if (debug) debug(key, "added myself to the DBLockSync lockHash.");
 
             // okay, now we've got ourselves recorded as the only lock
             // that can be in the process of establishing for this
@@ -176,6 +257,8 @@ public final class DBWriteLock extends DBLock {
 
             while (!okay)
               {
+                if (debug) debug("establish() looping to get establish permission for " + getBaseNames(baseSet));
+
                 if (this.abort)
                   {
                     throw new InterruptedException("aborted on command");
@@ -216,10 +299,9 @@ public final class DBWriteLock extends DBLock {
                       {
                         if (debug)
                           {
-                            System.err.println(this.key + ": DBWriteLock.establish(): waiting for dumpers on base " +
-                                               base.getName());
-                            System.err.println(this.key + ": DBWriteLock.establish(): dumperList size: " +
-                                               base.getWaitingDumperListSize());
+                            debug("establish() waiting for waiting / queued dumpers on base " + base.getName());
+                            debug("establish() waiting dumperList size: " + base.getWaitingDumperListSize());
+                            debug("establish() dumpLock list size: " + base.getDumpLockListSize());
                           }
 
                         okay = false;
@@ -233,10 +315,7 @@ public final class DBWriteLock extends DBLock {
                   }
               }
 
-            if (debug)
-              {
-                System.err.println(this.key + ": DBWriteLock.establish(): no dumpers queued.");
-              }
+            if (debug) debug("establish() no dumpers queued");
 
             // okay, there are no dump locks waiting to establish.
             // Add ourselves to the ObjectBase write queues.  This
@@ -253,10 +332,7 @@ public final class DBWriteLock extends DBLock {
 
             waiting = true;
 
-            if (debug)
-              {
-                System.err.println(this.key + ": DBWriteLock.establish(): added ourself to the writerList.");
-              }
+            if (debug) debug("establish() added ourselves to the writerList");
 
             // spinwait until we can get into all of the ObjectBases
             // note that since we added ourselves to the writer
@@ -268,10 +344,7 @@ public final class DBWriteLock extends DBLock {
 
             while (!okay)
               {
-                if (debug)
-                  {
-                    System.err.println(this.key + ": DBWriteLock.establish(): spinning.");
-                  }
+                if (debug) debug("establish() spinning");
 
                 if (this.abort)
                   {
@@ -294,21 +367,15 @@ public final class DBWriteLock extends DBLock {
                           {
                             if (!base.isReaderEmpty())
                               {
-                                System.err.println(this.key +
-                                                   ": DBWriteLock.establish(): " +
-                                                   "waiting for readers to release.");
+                                debug("establish() waiting for readers to release");
                               }
                             else if (!base.isDumpLockListEmpty())
                               {
-                                System.err.println(this.key +
-                                                   ": DBWriteLock.establish(): " +
-                                                   "waiting for dumpers to release.");
+                                debug("establish() waiting for dumpers to release");
                               }
                             else if (base.isWriteInProgress())
                               {
-                                System.err.println(this.key +
-                                                   ": DBWriteLock.establish(): " +
-                                                   "waiting for writer to release.");
+                                debug("establish() waiting for writer to release");
                               }
                           }
 
@@ -358,18 +425,21 @@ public final class DBWriteLock extends DBLock {
           }
       }
 
-    if (debug)
-      {
-        System.err.println(key + ": DBWriteLock.establish(): got the lock.");
-      }
+    if (debug) debug("establish() got the lock.");
   }
 
   /**
-   * <p>Release this lock on all bases locked</p>
+   * Release this lock on all bases locked
    */
 
   @Override public final void release()
   {
+    if (debug)
+      {
+        debug("release() entering");
+        Ganymede.printCallStack();
+      }
+
     synchronized (lockSync)
       {
         // if we are trying to force this lock to go away on behalf of
@@ -378,6 +448,8 @@ public final class DBWriteLock extends DBLock {
 
         while (this.inEstablish)
           {
+            if (debug) debug("release() waiting for inEstablish");
+
             try
               {
                 lockSync.wait(2500);
@@ -393,6 +465,7 @@ public final class DBWriteLock extends DBLock {
 
         if (!locked)
           {
+            if (debug) debug("release() not locked, returning");
             return;
           }
 
@@ -402,9 +475,11 @@ public final class DBWriteLock extends DBLock {
           }
 
         this.locked = false;
-        lockSync.unclaimLockKey(key, this);
+        lockSync.unclaimLockKey(this.key, this);
 
-        key = null;             // gc
+        if (debug) debug("release() released");
+
+        this.key = null;        // gc
 
         lockSync.decLockCount();
         lockSync.notifyAll();   // many readers may want in
@@ -428,8 +503,19 @@ public final class DBWriteLock extends DBLock {
   {
     synchronized (lockSync)
       {
+        if (debug) debug("abort() aborting");
         abort = true;
         release();              // blocks
       }
+  }
+
+  private void debug(Object key, String message)
+  {
+    System.err.println("DBWriteLock(" + key + "): " + message);
+  }
+
+  private void debug(String message)
+  {
+    System.err.println("DBWriteLock(" + this.key + "): " + message);
   }
 }

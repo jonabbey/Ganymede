@@ -217,7 +217,7 @@ public class NumericDBField extends DBField implements num_field {
   {
     if (value == null)
       {
-        return "null";
+        return "";
       }
 
     return Integer.toString(this.value());
@@ -246,32 +246,32 @@ public class NumericDBField extends DBField implements num_field {
 
   @Override public String getDiffString(DBField orig)
   {
-    NumericDBField origN;
-    StringBuilder result = new StringBuilder();
-
-    /* -- */
-
     if (!(orig instanceof NumericDBField))
       {
         throw new IllegalArgumentException("bad field comparison");
       }
 
-    origN = (NumericDBField) orig;
-
-    if (origN.value() != this.value())
-      {
-        // "\tOld: {0,number,#}\n"
-        result.append(ts.l("getDiffString.old", origN.getValueLocal()));
-
-        // "\tNew: {0,number,#}\n"
-        result.append(ts.l("getDiffString.new", this.getValueLocal()));
-
-        return result.toString();
-      }
-    else
+    if (this == orig)
       {
         return null;
       }
+
+    NumericDBField origN = (NumericDBField) orig;
+
+    if (origN.value() == this.value())
+      {
+        return null;
+      }
+
+    StringBuilder result = new StringBuilder();
+
+    // "\tOld: {0,number,#}\n"
+    result.append(ts.l("getDiffString.old", origN.getValueLocal()));
+
+    // "\tNew: {0,number,#}\n"
+    result.append(ts.l("getDiffString.new", this.getValueLocal()));
+
+    return result.toString();
   }
 
   // ****

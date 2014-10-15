@@ -55,6 +55,8 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.rmi.RemoteException;
@@ -104,6 +106,7 @@ import arlut.csd.ganymede.common.FieldInfo;
 import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.FieldType;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.IPAddress;
 import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
@@ -1247,7 +1250,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
             cb.removeActionListener(this);
             cb.setSelected((value == null) ? false : value.booleanValue());
-            cb.addActionListener(this);
           }
         else if (comp instanceof JComboBox)
           {
@@ -1597,7 +1599,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
                 println("Updating JIPField.");
               }
 
-            Byte[] bytes = (Byte[]) currentInfo.getValue();
+            IPAddress address = (IPAddress) currentInfo.getValue();
 
             if (comp.equals(currentlyChangingComponent))
               {
@@ -1605,11 +1607,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
                 // that we are processing a callback from.  the
                 // JIPField has specific support for this, etc.
 
-                ((JIPField)comp).substituteValueByCallBack(this, bytes);
+                ((JIPField)comp).substituteValueByCallBack(this, address);
               }
             else
               {
-                ((JIPField)comp).setValue(bytes);
+                ((JIPField)comp).setValue(address);
               }
           }
         else
@@ -2923,7 +2925,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
         String currentChoice = (String) fieldInfo.getValue();
 
-        JComboBox combo = new JComboBox(choices);
+        final JComboBox combo = new JComboBox(choices);
         combo.setKeySelectionManager(new TimedKeySelectionManager());
 
         combo.setMaximumRowCount(8);
@@ -2974,6 +2976,34 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
           {
             combo.addItemListener(this); // register callback
           }
+
+        combo.addFocusListener(new FocusListener()
+          {
+            public void focusLost(FocusEvent e)
+            {
+            }
+
+            public void focusGained(FocusEvent e)
+            {
+              scrollRectToVisible(combo.getBounds());
+            }
+
+          });
+
+        Component editor = combo.getEditor().getEditorComponent();
+
+        editor.addFocusListener(new FocusListener()
+          {
+            public void focusLost(FocusEvent e)
+            {
+            }
+
+            public void focusGained(FocusEvent e)
+            {
+              scrollRectToVisible(combo.getBounds());
+            }
+
+          });
 
         registerComponent(combo, field, fieldTemplate);
 
@@ -3295,9 +3325,21 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   private void addBooleanField(db_field field, FieldInfo fieldInfo,
                                FieldTemplate fieldTemplate) throws RemoteException
   {
-    JCheckBox cb = new JCheckBox();
+    final JCheckBox cb = new JCheckBox();
 
     /* -- */
+
+    cb.addFocusListener(new FocusListener()
+      {
+        public void focusLost(FocusEvent e)
+        {
+        }
+
+        public void focusGained(FocusEvent e)
+        {
+          scrollRectToVisible(cb.getBounds());
+        }
+      });
 
     registerComponent(cb, field, fieldTemplate);
 
@@ -3700,7 +3742,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     JIPField
       ipf;
 
-    Byte[] bytes;
+    IPAddress address;
 
     /* -- */
 
@@ -3722,11 +3764,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     registerComponent(ipf, field, fieldTemplate);
 
-    bytes = (Byte[]) fieldInfo.getValue();
+    address = (IPAddress) fieldInfo.getValue();
 
-    if (bytes != null)
+    if (address != null)
       {
-        ipf.setValue(bytes);
+        ipf.setValue(address);
       }
 
     ipf.setCallback(this);

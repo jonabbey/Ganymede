@@ -3,16 +3,16 @@
    notesTab.java
 
    This class manages the notes tab in the Ganymede client.
-   
+
    Created: 21 June 2005
 
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2005
+
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Contact information
@@ -91,7 +91,7 @@ public class notesTab extends clientTab {
     try
       {
         contentPane.getVerticalScrollBar().setUnitIncrement(15);
-        notes_field = (string_field) parent.getObject().getField(SchemaConstants.NotesField);
+        notes_field = parent.getObject().getStringField(SchemaConstants.NotesField);
         notes_panel = new notesPanel(notes_field, parent.isEditable(), parent);
         contentPane.setViewportView(notes_panel);
       }

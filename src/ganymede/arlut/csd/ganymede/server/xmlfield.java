@@ -14,7 +14,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -57,7 +57,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -73,13 +74,11 @@ import arlut.csd.Util.XMLUtils;
 import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.FieldType;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.IPAddress;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.PermEntry;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SyncPrefEnum;
-import arlut.csd.ganymede.rmi.pass_field;
-import arlut.csd.ganymede.rmi.perm_field;
-import arlut.csd.ganymede.rmi.field_option_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -999,7 +998,7 @@ public final class xmlfield implements FieldType {
     return result;
   }
 
-  public String parseIP(XMLItem item) throws SAXException
+  public IPAddress parseIP(XMLItem item) throws SAXException
   {
     if (!item.matches("ip"))
       {
@@ -1012,7 +1011,7 @@ public final class xmlfield implements FieldType {
         owner.xSession.tell("\nError, found a non-empty ip field value element: " + item);
       }
 
-    return item.getAttrStr("val");
+    return new IPAddress(item.getAttrStr("val"));
   }
 
   public Double parseFloat(XMLItem item) throws SAXException
@@ -1094,7 +1093,7 @@ public final class xmlfield implements FieldType {
           }
         else if (fieldDef.isArray() && (fieldDef.isString() || fieldDef.isIP()))
           {
-            DBField field = (DBField) owner.objref.getField(fieldDef.getID());
+            DBField field = owner.objref.getField(fieldDef.getID());
 
             if (setValues != null)
               {
@@ -1171,7 +1170,7 @@ public final class xmlfield implements FieldType {
         else if (fieldDef.isPassword())
           {
             xPassword xp = (xPassword) value;
-            PasswordDBField field = (PasswordDBField) owner.objref.getField(fieldDef.getID());
+            PasswordDBField field = owner.objref.getPassField(fieldDef.getID());
 
             if (xp == null)
               {
@@ -1217,7 +1216,7 @@ public final class xmlfield implements FieldType {
               }
             else if (!fieldDef.isEditInPlace())
               {
-                InvidDBField field = (InvidDBField) owner.objref.getField(fieldDef.getID());
+                InvidDBField field = owner.objref.getInvidField(fieldDef.getID());
 
                 /* -- */
 
@@ -1297,7 +1296,7 @@ public final class xmlfield implements FieldType {
               }
             else                // *** edit in place / embedded object case ***
               {
-                InvidDBField field = (InvidDBField) owner.objref.getField(fieldDef.getID());
+                InvidDBField field = owner.objref.getInvidField(fieldDef.getID());
 
                 /* -- */
 
@@ -1371,7 +1370,7 @@ public final class xmlfield implements FieldType {
                         else
                           {
                             object.setInvid(result.getInvid());
-                            object.objref = result.getObject();
+                            object.objref = (DBObject) result.getObject();
 
                             // now that we've copied the object
                             // carrier info out, clear the return val
@@ -1504,7 +1503,7 @@ public final class xmlfield implements FieldType {
           }
         else if (fieldDef.isFieldOptions())
           {
-            field_option_field field = (field_option_field) owner.objref.getField(fieldDef.getID());
+            FieldOptionDBField field = owner.objref.getFieldOptionsField(fieldDef.getID());
 
             if (setValues != null)
               {
@@ -1531,7 +1530,7 @@ public final class xmlfield implements FieldType {
                       {
                         for (xOption fieldOption: option.fields.values())
                           {
-                            Hashtable<String, FieldTemplate> fieldHash = owner.xSession.getFieldHash(option.getName());
+                            Map<String, FieldTemplate> fieldHash = owner.xSession.getFieldHash(option.getName());
 
                             if (fieldHash == null)
                               {
@@ -1568,7 +1567,7 @@ public final class xmlfield implements FieldType {
           }
         else if (fieldDef.isPermMatrix())
           {
-            perm_field field = (perm_field) owner.objref.getField(fieldDef.getID());
+            PermissionMatrixDBField field = owner.objref.getPermField(fieldDef.getID());
 
             if (setValues != null)
               {
@@ -1595,7 +1594,7 @@ public final class xmlfield implements FieldType {
                       {
                         for (xPerm fieldPerm: perm.fields.values())
                           {
-                            Hashtable<String, FieldTemplate> fieldHash = owner.xSession.getFieldHash(perm.getName());
+                            Map<String, FieldTemplate> fieldHash = owner.xSession.getFieldHash(perm.getName());
 
                             if (fieldHash == null)
                               {
@@ -1996,9 +1995,9 @@ class xInvid {
    * actual on-server Invid corresponding to this xInvid object.</p>
    *
    * <p>invidPtr will contain an actual {@link
-   * arlut.csd.ganymede.common.Invid} object if this <invid> element
-   * could be matched against a pre-existing Invid on the Ganymede
-   * server.</p>
+   * arlut.csd.ganymede.common.Invid} object if this &lt;invid&gt;
+   * element could be matched against a pre-existing Invid on the
+   * Ganymede server.</p>
    *
    * <p>If no server-side Invid can be found, invidPtr may instead
    * point to the {@link arlut.csd.ganymede.server.xmlobject} object
@@ -2395,7 +2394,7 @@ class xPerm {
    * will be null.</p>
    */
 
-  Hashtable<String, xPerm> fields = null;
+  Map<String, xPerm> fields = null;
 
   boolean view = false;
   boolean edit = false;
@@ -2448,7 +2447,7 @@ class xPerm {
 
     if (objectType && !item.isEmpty())
       {
-        fields = new Hashtable<String, xPerm>();
+        fields = new HashMap<String, xPerm>();
         item = getXSession().getNextItem();
 
         while (!item.matchesClose(label) && !(item instanceof XMLEndDocument))
@@ -2515,7 +2514,7 @@ class xOption {
    * will be null.</p>
    */
 
-  Hashtable<String, xOption> fields = null;
+  Map<String, xOption> fields = null;
 
   /**
    * <p>The option for this xOption.</p>
@@ -2566,7 +2565,7 @@ class xOption {
 
     if (objectType && !item.isEmpty())
       {
-        fields = new Hashtable<String, xOption>();
+        fields = new HashMap<String, xOption>();
         item = getXSession().getNextItem();
 
         while (!item.matchesClose(label) && !(item instanceof XMLEndDocument))

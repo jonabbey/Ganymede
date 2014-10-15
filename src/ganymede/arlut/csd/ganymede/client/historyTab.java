@@ -3,17 +3,19 @@
    historyTab.java
 
    This class manages the history tab in the Ganymede client.
-   
+
    Created: 21 June 2005
 
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2005
+
+   Copyright (C) 1996-2014
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -92,11 +94,11 @@ public class historyTab extends clientTab {
   {
     try
       {
-        string_field creator_field = (string_field) parent.getObject().getField(SchemaConstants.CreatorField);
-        date_field creation_date_field = (date_field) parent.getObject().getField(SchemaConstants.CreationDateField);
-        string_field modifier_field = (string_field) parent.getObject().getField(SchemaConstants.ModifierField);
-        date_field modification_date_field = (date_field) parent.getObject().getField(SchemaConstants.ModificationDateField);
-        
+        string_field creator_field = parent.getObject().getStringField(SchemaConstants.CreatorField);
+        date_field creation_date_field = parent.getObject().getDateField(SchemaConstants.CreationDateField);
+        string_field modifier_field = parent.getObject().getStringField(SchemaConstants.ModifierField);
+        date_field modification_date_field = parent.getObject().getDateField(SchemaConstants.ModificationDateField);
+
         history_panel = new historyPanel(parent.getObjectInvid(),
                                          parent.getgclient(),
                                          creator_field,

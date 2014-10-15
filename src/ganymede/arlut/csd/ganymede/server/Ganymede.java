@@ -18,7 +18,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -66,13 +66,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
-import java.rmi.RMISecurityManager;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.RemoteServer;
 import java.util.Date;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
@@ -117,16 +116,11 @@ import arlut.csd.ganymede.rmi.Server;
  * arlut.csd.ganymede.server.DBField DBField}'s which ultimately hold
  * the actual data from the database.</p>
  *
- * <p>The ganymede.db file may define a number of task classes that
- * are to be run by the server at defined times.  The server's main()
- * method starts a background {@link
- * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}
- * thread to handle background tasks.</p>
- *
  * <p>When the database has been loaded from disk, the main() method
- * creates a {@link arlut.csd.ganymede.server.GanymedeServer GanymedeServer}
- * object.  GanymedeServer implements the {@link arlut.csd.ganymede.rmi.Server
- * Server} RMI remote interface, and is published in the RMI registry.</p>
+ * creates a {@link arlut.csd.ganymede.server.GanymedeServer
+ * GanymedeServer} object.  GanymedeServer implements the {@link
+ * arlut.csd.ganymede.rmi.Server Server} RMI remote interface, and is
+ * published in the RMI registry.</p>
  *
  * <p>Clients and admin consoles may then connect to the published
  * GanymedeServer object via RMI to establish a connection to the
@@ -151,15 +145,27 @@ import arlut.csd.ganymede.rmi.Server;
  * the {@link arlut.csd.ganymede.rmi.adminSession adminSession} RMI
  * remote interface.</p>
  *
- * <p>Most of the server's database logic is handled by the DBStore
- * object and its related classes ({@link
+ * <p>All client permissions and communications are handled by the
+ * higher level {@link arlut.csd.ganymede.server.GanymedeSession}
+ * class, all lower level data manipulation by the {@link
+ * arlut.csd.ganymede.server.DBStore} object and its related classes
+ * ({@link arlut.csd.ganymede.server.DBSession DBSession}, {@link
  * arlut.csd.ganymede.server.DBObject DBObject}, {@link
  * arlut.csd.ganymede.server.DBEditSet DBEditSet}, {@link
  * arlut.csd.ganymede.server.DBNameSpace DBNameSpace}, and {@link
  * arlut.csd.ganymede.server.DBJournal DBJournal}).</p>
  *
- * <p>All client permissions and communications are handled by the
- * GanymedeSession class.</p>
+ * <p>The ganymede.db file may define a number of task classes that
+ * are to be run by the server at defined times.  The server's main()
+ * method starts a background {@link
+ * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}
+ * thread to schedule the execution of background tasks on additional
+ * threads, including the running of appropriate {@link
+ * arlut.csd.ganymede.server.SyncRunner} and {@link
+ * arlut.csd.ganymede.server.GanymedeBuilderTask} classes registered
+ * for execution in the Ganymede server's database.</p>
+ *
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public final class Ganymede {
@@ -204,7 +210,7 @@ public final class Ganymede {
    * admin console.</p>
    */
 
-  static public Date startTime = new Date();
+  static final public Date startTime = new Date();
 
   /**
    * <p>If the server is started with propFilename on
@@ -424,7 +430,7 @@ public final class Ganymede {
    * ganymede.db file at task registration time.</p>
    */
 
-  static private Hashtable upgradeClassMap = null;
+  static private HashMap<String, String> upgradeClassMap = null;
 
   /**
    * <p>Uncaught exception handler in use on the Ganymede server.
@@ -1427,11 +1433,6 @@ public final class Ganymede {
       }
     catch (RuntimeException ex)
       {
-        if (bindingName == null)
-          {
-            bindingName = "unknown";
-          }
-
         // We're catching RuntimeException separately to placate
         // FindBugs.
         // "Couldn''t establish server binding {0}: "
@@ -1439,11 +1440,6 @@ public final class Ganymede {
       }
     catch (Exception ex)
       {
-        if (bindingName == null)
-          {
-            bindingName = "unknown";
-          }
-
         // "Couldn''t establish server binding {0}: "
         throw new GanymedeStartupException(ts.l("main.error_no_binding", bindingName) + ex, ex);
       }
@@ -1765,7 +1761,7 @@ public final class Ganymede {
     /* -- */
 
     v_object = DBStore.viewDBObject(supergashinvid);
-    p = (PasswordDBField) v_object.getField(SchemaConstants.PersonaPasswordField);
+    p = v_object.getPassField(SchemaConstants.PersonaPasswordField);
 
     if (p == null || !p.matchPlainText(defaultrootpassProperty))
       {
@@ -1781,7 +1777,7 @@ public final class Ganymede {
             throw new RuntimeException(ts.l("startupHook.no_supergash", rootname));
           }
 
-        p = (PasswordDBField) e_object.getField(SchemaConstants.PersonaPasswordField);
+        p = e_object.getPassField(SchemaConstants.PersonaPasswordField);
         ReturnVal retVal = p.setPlainTextPass(defaultrootpassProperty); // default supergash password
 
         if (!ReturnVal.didSucceed(retVal))
@@ -1828,7 +1824,7 @@ public final class Ganymede {
       {
         for (DBObject object: objects)
           {
-            StringDBField labelField = (StringDBField) object.getField(SchemaConstants.ObjectEventLabel);
+            StringDBField labelField = object.getStringField(SchemaConstants.ObjectEventLabel);
 
             if (labelField == null)
               {
@@ -1866,7 +1862,7 @@ public final class Ganymede {
 
   /**
    * <p>At DBStore version 2.7, we changed the package name for our
-   * built-in task classes.  This method creates a private Hashtable,
+   * built-in task classes.  This method creates a private HashMap,
    * {@link arlut.csd.ganymede.server.Ganymede#upgradeClassMap}, which holds
    * a mapping of old class names to new ones for the built-in classes.</p>
    */
@@ -1875,7 +1871,7 @@ public final class Ganymede {
   {
     if (upgradeClassMap == null)
       {
-        upgradeClassMap = new Hashtable();
+        upgradeClassMap = new HashMap<String,String>();
         upgradeClassMap.put("arlut.csd.ganymede.dumpAndArchiveTask", "arlut.csd.ganymede.server.dumpAndArchiveTask");
         upgradeClassMap.put("arlut.csd.ganymede.dumpTask", "arlut.csd.ganymede.server.dumpTask");
         upgradeClassMap.put("arlut.csd.ganymede.GanymedeExpirationTask", "arlut.csd.ganymede.server.GanymedeExpirationTask");
@@ -1914,7 +1910,7 @@ public final class Ganymede {
               {
                 prepClassMap();
 
-                StringDBField taskClassStrF = (StringDBField) object.getField(SchemaConstants.TaskClass);
+                StringDBField taskClassStrF = object.getStringField(SchemaConstants.TaskClass);
 
                 if (taskClassStrF != null)
                   {
@@ -1922,7 +1918,7 @@ public final class Ganymede {
 
                     if (upgradeClassMap.containsKey(taskClassStr))
                       {
-                        String newClassName = (String) upgradeClassMap.get(taskClassStr);
+                        String newClassName = upgradeClassMap.get(taskClassStr);
 
                         // "Rewriting old system task class {0} as {1}"
                         System.err.println(ts.l("registerTasks.rewritingClass", taskClassStr, newClassName));
@@ -1962,7 +1958,8 @@ public final class Ganymede {
                                 ts.l("registerTasks.memory_status_task"));
 
     // register garbage collection task without any schedule for
-    // execution.. this is so that the admin can launch it from theadmin console
+    // execution.. this is so that the admin can launch it from the
+    // admin console manually if she is feeling silly
 
     scheduler.addActionOnDemand(new gcTask(),
                                 ts.l("registerTasks.gc_task"));

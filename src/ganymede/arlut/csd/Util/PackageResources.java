@@ -6,18 +6,19 @@
 
    Taken from Java Developer's Journal, Volume 2, Issue 5.
    Heavily modified by Jon Abbey and Mike Mulvaney
-   
-   Created: 9 July 1997
 
+   Created: 9 July 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -66,11 +67,11 @@ import java.net.URL;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Utility class to provide resource-loading services.  Methods in this class
- * can load images and other resources from either CLASSPATH or a jar file,
- * depending on how the program using this class is run.</p>
+ * <p>Utility class to provide resource-loading services.  Methods in
+ * this class can load images and other resources from either
+ * CLASSPATH or a jar file, depending on how the program using this
+ * class is run.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey
  */
 
@@ -84,20 +85,21 @@ public class PackageResources {
   // ---
 
   /**
-   * <p>Loads a generic resource by its filename from either CLASSPATH or a jar file,
-   * depending on how the code calling this method was run.</p>
+   * <p>Loads a generic resource by its filename from either CLASSPATH
+   * or a jar file, depending on how the code calling this method was
+   * run.</p>
    *
    * @param strResource Filename of resource to be loaded
    * @param refClass Parent Class, used to find path to image
    */
-  
-  public static URL getPackageResource(String strResource, Class refClass) 
+
+  public static URL getPackageResource(String strResource, Class refClass)
   {
     ClassLoader cl;
     String strPackageName, filePackageName, str;
     int i;
     URL url;
-    
+
     /* -- */
 
     if (refClass != null)
@@ -143,20 +145,21 @@ public class PackageResources {
   }
 
   /**
-   * <p>Loads a generic resource by its filename from either CLASSPATH or a jar file,
-   * depending on how the code calling this method was run.</p>
+   * <p>Loads a generic resource by its filename from either CLASSPATH
+   * or a jar file, depending on how the code calling this method was
+   * run.</p>
    *
    * @param strResource Filename of resource to be loaded
    * @param refClass Parent Class, used to find path to image
    */
-  
-  public static InputStream getPackageResourceAsStream(String strResource, Class refClass) 
+
+  public static InputStream getPackageResourceAsStream(String strResource, Class refClass)
   {
     ClassLoader cl;
     String strPackageName, filePackageName, str;
     int i;
     InputStream stream;
-    
+
     /* -- */
 
     if (refClass != null)
@@ -188,7 +191,7 @@ public class PackageResources {
       {
         System.err.println("PackageResources: trying to get str " + str);
       }
-    
+
     if (cl == null)
       {
         stream = ClassLoader.getSystemResourceAsStream(str);
@@ -197,7 +200,7 @@ public class PackageResources {
       {
         stream = cl.getResourceAsStream(str);
       }
-    
+
     return stream;
   }
 
@@ -210,7 +213,7 @@ public class PackageResources {
    * @param refClass Parent Class, used to find path to image
    */
 
-  public static Image getImageResource(Component comp, String imageName, Class refClass) 
+  public static Image getImageResource(Component comp, String imageName, Class refClass)
   {
     Image image = null;
     URL url;
@@ -230,7 +233,7 @@ public class PackageResources {
    * @param url URL of the image to load
    */
 
-  public static Image getImageResource(Component comp, URL url) 
+  public static Image getImageResource(Component comp, URL url)
   {
     Image image = null;
     Component ptr;
@@ -238,12 +241,12 @@ public class PackageResources {
     if (context == null && !nevertryagain)
       {
         ptr = comp;
-        
+
         while (ptr != null && (!(ptr instanceof Applet)))
           {
             ptr = ptr.getParent();
           }
-        
+
         if (ptr != null)
           {
             try
@@ -290,7 +293,7 @@ public class PackageResources {
       {
         System.err.println("PackageResources.getImageResouce(): Returning image.");
       }
-    
+
     return image;
   }
 
@@ -300,12 +303,12 @@ public class PackageResources {
    * Helper method to handle the MediaTracker for image loading.
    */
 
-  public static void waitForImage(Component component, 
-                                  Image image) 
+  public static void waitForImage(Component component,
+                                  Image image)
   {
     MediaTracker tracker = new MediaTracker(component);
 
-    try 
+    try
       {
         tracker.addImage(image, 0);
         tracker.waitForID(0);

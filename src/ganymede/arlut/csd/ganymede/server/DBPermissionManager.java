@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -49,11 +49,14 @@
 
 package arlut.csd.ganymede.server;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
-import java.util.Hashtable;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
-import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.BaseListTransport;
@@ -65,7 +68,6 @@ import arlut.csd.ganymede.common.PermEntry;
 import arlut.csd.ganymede.common.PermMatrix;
 import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.QueryResult;
-import arlut.csd.ganymede.common.Result;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
 
@@ -87,15 +89,37 @@ import arlut.csd.ganymede.common.SchemaConstants;
 
 public final class DBPermissionManager {
 
-  static final boolean debug = false;
-  static final boolean permsdebug = false;
-
   /**
    * TranslationService object for handling string localization in
    * the Ganymede server.
    */
 
-  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBPermissionManager");
+  static final TranslationService ts =
+    TranslationService.getTranslationService("arlut.csd.ganymede.server.DBPermissionManager");
+
+  /**
+   * Invid for the supergash Owner Group Object
+   */
+
+  static final Invid SUPERGASH_GROUP_INVID =
+    Invid.createInvid(SchemaConstants.OwnerBase,
+                      SchemaConstants.OwnerSupergash);
+
+  /**
+   * Invid for the supergash Persona Object
+   */
+
+  static final Invid SUPERGASH_PERSONA_INVID =
+    Invid.createInvid(SchemaConstants.PersonaBase,
+                      SchemaConstants.PersonaSupergashObj);
+
+  /**
+   * Invid for the default Role Object
+   */
+
+  static final Invid DEFAULT_ROLE_INVID =
+    Invid.createInvid(SchemaConstants.RoleBase,
+                      SchemaConstants.RoleDefaultObj);
 
   // ---
 
@@ -103,20 +127,13 @@ public final class DBPermissionManager {
    * The GanymedeSession that this DBPermissionManager is connected to.
    */
 
-  private GanymedeSession gSession = null;
+  final private GanymedeSession gSession;
 
   /**
    * The DBSession that lays under gSession.
    */
 
-  private DBSession dbSession = null;
-
-  /**
-   * A flag indicating whether the client has supergash priviliges.  We
-   * keep track of this to speed internal operations.
-   */
-
-  private boolean supergashMode = false;
+  final private DBSession dbSession;
 
   /**
    * GanymedeSessions created for internal operations always operate
@@ -124,45 +141,72 @@ public final class DBPermissionManager {
    * having to do persona membership checks on initial set-up.
    */
 
-  private boolean beforeversupergash = false; // Be Forever Yamamoto
+  final private boolean beforeversupergash; // Be Forever Yamamoto
 
   /**
-   * <p>The name of the user logged in.  If the person logged in is
-   * using supergash, username will be supergash, even though
-   * supergash isn't technically a user.</p>
+   * The name that the session is given.  Must be non-null and unique
+   * among logged in sessions on the server.
+   */
+
+  final private String sessionName;
+
+  /**
+   * The object reference identifier for the logged in user, if
+   * any. If the client logged in directly to a non user-linked
+   * persona account (e.g., supergash, monitor), this will be null.
+   * See personaInvid in that case.
+   */
+
+  final private Invid userInvid;
+
+  /**
+   * <p>The name of the user logged in.</p>
    *
-   * <p>May be null if the containing GanymedeSession was created by
-   * an internal Ganymede task or process.</p>
+   * <p>May be null if the containing GanymedeSession is created by an
+   * internal Ganymede task or process.</p>
    */
 
-  private String username;
+  final private String username;
+
+  // --
 
   /**
-   * <p>The name that the session is given.  Must be non-null and
-   * unique among logged in sessions on the server.</p>
+   * <p>True if the gSession currently has supergash privileges.</p>
+   *
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
+   * String} is called.</p>
    */
 
-  private String sessionName;
+  private boolean supergashMode = false;
 
   /**
-   * <p>The object reference identifier for the logged in user, if
-   * any.  If the client logged in directly to a persona account, this
-   * will be null.  See personaInvid in that case.</p>
+   * False if we've detected that the underlying user or admin persona
+   * for this DBPermissionManager has been deleted out from under us.
    */
 
-  private Invid userInvid;
+  private boolean valid = true;
 
   /**
    * <p>The name of the current persona, of the form
    * '&lt;username&gt;:&lt;description&gt;', for example,
    * 'broccol:GASH Admin'.  If the user is logged in with just
    * end-user privileges, personaName will be null.</p>
+   *
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
+   * String} is called.</p>
    */
 
-  private String personaName = null;
+  private String personaName;
 
   /**
-   * <p>The object reference identifier for the current persona, if any.</p>
+   * <p>The object reference identifier for the current persona, if
+   * any.</p>
+   *
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
+   * String} is called.</p>
    */
 
   private Invid personaInvid;
@@ -172,46 +216,52 @@ public final class DBPermissionManager {
    * can look up owner groups and what not more quickly.  An end-user
    * logged in without any extra privileges will have a null
    * personaObj value.</p>
+   *
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
+   * String} is called.</p>
    */
 
-  private DBObject personaObj = null;
+  private DBObject personaObj;
 
   /**
-   * <p>When did we last check our persona permissions?</p>
+   * When did we last check our persona permissions?
    */
 
-  private Date personaTimeStamp = null;
+  private Date personaTimeStamp;
 
   /**
-   * <p>When did we last update our local cache/summary of permissions records?</p>
-   */
-
-  private Date permTimeStamp;
-
-  /**
-   * <p>This variable stores the permission bits that are applicable
-   * to objects that the current persona has ownership privilege over.
+   * <p>This variable stores the permission bits that are applicable to
+   * objects that the current persona has ownership privilege over.
    * This matrix is always a permissive superset of {@link
-   * arlut.csd.ganymede.server.DBPermissionManager#defaultPerms
-   * defaultPerms}.</p>
+   * arlut.csd.ganymede.server.DBPermissionManager#unownedObjectPerms
+   * unownedObjectPerms}.</p>
+   *
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
+   * String} is called or if the relevant Role Objects are changed in
+   * the database.</p>
+   *
+   * <p>If this DBPermissionManager has supergash privileges, this
+   * PermMatrix will be null.</p>
    */
 
-  private PermMatrix personaPerms;
+  private PermMatrix ownedObjectPerms;
 
   /**
    * <p>This variable stores the permission bits that are applicable
    * to generic objects not specifically owned by this persona.</p>
    *
-   * <p>Each permission object in the Ganymede database includes
-   * permissions as apply to objects owned by the persona and as apply
-   * to objects not owned by the persona.</p>
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
+   * String} is called or if the relevant Role Objects are changed in
+   * the database.</p>
    *
-   * <p>This variable holds the union of the 'as apply to objects not
-   * owned by the persona' matrices across all permissions objects
-   * that apply to the current persona.</p>
+   * <p>If this DBPermissionManager has supergash privileges, this
+   * PermMatrix will be null.</p>
    */
 
-  private PermMatrix defaultPerms;
+  private PermMatrix unownedObjectPerms;
 
   /**
    * <p>This variable stores the permission bits that are applicable
@@ -219,11 +269,23 @@ public final class DBPermissionManager {
    * and which the current admin has permission to delegate to
    * subordinate roles.  This matrix is always a permissive superset
    * of {@link
-   * arlut.csd.ganymede.server.DBPermissionManager#delegatableDefaultPerms
-   * delegatableDefaultPerms}.</p>
+   * arlut.csd.ganymede.server.DBPermissionManager#delegatableUnownedObjectPerms
+   * delegatableUnownedObjectPerms}.</p>
+   *
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
+   * String} is called or if the relevant Role Objects are changed in
+   * the database.</p>
+   *
+   * <p>Used by code in {@link
+   * arlut.csd.ganymede.server.PermissionMatrixDBField} to control
+   * what privileges personae are able to grant to new personae.</p>
+   *
+   * <p>If this DBPermissionManager has supergash privileges, this
+   * PermMatrix will be null.</p>
    */
 
-  private PermMatrix delegatablePersonaPerms;
+  private PermMatrix delegatableOwnedObjectPerms;
 
   /**
    * <p>This variable stores the permission bits that are applicable to
@@ -231,70 +293,85 @@ public final class DBPermissionManager {
    * the current admin has permission to delegate to subordinate
    * roles.</p>
    *
-   * <p>Each permission object in the Ganymede database includes
-   * permissions as apply to objects owned by the persona and as apply
-   * to objects not owned by the persona.</p>
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#selectPersona(String,
+   * String} is called or if the relevant Role Objects are changed in
+   * the database.</p>
    *
-   * <p>This variable holds the union of the 'as apply to objects not
-   * owned by the persona' matrices across all permissions objects
-   * that apply to the current persona.</p>
+   * <p>Used by code in {@link
+   * arlut.csd.ganymede.server.PermissionMatrixDBField} to control
+   * what privileges personae are able to grant to new personae.</p>
+   *
+   * <p>If this DBPermissionManager has supergash privileges, this
+   * PermMatrix will be null.</p>
    */
 
-  private PermMatrix delegatableDefaultPerms;
+  private PermMatrix delegatableUnownedObjectPerms;
 
   /**
-   * <p>A reference to the Ganymede {@link
+   * <p>A reference to the checked-in Ganymede {@link
    * arlut.csd.ganymede.server.DBObject DBObject} storing our default
    * permissions, or the permissions that applies when we are not in
    * supergash mode and we do not have any ownership over the object
    * in question.</p>
+   *
+   * <p>May change if the relevant Role Object is changed in the
+   * database.</p>
    */
 
-  private DBObject defaultObj;
+  private DBObject defaultRoleObj;
 
   /**
-   * <p>This variable is a vector of object references
-   * ({@link arlut.csd.ganymede.common.Invid Invid}'s) to the owner groups
-   * that the client has requested newly created objects be placed in.  While
-   * this vector is not-null, any new objects created will be owned by the list
-   * of ownergroups held here.</p>
+   * When did we last notice a change in any Role Objects?
    */
 
-  private Vector<Invid> newObjectOwnerInvids = null;
+  private Date rolesLastCheckedTimeStamp;
 
   /**
-   * <p>This variable is a vector of object references (Invid's) to the
-   * owner groups that the client has requested the listing of objects
-   * be restricted to.  That is, the client has requested that the
+   * When did we last check our User Object?
+   */
+
+  private Date userTimeStamp;
+
+  /**
+   * <p>This variable is a non-modifiable List of object references
+   * ({@link arlut.csd.ganymede.common.Invid Invids}) to the owner
+   * groups that the client has requested newly created objects be
+   * placed in.  While this List is not-null, any new objects created
+   * will be owned by the list of ownergroups held here.</p>
+   *
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#setDefaultOwner(java.util.List)}
+   * is called.</p>
+   */
+
+  private List<Invid> newObjectOwnerInvids;
+
+  /**
+   * <p>This variable is an unmodifiable List of object references
+   * ({@link arlut.csd.ganymede.common.Invid Invids}) to the owner
+   * groups that the client has requested the listing of objects be
+   * restricted to.  That is, the client has requested that the
    * results of Queries and Dumps only include those objects owned by
    * owner groups in this list.  This feature is used primarily for
    * when a client is logged in with supergash privileges, but the
-   * user wants to restrict the visibility of objects for convenience.</p>
+   * user wants to restrict the visibility of objects for
+   * convenience.</p>
+   *
+   * <p>May change if {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#filterQueries(java.util.List)}
+   * is called.</p>
    */
 
-  private Vector<Invid> visibilityFilterInvids = null;
-
-  /**
-   * <p>Boolean semaphore to control whether we have already been
-   * configured.</p>
-   */
-
-  private booleanSemaphore configured = new booleanSemaphore(false);
+  private List<Invid> visibilityFilterInvids;
 
   /* -- */
 
   /**
-   * Constructor
-   */
-
-  public DBPermissionManager(GanymedeSession gSession)
-  {
-    this.gSession = gSession;
-    this.dbSession = gSession.getDBSession();
-  }
-
-  /**
-   * Configures this DBPermissionManager for a privileged internal session.
+   * Constructor for a privileged internal session
+   *
+   * @param gSession The GanymedeSession that we are managing
+   * permissions for.
    *
    * @param sessionName The name of this session, used for identifying
    * the task or server component that is using our GanymedeSession to
@@ -302,33 +379,36 @@ public final class DBPermissionManager {
    * sessions on the server and may not be null.
    */
 
-  public DBPermissionManager configureInternalSession(String sessionName)
+  public DBPermissionManager(GanymedeSession gSession, String sessionName)
   {
+    if (gSession == null)
+      {
+        throw new IllegalArgumentException("gSession must be non-null");
+      }
+
     if (sessionName == null)
       {
         throw new IllegalArgumentException("sessionName may not be null");
       }
 
-    if (configured.set(true))
-      {
-        throw new IllegalStateException("Reconfiguring a DBPermissionManager is not allowed.");
-      }
-
+    this.gSession = gSession;
+    this.dbSession = gSession.getDBSession();
     this.sessionName = sessionName;
 
-    username = null;
-    userInvid = null;
+    this.beforeversupergash = true;
+    this.supergashMode = true;
 
-    supergashMode = true;
-    beforeversupergash = true;
-
-    updatePerms(true);
-
-    return this;
+    this.username = null;
+    this.userInvid = null;
+    this.personaInvid = null;
+    this.personaName = null;
   }
 
   /**
-   * Configures this DBPermissionManager for a remote user session.
+   * Constructor for a logged-in user
+   *
+   * @param gSession The GanymedeSession that we are managing
+   * permissions for.
    *
    * @param userObject A DBObject describing the user logged in, or
    * null if the user is logging in with a non-user-linked persona
@@ -344,48 +424,93 @@ public final class DBPermissionManager {
    * among logged-in sessions in the server and may not be null.
    */
 
-  public DBPermissionManager configureClientSession(DBObject userObject, DBObject personaObject, String sessionName)
+  public DBPermissionManager(GanymedeSession gSession,
+                             DBObject userObject,
+                             DBObject personaObject,
+                             String sessionName)
   {
+    if (gSession == null)
+      {
+        throw new IllegalArgumentException("gSession must be non-null");
+      }
+
     if (sessionName == null)
       {
         throw new IllegalArgumentException("sessionLabel may not be null");
       }
 
-    if (configured.set(true))
+    if (userObject == null && personaObject == null)
       {
-        throw new IllegalStateException("Reconfiguring a DBPermissionManager is not allowed.");
+        throw new IllegalArgumentException("userObject or personaObject must be non-null");
+      }
+
+    this.gSession = gSession;
+    this.dbSession = gSession.getDBSession();
+
+    if (personaObject != null &&
+        personaObject.getInvid().equals(SUPERGASH_PERSONA_INVID))
+      {
+        this.beforeversupergash = true;
+        this.supergashMode = true;
+      }
+    else
+      {
+        this.beforeversupergash = false;
+        this.supergashMode = false;
       }
 
     this.sessionName = sessionName;
 
     if (userObject != null)
       {
-        userInvid = userObject.getInvid();
-        username = userObject.getLabel();
-      }
-    else
-      {
-        userInvid = null;
-      }
+        this.userInvid = userObject.getInvid();
+        this.username = userObject.getLabel();
 
-    if (personaObject != null)
-      {
-        personaInvid = personaObject.getInvid();
-        personaName = personaObject.getLabel();
-
-        if (username == null)
+        if (this.userInvid == null || this.username == null)
           {
-            username = personaName; // for supergash, monitor
+            throw new NullPointerException();
+          }
+
+        if ("".equals(this.username.trim()))
+          {
+            throw new IllegalArgumentException("empty username");
           }
       }
     else
       {
-        personaInvid = null;    // shouldn't happen
+        this.userInvid = null;
+        this.username = personaObject.getLabel();
       }
 
-    updatePerms(true);
+    if (personaObject != null)
+      {
+        this.personaInvid = personaObject.getInvid();
+        this.personaName = personaObject.getLabel();
 
-    return this;
+        if (this.personaInvid == null || this.personaName == null)
+          {
+            throw new NullPointerException();
+          }
+
+        if ("".equals(this.personaName.trim()))
+          {
+            throw new IllegalArgumentException("empty personaName");
+          }
+      }
+    else
+      {
+        this.personaInvid = null;
+        this.personaName = null;
+      }
+
+    try
+      {
+        updatePerms();
+      }
+    catch (NotLoggedInException ex)
+      {
+        throw new IllegalStateException(ex);
+      }
   }
 
   /**
@@ -393,9 +518,9 @@ public final class DBPermissionManager {
    * level privileges.
    */
 
-  public boolean isSuperGash()
+  public synchronized boolean isSuperGash()
   {
-    return supergashMode;
+    return this.supergashMode;
   }
 
   /**
@@ -403,29 +528,35 @@ public final class DBPermissionManager {
    * default end-user privileges.
    */
 
-  public boolean isPrivileged()
+  public synchronized boolean isPrivileged()
   {
-    return personaName != null || isSuperGash();
+    return personaInvid != null || isSuperGash();
   }
 
   /**
-   * Returns true if the session is a standard user with currently
-   * elevated privileges.
+   * Returns true if the session is either an end-user user or an
+   * end-user user using a persona.
    */
 
-  public boolean isElevated()
+  public boolean isUserLinked()
   {
     return userInvid != null;
   }
 
   /**
-   * <p>This method returns the name of the user that is logged into
-   * this session, or null if this session was created by a Ganymede
-   * server task or other internal process.</p>
-   *
-   * <p>If supergash is using this session, this method will return
-   * supergash as well, even though technically supergash isn't a
-   * user.</p>
+   * Returns true if the session is operating solely with unprivileged
+   * end-users privileges.
+   */
+
+  public boolean isEndUser()
+  {
+    return !isSuperGash() && userInvid != null && personaInvid == null;
+  }
+
+  /**
+   * This method returns the name of the user that is logged into this
+   * session, or null if this session was created for supergash,
+   * monitor, or a Ganymede server task or other internal process.
    */
 
   public String getUserName()
@@ -434,10 +565,11 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>Convenience method to get access to this session's user invid.</p>
+   * <p>Convenience method to get access to this session's user
+   * invid.</p>
    *
-   * <p>May be null if supergash, monitor, or Ganymede server task or
-   * internal process is running the session.</p>
+   * <p>May be null if supergash, monitor, or a Ganymede server task
+   * or internal process is running the session.</p>
    */
 
   public Invid getUserInvid()
@@ -446,55 +578,58 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>Convenience method to get access to this session's UserBase
-   * instance.</p>
+   * <p>Convenience method to get access to this session's User
+   * Object.</p>
    *
    * <p>May be null if supergash, monitor, or Ganymede server task or
    * internal process is running the session.</p>
    */
 
-  public DBObject getUser()
+  synchronized DBObject getUser()
   {
     if (userInvid != null)
       {
-        // okay to use session.viewDBObject() here, because getUser()
-        // is only used for internal purposes, and we don't need or
-        // want to do permissions checking
+        // using dbSession to skip perms checking
 
-        return dbSession.viewDBObject(userInvid);
+        DBObject userObject = dbSession.viewDBObject(userInvid);
+
+        if (userObject == null)
+          {
+            return null;
+          }
+
+        return userObject.getOriginal();
       }
 
     return null;
   }
 
   /**
-   * <p>This method returns the name of the persona who is active.
-   * May be null or empty if we have an end-user who is logged in with
-   * no elevated persona privileges.</p>
+   * This method returns the name of the persona who is active.  May
+   * be null or empty if we have an end-user who is logged in with no
+   * elevated persona privileges.
    */
 
-  public String getPersonaName()
+  public synchronized String getPersonaName()
   {
     return personaName;
   }
 
   /**
-   * <p>Convenience method to get access to this session's persona invid.</p>
+   * Convenience method to get access to this session's persona invid.
    */
 
-  public Invid getPersonaInvid()
+  public synchronized Invid getPersonaInvid()
   {
     return personaInvid;
   }
 
   /**
-   * <p>This method gives access to the DBObject for the administrator's
-   * persona record, if any.  This is used by
-   * {@link arlut.csd.ganymede.server.DBSession DBSession} to get the
-   * label for the administrator for record keeping.</p>
+   * This method gives access to the DBObject for the administrator's
+   * persona record, if any.
    */
 
-  public DBObject getPersona()
+  synchronized DBObject getPersona()
   {
     return personaObj;
   }
@@ -512,49 +647,36 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method returns the name of the user who is active
-   * (including supergash or monitor for the non-user-linked
-   * personas), or the name of the internal Ganymede task or process
-   * that is running the session if no user is attached to this
-   * session.</p>
+   * This method returns the name of the user who is active, or the
+   * name of the internal Ganymede task or process that is running the
+   * session if no user is attached to this session.
    */
 
-  public String getBaseIdentity()
+  public synchronized String getBaseIdentity()
   {
-    if (username != null && !username.equals(""))
+    if (username != null)
       {
         return username;
       }
-    else
-      {
-        return sessionName;
-      }
+
+    return sessionName;
   }
 
   /**
-   * <p>This method returns the name of the persona who is active, the
+   * This method returns the name of the persona who is active, the
    * raw user name if no persona privileges have been assumed, or the
    * name of the internal Ganymede task or process that is running the
-   * session if no user is attached to this session.</p>
+   * session if no user is attached to this session.
    */
 
-  public String getIdentity()
+  public synchronized String getIdentity()
   {
-    if (personaName == null || personaName.equals(""))
-      {
-        if (username != null && !username.equals(""))
-          {
-            return username;
-          }
-        else
-          {
-            return sessionName;
-          }
-      }
-    else
+    if (personaName != null)
       {
         return personaName;
       }
+
+    return getBaseIdentity();
   }
 
   /**
@@ -566,7 +688,7 @@ public final class DBPermissionManager {
    * server task or internal process.</p>
    */
 
-  public Invid getIdentityInvid()
+  public synchronized Invid getIdentityInvid()
   {
     if (userInvid != null)
       {
@@ -577,17 +699,17 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>Returns a Vector of Invids containing user and persona Invids
-   * for the GanymedeSession that this DBPermissionManager is attached
-   * to.</p>
+   * <p>Returns an unmodifiable List of Invids containing user and
+   * persona Invids for the GanymedeSession that this
+   * DBPermissionManager is attached to.</p>
    *
-   * <p>May return an empty Vector if this session is being run by a
+   * <p>May return an empty List if this session is being run by a
    * Ganymede server task or internal process.</p>
    */
 
-  public Vector<Invid> getIdentityInvids()
+  public synchronized List<Invid> getIdentityInvids()
   {
-    Vector<Invid> ids = new Vector<Invid>();
+    List<Invid> ids = new ArrayList<Invid>();
 
     if (userInvid != null)
       {
@@ -599,59 +721,46 @@ public final class DBPermissionManager {
         ids.add(personaInvid);
       }
 
-    return ids;
+    return Collections.unmodifiableList(ids);
   }
 
   /**
-   * <p>Returns the email address that should be used in the 'From:'
+   * Returns the email address that should be used in the 'From:'
    * field of mail sent by the GanymedeSession which owns this
    * DBPermissionManager.
    */
 
-  public String getIdentityReturnAddress()
+  public synchronized String getReturnAddress()
   {
-    String returnAddr;
-
-    // do we have a real user name, or a persona name?
-
-    if (username == null || userInvid == null)
+    if (!isUserLinked())
       {
-        // local server process or supergash/monitor
-
-        returnAddr = Ganymede.returnaddrProperty;
+        return Ganymede.returnaddrProperty;
       }
-    else
-      {
-        if (username.indexOf(':') == -1)
-          {
-            // real username, save it as is
 
-            returnAddr = username;
+    String mailsuffix = System.getProperty("ganymede.defaultmailsuffix");
+
+    if (mailsuffix != null)
+      {
+        if (mailsuffix.contains("@"))
+          {
+            return username + mailsuffix;
           }
         else
           {
-            // persona, extract the user's name out of it
-            returnAddr = username.substring(0, username.indexOf(':'));
-          }
-
-        String mailsuffix = System.getProperty("ganymede.defaultmailsuffix");
-
-        if (mailsuffix != null)
-          {
-            returnAddr += mailsuffix;
+            return username + "@" + mailsuffix;
           }
       }
 
-    return returnAddr;
+    return username;
   }
 
   /**
-   * <p>Returns the Invid of the admin persona (or user, if running
-   * with unelevated privileges) who is responsible for actions taken
-   * by the containing GanymedeSession.</p>
+   * Returns the Invid of the admin persona (or user, if running with
+   * unelevated privileges) who is responsible for actions taken by
+   * the containing GanymedeSession.
    */
 
-  public Invid getResponsibleInvid()
+  public synchronized Invid getResponsibleInvid()
   {
     if (personaInvid != null)
       {
@@ -662,267 +771,259 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method returns a list of personae names available to the
-   * user logged in.</p>
+   * <p>Returns a successful ReturnVal if the user / persona
+   * credentials for this session are currently valid.</p>
+   *
+   * <p>If the user or persona connected to this session have been
+   * deleted by another session, we'll return an error dialog
+   * explaining that.</p>
+   *
+   * @return null if the session is valid, else a ReturnVal with an
+   * error dialog encoded.
    */
 
-  public Vector<String> getAvailablePersonae()
+  public synchronized ReturnVal isValidSession()
   {
-    DBObject user;
-    Vector<String> results;
-    InvidDBField inv;
-
-    /* -- */
-
-    user = getUser();
-
-    if (user == null)
+    if (this.beforeversupergash)
       {
         return null;
       }
 
-    results = new Vector<String>();
-
-    inv = (InvidDBField) user.getField(SchemaConstants.UserAdminPersonae);
-
-    if (inv != null)
+    if (isEndUser() && getUser() == null)
       {
-        // it's okay to loop on this field since we should be looking
-        // at a DBObject and not a DBEditObject
+        // "Session Invalidated"
+        // "User object {0} deleted while logged in with session {1}"
+        return Ganymede.createErrorDialog(gSession,
+                                          ts.l("isValidSession.error"),
+                                          ts.l("isValidSession.user_deleted",
+                                               this.username,
+                                               this.sessionName));
+      }
 
-        for (int i = 0; i < inv.size(); i++)
+    if (this.personaInvid != null &&
+        dbSession.viewDBObject(this.personaInvid) == null)
+      {
+        // "Session Invalidated"
+        // "Persona object {0} deleted while logged in with session {1}"
+        return Ganymede.createErrorDialog(gSession,
+                                          ts.l("isValidSession.error"),
+                                          ts.l("isValidSession.persona_deleted",
+                                               this.personaName,
+                                               this.sessionName));
+      }
+
+    return null;
+  }
+
+  /**
+   * Returns a serializable Vector of personae names available to the
+   * user logged in, or null if we're logged in as a non user-linked
+   * supergash persona.
+   */
+
+  public synchronized Vector<String> getAvailablePersonae()
+  {
+    DBObject u = getUser();
+
+    if (u == null)
+      {
+        return null;
+      }
+
+    Vector<String> results = new Vector<String>();
+    Vector personae = u.getFieldValuesLocal(SchemaConstants.UserAdminPersonae);
+
+    for (Invid invid: (List<Invid>) personae)
+      {
+        try
           {
-            Invid invid = (Invid) inv.getElementLocal(i);
-
-            try
-              {
-                results.add(dbSession.viewDBObject(invid).getLabel());
-              }
-            catch (NullPointerException ex)
-              {
-              }
+            results.add(dbSession.getCommittedObjectLabel(invid));
+          }
+        catch (NullPointerException ex)
+          {
           }
       }
 
-    results.add(user.getLabel()); // add their 'end-user' persona
+    results.add(u.getLabel()); // add their 'end-user' persona
 
     return results;
   }
 
-  public PermMatrix getPersonaPerms()
+  public synchronized PermMatrix getOwnedObjectPerms()
   {
-    return personaPerms;
+    return ownedObjectPerms;
   }
 
-  public PermMatrix getDefaultPerms()
+  public synchronized PermMatrix getDefaultPerms()
   {
-    return defaultPerms;
+    return unownedObjectPerms;
   }
 
-  public PermMatrix getDelegatablePersonaPerms()
+  public synchronized PermMatrix getDelegatableOwnedObjectPerms()
   {
-    return delegatablePersonaPerms;
+    return delegatableOwnedObjectPerms;
   }
 
-  public PermMatrix getDelegatableDefaultPerms()
+  public synchronized PermMatrix getDelegatableUnownedObjectPerms()
   {
-    return delegatableDefaultPerms;
+    return delegatableUnownedObjectPerms;
   }
 
   /**
-   * <p>This method is used to select an admin persona, changing the
-   * permissions that the user has and the objects that are accessible
-   * in the database.</p>
+   * <p>This method is used to select an admin persona linked to the
+   * end-user connected to the linked GanymedeSession, or the
+   * unprivileged end user itself.</p>
+   *
+   * <p>If the persona is successfully changed, the linked
+   * GanymedeSession's transaction will be aborted and re-started with
+   * recalculated permissions.</p>
+   *
+   * @param label The canonical label of the persona (or end user) to change to
+   * @param password The password for the persona to change to.  May
+   * be null if label is the user's name.
+   *
+   * @return true if the persona could be changed
    */
 
-  public boolean selectPersona(String newPersona, String password)
+  public synchronized boolean selectPersona(String label, String password)
   {
-    DBObject
-      user,
-      personaObject = null;
+    DBObject userObject = getUser();
 
-    InvidDBField inv;
-    Invid invid;
-    PasswordDBField pdbf;
-
-    /* -- */
-
-    user = getUser();
-
-    if (user == null)
+    if (userObject == null)
       {
-        // they may be the special supergash account, but they can't
-        // change persona
-
         return false;
       }
 
-    // if they are selecting their base username, go ahead and clear
-    // out the persona privs and return true
-
-    if (user.getLabel().equals(newPersona))
+    if (!findPersona(userObject, label, password))
       {
-        if (password != null)
-          {
-            pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+        // "Failed attempt to switch to persona {0} for user: {1}"
+        Ganymede.debug(ts.l("selectPersona.no_persona", label, this.username));
+        return false;
+      }
 
-            if (pdbf == null || !pdbf.matchPlainText(password))
-              {
-                return false;
-              }
-          }
+    // "User {0} switched to persona {1}."
+    Ganymede.debug(ts.l("selectPersona.switched", this.username, label));
 
-        // the GUI client will close transactions first, but since we
-        // might not be working on behalf of the GUI client, let's
-        // make sure
+    gSession.restartTransaction();
 
-        if (dbSession.editSet != null)
-          {
-            String description = dbSession.editSet.description;
-            boolean interactive = dbSession.editSet.isInteractive();
+    this.visibilityFilterInvids = null;
+    this.ownedObjectPerms = null;
+    this.unownedObjectPerms = null;
+    this.delegatableOwnedObjectPerms = null;
+    this.delegatableUnownedObjectPerms = null;
+    this.personaTimeStamp = null; // force updatePerms()
 
-            // close the existing transaction
+    try
+      {
+        updatePerms();
+      }
+    catch (NotLoggedInException ex)
+      {
+        return false;
+      }
 
-            try
-              {
-                gSession.abortTransaction();
+    gSession.resetAdminEntry();
+    gSession.setLastEvent("selectPersona: " + label);
 
-                // open a new one with the same description and
-                // interactivity
+    return true;
+  }
 
-                gSession.openTransaction(description, interactive);
-              }
-            catch (NotLoggedInException ex)
-              {
-                throw new RuntimeException(ex);
-              }
-          }
+  /**
+   * Sets this.personaName and this.personaInvid and returns true if a
+   * persona object with name matching label and password matching
+   * pass linked to the object user can be found, or if the name of
+   * the object user matches label.
+   *
+   * @param user The DBObject containing information about the user
+   * looking to change his persona
+   * @param label The name of the persona he is attempting to change to
+   * @param pass The password that he is using to try to change his
+   * persona, or null if the user is attempting to change to his
+   * unprivileged end-user privs.
+   */
 
-        personaObject = null;
+  private boolean findPersona(DBObject user, String label, String pass)
+  {
+    if (user == null || label == null)
+      {
+        return false;
+      }
+
+    // we don't need to check a password to switch to our end-user
+    // privs
+
+    if (user.getLabel().equals(label))
+      {
         this.personaInvid = null;
         this.personaName = null;
-        this.visibilityFilterInvids = null;
-        this.username = user.getLabel(); // in case they logged in directly as an admin account
-
-        updatePerms(true);
-
-        gSession.resetAdminEntry(); // null our admin console cache
-        gSession.setLastEvent("selectPersona: " + newPersona);
+        this.personaObj = null;
 
         return true;
       }
 
-    // ok, we need to find out persona they are trying to switch to
-
-    inv = (InvidDBField) user.getField(SchemaConstants.UserAdminPersonae);
-
-    // it's okay to loop on this field since we should be looking at a
-    // DBObject and not a DBEditObject
-
-    for (int i = 0; i < inv.size(); i++)
+    if (pass == null)
       {
-        invid = (Invid) inv.getElementLocal(i);
-
-        // it's okay to use the faster viewDBObject() here, because we
-        // are always going to be doing this for internal purposes
-
-        personaObject = dbSession.viewDBObject(invid);
-
-        if (!personaObject.getLabel().equals(newPersona))
-          {
-            personaObject = null;
-          }
-        else
-          {
-            break;
-          }
-      }
-
-    if (personaObject == null)
-      {
-        // "Couldn''t find persona {0} for user: {1}"
-        Ganymede.debug(ts.l("selectPersona.no_persona", newPersona, this.username));
         return false;
       }
 
-    pdbf = (PasswordDBField) personaObject.getField(SchemaConstants.PersonaPasswordField);
+    List personae = user.getFieldValuesLocal(SchemaConstants.UserAdminPersonae);
 
-    if (pdbf != null && pdbf.matchPlainText(password))
+    for (Invid invid: (List<Invid>) personae)
       {
-        // "User {0} switched to persona {1}."
-        Ganymede.debug(ts.l("selectPersona.switched", this.username, newPersona));
+        DBObject persona = dbSession.viewDBObject(invid).getOriginal();
 
-        this.personaName = personaObject.getLabel();
-
-        // the GUI client will close transactions first, but since we
-        // might not be working on behalf of the GUI client, let's
-        // make sure
-
-        if (dbSession.editSet != null)
+        if (!label.equals(persona.getLabel()))
           {
-            String description = dbSession.editSet.description;
-            boolean interactive = dbSession.editSet.isInteractive();
-
-            try
-              {
-                // close the existing transaction
-
-                gSession.abortTransaction();
-
-                // open a new one with the same description and
-                // interactivity
-
-                gSession.openTransaction(description, interactive);
-              }
-            catch (NotLoggedInException ex)
-              {
-                throw new RuntimeException(ex);
-              }
+            continue;
           }
 
-        this.personaInvid = personaObject.getInvid();
-        this.username = user.getLabel(); // in case they logged in directly as an admin account
-        this.visibilityFilterInvids = null;
+        PasswordDBField pdbf =
+          persona.getPassField(SchemaConstants.PersonaPasswordField);
 
-        updatePerms(true);
+        if (pdbf != null && pdbf.matchPlainText(pass))
+          {
+            if (persona.getLabel() == null || persona.getInvid() == null)
+              {
+                throw new NullPointerException();
+              }
 
-        gSession.resetAdminEntry(); // null our admin console cache
-        gSession.setLastEvent("selectPersona: " + newPersona);
-        return true;
+            this.personaName = persona.getLabel();
+            this.personaInvid = persona.getInvid();
+            this.personaObj = persona;
+
+            return true;
+          }
       }
 
     return false;
   }
 
   /**
-   * <p>This method returns a QueryResult of owner groups that the
+   * This method returns a QueryResult of owner groups that the
    * current persona has access to.  This list is the transitive
    * closure of the list of owner groups in the current persona.  That
    * is, the list includes all the owner groups in the current persona
    * along with all of the owner groups those owner groups own, and so
-   * on.</p>
+   * on.
    */
 
-  public QueryResult getAvailableOwnerGroups()
+  public synchronized QueryResult getAvailableOwnerGroups()
   {
-    Query q;
     QueryResult result = new QueryResult();
     QueryResult fullOwnerList;
-    Vector<Invid> alreadySeen = new Vector<Invid>();
-    Invid inv;
 
     /* -- */
 
     if (!isPrivileged())
       {
-        return result;          // End users don't have any owner group access
+        return result;
       }
-
-    q = new Query(SchemaConstants.OwnerBase);
-    q.setFiltered(false);
 
     try
       {
+        Query q = new Query(SchemaConstants.OwnerBase);
+        q.setFiltered(false);
+
         fullOwnerList = gSession.query(q);
       }
     catch (NotLoggedInException ex)
@@ -939,15 +1040,11 @@ public final class DBPermissionManager {
 
     // otherwise, we've got to do a very little bit of legwork
 
-    for (int i = 0; i < fullOwnerList.size(); i++)
+    for (ObjectHandle handle: fullOwnerList.getHandles())
       {
-        alreadySeen.clear();
-
-        inv = fullOwnerList.getInvid(i);
-
-        if (recursePersonaMatch(inv, alreadySeen))
+        if (isMemberOfOwnerGroup(handle.getInvid()))
           {
-            result.addRow(inv, dbSession.viewDBObject(inv).getLabel(), false);
+            result.addRow(handle);
           }
       }
 
@@ -958,27 +1055,27 @@ public final class DBPermissionManager {
    * <p>This method may be used to set the owner groups of any objects
    * created hereafter.</p>
    *
-   * @param ownerInvids a Vector of Invid objects pointing to
-   * ownergroup objects.
+   * @param ownerInvids a List of Invid objects pointing to ownergroup
+   * objects.
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
    */
 
-  public synchronized ReturnVal setDefaultOwner(Vector<Invid> ownerInvids)
+  public synchronized ReturnVal setDefaultOwner(List<Invid> ownerInvids)
   {
-    Vector<Invid> tmpInvids;
+    List<Invid> tmpInvids;
 
     /* -- */
 
     if (ownerInvids == null)
       {
-        newObjectOwnerInvids = null;
+        this.newObjectOwnerInvids = null;
         return null;
       }
 
-    tmpInvids = new Vector<Invid>();
+    tmpInvids = new ArrayList<Invid>();
 
     for (Invid ownerInvidItem: ownerInvids)
       {
@@ -988,6 +1085,8 @@ public final class DBPermissionManager {
 
         if (ownerInvidItem.getType() != SchemaConstants.OwnerBase)
           {
+            // "Error in setDefaultOwner()"
+            // "Error.. ownerInvids contains an invalid invid"
             return Ganymede.createErrorDialog(gSession,
                                               ts.l("setDefaultOwner.error_title"),
                                               ts.l("setDefaultOwner.error_text"));
@@ -1010,24 +1109,26 @@ public final class DBPermissionManager {
         tmpInvids.add(ownerInvidItem);
       }
 
-    if (!supergashMode && !isMemberAll(tmpInvids))
+    tmpInvids = Collections.unmodifiableList(tmpInvids);
+
+    if (!this.supergashMode && !isMemberOfAllOwnerGroups(tmpInvids))
       {
+        // "Error in setDefaultOwner()"
+        // "Error.. ownerInvids contains invid that the persona is not a member of."
         return Ganymede.createErrorDialog(gSession,
                                           ts.l("setDefaultOwner.error_title"),
                                           ts.l("setDefaultOwner.error_text2"));
       }
-    else
-      {
-        newObjectOwnerInvids = tmpInvids;
-        gSession.setLastEvent("setDefaultOwner");
-        return null;
-      }
+
+    this.newObjectOwnerInvids = tmpInvids;
+    gSession.setLastEvent("setDefaultOwner");
+    return null;
   }
 
   /**
-   * <p>Returns a Vector of Invids of the owner groups that should be
-   * made owners of a newly created object by the GanymedeSession
-   * owned by this DBPermissionManager.</p>
+   * <p>Returns an unmodifiable List of Invids of the owner groups
+   * that should be made owners of a newly created object by the
+   * GanymedeSession owned by this DBPermissionManager.</p>
    *
    * <p>If an admin has authority over more than one owner group and
    * they have not previously specified the collection of owner groups
@@ -1035,65 +1136,67 @@ public final class DBPermissionManager {
    * first one in the list.</p>
    */
 
-  public Vector<Invid> getNewOwnerInvids()
+  public synchronized List<Invid> getNewOwnerInvids()
   {
-    if (newObjectOwnerInvids != null)
+    if (this.newObjectOwnerInvids != null)
       {
-        return newObjectOwnerInvids;
+        return this.newObjectOwnerInvids;
       }
-    else
+
+    // supergash is allowed to create objects with no owners, so if
+    // they haven't called setDefaultOwner(), provide an empty list
+
+    if (isSuperGash())
       {
-        Vector<Invid> ownerInvids = new Vector<Invid>();
-
-        // supergash is allowed to create objects with no owners,
-        // so we won't worry about what supergash might try to do.
-
-        if (!isSuperGash())
-          {
-            QueryResult ownerList = getAvailableOwnerGroups();
-
-            if (ownerList.size() > 0)
-              {
-                // If we're interactive, the client really should hav
-                // helped us out by prompting the user for their
-                // preferred default owner list, but if we are talking
-                // to a custom client, this might not be the case, in
-                // which case we'll just pick the first owner group we
-                // can put it into and put it there.
-                //
-                // The client can always manually set the owner group
-                // in a created object after we return it, of course.
-
-                ownerInvids.add(ownerList.getInvid(0));
-              }
-          }
-
-        return ownerInvids;
+        return Collections.unmodifiableList(new ArrayList<Invid>());
       }
+
+    List<Invid> ownerInvids = new ArrayList<Invid>();
+
+    QueryResult ownerList = getAvailableOwnerGroups();
+
+    if (ownerList.size() > 0)
+      {
+        // If we're interactive, the client really should have
+        // helped us out by prompting the user for their
+        // preferred default owner list, but if we are talking
+        // to a custom client, this might not be the case, in
+        // which case we'll just pick the first owner group we
+        // can put it into and put it there.
+        //
+        // The client can always manually set the owner group
+        // in a created object after we return it, of course.
+
+        ownerInvids.add(ownerList.getInvid(0));
+      }
+
+    return Collections.unmodifiableList(ownerInvids);
   }
 
   /**
-   * <p>This method may be used to cause the server to pre-filter any object
-   * listing to only show those objects directly owned by owner groups
-   * referenced in the ownerInvids list.  This filtering will not restrict
-   * the ability of the client to directly view any object that the client's
-   * persona would normally have access to, but will reduce clutter and allow
-   * the client to present the world as would be seen by administrator personas
-   * with just the listed ownerGroups accessible.</p>
+   * <p>This method may be used to cause the server to pre-filter any
+   * object listing to only show those objects directly owned by owner
+   * groups referenced in the ownerInvids list.  This filtering will
+   * not restrict the ability of the client to directly view any
+   * object that the client's persona would normally have access to,
+   * but will reduce clutter and allow the client to present the world
+   * as would be seen by administrator personas with just the listed
+   * ownerGroups accessible.</p>
    *
    * <p>This method cannot be used to grant access to objects that are
    * not accessible by the client's adminPersona.</p>
    *
-   * <p>Calling this method with ownerInvids set to null will turn off the filtering.</p>
+   * <p>Calling this method with ownerInvids set to null will turn off
+   * the filtering.</p>
    *
-   * @param ownerInvids a Vector of Invid objects pointing to ownergroup objects.
+   * @param ownerInvids a List of Invid objects pointing to ownergroup objects.
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
    */
 
-  public synchronized ReturnVal filterQueries(Vector<Invid> ownerInvids)
+  public synchronized ReturnVal filterQueries(List<Invid> ownerInvids)
   {
     if (ownerInvids == null || ownerInvids.size() == 0)
       {
@@ -1101,29 +1204,28 @@ public final class DBPermissionManager {
         return null;
       }
 
-    if (!supergashMode && !isMemberAll(ownerInvids))
+    List<Invid> copyList =
+      Collections.unmodifiableList(new ArrayList<Invid>(ownerInvids));
+
+    if (this.supergashMode || isMemberOfAllOwnerGroups(copyList))
       {
-        return Ganymede.createErrorDialog(gSession,
-                                          ts.l("filterQueries.error"),
-                                          ts.l("setDefaultOwner.error_text2"));
-      }
-    else
-      {
-        visibilityFilterInvids = ownerInvids;
+        this.visibilityFilterInvids = copyList;
         gSession.setLastEvent("filterQueries");
         return null;
       }
+
+    // "Server: Error in filterQueries()"
+    // "Error.. ownerInvids contains invid that the persona is not a member of."
+    return Ganymede.createErrorDialog(gSession,
+                                      ts.l("filterQueries.error"),
+                                      ts.l("setDefaultOwner.error_text2"));
   }
 
   //  Database operations
 
   /**
-   * <p>Returns a serialized representation of the basic category
-   * and base structure on the server.</p>
-   *
-   * <p>This method is synchronized to avoid any possible deadlock
-   * between DBStore and GanymedeSession, as the CategoryTransport
-   * constructor calls other synchronized methods on GanymedeSession.</p>
+   * Returns a serialized representation of the basic category and
+   * base structure on the server.
    *
    * @param hideNonEditables If true, the CategoryTransport returned
    * will only include those object types that are editable by the
@@ -1134,93 +1236,47 @@ public final class DBPermissionManager {
 
   public synchronized CategoryTransport getCategoryTree(boolean hideNonEditables)
   {
-    if (supergashMode)
+    if (this.supergashMode)
       {
-        // XXX CACHE WARNING! XXX
-
-        // All sessions with supergash privileges can use the cached
-        // full category tree transport object.. we'll build it here
-        // if we need to.
-
-        if (Ganymede.catTransport == null)
+        if (Ganymede.catTransport != null)
           {
-            // pass Ganymede.internalSession so that the master
-            // CategoryTransport object will correctly grant
-            // object creation privs for all object types
-
-            Ganymede.catTransport = Ganymede.db.rootCategory.getTransport(Ganymede.internalSession, true);
+            return Ganymede.catTransport;
           }
 
-        if (debug)
-          {
-            System.err.println("getCategoryTree(): returning system's complete category tree");
-          }
+        // hiding noneditables for supergash?  nonsense.
+        Ganymede.catTransport = Ganymede.db.rootCategory.getTransport(this.gSession, true);
 
         return Ganymede.catTransport;
       }
-    else
-      {
-        // not in supergash mode.. download a subset of the category tree to the user
 
-        CategoryTransport transport = Ganymede.db.rootCategory.getTransport(gSession, hideNonEditables);
-
-        if (debug)
-          {
-            System.err.println("getCategoryTree(): generated custom category tree");
-          }
-
-        if (false)
-          {
-            System.err.println("%%% Printing PersonaPerms");
-            PermissionMatrixDBField.debugdump(personaPerms);
-
-            System.err.println("%%% Printing DefaultPerms");
-            PermissionMatrixDBField.debugdump(defaultPerms);
-          }
-
-        return transport;
-      }
+    return Ganymede.db.rootCategory.getTransport(this.gSession, hideNonEditables);
   }
 
   /**
-   * <p>Returns a serialized representation of the object types
-   * defined on the server.  This BaseListTransport object
-   * will not include field information.  The client is
-   * obliged to call getFieldTemplateVector() on any
-   * bases that it needs field information for.</p>
-   *
-   * <p>This method is synchronized to avoid any possible deadlock
-   * between DBStore and GanymedeSession, as the BaseListTransport
-   * constructor calls other synchronized methods on GanymedeSession.</p>
+   * Returns a serialized representation of the object types defined
+   * on the server.  This BaseListTransport object will not include
+   * field information.  The client is obliged to call
+   * getFieldTemplateVector() on any bases that it needs field
+   * information for.
    *
    * @see arlut.csd.ganymede.common.BaseListTransport
    */
 
   public synchronized BaseListTransport getBaseList()
   {
-    if (supergashMode && Ganymede.baseTransport != null)
+    if (this.supergashMode && Ganymede.baseTransport != null)
       {
         return Ganymede.baseTransport;
       }
 
     BaseListTransport transport = new BaseListTransport();
 
-    // *sync* on DBStore, this GanymedeSession
-
-    // we sync on Ganymede.db to make sure that no one adds or deletes
-    // any object bases while we're creating our BaseListTransport.
-    // We could use the loginSemaphore, but that would be a bit heavy
-    // for our purposes here.
-
-    synchronized (Ganymede.db)
+    for (DBObjectBase base: Ganymede.db.bases())
       {
-        for (DBObjectBase base: Ganymede.db.bases())
-          {
-            base.addBaseToTransport(transport, null);
-          }
+        base.addBaseToTransport(transport, this.gSession);
       }
 
-    if (supergashMode)
+    if (this.supergashMode)
       {
         Ganymede.baseTransport = transport;
       }
@@ -1229,15 +1285,13 @@ public final class DBPermissionManager {
   }
 
   /**
-   * <p>This method applies this GanymedeSession's current owner filter
-   * to the given QueryResult &lt;qr&gt; and returns a QueryResult
-   * with any object handles that are not matched by the filter
-   * stripped.</p>
+   * <p>This method applies this GanymedeSession's current owner
+   * filter to the given QueryResult &lt;qr&gt; and returns a
+   * QueryResult with any object handles that are not matched by the
+   * filter stripped.</p>
    *
-   * <p>If the submitted QueryResult &lt;qr&gt; is null, filterQueryResult()
-   * will itself return null.</p>
-   *
-   * <p>NB: This method requires no external synchronization</p>
+   * <p>If the submitted QueryResult &lt;qr&gt; is null,
+   * filterQueryResult() will itself return null.</p>
    */
 
   public QueryResult filterQueryResult(QueryResult qr)
@@ -1247,423 +1301,169 @@ public final class DBPermissionManager {
         return null;
       }
 
-    QueryResult result = new QueryResult(qr.isForTransport());
-
-    /* -- */
-
-    Vector<ObjectHandle> handles = qr.getHandles();
-
-    for (ObjectHandle handle: handles)
+    if (this.visibilityFilterInvids == null ||
+        this.visibilityFilterInvids.size() == 0)
       {
-        Invid invid = handle.getInvid();
+        return qr;
+      }
 
-        if (invid != null)
+    QueryResult result = new QueryResult();
+
+    for (ObjectHandle handle: qr.getHandles())
+      {
+        if (filterMatch(handle.getInvid()))
           {
-            DBObject obj = dbSession.viewDBObject(invid);
-
-            if (filterMatch(obj))
-              {
-                result.addRow(handle);
-              }
+            result.addRow(handle);
           }
       }
 
     return result;
   }
 
-  // **
-  // the following are the non-exported permissions management
-  // **
-
   /**
-   * <p>This method finds the ultimate owner of an embedded object</p>
+   * This method returns true if the visibility filter vector allows
+   * visibility of the object in question.  The visibility vector
+   * works by direct ownership identity (i.e., no recursing up), so
+   * it's a simple loop-di-loop.
    */
 
-  DBObject getContainingObj(DBObject object)
+  public boolean filterMatch(Invid invid)
   {
-    return dbSession.getContainingObj(object);
+    if (invid == null)
+      {
+        return false;
+      }
+
+    if (visibilityFilterInvids == null || visibilityFilterInvids.size() == 0)
+      {
+        return true;
+      }
+
+    return filterMatch(dbSession.viewDBObject(invid));
   }
 
   /**
-   * <p>This method takes the administrator's current
-   * persona, considers the owner groups the administrator
-   * is a member of, checks to see if the object is owned
-   * by that group, and determines the appropriate permission
-   * bits for the object.  getPerm() will OR any proprietary
-   * ownership bits with the default permissions to give
-   * an appropriate result.</p>
+   * This method returns true if the visibility filter vector allows
+   * visibility of the object in question.  The visibility vector
+   * works by direct ownership identity (i.e., no recursing up), so
+   * it's a simple loop-di-loop.
    */
 
-  public PermEntry getPerm(DBObject object)
+  public boolean filterMatch(DBObject obj)
   {
-    boolean doDebug = permsdebug && object.getInvid().getType() == 267;
-    boolean useSelfPerm = false;
-    PermEntry result;
+    if (obj == null)
+      {
+        return false;
+      }
 
-    /* -- */
+    if (visibilityFilterInvids == null || visibilityFilterInvids.size() == 0)
+      {
+        return true;
+      }
 
+    List owners = obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
+
+    return VectorUtils.overlaps(visibilityFilterInvids, owners);
+  }
+
+  /**
+   * Returns the authorized privileges for this DBPermissionManager on
+   * object.
+   *
+   * @return a non-null PermEntry
+   */
+
+  public synchronized PermEntry getPerm(DBObject object)
+  {
     if (object == null)
       {
-        return null;
+        throw new NullPointerException();
       }
 
-    if (supergashMode)
+    try
+      {
+        updatePerms();
+      }
+    catch (NotLoggedInException ex)
+      {
+        return PermEntry.noPerms;
+      }
+
+    if (this.supergashMode)
       {
         return PermEntry.fullPerms;
       }
 
-    // find the top-level object if we were passed an embedded object
-
-    if (doDebug)
-      {
-        System.err.println("DBPermissionManager.getPerm(" + object + ")");
-      }
-
-    object = getContainingObj(object);
-
-    // does this object type have an override?
-
-    result = object.getBase().getObjectHook().permOverride(gSession, object);
-
-    if (result != null)
-      {
-        if (doDebug)
-          {
-            System.err.println("getPerm(): found an object override, returning " + result);
-          }
-
-        return result;
-      }
-
-    // no override.. do we have an expansion?
-
-    result = object.getBase().getObjectHook().permExpand(gSession, object);
-
-    if (result == null)
-      {
-        result = PermEntry.noPerms;
-      }
-
-    // make sure we have personaPerms up to date
-
-    updatePerms(false);         // *sync*
-
-    // if we are operating on behalf of an end user and the object in
-    // question happens to be that user's record, we'll act as if we
-    // own ourself.  We'll then wind up with the default permission
-    // object's objects owned privs.
-
-    useSelfPerm = (userInvid != null) && userInvid.equals(object.getInvid());
-
-    // If we aren't editing ourselves, go ahead and check to see
-    // whether the custom logic for this object type wants to grant
-    // ownership of this object.
-
-    if (!useSelfPerm && object.getBase().getObjectHook().grantOwnership(gSession, object))
-      {
-        if (doDebug)
-          {
-            System.err.println("getPerm(): grantOwnership() returned true");
-          }
-
-        useSelfPerm = true;
-      }
-
-    // If the current persona owns the object, look to our
-    // personaPerms to get the permissions applicable, else
-    // look at the default perms
-
-    if (useSelfPerm || personaMatch(object))
-      {
-        if (doDebug)
-          {
-            System.err.println("getPerm(): personaMatch or useSelfPerm returned true");
-          }
-
-        PermEntry temp = personaPerms.getPerm(object.getTypeID());
-
-        if (doDebug)
-          {
-            System.err.println("getPerm(): personaPerms.getPerm(" + object + ") returned " + temp);
-
-            System.err.println("%%% Printing PersonaPerms");
-            PermissionMatrixDBField.debugdump(personaPerms);
-          }
-
-        PermEntry val = result.union(temp);
-
-        if (doDebug)
-          {
-            System.err.println("getPerm(): returning " + val);
-          }
-
-        return val;
-      }
-    else
-      {
-        if (doDebug)
-          {
-            System.err.println("getPerm(): personaMatch and useSelfPerm returned false");
-          }
-
-        PermEntry temp = defaultPerms.getPerm(object.getTypeID());
-
-        if (doDebug)
-          {
-            System.err.println("getPerm(): defaultPerms.getPerm(" + object + ") returned " + temp);
-
-            System.err.println("%%% Printing DefaultPerms");
-            PermissionMatrixDBField.debugdump(defaultPerms);
-          }
-
-        PermEntry val = result.union(temp);
-
-        if (doDebug)
-          {
-            System.err.println("getPerm(): returning " + val);
-          }
-
-        return val;
-      }
+    return this.getObjectPerm(object, isOwnedByUs(object));
   }
 
   /**
-   * <p>This method takes the administrator's current
-   * persona, considers the owner groups the administrator
-   * is a member of, checks to see if the object is owned
-   * by that group, and determines the appropriate permission
-   * bits for the field in the object.</p>
+   * Returns the authorized privileges for this DBPermissionManager on
+   * field fieldID in object.
    *
-   * <p>This method duplicates the logic of {@link
-   * arlut.csd.ganymede.server.DBPermissionManager#getPerm(arlut.csd.ganymede.server.DBObject)
-   * getPerm(object)} internally for efficiency.  This method is
-   * called <B>quite</B> a lot in the server, and has been tuned
-   * to use the pre-calculated DBPermissionManager
-   * {@link arlut.csd.ganymede.server.DBPermissionManager#defaultPerms defaultPerms}
-   * and {@link arlut.csd.ganymede.server.DBPermissionManager#personaPerms personaPerms}
-   * objects which cache the effective permissions for fields in the
-   * Ganymede {@link arlut.csd.ganymede.server.DBStore DBStore} for the current
-   * persona.</p>
+   * @return a non-null PermEntry
    */
 
-  public PermEntry getPerm(DBObject object, short fieldId)
+  public synchronized PermEntry getPerm(DBObject object, short fieldID)
   {
-    // if this is true, the object was considered to be owned.
-
-    boolean objectIsOwned = false;
-
-    // reference to which PermMatrix we use to look up permissions..
-    // that for objects we own, or that for objects we don't.
-
-    PermMatrix applicablePerms = null;
-
-    // reference to custom pseudostatic DBEditObject handler
-    // registered with the object's type, if any
-
-    DBEditObject objectHook;
-
-    // object permissions resulting from DBEditObject subclass
-    // customization
-
-    PermEntry overrideObjPerm = null;
-    PermEntry expandObjPerm = null;
-
-    // field permissions resulting from DBEditObject subclass
-    // customization
-
-    PermEntry overrideFieldPerm = null;
-    PermEntry expandFieldPerm = null;
-
-    // and our results
-
-    PermEntry objectPerm = null;
-    PermEntry fieldPerm = null;
-
-    /* -- */
-
-    if (permsdebug)
+    if (object == null)
       {
-        System.err.println("Entering DBPermissionManager.getPerm(" + object + "," + fieldId + ")");
+        throw new NullPointerException();
       }
 
-    if (supergashMode)
+    try
       {
-        return PermEntry.fullPerms;
+        updatePerms();
+      }
+    catch (NotLoggedInException ex)
+      {
+        return PermEntry.noPerms;
       }
 
-    objectHook = object.getBase().getObjectHook();
+    boolean owned = isOwnedByUs(object);
+    PermEntry objectPerm = this.getObjectPerm(object, owned);
+    PermEntry fieldPerm = this.getFieldPerm(object, fieldID, owned);
 
-    // check for permissions overrides or expansions from the object's
-    // custom plug-in class.. all of these objectHook calls will
-    // return null if there is no customization
-
-    overrideFieldPerm = objectHook.permOverride(gSession, object, fieldId);
-
-    if (overrideFieldPerm == null)
-      {
-        expandFieldPerm = objectHook.permExpand(gSession, object, fieldId);
-      }
-
-    overrideObjPerm = objectHook.permOverride(gSession, object);
-
-    if (overrideObjPerm == null)
-      {
-        expandObjPerm = objectHook.permExpand(gSession, object);
-      }
-
-    // make sure we have personaPerms up to date
-
-    updatePerms(false);         // *sync*
-
-    // embedded object ownership is determined by the top-level object
-
-    DBObject containingObj = getContainingObj(object);
-
-    if ((userInvid != null && userInvid.equals(containingObj.getInvid())) ||
-        objectHook.grantOwnership(gSession, object) ||
-        objectHook.grantOwnership(gSession, containingObj) ||
-        personaMatch(containingObj))
-      {
-        if (permsdebug)
-          {
-            System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") choosing persona perms");
-          }
-
-        objectIsOwned = true;
-
-        applicablePerms = personaPerms; // superset of defaultPerms
-      }
-    else
-      {
-        if (permsdebug)
-          {
-            System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") choosing default perms");
-          }
-
-        applicablePerms = defaultPerms;
-      }
-
-    if (overrideObjPerm != null)
-      {
-        objectPerm = overrideObjPerm;
-      }
-    else
-      {
-        objectPerm = applicablePerms.getPerm(object.getTypeID());
-
-        if (objectPerm == null)
-          {
-            if (permsdebug)
-              {
-                System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") found no object perm");
-              }
-
-            objectPerm = PermEntry.noPerms;
-          }
-
-        objectPerm = objectPerm.union(expandObjPerm);
-      }
-
-    if (overrideFieldPerm != null)
-      {
-        if (permsdebug)
-          {
-            System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") returning override perm");
-          }
-
-        // allow field create perm even if they don't have object create perm
-
-        PermEntry temp = overrideFieldPerm.intersection(objectPerm);
-
-        // add back the create bit if the field is creatable
-
-        if (overrideFieldPerm.isCreatable())
-          {
-            temp = temp.union(PermEntry.getPermEntry(false, false, true, false));
-          }
-
-        return temp;
-      }
-
-    fieldPerm = applicablePerms.getPerm(object.getTypeID(), fieldId);
-
-    // if we don't have an explicit permissions entry for the field,
-    // return the effective one for the object.
+    PermEntry result;
 
     if (fieldPerm == null)
       {
-        if (permsdebug)
-          {
-            System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") returning object perms");
-          }
+        // it's possible to lack per-field perms, in which case we
+        // devolve to the object-level perms
 
-        // if we are returning permissions for the owner list field
-        // and the object in question has not been granted owner ship
-        // privileges, make sure that we don't allow editing of the
-        // owner list field, which could be used to make the object
-        // owned, and thus gain privileges
-
-        // likewise, we don't want to allow non-privileged end users
-        // to edit the owner list field at all.
-
-        if (fieldId == SchemaConstants.OwnerListField &&
-            (!objectIsOwned || personaObj == null))
-          {
-            return objectPerm.intersection(PermEntry.viewPerms);
-          }
-
-        // nor do we want anyone to be able to modify the historical
-        // fields
-
-        if (fieldId == SchemaConstants.CreationDateField ||
-            fieldId == SchemaConstants.CreatorField ||
-            fieldId == SchemaConstants.ModificationDateField ||
-            fieldId == SchemaConstants.ModifierField)
-          {
-            return objectPerm.intersection(PermEntry.viewPerms);
-          }
-
-        return objectPerm;
-      }
-
-    if (permsdebug)
-      {
-        System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") returning field perms");
-
-        System.err.println("fieldPerm = " + fieldPerm);
-        System.err.println("objectPerm = " + objectPerm);
-        System.err.println("expandFieldPerm = " + expandFieldPerm);
-      }
-
-    // we want to return the more restrictive permissions of the
-    // object's permissions and the field's permissions.. we can never
-    // look at a field in an object we can't look at.
-
-    if ((fieldId == SchemaConstants.OwnerListField &&
-        (!objectIsOwned || personaObj == null)) ||
-        (fieldId == SchemaConstants.CreationDateField ||
-         fieldId == SchemaConstants.CreatorField ||
-         fieldId == SchemaConstants.ModificationDateField ||
-         fieldId == SchemaConstants.ModifierField))
-      {
-        return fieldPerm.union(expandFieldPerm).intersection(objectPerm).intersection(PermEntry.viewPerms);
+        result = objectPerm;
       }
     else
       {
-        // allow field create perm even if they don't have object create perm
+        // the only perm that we can sensibly have on a field that we
+        // don't possess on the object is the create perm
 
-        PermEntry temp = fieldPerm.union(expandFieldPerm);
-        PermEntry temp2 = temp.intersection(objectPerm);
+        result = fieldPerm.intersection(objectPerm);
 
-        // add back the create bit if the field is creatable
-
-        if (temp.isCreatable())
+        if (fieldPerm.isCreatable())
           {
-            temp = temp2.union(PermEntry.getPermEntry(false, false, true, false));
+            result = result.union(PermEntry.createPerms);
           }
-
-        return temp;
       }
+
+    // the following check we do even for supergash, as we don't want
+    // to allow supergash-privileged end users from messing with
+    // metadata.
+    //
+    // DBEditSet.commit_recordModificationDates() bypasses perms, so
+    // no problem there
+
+    if ((fieldID == SchemaConstants.OwnerListField &&
+         (!owned || this.isEndUser())) ||
+        (fieldID == SchemaConstants.CreationDateField ||
+         fieldID == SchemaConstants.CreatorField ||
+         fieldID == SchemaConstants.ModificationDateField ||
+         fieldID == SchemaConstants.ModifierField))
+      {
+        result = PermEntry.viewPerms.intersection(result);
+      }
+
+    return result != null ? result : PermEntry.noPerms;
   }
 
   /**
@@ -1671,59 +1471,42 @@ public final class DBPermissionManager {
    * This is currently used primarily to check to see whether a user
    * has privileges to create an object of a specific type.</p>
    *
-   * <p>This method takes the administrator's current persona's set of
-   * appropriate permission matrices, does a binary OR'ing of the
-   * permission bits for the given base, and returns the effective
-   * permission entry.</p>
+   * @param ownedByUs If true, this method will return the permission
+   * that the current persona would have for an object that was owned
+   * by the current persona.  If false, this method will return the
+   * default permissions that apply to objects not owned by the
+   * persona.
    *
-   * @param includeOwnedPerms If true, this method will return the
-   * permission that the current persona would have for an object that
-   * was owned by the current persona.  If false, this method will
-   * return the default permissions that apply to objects not owned by
-   * the persona.
+   * @return a non-null PermEntry
    */
 
-  PermEntry getPerm(short baseID, boolean includeOwnedPerms)
+  synchronized PermEntry getPerm(short baseID, boolean ownedByUs)
   {
-    PermEntry result;
+    try
+      {
+        updatePerms();
+      }
+    catch (NotLoggedInException ex)
+      {
+        return PermEntry.noPerms;
+      }
 
-    /* -- */
-
-    if (supergashMode)
+    if (this.supergashMode)
       {
         return PermEntry.fullPerms;
       }
 
-    updatePerms(false); // *sync* make sure we have personaPerms up to date
+    PermMatrix pm = ownedByUs ? this.ownedObjectPerms : this.unownedObjectPerms;
+    PermEntry result = pm.getPerm(baseID);
 
-    // note that we can use personaPerms, since the persona's
-    // base type privileges apply generically to objects of the
-    // given type
-
-    if (includeOwnedPerms)
-      {
-        result = personaPerms.getPerm(baseID);
-      }
-    else
-      {
-        result = defaultPerms.getPerm(baseID);
-      }
-
-    if (result == null)
-      {
-        return PermEntry.noPerms;
-      }
-    else
-      {
-        return result;
-      }
+    return result != null ? result : PermEntry.noPerms;
   }
 
   /**
-   * <p>This method returns the current persona's default permissions for
-   * a base and field.  This permission applies generically to objects
-   * that are not owned by this persona and to objects that are
-   * owned.</p>
+   * <p>This method returns the current persona's default permissions
+   * for a base and field.  This permission applies generically to
+   * objects that are not owned by this persona and to objects that
+   * are owned.</p>
    *
    * <p>This is used by the {@link
    * arlut.csd.ganymede.server.GanymedeSession#dump(arlut.csd.ganymede.common.Query)
@@ -1731,599 +1514,547 @@ public final class DBPermissionManager {
    * set of possible fields to be returned at the time that the dump
    * results are being prepared.</p>
    *
-   * @param includeOwnedPerms If true, this method will return the permission
-   * that the current persona would have for an object that was owned
-   * by the current persona.  If false, this method will return the default
-   * permissions that apply to objects not owned by the persona.
+   * @return a non-null PermEntry
    */
 
-  PermEntry getPerm(short baseID, short fieldID, boolean includeOwnedPerms)
+  synchronized PermEntry getPerm(short baseID, short fieldID, boolean ownedByUs)
   {
-    PermEntry
-      result = null;
+    try
+      {
+        updatePerms();
+      }
+    catch (NotLoggedInException ex)
+      {
+        return PermEntry.noPerms;
+      }
 
-    /* -- */
-
-    if (supergashMode)
+    if (this.supergashMode)
       {
         return PermEntry.fullPerms;
       }
 
-    // make sure we have defaultPerms and personaPerms up to date
-
-    updatePerms(false);         // *sync*
-
-    // remember that personaPerms is a permissive superset of
-    // defaultPerms
-
-    if (includeOwnedPerms)
-      {
-        if (personaPerms != null)
-          {
-            result = personaPerms.getPerm(baseID, fieldID);
-
-            // if we don't have a specific permissions entry for
-            // this field, inherit the one for the base
-
-            if (result == null)
-              {
-                result = personaPerms.getPerm(baseID);
-              }
-          }
-      }
-    else
-      {
-        result = defaultPerms.getPerm(baseID, fieldID);
-
-        // if we don't have a specific permissions entry for
-        // this field, inherit the one for the base
-
-        if (result == null)
-          {
-            result = defaultPerms.getPerm(baseID);
-          }
-      }
+    PermMatrix pm = ownedByUs ? ownedObjectPerms : unownedObjectPerms;
+    PermEntry result = pm.getPerm(baseID, fieldID);
 
     if (result == null)
       {
-        return PermEntry.noPerms;
+        result = pm.getPerm(baseID);
+      }
+
+    return result != null ? result : PermEntry.noPerms;
+  }
+
+  /**
+   * Returns the permissions for obj.
+   *
+   * @return a non-null PermEntry
+   */
+
+  private PermEntry getObjectPerm(DBObject obj, boolean ownedByUs)
+  {
+    if (obj == null)
+      {
+        throw new NullPointerException();
+      }
+
+    // getPerm() calls updatePerms() before calling us
+
+    if (this.supergashMode)
+      {
+        return PermEntry.fullPerms;
+      }
+
+    PermEntry customP = obj.getHook().permOverride(gSession, obj);
+
+    if (customP != null)
+      {
+        return customP;
+      }
+
+    PermEntry expandP = obj.getHook().permExpand(gSession, obj);
+
+    if (expandP == null)
+      {
+        expandP = PermEntry.noPerms;
+      }
+
+    PermMatrix pm = ownedByUs ? ownedObjectPerms : unownedObjectPerms;
+
+    // we always union below so that we'll return PermEntry.noPerms
+    // rather than null even if the applicable PermMatrix doesn't have
+    // an entry for this object type.
+
+    return expandP.union(pm.getPerm(obj.getTypeID()));
+  }
+
+  /**
+   * Returns the permissions for fieldID in obj, without considering
+   * object-level permissions.
+   *
+   * @return A null PermEntry if no appropriate field-level permission
+   * is granted, or a non-null PermEntry if we have an explicit
+   * permission recorded for this field type.
+   */
+
+  private synchronized PermEntry getFieldPerm(DBObject obj,
+                                              short fieldID,
+                                              boolean ownedByUs)
+  {
+    if (obj == null)
+      {
+        throw new NullPointerException();
+      }
+
+    // getPerm() calls updatePerms() before calling us
+
+    if (this.supergashMode)
+      {
+        return PermEntry.fullPerms;
+      }
+
+    PermEntry customP = obj.getHook().permOverride(gSession, obj, fieldID);
+
+    if (customP != null)
+      {
+        return customP;
+      }
+
+    PermMatrix pm = ownedByUs ? ownedObjectPerms: unownedObjectPerms;
+    PermEntry expandP = obj.getHook().permExpand(gSession, obj, fieldID);
+
+    if (expandP == null)
+      {
+        // unlike in the getObjectPerm case, we do want to return null
+        // if there is no explicit permission recorded for a specific
+        // field
+
+        return pm.getPerm(obj.getTypeID(), fieldID);
       }
     else
       {
-        return result;
+        return expandP.union(pm.getPerm(obj.getTypeID(), fieldID));
       }
   }
 
   /**
-   * <p>This convenience method resets defaultPerms from the default
-   * permission object in the Ganymede database.</p>
+   * <p>Sets supergash mode and/or the four PermMatrix objects that
+   * DBPermissionManager uses to track permissions.</p>
+   *
+   * <p>This method is synchronized, and a whole lot of operations in
+   * the server need to pass through here to ensure that the effective
+   * permissions for this session haven't changed.  This method is
+   * designed to return very quickly if permissions have not
+   * changed.</p>
    */
 
-  private void resetDefaultPerms()
+  private synchronized void updatePerms() throws NotLoggedInException
   {
-    PermissionMatrixDBField pField;
-
-    /* -- */
-
-    pField = (PermissionMatrixDBField) defaultObj.getField(SchemaConstants.RoleDefaultMatrix);
-
-    if (pField == null)
+    if (beforeversupergash || Ganymede.firstrun)
       {
-        defaultPerms = new PermMatrix();
-        delegatableDefaultPerms = new PermMatrix();
+        this.supergashMode = true;
+        return;
       }
-    else
+
+    if (!rolesWereChanged() && !personaWasChanged() && !userWasChanged())
       {
-        defaultPerms = pField.getMatrix();
+        // there's a bit of a race here, as the calling getPerm()
+        // method won't check for the currency of the perms we've got
+        // configured until the next updatePerms() call, but returning
+        // slightly out of date perms won't break consistency.
 
-        // default permissions are implicitly delegatable
+        return;
+      }
 
-        delegatableDefaultPerms = pField.getMatrix();
+    DBReadLock updatePermsLock = null;
+
+    try
+      {
+        updatePermsLock = dbSession.openReadLock(Ganymede.db.getPermBases());
+
+        updateDefaultRoleObj();
+        DBObject persona = updatePersonaObj();
+
+        this.supergashMode = false;
+
+        if (this.isEndUser())
+          {
+            initializeDefaultPerms();
+            configureEndUser();
+            return;
+          }
+
+        if (persona.containsFieldValueLocal(SchemaConstants.PersonaGroupsField,
+                                            SUPERGASH_GROUP_INVID))
+          {
+            this.supergashMode = true;
+            return;
+          }
+
+        initializeDefaultPerms();
+
+        // Personae do not get the default 'objects-owned' privileges for
+        // the wider range of objects under their ownership.  Any special
+        // privileges granted to admins over objects owned by them must be
+        // derived from a non-default role.
+
+        List roles = persona.getFieldValuesLocal(SchemaConstants.PersonaPrivs);
+
+        for (Invid role: (List<Invid>) roles)
+          {
+            DBObject roleObj = dbSession.viewDBObject(role).getOriginal();
+
+            if (roleObj.hasField(SchemaConstants.RoleMatrix))
+              {
+                PermissionMatrixDBField pmdbf =
+                  roleObj.getPermField(SchemaConstants.RoleMatrix);
+
+                PermMatrix m = pmdbf.getMatrix();
+
+                this.ownedObjectPerms = this.ownedObjectPerms.union(m);
+
+                if (roleObj.isSet(SchemaConstants.RoleDelegatable))
+                  {
+                    this.delegatableOwnedObjectPerms =
+                      this.delegatableOwnedObjectPerms.union(m);
+                  }
+              }
+
+            if (roleObj.hasField(SchemaConstants.RoleDefaultMatrix))
+              {
+                PermissionMatrixDBField pmdbf =
+                  roleObj.getPermField(SchemaConstants.RoleDefaultMatrix);
+
+                PermMatrix m = pmdbf.getMatrix();
+
+                this.ownedObjectPerms = this.ownedObjectPerms.union(m);
+                this.unownedObjectPerms = this.unownedObjectPerms.union(m);
+
+                if (roleObj.isSet(SchemaConstants.RoleDelegatable))
+                  {
+                    this.delegatableOwnedObjectPerms =
+                      this.delegatableOwnedObjectPerms.union(m);
+
+                    this.delegatableUnownedObjectPerms =
+                      this.delegatableUnownedObjectPerms.union(m);
+                  }
+              }
+          }
+      }
+    catch (InterruptedException ex)
+      {
+        throw new RuntimeException(ex);
+      }
+    catch (Exception ex2)
+      {
+        if (!this.valid)
+          {
+            throw new NotLoggedInException(ex2);
+          }
+      }
+    finally
+      {
+        try
+          {
+            if (updatePermsLock != null)
+              {
+                dbSession.releaseLock(updatePermsLock);
+              }
+          }
+        catch (Exception ex3)
+          {
+            if (this.valid)
+              {
+                throw new RuntimeException(ex3);
+              }
+          }
       }
   }
 
   /**
-   * <p>This non-exported (server-side only) method is used to
-   * generate a comprehensive permissions matrix that applies to all
-   * objects owned by the active persona for this user.</p>
+   * Checks to see if any Role Objects have changed in the server
+   * since we last updated our perms.
    *
-   * <p>This method is synchronized, and a whole lot of operations in the server
-   * need to pass through here to ensure that the effective permissions for this
-   * session haven't changed.  This method is designed to return very quickly
-   * if permissions have not changed and forceUpdate is false.</p>
-   *
-   * @param forceUpdate If false, updatePerms() will do nothing if the Ganymede
-   * permissions database has not been changed since updatePerms() was last
-   * called in this DBPermissionManager.
+   * @return true if any changes have been made to Role Objects in the
+   * server
    */
 
-  private synchronized void updatePerms(boolean forceUpdate)
+  private synchronized boolean rolesWereChanged()
   {
-    PermissionMatrixDBField permField;
+    return (this.rolesLastCheckedTimeStamp == null ||
+            Ganymede.db.getObjectBase(SchemaConstants.RoleBase).changedSince(this.rolesLastCheckedTimeStamp));
+  }
 
-    /* -- */
+  /**
+   * Updates the defaultRoleObj we reference.  Separated from
+   * rolesWereChanged() so that we can do this part in a DBReadLock.
+   */
 
-    if (forceUpdate)
+  private synchronized void updateDefaultRoleObj()
+  {
+    try
       {
-        // clear our time stamp to force an update further on
+        // get the time before we view our object, so if we get a race
+        // between the date and the viewDBObject call, that will cause
+        // us to check again next time.
 
-        personaTimeStamp = null;
+        Date roleTime = new Date();
 
-        if (permsdebug)
-          {
-            System.err.println("updatePerms(true)");
-          }
+        this.defaultRoleObj =
+          dbSession.viewDBObject(DEFAULT_ROLE_INVID).getOriginal();
+
+        this.rolesLastCheckedTimeStamp = roleTime;
+      }
+    catch (NullPointerException ex)
+      {
+        // "Serious error!  No default permissions object found in database!"
+        throw new IllegalStateException(ts.l("updateDefaultRoleObj.no_default_perms"), ex);
+      }
+  }
+
+  /**
+   * Returns true if this.personaObj may have changed in the database.
+   *
+   * @return true if this.personaObj may have been changed
+   */
+
+  private synchronized boolean personaWasChanged()
+  {
+    return ((this.personaObj == null && this.personaInvid != null) ||
+            (this.personaObj != null && this.personaInvid == null) ||
+            this.personaTimeStamp == null ||
+            Ganymede.db.getObjectBase(SchemaConstants.PersonaBase).changedSince(this.personaTimeStamp));
+  }
+
+  /**
+   * Returns true if this session is being run by an end-user and the
+   * user linked to this session may have changed in the database.
+   *
+   * @return true if the user referenced by this.userInvid may have
+   * been changed
+   */
+
+  private synchronized boolean userWasChanged()
+  {
+    return this.isEndUser() &&
+      (this.userTimeStamp == null ||
+       Ganymede.db.getObjectBase(SchemaConstants.UserBase).changedSince(this.userTimeStamp));
+  }
+
+  /**
+   * Updates the personaObj we reference.  Separated from
+   * personaWasChanged() so that we can do this part in a DBReadLock.
+   */
+
+  private synchronized DBObject updatePersonaObj()
+  {
+    // get the time before we view our object, so if we get a race
+    // between the date and the viewDBObject call, that will cause
+    // us to check again next time.
+
+    Date personaTime = new Date();
+
+    if (this.personaInvid == null)
+      {
+        this.personaObj = null;
+        this.personaTimeStamp = personaTime;
+        return null;
+      }
+
+    DBObject currentPersonaObj = dbSession.viewDBObject(this.personaInvid);
+
+    this.personaTimeStamp = personaTime;
+
+    if (currentPersonaObj == null)
+      {
+        this.valid = false;
+        this.personaTimeStamp = null;
+
+        // "Persona object {0} deleted while persona {0} logged in with session {1}"
+        gSession.forceOff(ts.l("updatePersonaObj.not_logged_in",
+                               this.personaName, this.sessionName));
+
+        return null;
+      }
+
+    this.personaObj = currentPersonaObj.getOriginal();
+
+    return this.personaObj;
+  }
+
+  /**
+   * This convenience method resets all privilege matricies from the
+   * default unowned permissions in the default Role object.
+   */
+
+  private synchronized void initializeDefaultPerms()
+  {
+    PermissionMatrixDBField pField =
+      this.defaultRoleObj.getPermField(SchemaConstants.RoleDefaultMatrix);
+
+    PermMatrix defaultMatrix;
+
+    if (pField != null)
+      {
+        defaultMatrix = pField.getMatrix();
       }
     else
       {
-        if (permsdebug)
-          {
-            System.err.println("updatePerms(false)");
-          }
+        defaultMatrix = new PermMatrix();
       }
 
-    // first, make sure we have a copy of our default role
-    // DBObject.. permTimeStamp is used to track this.
+    this.unownedObjectPerms = defaultMatrix;
+    this.delegatableUnownedObjectPerms = defaultMatrix;
+    this.ownedObjectPerms = defaultMatrix;
+    this.delegatableOwnedObjectPerms = defaultMatrix;
+  }
 
-    if (permTimeStamp == null || !permTimeStamp.before(Ganymede.db.getObjectBase(SchemaConstants.RoleBase).getTimeStamp()))
+  /**
+   * <p>Do the perms configuration needed for an unprivileged end
+   * user.</p>
+   *
+   * <p>This is the only case in which the defaultRoleObj's owned
+   * objects matrix (SchemaConstants.RoleMatrix) is consulted.</p>
+   */
+
+  private synchronized void configureEndUser()
+  {
+    // get the time before we view our object, so if we get a race
+    // between the date and the viewDBObject call, that will cause
+    // us to check again next time.
+
+    Date userTime = new Date();
+
+    if (getUser() == null)
       {
-        defaultObj = dbSession.viewDBObject(SchemaConstants.RoleBase,
-                                            SchemaConstants.RoleDefaultObj);
+        this.userTimeStamp = null;
+        this.valid = false;
 
-        if (defaultObj == null)
-          {
-            if (!Ganymede.firstrun)
-              {
-                Ganymede.debug(ts.l("updatePerms.no_default_perms"));
-                throw new RuntimeException(ts.l("updatePerms.no_default_perms"));
-              }
-            else
-              {
-                // we're loading the database with a bulk-loader
-                // linked to the server code.  Don't bother with
-                // permissions
+        // "User object for user {0} deleted while user {0} logged in with session {1}"
+        gSession.forceOff(ts.l("configureEndUser.not_logged_in",
+                               this.username, this.sessionName));
 
-                supergashMode = true;
-                return;
-              }
-          }
-
-        // remember we update this so we don't need to do it again
-
-        if (permTimeStamp == null)
-          {
-            permTimeStamp = new Date();
-          }
-        else
-          {
-            permTimeStamp.setTime(System.currentTimeMillis());
-          }
+        return;
       }
 
-    // here's where we break out if nothing needs to be updated.. note
-    // that we are testing personaTimeStamp here, not permTimeStamp.
+    this.userTimeStamp = userTime;
 
-    if (personaTimeStamp != null && personaTimeStamp.after(Ganymede.db.getObjectBase(SchemaConstants.PersonaBase).getTimeStamp()))
+    PermissionMatrixDBField permField = this.defaultRoleObj.getPermField(SchemaConstants.RoleMatrix);
+
+    if (permField == null)
       {
         return;
       }
 
-    if (permsdebug)
-      {
-        System.err.println("DBPermissionManager.updatePerms(): doing full permissions recalc for " +
-                           (personaName == null ? username : personaName));
-      }
-
-    // persona invid may well have changed since we last loaded
-    // personaInvid.. thus, we have to set it here.  Setting
-    // personaObj is one of the primary reasons that other parts of
-    // DBPermissionManager call updatePerms(), so don't mess with this. I
-    // tried it, believe me, it didn't work.
-
-    if (personaInvid != null)
-      {
-        personaObj = dbSession.viewDBObject(personaInvid);
-
-        // if this session is editing the personaObj at the moment,
-        // let's make a point of getting the version that isn't
-        // checked out for editing so we don't risk inter-thread
-        // interactions below
-
-        if (personaObj instanceof DBEditObject)
-          {
-            personaObj = ((DBEditObject) personaObj).getOriginal();
-          }
-      }
-    else
-      {
-        personaObj = null;
-      }
-
-    // if we're not locked into supergash mode (for internal sessions,
-    // etc.), lets find out whether we're in supergash mode currently
-
-    if (!beforeversupergash)
-      {
-        supergashMode = false;
-
-        // ok, we're not supergash.. or at least, we might not be.  If
-        // we are not currently active as a persona, personaPerms will
-        // just be our defaultPerms
-
-        if (personaObj == null)
-          {
-            // ok, we're not only not supergash, but we're also not
-            // even a privileged persona.  Load defaultPerms and
-            // personaPerms with the two permission matrices from the
-            // default permission object.
-
-            PermMatrix selfPerm = null;
-
-            /* -- */
-
-            resetDefaultPerms();
-
-            permField = (PermissionMatrixDBField) defaultObj.getField(SchemaConstants.RoleMatrix);
-
-            if (permField == null)
-              {
-                selfPerm = new PermMatrix();
-              }
-            else
-              {
-                // selfPerm is the permissions that the default
-                // permission object has for objects owned.
-
-                selfPerm = permField.getMatrix();
-
-                if (selfPerm == null)
-                  {
-                    System.err.println(ts.l("updatePerms.null_selfperm"));
-                  }
-              }
-
-            // personaPerms starts off as the union of permissions
-            // applicable to all objects and all objects owned, from
-            // the default permissions object.
-
-            personaPerms = new PermMatrix(defaultPerms).union(selfPerm);
-            delegatablePersonaPerms = new PermMatrix(defaultPerms).union(selfPerm);
-
-            if (permsdebug)
-              {
-                System.err.println("DBPermissionManager.updatePerms(): returning.. no persona obj for " +
-                                   (personaName == null ? username : personaName));
-              }
-
-            // remember the last time we pulled personaPerms / defaultPerms
-
-            if (personaTimeStamp == null)
-              {
-                personaTimeStamp = new Date();
-              }
-            else
-              {
-                personaTimeStamp.setTime(System.currentTimeMillis());
-              }
-
-            return;
-          }
-        else
-          {
-            if (permsdebug)
-              {
-                System.err.println("updatePerms(): calculating new personaPerms");;
-              }
-
-            InvidDBField idbf = (InvidDBField) personaObj.getField(SchemaConstants.PersonaGroupsField);
-
-            if (idbf != null)
-              {
-                Vector<Invid> vals = (Vector<Invid>) idbf.getValuesLocal();
-
-                // loop over the owner groups this persona is a member
-                // of, see if it includes the supergash owner group
-
-                // it's okay to loop on this field since we should be looking
-                // at a DBObject and not a DBEditObject
-
-                for (Invid inv: vals)
-                  {
-                    if (inv.getNum() == SchemaConstants.OwnerSupergash)
-                      {
-                        supergashMode = true;
-                        break;
-                      }
-                  }
-              }
-
-            if (!supergashMode)
-              {
-                // since we're not in supergash mode, we need to take
-                // into account the operational privileges granted us
-                // by the default permission matrix and all the
-                // permission matrices associated with this persona.
-                // Calculate the union of all of the applicable
-                // permission matrices.
-
-                // make sure that defaultPerms is reset to the
-                // baseline, and initialize personaPerms from it.
-
-                resetDefaultPerms();
-
-                // Personas do not get the default 'objects-owned'
-                // privileges for the wider range of objects under
-                // their ownership.  Any special privileges granted to
-                // admins over objects owned by them must be derived
-                // from a non-default role.
-
-                // they do get the default permissions that all users have
-                // for non-owned objects, though.
-
-                personaPerms = new PermMatrix(defaultPerms);
-
-                // default permissions on non-owned are implicitly delegatable.
-
-                delegatablePersonaPerms = new PermMatrix(defaultPerms);
-
-                // now we loop over all permissions objects referenced
-                // by our persona, or'ing in both the objects owned
-                // permissions and default permissions to augment defaultPerms
-                // and personaPerms.
-
-                idbf = (InvidDBField) personaObj.getField(SchemaConstants.PersonaPrivs);
-
-                if (idbf != null)
-                  {
-                    Vector<Invid> vals = (Vector<Invid>) idbf.getValuesLocal();
-
-                    PermissionMatrixDBField pmdbf, pmdbf2;
-                    Hashtable<String, PermEntry> pmdbfMatrix1 = null, pmdbfMatrix2 = null;
-                    DBObject pObj;
-
-                    /* -- */
-
-                    // it's okay to loop on this field since we should be looking
-                    // at a DBObject and not a DBEditObject
-
-                    for (Invid inv: vals)
-                      {
-                        pObj = dbSession.viewDBObject(inv);
-
-                        if (pObj != null)
-                          {
-                            if (permsdebug)
-                              {
-                                System.err.println("updatePerms(): unioning " + pObj + " into personaPerms and defaultPerms");
-
-                                System.err.println("personaPerms is currently:");
-
-                                PermissionMatrixDBField.debugdump(personaPerms);
-                              }
-
-                            // The default permissions for this
-                            // administrator consists of the union of
-                            // all default perms fields in all
-                            // permission matrices for this admin
-                            // persona.
-
-                            // personaPerms is the union of all
-                            // permissions applicable to objects that
-                            // are owned by this persona
-
-                            pmdbf = (PermissionMatrixDBField) pObj.getField(SchemaConstants.RoleMatrix);
-
-                            if (pmdbf != null)
-                              {
-                                pmdbfMatrix1 = pmdbf.getInnerMatrix();
-                              }
-
-                            pmdbf2 = (PermissionMatrixDBField) pObj.getField(SchemaConstants.RoleDefaultMatrix);
-
-                            if (pmdbf2 != null)
-                              {
-                                pmdbfMatrix2 = pmdbf2.getInnerMatrix();
-                              }
-
-                            if (permsdebug)
-                              {
-                                PermMatrix pm = new PermMatrix(pmdbfMatrix1);
-
-                                System.err.println("updatePerms(): RoleMatrix for " + pObj + ":");
-
-                                PermissionMatrixDBField.debugdump(pm);
-
-                                pm = new PermMatrix(pmdbfMatrix2);
-
-                                System.err.println("updatePerms(): RoleDefaultMatrix for " + pObj + ":");
-
-                                PermissionMatrixDBField.debugdump(pm);
-                              }
-
-                            personaPerms = personaPerms.union(pmdbfMatrix1);
-
-                            if (permsdebug)
-                              {
-                                System.err.println("updatePerms(): personaPerms after unioning with RoleMatrix is");
-
-                                PermissionMatrixDBField.debugdump(personaPerms);
-                              }
-
-                            personaPerms = personaPerms.union(pmdbfMatrix2);
-
-                            if (permsdebug)
-                              {
-                                System.err.println("updatePerms(): personaPerms after unioning with RoleDefaultMatrix is");
-
-                                PermissionMatrixDBField.debugdump(personaPerms);
-                              }
-
-                            defaultPerms = defaultPerms.union(pmdbfMatrix2);
-
-                            // we want to maintain our notion of
-                            // delegatable permissions separately..
-
-                            Boolean delegatable = (Boolean) pObj.getFieldValueLocal(SchemaConstants.RoleDelegatable);
-
-                            if (delegatable != null && delegatable.booleanValue())
-                              {
-                                delegatablePersonaPerms = delegatablePersonaPerms.union(pmdbfMatrix1).union(pmdbfMatrix2);
-                                delegatableDefaultPerms = delegatableDefaultPerms.union(pmdbfMatrix2);
-                              }
-                          }
-                      }
-                  }
-              }
-          }
-      }
-
-    // remember the last time we pulled personaPerms / defaultPerms
-
-    if (personaTimeStamp == null)
-      {
-        personaTimeStamp = new Date();
-      }
-    else
-      {
-        personaTimeStamp.setTime(System.currentTimeMillis());
-      }
-
-    if (permsdebug)
-      {
-        System.err.println("DBPermissionManager.updatePerms(): finished full permissions recalc for " +
-                           (personaName == null ? username : personaName));
-
-        System.err.println("personaPerms = \n\n" + personaPerms);
-        System.err.println("\n\ndefaultPerms = \n\n" + defaultPerms);
-      }
-
-    return;
+    PermMatrix selfPerms = permField.getMatrix();
+
+    this.ownedObjectPerms = this.ownedObjectPerms.union(selfPerms);
+    this.delegatableOwnedObjectPerms =
+      this.delegatableOwnedObjectPerms.union(selfPerms);
   }
 
   /**
-   * <p>Recursive helper method for personaMatch.. this method does a
-   * depth first search up the owner tree for each Invid contained in
-   * the owners Vector to see if the gSession's personaInvid is a
-   * member of any of the containing owner groups.</p>
+   * Returns true if the active persona is allowed to exert owned
+   * object permissions against obj.  Note that isOwnedByUs() checks
+   * the grantOwnership() method in custom plugin code, and must not
+   * be called from a grantOwnership call, lest recursion result.
    *
-   * @param owners A vector of invids pointing to OwnerBase objects
-   * @param alreadySeen A vector of owner group Invid's that have
-   * already been checked.  (For infinite loop avoidance).
-   *
-   * @return true if a match is found
+   * @perm obj The DBObject to check ownership privileges on
    */
 
-  public boolean recursePersonasMatch(Vector<Invid> owners, Vector<Invid> alreadySeen)
+  private synchronized boolean isOwnedByUs(DBObject obj)
   {
-    // *** It is critical that this method not modify the owners parameter passed
-    // *** in, as it may be 'live' in a DBField.
-
-    if (owners == null)
+    if (obj == null)
       {
         return false;
       }
 
-    for (Invid owner: owners)
+    if (this.supergashMode)
       {
-        if (recursePersonaMatch(owner, alreadySeen))
+        return true;
+      }
+
+    // end users are considered to own themselves
+
+    if (!isPrivileged() &&
+        this.userInvid != null &&
+        this.userInvid.equals(obj.getInvid()))
+      {
+        return true;
+      }
+
+    while (obj.isEmbedded())
+      {
+        if (obj.getHook().grantOwnership(gSession, obj))
           {
             return true;
           }
+
+        Invid inv = (Invid) obj.getFieldValueLocal(SchemaConstants.ContainerField);
+
+        if (inv == null)
+          {
+            // "isOwnedByUs couldn''t find owner of embedded object {0}"
+            throw new IntegrityConstraintException(ts.l("isOwnedByUs.integrity",
+                                                        obj.getLabel()));
+          }
+
+        obj = dbSession.viewDBObject(inv);
       }
 
-    return false;
-  }
-
-  /**
-   * <p>Recursive helper method for personaMatch.. this method does a
-   * depth first search up the owner tree for the owner Invid to see
-   * if the gSession's personaInvid is a member of any of the
-   * containing owner groups.</p>
-   *
-   * @param owner An Invid pointing to an OwnerBase object
-   * @param alreadySeen A vector of owner group Invid's that have
-   * already been checked.  (For infinite loop avoidance).
-   *
-   * @return true if a match is found
-   */
-
-  public boolean recursePersonaMatch(Invid owner, Vector<Invid> alreadySeen)
-  {
-    DBObject ownerObj;
-    InvidDBField inf;
-
-    /* -- */
-
-    if (owner == null)
+    if (obj.getHook().grantOwnership(gSession, obj))
       {
-        throw new IllegalArgumentException("Null owner passed to recursePersonaMatch");
+        return true;
       }
 
-    if (alreadySeen.contains(owner))
+    if (!isPrivileged())
       {
         return false;
       }
-    else
-      {
-        alreadySeen.add(owner);
-      }
 
-    ownerObj = dbSession.viewDBObject(owner);
-
-    inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
-
-    if (inf != null)
-      {
-        if (inf.getValuesLocal().contains(getPersonaInvid()))
-          {
-            return true;
-          }
-      }
-
-    // didn't find, recurse up
-
-    inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerListField);
-
-    if (inf != null)
-      {
-        if (recursePersonasMatch((Vector<Invid>) inf.getValuesLocal(), alreadySeen))
-          {
-            return true;
-          }
-      }
-
-    return false;
+    return personaMatch(obj);
   }
 
   /**
-   * <p>Returns true if the active persona has some sort of
-   * owner/access relationship with the object in question through
-   * its list of owner groups.</p>
+   * Returns true if the active person has ownership privileges over
+   * obj without consulting custom plugin code, solely through owner
+   * group membership.
    */
 
   public boolean personaMatch(DBObject obj)
   {
-    boolean showit = false;
-
-    /* -- */
-
-    if (obj == null || personaInvid == null)
+    if (obj == null)
       {
         return false;
       }
 
-    Vector<Invid> owners = (Vector<Invid>) obj.getFieldValuesLocal(SchemaConstants.OwnerListField); // owner or container
+    if (this.supergashMode)
+      {
+        return true;
+      }
+
+    // personaMatch() may be called from custom code without going
+    // through isOwnedByUs(), so make sure that we've got the
+    // top-level object
+
+    if (obj.isEmbedded())
+      {
+        obj = dbSession.getContainingObj(obj);
+      }
+
+    // end users are considered to own themselves
+
+    if (!isPrivileged())
+      {
+        return this.userInvid != null && this.userInvid.equals(obj.getInvid());
+      }
+
+    List<Invid> owners = (List<Invid>)
+      obj.getFieldValuesLocal(SchemaConstants.OwnerListField);
 
     // All owner group objects are considered to be self-owning.
 
     if (obj.getTypeID() == SchemaConstants.OwnerBase)
       {
-        if (permsdebug)
-          {
-            System.err.println("** Augmenting owner group " + obj.getLabel() + " with self-ownership");
-            showit = true;
-          }
-
         if (!owners.contains(obj.getInvid()))
           {
             owners.add(obj.getInvid());
@@ -2335,174 +2066,148 @@ public final class DBPermissionManager {
 
     if (obj.getTypeID() == SchemaConstants.PersonaBase)
       {
-        if (permsdebug)
-          {
-            System.err.print("** Augmenting admin persona " + obj.getLabel() + " ");
-            showit = true;
-          }
-
-        Vector<Invid> values = (Vector<Invid>) obj.getFieldValuesLocal(SchemaConstants.PersonaGroupsField);
-
-        if (permsdebug)
-          {
-            for (int i = 0; i < values.size(); i++)
-              {
-                if (i > 0)
-                  {
-                    System.err.print(", ");
-                  }
-
-                System.err.print(values.get(i));
-              }
-
-            System.err.println();
-          }
+        List<Invid> values = (List<Invid>)
+          obj.getFieldValuesLocal(SchemaConstants.PersonaGroupsField);
 
         owners = arlut.csd.Util.VectorUtils.union(owners, values);
       }
-    else
-      {
-        if (permsdebug)
-          {
-            System.err.println("<no owner groups in this persona>");
-          }
-      }
 
-    boolean result = recursePersonasMatch(owners, new Vector<Invid>());
-
-    if (showit)
-      {
-        System.err.println("++ Result = " + result);
-      }
-
-    return result;
+    return isMemberOfAnyOwnerGroups(owners);
   }
 
   /**
-   * <p>This helper method iterates through the owners vector and
-   * checks to see if the current personaInvid is a member of all of
-   * the groups through either direct membership or through membership
-   * of an owning group.  This method depends on
-   * recursePersonasMatch().</p>
+   * Returns true if this.personaInvid is a member of the owner group
+   * pointed to by the owner Invid, or in any of the owner groups that
+   * own that owner group, transitively.
+   *
+   * @param owner An Invid pointing to an OwnerBase object
+   * @return true if a match is found
    */
 
-  private boolean isMemberAll(Vector<Invid> owners)
+  private synchronized boolean isMemberOfOwnerGroup(Invid owner)
   {
-    DBObject ownerObj;
-    InvidDBField inf;
-    boolean found;
+    return isMemberOfOwnerGroup(owner, new HashSet<Invid>());
+  }
 
-    /* -- */
+  /**
+   * Returns true if this.personaInvid is a member of the owner group
+   * pointed to by the owner Invid, or in any of the owner groups that
+   * own that owner group, transitively.
+   *
+   * @param owner An Invid pointing to an OwnerBase object
+   * @param alreadySeen A Set of owner group Invid's that have already
+   * been checked and which are known. (For infinite loop avoidance).
+   *
+   * @return true if a match is found
+   */
 
-    if (owners == null)
+  private synchronized boolean isMemberOfOwnerGroup(Invid owner, Set<Invid> alreadySeen)
+  {
+    if (owner == null)
       {
-        return false;           // shouldn't happen in context
+        throw new IllegalArgumentException("Null owner");
       }
 
-    // loop over all the owner groups in the vector, make sure
-    // that we are a valid member of each of these groups, either
-    // directly or through being a member of a group that owns
-    // one of these groups.
+    if (owner.getType() != SchemaConstants.OwnerBase)
+      {
+        throw new IllegalArgumentException("bad owner group");
+      }
+
+    if (alreadySeen.contains(owner))
+      {
+        return false;           // cycle
+      }
+
+    alreadySeen.add(owner);
+
+    DBObject ownerObj = dbSession.viewDBObject(owner).getOriginal();
+
+    List<Invid> personaeInOwnerGroup = (List<Invid>)
+      ownerObj.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
+
+    if (personaeInOwnerGroup.contains(getPersonaInvid()))
+      {
+        return true;
+      }
+
+    // didn't find, recurse up
+
+    List<Invid> ownersOfOwnerGroup = (List<Invid>)
+      ownerObj.getFieldValuesLocal(SchemaConstants.OwnerListField);
+
+    return isMemberOfAnyOwnerGroups(ownersOfOwnerGroup, alreadySeen);
+  }
+
+  /**
+   * Returns true if this.personaInvid is a member of any of the owner
+   * group objects whose Invids are included in the owners List, or in
+   * any of the owner groups that own those owner groups,
+   * transitively.
+   *
+   * @param owners A List of invids pointing to OwnerBase objects
+   *
+   * @return true if a match is found
+   */
+
+  private synchronized boolean isMemberOfAnyOwnerGroups(List<Invid> owners)
+  {
+    return isMemberOfAnyOwnerGroups(owners, new HashSet<Invid>());
+  }
+
+  /**
+   * Returns true if this.personaInvid is a member of any of the owner
+   * group objects whose Invids are included in the owners List, or in
+   * any of the owner groups that own those owner groups,
+   * transitively.
+   *
+   * @param owners A List of invids pointing to OwnerBase objects
+   * @param alreadySeen A Set of owner group Invid's that have already
+   * been checked.  (For infinite loop avoidance).
+   *
+   * @return true if a match is found
+   */
+
+  private synchronized boolean isMemberOfAnyOwnerGroups(List<Invid> owners,
+                                                        Set<Invid> alreadySeen)
+  {
+    if (owners == null)
+      {
+        return false;
+      }
 
     for (Invid owner: owners)
       {
-        found = false;  // yes, but what have you done for me _lately_?
-
-        if (owner.getType() != SchemaConstants.OwnerBase)
+        if (isMemberOfOwnerGroup(owner, alreadySeen))
           {
-            Ganymede.debug("DBPermissionManager.isMemberAll(): bad invid passed " + owner.toString());
-            return false;
+            return true;
           }
+      }
 
-        ownerObj = dbSession.viewDBObject(owner);
+    return false;
+  }
 
-        inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
+  /**
+   * This helper method iterates through the owners vector and checks
+   * to see if the current personaInvid is a member of all of the
+   * groups through either direct membership or through membership of
+   * an owning group.  This method depends on isMemberOfOwnerGroup().
+   */
 
-        if (inf != null && inf.getValuesLocal().contains(personaInvid))
-          {
-            found = true;
-          }
-        else
-          {
-            // didn't find, recurse up
+  private synchronized boolean isMemberOfAllOwnerGroups(List<Invid> owners)
+  {
+    if (owners == null)
+      {
+        return false;
+      }
 
-            inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerListField);
-
-            if (inf != null)
-              {
-                // using getValuesLocal() here is safe only because
-                // recursePersonasMatch() never tries to modify the
-                // owners value passed in.  Otherwise, we'd have to
-                // clone the results from getValuesLocal().
-
-                if (recursePersonasMatch(inf.getValuesLocal(), new Vector<Invid>()))
-                  {
-                    found = true;
-                  }
-              }
-          }
-
-        if (!found)
+    for (Invid owner: owners)
+      {
+        if (!isMemberOfOwnerGroup(owner))
           {
             return false;
           }
       }
 
     return true;
-  }
-
-  /**
-   * <p>This method returns true if the visibility filter vector
-   * allows visibility of the object in question.  The visibility
-   * vector works by direct ownership identity (i.e., no recursing
-   * up), so it's a simple loop-di-loop.</p>
-   */
-
-  public boolean filterMatch(DBObject obj)
-  {
-    Vector<Invid> owners;
-    InvidDBField inf;
-
-    /* -- */
-
-    if (obj == null)
-      {
-        return false;
-      }
-
-    if (visibilityFilterInvids == null || visibilityFilterInvids.size() == 0)
-      {
-        return true;            // no visibility restriction, go for it
-      }
-
-    inf = (InvidDBField) obj.getField(SchemaConstants.OwnerListField);
-
-    if (inf == null)
-      {
-        return false;   // we have a restriction, but the object is only owned by supergash.. nope.
-      }
-
-    owners = (Vector<Invid>) inf.getValuesLocal();
-
-    if (owners == null)
-      {
-        return false;   // we shouldn't get here, but we don't really care either
-      }
-
-    // we've got the owners for this object.. now, is there any match between our
-    // visibilityFilterInvids and the owners of this object?
-
-    for (Invid tmpInvid: visibilityFilterInvids)
-      {
-        for (Invid secondInvid: owners)
-          {
-            if (tmpInvid.equals(secondInvid))
-              {
-                return true;
-              }
-          }
-      }
-
-    return false;
   }
 }

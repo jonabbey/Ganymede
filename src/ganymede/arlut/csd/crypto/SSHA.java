@@ -17,11 +17,13 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -56,6 +58,7 @@
 package arlut.csd.crypto;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 
 /*------------------------------------------------------------------------------
@@ -81,6 +84,11 @@ public final class SSHA {
   private final static boolean debug = false;
 
   // ---
+
+  static private Charset UTF8()
+  {
+    return Charset.forName("UTF-8");
+  }
 
   static private MessageDigest getSHA1()
   {
@@ -117,11 +125,11 @@ public final class SSHA {
       }
     else
       {
-        saltBytes = salt.getBytes();
+        saltBytes = salt.getBytes(UTF8());
       }
 
     hasher.reset();
-    hasher.update(plaintext.getBytes());
+    hasher.update(plaintext.getBytes(UTF8()));
     hasher.update(saltBytes);
     byte digestBytes[] = hasher.digest();
     byte outBytes[] = new byte[saltBytes.length + 20]; // SHA1 hash is 20 bytes long
@@ -202,10 +210,10 @@ public final class SSHA {
             System.err.println("Salt is " + new String(saltBytes));
           }
       }
-    
+
     if (saltBytes != null)
       {
-        byte[] inBytes = plaintext.getBytes();
+        byte[] inBytes = plaintext.getBytes(UTF8());
         plainBytes = new byte[inBytes.length + saltBytes.length];
 
         for (int i = 0; i < inBytes.length; i++)
@@ -220,7 +228,7 @@ public final class SSHA {
       }
     else
       {
-        plainBytes = plaintext.getBytes();
+        plainBytes = plaintext.getBytes(UTF8());
       }
 
     if (debug)
@@ -287,7 +295,7 @@ public final class SSHA {
   public static void main(String args[])
   {
     String hashText = SSHA.getLDAPSSHAHash("secret", null);
-    
+
     if (SSHA.matchSHAHash(hashText, "secret"))
       {
         System.out.println("Good match on " + hashText);
@@ -298,7 +306,7 @@ public final class SSHA {
       }
 
     /*
-      example unsalted hashText for 'abc' from 
+      example unsalted hashText for 'abc' from
 
       http://developer.netscape.com/docs/technote/ldap/pass_sha.html
     */
@@ -316,7 +324,7 @@ public final class SSHA {
 
     /*
       example unsalted hashText for
-      'abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq' from 
+      'abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq' from
 
       http://developer.netscape.com/docs/technote/ldap/pass_sha.html
     */

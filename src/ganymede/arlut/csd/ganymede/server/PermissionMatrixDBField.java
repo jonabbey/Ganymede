@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -57,7 +57,9 @@ import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import arlut.csd.Util.TranslationService;
@@ -187,7 +189,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
         try
           {
             basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-            base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+            base = Ganymede.db.getObjectBase(basenum);
 
             if (base == null)
               {
@@ -239,7 +241,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
         try
           {
             basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-            base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+            base = Ganymede.db.getObjectBase(basenum);
 
             if (base == null)
               {
@@ -259,7 +261,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
                       {
                         fieldnum = Short.valueOf(fieldId).shortValue();
 
-                        field = (DBObjectBaseField) base.getField(fieldnum);
+                        field = base.getField(fieldnum);
 
                         if (field == null)
                           {
@@ -332,7 +334,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     try
       {
         basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-        base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+        base = Ganymede.db.getObjectBase(basenum);
 
         if (base == null)
           {
@@ -348,7 +350,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
                   {
                     fieldnum = Short.valueOf(fieldId).shortValue();
 
-                    field = (DBObjectBaseField) base.getField(fieldnum);
+                    field = base.getField(fieldnum);
 
                     if (field == null)
                       {
@@ -413,11 +415,10 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     result.append("PermMatrix DebugDump\n");
 
-    for (String key: matrix.keySet())
+    for (Map.Entry<String, PermEntry> item: matrix.entrySet())
       {
-        entry = matrix.get(key);
-
-        basename = decodeBaseName(key);
+        entry = item.getValue();
+        basename = decodeBaseName(item.getKey());
 
         if (baseHash.containsKey(basename))
           {
@@ -429,16 +430,16 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
             baseHash.put(basename, vec);
           }
 
-        vec.add(decodeFieldName(key) + " -- " + entry.toString());
+        vec.add(decodeFieldName(item.getKey()) + " -- " + entry.toString());
       }
 
-    for (String key: baseHash.keySet())
+    for (Map.Entry<String, Vector<String>> item: baseHash.entrySet())
       {
-        vec = baseHash.get(key);
+        vec = item.getValue();
 
         for (String val: vec)
           {
-            result.append(key + ":" + val + "\n");
+            result.append(item.getKey() + ":" + val + "\n");
           }
 
         result.append("\n");
@@ -713,7 +714,10 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     // dumped after changing the schema, this is an appropriate place
     // to do the cleanup.
 
-    clean();
+    if (DBSchemaEdit.schemaEditedSinceStartup)
+      {
+        clean();
+      }
 
     // now actually emit stuff.
 
@@ -801,12 +805,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     xmlOut.startElementIndent("permissions");
     xmlOut.indentOut();
 
-    for (String key: baseHash.keySet())
+    for (Map.Entry<String,Hashtable<String, PermEntry>> item: baseHash.entrySet())
       {
-        innerTable = baseHash.get(key);
+        innerTable = item.getValue();
         entry = innerTable.get("[base]");
 
-        xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(key));
+        xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(item.getKey()));
         xmlOut.indentOut();
 
         if (entry != null)
@@ -814,22 +818,22 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
             xmlOut.attribute("perm", entry.getXMLCode());
           }
 
-        for (String fieldKey: innerTable.keySet())
+        for (Map.Entry<String, PermEntry> fieldItem: innerTable.entrySet())
           {
-            if (fieldKey.equals("[base]"))
+            if (fieldItem.getKey().equals("[base]"))
               {
                 continue;       // we've already wrote perms for the base
               }
 
-            PermEntry fieldEntry = innerTable.get(fieldKey);
+            PermEntry fieldEntry = fieldItem.getValue();
 
-            xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(fieldKey));
+            xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(fieldItem.getKey()));
             xmlOut.attribute("perm", fieldEntry.getXMLCode());
-            xmlOut.endElement(arlut.csd.Util.XMLUtils.XMLEncode(fieldKey));
+            xmlOut.endElement(arlut.csd.Util.XMLUtils.XMLEncode(fieldItem.getKey()));
           }
 
         xmlOut.indentIn();
-        xmlOut.endElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(key));
+        xmlOut.endElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(item.getKey()));
       }
 
     xmlOut.indentIn();
@@ -848,24 +852,21 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     /* -- */
 
-    clean();
-
     for (String key: matrix.keySet())
       {
         PermEntry entry = matrix.get(key);
 
         if (isBasePerm(key))
           {
-            result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
-                          " -- " + entry.difference(null));
-            result.append("\n");
+            result.append(decodeBaseName(key) + " -- " + entry.difference(null));
           }
         else
           {
             result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
                           " -- " + entry.difference(null));
-            result.append("\n");
           }
+
+        result.append("\n");
       }
 
     return result.toString();
@@ -898,7 +899,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   @Override public String getDiffString(DBField orig)
   {
-    StringBuilder result = new StringBuilder();
     PermissionMatrixDBField origP;
 
     /* -- */
@@ -908,14 +908,14 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
         throw new IllegalArgumentException("bad field comparison");
       }
 
-    clean();
-
     origP = (PermissionMatrixDBField) orig;
 
     if (origP.equals(this))
       {
         return null;
       }
+
+    StringBuilder result = new StringBuilder();
 
     Vector<String> myKeys = new Vector<String>();
     Vector<String> origKeys = new Vector<String>();
@@ -979,7 +979,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * @see arlut.csd.ganymede.rmi.perm_field
    */
 
-  public PermMatrix getMatrix()
+  public synchronized PermMatrix getMatrix()
   {
     return new PermMatrix(this.matrix);
   }
@@ -997,7 +997,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * @see arlut.csd.ganymede.rmi.perm_field
    */
 
-  public PermMatrix getTemplateMatrix()
+  public synchronized PermMatrix getTemplateMatrix()
   {
     if (!(this.owner instanceof DBEditObject))
       {
@@ -1011,12 +1011,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     if (getID() == SchemaConstants.RoleMatrix)
       {
-        return this.owner.gSession.getPermManager().getDelegatablePersonaPerms();
+        return this.owner.gSession.getPermManager().getDelegatableOwnedObjectPerms();
       }
 
     if (getID() == SchemaConstants.RoleDefaultMatrix)
       {
-        return this.owner.gSession.getPermManager().getDelegatableDefaultPerms();
+        return this.owner.gSession.getPermManager().getDelegatableUnownedObjectPerms();
       }
 
     return null;
@@ -1031,7 +1031,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * @see arlut.csd.ganymede.common.PermMatrix
    */
 
-  public PermEntry getPerm(short baseID, short fieldID)
+  public synchronized PermEntry getPerm(short baseID, short fieldID)
   {
     return matrix.get(matrixEntry(baseID, fieldID));
   }
@@ -1044,7 +1044,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * @see arlut.csd.ganymede.common.PermMatrix
    */
 
-  public PermEntry getPerm(short baseID)
+  public synchronized PermEntry getPerm(short baseID)
   {
     return matrix.get(matrixEntry(baseID));
   }
@@ -1057,7 +1057,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * @see arlut.csd.ganymede.common.PermMatrix
    */
 
-  public PermEntry getPerm(Base base, BaseField field)
+  public synchronized PermEntry getPerm(Base base, BaseField field)
   {
     try
       {
@@ -1078,7 +1078,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * @see arlut.csd.ganymede.common.PermMatrix
    */
 
-  public PermEntry getPerm(Base base)
+  public synchronized PermEntry getPerm(Base base)
   {
     try
       {
@@ -1154,9 +1154,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * PermissionMatrixDBField is not editable.</p>
    *
    * @param baseID the object type to set permissions for
-   * @param fieldID the field to set permissions for.  If fieldID < 0,
+   * @param fieldID the field to set permissions for.  If fieldID &lt; 0,
    * the permission will be applied to the object as a whole rather
    * than any individual field within the object
+   *
+   * @return A ReturnVal encoding success or failure
    *
    * @see arlut.csd.ganymede.rmi.perm_field
    * @see arlut.csd.ganymede.common.PermEntry
@@ -1173,7 +1175,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
         else
           {
             DBObjectBase base = Ganymede.db.getObjectBase(baseID);
-            DBObjectBaseField field = (DBObjectBaseField) base.getField(fieldID);
+            DBObjectBaseField field = base.getField(fieldID);
 
             String baseName = base.getName();
             String fieldName = field.getName();
@@ -1278,9 +1280,15 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   private void clean()
   {
-    for (String key: matrix.keySet())
+    Set<Map.Entry<String, PermEntry>> elements = matrix.entrySet();
+    Iterator<Map.Entry<String, PermEntry>> iterator = elements.iterator();
+
+    while (iterator.hasNext())
       {
-        PermEntry pe = matrix.get(key);
+        Map.Entry<String, PermEntry> entry = iterator.next();
+
+        String key = entry.getKey();
+        PermEntry pe = entry.getValue();
 
         // If we have invalid entries, we're just going to throw them out,
         // forget they even existed..  this is only remotely reasonable
@@ -1292,7 +1300,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
         if (!isValidCode(key))
           {
-            matrix.remove(key);
+            iterator.remove();
 
             if (debug)
               {
@@ -1392,16 +1400,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * those for the field itself.</p>
    */
 
-  public boolean allowablePermEntry(short baseID, short fieldID, PermEntry entry)
+  public synchronized boolean allowablePermEntry(short baseID, short fieldID, PermEntry entry)
   {
     if (this.owner.gSession == null)
       {
         return false;
-      }
-
-    if (this.owner.gSession.getPermManager().isSuperGash())
-      {
-        return true;
       }
 
     if (entry == null)
@@ -1409,9 +1412,26 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
         throw new IllegalArgumentException("entry is null");
       }
 
+    DBObjectBase base = Ganymede.db.getObjectBase(baseID);
+
+    if (base == null)
+      {
+        throw new IllegalArgumentException("bad base id");
+      }
+
+    if (fieldID != -1 && base.getField(fieldID) == null)
+      {
+        throw new IllegalArgumentException("bad field id");
+      }
+
+    if (this.owner.gSession.getPermManager().isSuperGash())
+      {
+        return true;
+      }
+
     if (getID() == SchemaConstants.RoleMatrix)
       {
-        if (this.owner.gSession.getPermManager().getPersonaPerms() == null)
+        if (this.owner.gSession.getPermManager().getOwnedObjectPerms() == null)
           {
             return false;
           }
@@ -1420,11 +1440,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
         if (fieldID < 0)
           {
-            adminPriv = (PermEntry) this.owner.gSession.getPermManager().getDelegatablePersonaPerms().getPerm(baseID);
+            adminPriv = (PermEntry) this.owner.gSession.getPermManager().getDelegatableOwnedObjectPerms().getPerm(baseID);
           }
         else
           {
-            adminPriv = (PermEntry) this.owner.gSession.getPermManager().getDelegatablePersonaPerms().getPerm(baseID, fieldID);
+            adminPriv = (PermEntry) this.owner.gSession.getPermManager().getDelegatableOwnedObjectPerms().getPerm(baseID, fieldID);
           }
 
         // the adminPriv should have all the bits set that we are seeking to set
@@ -1442,11 +1462,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
         if (fieldID < 0)
           {
-            adminPriv = (PermEntry) this.owner.gSession.getPermManager().getDelegatableDefaultPerms().getPerm(baseID);
+            adminPriv = (PermEntry) this.owner.gSession.getPermManager().getDelegatableUnownedObjectPerms().getPerm(baseID);
           }
         else
           {
-            adminPriv = (PermEntry) this.owner.gSession.getPermManager().getDelegatableDefaultPerms().getPerm(baseID, fieldID);
+            adminPriv = (PermEntry) this.owner.gSession.getPermManager().getDelegatableUnownedObjectPerms().getPerm(baseID, fieldID);
           }
 
         // the adminPriv should have all the bits set that we are seeking to set
@@ -1465,7 +1485,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * for PermMatrix creation.</p>
    */
 
-  public Hashtable<String, PermEntry> getInnerMatrix()
+  public synchronized Hashtable<String, PermEntry> getInnerMatrix()
   {
     return new Hashtable<String, PermEntry>(this.matrix);
   }

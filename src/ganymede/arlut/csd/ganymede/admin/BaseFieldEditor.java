@@ -3,16 +3,16 @@
    BaseFieldEditor.java
 
    Base Field editor component for GASHSchema
-   
+
    Created: 14 August 1997
 
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2011
+
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Contact information
@@ -130,16 +130,16 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
   FieldNode
     fieldNode;
 
-  BaseField 
+  BaseField
     fieldDef;                   // remote reference
 
   //  java.awt.CardLayout
   // card;
 
-  JLabelPanel 
+  JLabelPanel
     editPanel;
 
-  GASHSchema 
+  GASHSchema
     owner;
 
   StringDialog
@@ -199,7 +199,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     booleanShowing,
     numericShowing,
     floatShowing,
-    fieldOptionShowing,    
+    fieldOptionShowing,
     dateShowing,
     stringShowing,
     referenceShowing,
@@ -230,7 +230,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     editPanel = setupEditPanel();
     setComponent(editPanel);
   }
-   
+
   private JLabelPanel setupEditPanel()
   {
     idN = new JnumberField(20,  false, false, 0, 0);
@@ -590,7 +590,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
              System.err.println("owner.editor is null");
            }
        }
-     
+
      try
        {
          nameSpaces = owner.getSchemaEdit().getNameSpaces();
@@ -599,8 +599,8 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
        {
          System.err.println("RemoteException getting namespaces: " + rx);
        }
-      
-     namespaceC.addItem(noneToken);      
+
+     namespaceC.addItem(noneToken);
 
      if (nameSpaces == null || nameSpaces.length == 0)
        {
@@ -620,7 +620,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
              catch (RemoteException rx)
                {
                  System.err.println("RemoteException getting namespace: " + rx);
-               }    
+               }
            }
        }
    }
@@ -631,7 +631,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
    * in the BaseFieldEditor.
    *
    */
-    
+
   void refreshTargetChoice()
   {
     Base[] baseList;
@@ -641,7 +641,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     try
       {
         targetC.removeAllItems();
-      }     
+      }
     catch (IndexOutOfBoundsException ex)
       {
         // Swing 1.1 beta 2 will do this to us, just
@@ -654,7 +654,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
       {
         // if this field is edit in place, we only want to list embeddable
         // object types
-        
+
         if (fieldDef.isEditInPlace())
           {
             baseList = owner.getSchemaEdit().getBases(fieldDef.isEditInPlace());
@@ -666,6 +666,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
       }
     catch (RemoteException rx)
       {
+        rx.printStackTrace();
         throw new IllegalArgumentException("Exception getting Bases: " + rx);
       }
 
@@ -687,7 +688,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
   /**
    *
    * This method regenerates the list of valid target field choices
-   * in the BaseFieldEditor when the targetBase is not "&lt;any&gt;".  
+   * in the BaseFieldEditor when the targetBase is not "&lt;any&gt;".
    *
    * This method doesn't make a selection, so upon exit of this
    * method, "&lt;none&gt;" will be selected in the fieldC widget.
@@ -703,7 +704,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     Vector fields = null;
 
     /* -- */
-    
+
     target = (String) targetC.getModel().getSelectedItem();
 
     try
@@ -746,7 +747,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
       }
 
     fieldC.addItem(noneToken);
-    
+
     if (fields == null)
       {
         if (debug)
@@ -785,7 +786,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
                   {
                     // in an edit in place field, we can only
                     // be linked to a target object's container link field
-                
+
                     if (bf.getID() == SchemaConstants.ContainerField)
                       {
                         fieldC.addItem(bf.getName());
@@ -818,7 +819,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
           }
       }
   }
-  
+
   /**
    *
    * This method changes the type on the server and updates
@@ -1084,7 +1085,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
             regexpDescS.setText(fieldDef.getRegexpDesc());
             OKCharS.setText(fieldDef.getOKChars());
             BadCharS.setText(fieldDef.getBadChars());
-            
+
             typeC.getModel().setSelectedItem(stringToken);
             stringShowing = true;
 
@@ -1122,7 +1123,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
             maxLengthN.setValue(fieldDef.getMaxLength());
             OKCharS.setText(fieldDef.getOKChars());
             BadCharS.setText(fieldDef.getBadChars());
-            
+
             typeC.getModel().setSelectedItem(passwordToken);
             passwordShowing = true;
 
@@ -1242,14 +1243,14 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
             SchemaEdit se = owner.getSchemaEdit();
             short targetB = fieldDef.getTargetBase();
-                
+
             if (targetB == -1)
               {
                 if (debug)
                   {
                     System.out.println("unknown target base");
                   }
-                
+
                 if (updateTargetC)
                   {
                     targetC.getModel().setSelectedItem(anyToken);
@@ -1259,45 +1260,45 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
               {
                 Base targetBase = null;
                 String string = null;
-                    
+
                 if (targetB == -2)
                   {
                     // we're assuming that we've got a known target field in
                     // all objects bases in the system.. this is mainly for
                     // the 'owner list' field.. we'll just pick the field from
                     // the current fieldDef and go with it.
-                        
+
                     if (debug)
                       {
                         System.out.println("new 'alltarget' base");
                       }
-                    
+
                     if (updateTargetC)
                       {
                         targetC.addItem(allToken);
                         targetC.getModel().setSelectedItem(allToken);
                       }
-                        
+
                     string = allToken;
-                        
+
                     targetBase = se.getBase((short) 0); // assume the field is present in first base
                   }
                 else
                   {
                     targetBase = se.getBase(targetB);
-                        
+
                     if (targetBase == null)
                       {
                         if (debug)
                           {
-                            System.err.println("targetbase is null when it shouldn't be: server error : base id " + 
+                            System.err.println("targetbase is null when it shouldn't be: server error : base id " +
                                                targetB);
-                            
+
                             System.out.println("Choosing <any>");
                           }
-                            
+
                         // we want to clear this bad reference
-                            
+
                         try
                           {
                             handleReturnVal(fieldDef.setTargetBase(null));
@@ -1306,7 +1307,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
                           {
                             throw new IllegalArgumentException("Exception couldn't clear target base: " + rx);
                           }
-                        
+
                         if (updateTargetC)
                           {
                             targetC.getModel().setSelectedItem(anyToken);
@@ -1315,7 +1316,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
                     else
                       {
                         string = targetBase.getName();
-                            
+
                         if (debug)
                           {
                             System.out.println("Choosing " + string);
@@ -1327,18 +1328,18 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
                           }
                       }
                   }
-                    
+
                 // regenerate the list of choices in fieldC
-                
+
                 refreshFieldChoice();
-                    
+
                 // Now that we have an appropriate list of
                 // choice items in the fieldC, let's see
                 // if we can't find something to select
                 // in fieldC
-                    
+
                 short targetF = fieldDef.getTargetField();
-                    
+
                 if (targetF == -1)
                   {
                     if (debug)
@@ -1351,16 +1352,16 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
                 else
                   {
                     BaseField targetField;
-                    
+
                     // see if our old field target value is still
                     // appropriate for the currently chosen base
-                    
+
                     if (targetBase != null)
                       {
                         try
                           {
                             targetField = targetBase.getField(targetF);
-                            
+
                             if (targetField != null)
                               {
                                 string = targetField.getName();
@@ -1383,12 +1384,12 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
                         if (debug)
                           {
                             System.err.println("targetbase is null, clearing targetField.");
-                        
+
                             System.out.println("Choosing <none>");
                           }
-                        
+
                         // we want to clear this bad reference
-                        
+
                         try
                           {
                             handleReturnVal(fieldDef.setTargetField(null));
@@ -1397,12 +1398,12 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
                           {
                             throw new IllegalArgumentException("Exception couldn't clear target base: " + rx);
                           }
-                        
+
                         fieldC.getModel().setSelectedItem(noneToken);
                       }
                   }
               } // else targetB != -1
-            
+
             typeC.getModel().setSelectedItem(objectRefToken);
             referenceShowing = true;
           }
@@ -1437,7 +1438,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
             else
               {
                 namespaceC.getModel().setSelectedItem(fieldDef.getNameSpaceLabel());
-                
+
                 if (debug)
                   {
                     System.out.println("selecting " + fieldDef.getNameSpaceLabel());
@@ -1498,7 +1499,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
             // if we aren't using a hashed form for password storage,
             // we have to use plaintext
 
-            if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+            if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() ||
                   apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
                   sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected() || bCryptedCF.isSelected())
                 && plainTextCF.isSelected())
@@ -1818,8 +1819,8 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
               {
                 // a password field has to have plaintext stored if it
                 // is not to store the password in crypted form.
-                
-                if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && 
+
+                if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
                     !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
                     !sshaHashcryptedCF.isSelected() && !shaUnixCryptedCF.isSelected() && !bCryptedCF.isSelected() &&
                     !plainTextCF.isSelected())
@@ -1827,7 +1828,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
                     plainTextCF.setValue(true);
                   }
 
-                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() ||
                       apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
                       sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected() || bCryptedCF.isSelected()))
                   {
@@ -1889,16 +1890,16 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
               {
                 // a password field has to have plaintext stored if it
                 // is not to store the password in crypted form.
-                
-                if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && 
+
+                if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
                     !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
                     !sshaHashcryptedCF.isSelected() && !shaUnixCryptedCF.isSelected()
                     && !plainTextCF.isSelected())
                   {
                     plainTextCF.setValue(true);
                   }
-                
-                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+
+                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() ||
                       apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
                       sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected()))
                   {
@@ -1925,15 +1926,15 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
               {
                 // a password field has to have plaintext stored if it
                 // is not to store the password in crypted form.
-                
+
                 if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
                     !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
                     && !plainTextCF.isSelected())
                   {
                     plainTextCF.setValue(true);
                   }
-                
-                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+
+                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() ||
                       apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
                   {
                     plainTextCF.setEnabled(false);
@@ -1959,7 +1960,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
               {
                 // a password field has to have plaintext stored if it
                 // is not to store the password in crypted form.
-                
+
                 if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
                     !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
                     !sshaHashcryptedCF.isSelected()
@@ -1967,8 +1968,8 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
                   {
                     plainTextCF.setValue(true);
                   }
-                
-                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+
+                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() ||
                       apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
                       sshaHashcryptedCF.isSelected()))
                   {
@@ -1995,7 +1996,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
               {
                 // a password field has to have plaintext stored if it
                 // is not to store the password in crypted form.
-                
+
                 if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
                     !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
                     !sshaHashcryptedCF.isSelected() && !shaUnixCryptedCF.isSelected()
@@ -2003,8 +2004,8 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
                   {
                     plainTextCF.setValue(true);
                   }
-                
-                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+
+                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() ||
                       apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
                       sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected()))
                   {
@@ -2041,8 +2042,8 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
                   {
                     plainTextCF.setValue(true);
                   }
-                
-                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+
+                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() ||
                       apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
                       sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected()))
                   {
@@ -2161,12 +2162,12 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
                 // "Warning: Changing Object Type"
                 // "Changing the type of this field will invalidate the label for this base.\nAre you sure you want to continue?"
 
-                changeLabelTypeDialog = new StringDialog(owner, 
+                changeLabelTypeDialog = new StringDialog(owner,
                                                          ts.l("itemStateChanged.typeChangeWarningTitle"),
                                                          ts.l("itemStateChanged.typeChangeLabelMessage"),
                                                          StringDialog.getDefaultOk(),
                                                          StringDialog.getDefaultCancel(), StandardDialog.ModalityType.DOCUMENT_MODAL);
-                
+
                 Hashtable answer = changeLabelTypeDialog.showDialog();
 
                 if (answer != null)  //Ok button was clicked
@@ -2196,7 +2197,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
                     okToChange = false;
 
-                    try 
+                    try
                       {
                         if (fieldDef.isNumeric())
                           {
@@ -2246,7 +2247,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
             System.out.println("Setting namespace to " + item);
           }
 
-        try 
+        try
           {
             if (item.equalsIgnoreCase(noneToken))
               {
@@ -2331,7 +2332,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
                         // target field to avoid accidental confusion if our
                         // new target base has a valid target field with the
                         // same id code as our old target field.
-                        
+
                         if ((oldBaseName != null) && !oldBaseName.equals(item))
                           {
                             handleReturnVal(fieldDef.setTargetField(null));

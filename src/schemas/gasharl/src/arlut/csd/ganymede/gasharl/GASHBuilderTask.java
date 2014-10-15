@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -64,6 +64,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
@@ -453,7 +454,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         baseChanged(dhcpGroupSchema.BASE) ||
         baseChanged(dhcpOptionSchema.BASE) ||
         baseChanged(dhcpEntrySchema.BASE) ||
-        baseChanged(dhcpNetworkSchema.BASE))
+        baseChanged(dhcpNetworkSchema.BASE) ||
+        baseChanged(dhcpSubnetSchema.BASE))
       {
         if (debug)
           {
@@ -623,7 +625,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     username = (String) object.getFieldValueLocal(SchemaConstants.UserUserName);
 
-    passField = (PasswordDBField) object.getField(SchemaConstants.UserPassword);
+    passField = object.getPassField(SchemaConstants.UserPassword);
 
     if (passField != null)
       {
@@ -791,7 +793,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     username = (String) object.getFieldValueLocal(SchemaConstants.UserUserName);
 
-    passField = (PasswordDBField) object.getField(SchemaConstants.UserPassword);
+    passField = object.getPassField(SchemaConstants.UserPassword);
 
     if (passField != null)
       {
@@ -881,23 +883,22 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
-   * we write out a file that maps badge numbers to a
-   * user's primary email address and user name for the
-   * personnel office's phonebook database to use
+   * <p>we write out a file that maps badge numbers to a user's
+   * primary email address and user name for the personnel office's
+   * phonebook database to use</p>
    *
-   * This method writes lines to the maildirect2 GASH output file.
+   * <p>This method writes lines to the maildirect2 GASH output file.</p>
    *
-   * The lines in this file look like the following.
+   * <p>The lines in this file look like the following.</p>
    *
-   * 4297 jonabbey@arlut.utexas.edu broccol
-   *
+   * <p>8124 jonabbey@arlut.utexas.edu broccol</p>
    */
 
   private void writeMailDirect2()
   {
     PrintWriter out;
-    Hashtable map = new Hashtable(); // map badge numbers to DBObject
-    Hashtable results = new Hashtable(); // map badge numbers to strings
+    Map<String, DBObject> map = new HashMap<String, DBObject>(); // map badge numbers to DBObject
+    Map<String, String> results = new HashMap<String, String>(); // map badge numbers to strings
 
     /* -- */
 
@@ -930,9 +931,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                     // happen if one of the users is an GASH admin, or
                     // if one is inactivated.
 
-                    DBObject oldUser = (DBObject) map.get(badgeNum);
-
-                    DBField field = (DBField) oldUser.getField(userSchema.PERSONAE);
+                    DBObject oldUser = map.get(badgeNum);
+                    DBField field = oldUser.getField(userSchema.PERSONAE);
 
                     if (field != null && field.isDefined())
                       {
@@ -955,11 +955,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               }
           }
 
-        Enumeration lines = results.elements();
-
-        while (lines.hasMoreElements())
+        for (String line: results.values())
           {
-            out.println((String) lines.nextElement());
+            out.println(line);
           }
       }
     finally
@@ -1033,7 +1031,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
                     DBObject oldUser = map.get(badgeNum);
 
-                    DBField field = (DBField) oldUser.getField(userSchema.PERSONAE);
+                    DBField field = oldUser.getField(userSchema.PERSONAE);
 
                     if (field != null && field.isDefined())
                       {
@@ -1819,7 +1817,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 // the entry is embedded in the user's record.. get
                 // the user' id and label
 
-                Invid userRef = (Invid) obj.getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
+                Invid userRef = obj.getParentInvid();
 
                 if (userRef.getType() != SchemaConstants.UserBase)
                   {
@@ -1922,8 +1920,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     String name = (String) object.getFieldValueLocal(MailmanListSchema.NAME);
     String ownerEmail = (String) object.getFieldValueLocal(MailmanListSchema.OWNEREMAIL);
-    PasswordDBField passField = (PasswordDBField) object.getField(MailmanListSchema.PASSWORD);
-    String password = (String) passField.getPlainText();
+    PasswordDBField passField = object.getPassField(MailmanListSchema.PASSWORD);
+    String password = passField.getPlainText();
 
     Invid serverInvid = (Invid) object.getFieldValueLocal(MailmanListSchema.SERVER);
     DBObject server = getObject(serverInvid);
@@ -3706,7 +3704,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
             String username = (String) user.getFieldValueLocal(userSchema.USERNAME);
 
-            PasswordDBField passField = (PasswordDBField) user.getField(userSchema.PASSWORD);
+            PasswordDBField passField = user.getPassField(userSchema.PASSWORD);
 
             if (passField == null)
               {
@@ -3794,7 +3792,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 continue;
               }
 
-            PasswordDBField passField = (PasswordDBField) user.getField(userSchema.PASSWORD);
+            PasswordDBField passField = user.getPassField(userSchema.PASSWORD);
 
             if (passField == null)
               {
@@ -3974,7 +3972,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
             if (!user.isInactivated())
               {
-                PasswordDBField passField = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+                PasswordDBField passField = user.getPassField(SchemaConstants.UserPassword);
 
                 if (passField != null)
                   {
@@ -4056,7 +4054,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 continue;
               }
 
-            PasswordDBField passField = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+            PasswordDBField passField = user.getPassField(SchemaConstants.UserPassword);
 
             if (passField == null)
               {
@@ -4104,7 +4102,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 continue;
               }
 
-            InvidDBField usersField = (InvidDBField) group.getField(groupSchema.USERS);
+            InvidDBField usersField = group.getInvidField(groupSchema.USERS);
 
             if (usersField == null)
               {
@@ -4217,13 +4215,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                     continue;
                   }
 
-                StringDBField usernameField = (StringDBField) user.getField(userSchema.USERNAME);
+                StringDBField usernameField = user.getStringField(userSchema.USERNAME);
                 String username = (String) usernameField.getValueLocal();
 
-                StringDBField mailUsernameField = (StringDBField) user.getField(userSchema.MAILUSER);
+                StringDBField mailUsernameField = user.getStringField(userSchema.MAILUSER);
                 String mailUsername = (String) mailUsernameField.getValueLocal();
 
-                PasswordDBField mailpassField = (PasswordDBField) user.getField(userSchema.MAILPASSWORD2);
+                PasswordDBField mailpassField = user.getPassField(userSchema.MAILPASSWORD2);
                 String mailpass = mailpassField.getPlainText();
 
                 mailCredentials.print(mailUsername);
@@ -4238,10 +4236,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
                 if (user.isDefined(userSchema.OLDMAILUSER) && user.isDefined(userSchema.OLDMAILPASSWORD2))
                   {
-                    mailUsernameField = (StringDBField) user.getField(userSchema.OLDMAILUSER);
+                    mailUsernameField = user.getStringField(userSchema.OLDMAILUSER);
                     mailUsername = (String) mailUsernameField.getValueLocal();
 
-                    mailpassField = (PasswordDBField) user.getField(userSchema.OLDMAILPASSWORD2);
+                    mailpassField = user.getPassField(userSchema.OLDMAILPASSWORD2);
                     mailpass = mailpassField.getPlainText();
 
                     mailCredentials.print(mailUsername);
@@ -4312,7 +4310,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     // add users in this Netgroup to oldMembers
 
-    InvidDBField users = (InvidDBField) object.getField(userNetgroupSchema.USERS);
+    InvidDBField users = object.getInvidField(userNetgroupSchema.USERS);
 
     if (users != null)
       {
@@ -4322,7 +4320,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     // recursively add in users in any netgroups in this netgroup
 
-    InvidDBField subGroups = (InvidDBField) object.getField(userNetgroupSchema.MEMBERGROUPS);
+    InvidDBField subGroups = object.getInvidField(userNetgroupSchema.MEMBERGROUPS);
 
     if (subGroups != null)
       {
@@ -4530,8 +4528,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         try
           {
-            IPstring = ((IPDBField) interfaceObj.getField(interfaceSchema.ADDRESS)).getValueString();
-            MACstring = ((StringDBField) interfaceObj.getField(interfaceSchema.ETHERNETINFO)).getValueString();
+            IPstring = interfaceObj.getIPField(interfaceSchema.ADDRESS).getValueString();
+            MACstring = interfaceObj.getStringField(interfaceSchema.ETHERNETINFO).getValueString();
             MACstring = MACstring.replace('-',':');
           }
         catch (NullPointerException ex)
@@ -4545,7 +4543,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         try
           {
-            ownerString = ((InvidDBField) object.getField(SchemaConstants.OwnerListField)).getValueString();
+            ownerString = object.getInvidField(SchemaConstants.OwnerListField).getValueString();
           }
         catch (Exception ex)
           {
@@ -4837,7 +4835,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     // get the IP address for this interface
 
-    ipField = (IPDBField) object.getField(interfaceSchema.ADDRESS);
+    ipField = object.getIPField(interfaceSchema.ADDRESS);
 
     if (ipField == null)
       {
@@ -4966,7 +4964,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             return false;
           }
 
-        dhcpFileWriter.println("# Generated by Ganymede GASHBuilderTask, revision $Rev$");
+        dhcpFileWriter.println("# Generated by Ganymede GASHBuilderTask");
         dhcpFileWriter.println("# " + new Date().toString());
         dhcpFileWriter.println("#");
         dhcpFileWriter.println("# NOTE: This file, in its entirety, is now being generated by Ganymede.");
@@ -5041,7 +5039,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     // loop once to find custom option spaces
 
-    HashSet foundOptions = new HashSet();
+    HashSet<String> foundOptions = new HashSet<String>();
 
     for (Invid optionInvid: customOptions)
       {
@@ -5115,7 +5113,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
-   * This method writes out DHCP info for a shared network to the new dhcpd file.
+   * <p>This method writes out DHCP info for a shared network to the
+   * new dhcpd file.</p>
+   *
+   * <p>As a side effect, this method collects information in the
+   * GASHBuilderTask.customOptions Set for use by the other DHCP
+   * writer methods.</p>
    *
    * @param object An object from the Ganymede system object base
    * @param writer The destination for this system line
@@ -5123,13 +5126,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   private void writeDHCPNetwork(DBObject object, Writer writer)
   {
-    String name = null;
-    IPDBField ipField = null;
-    String network_number = "";
-    String network_mask = "";
-    HashMap options = new HashMap();
-
-    name = (String) object.getFieldValueLocal(dhcpNetworkSchema.NAME);
+    String name = (String) object.getFieldValueLocal(dhcpNetworkSchema.NAME);
+    HashMap<String, dhcp_entry> options = new HashMap<String, dhcp_entry>();
 
     // If global, just write out options only now.
 
@@ -5144,50 +5142,64 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
         writer.write("\n#===============================================================================\n");
         writer.write("shared-network " + name + "\n");
-
-        ipField = (IPDBField) object.getField(dhcpNetworkSchema.NETWORK_NUMBER);
-
-        if (ipField != null)
-          {
-            network_number = (String) ipField.getEncodingString();
-          }
-
-        ipField = (IPDBField) object.getField(dhcpNetworkSchema.NETWORK_MASK);
-
-        if (ipField != null)
-          {
-            network_mask = (String) ipField.getEncodingString();
-          }
-
         writer.write("{\n");
-        writer.write("\tsubnet\t" + network_number + "\tnetmask\t\t" + network_mask + "\n");
-        writer.write("\t{ \n");
 
         if (object.isDefined(dhcpNetworkSchema.OPTIONS))
           {
             findDHCPOptions(options, object.getFieldValuesLocal(dhcpNetworkSchema.OPTIONS));
-            writeDHCPOptionList(options, object, writer, "\t\t");
+            writeDHCPOptionList(options, object, writer, "\t");
           }
 
-        if (object.isSet(dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS))
+        for (Invid subnet: (Vector<Invid>) object.getFieldValuesLocal(dhcpNetworkSchema.SUBNETS))
           {
-            writer.write("\t\tpool\n");
-            writer.write("\t\t{\n");
-            String guest_range = (String) object.getFieldValueLocal(dhcpNetworkSchema.GUEST_RANGE);
-            HashMap options2 = new HashMap();
-            writer.write("\t\t\trange\t" + guest_range + ";\n");
+            DBObject subnetObject = getObject(subnet);
+            String network_number = "";
+            String network_mask = "";
+            IPDBField ipField = subnetObject.getIPField(dhcpSubnetSchema.NETWORK_NUMBER);
 
-            if (object.isDefined(dhcpNetworkSchema.GUEST_OPTIONS))
+            if (ipField != null)
               {
-                findDHCPOptions(options2, object.getFieldValuesLocal(dhcpNetworkSchema.GUEST_OPTIONS));
-                writeDHCPOptionList(options2, object, writer, "\t\t\t");
+                network_number = (String) ipField.getEncodingString();
               }
 
-            writer.write("\t\t\tallow known clients;\n");
-            writer.write("\t\t}\n");
+            ipField = subnetObject.getIPField(dhcpSubnetSchema.NETWORK_MASK);
+
+            if (ipField != null)
+              {
+                network_mask = (String) ipField.getEncodingString();
+              }
+
+            writer.write("\tsubnet\t" + network_number + "\tnetmask\t\t" + network_mask + "\n");
+            writer.write("\t{ \n");
+
+            if (subnetObject.isDefined(dhcpSubnetSchema.OPTIONS))
+              {
+                options.clear();
+                findDHCPOptions(options, subnetObject.getFieldValuesLocal(dhcpSubnetSchema.OPTIONS));
+                writeDHCPOptionList(options, subnetObject, writer, "\t\t");
+              }
+
+            if (subnetObject.isSet(dhcpSubnetSchema.ALLOW_REGISTERED_GUESTS))
+              {
+                writer.write("\t\tpool\n");
+                writer.write("\t\t{\n");
+                String guest_range = (String) subnetObject.getFieldValueLocal(dhcpSubnetSchema.GUEST_RANGE);
+                writer.write("\t\t\trange\t" + guest_range + ";\n");
+
+                if (subnetObject.isDefined(dhcpSubnetSchema.GUEST_OPTIONS))
+                  {
+                    options.clear();
+                    findDHCPOptions(options, subnetObject.getFieldValuesLocal(dhcpSubnetSchema.GUEST_OPTIONS));
+                    writeDHCPOptionList(options, subnetObject, writer, "\t\t\t");
+                  }
+
+                writer.write("\t\t\tallow known clients;\n");
+                writer.write("\t\t}\n");
+              }
+
+            writer.write("\t} # END SUBNET " + network_number + "\n");
           }
 
-        writer.write("\t} # END SUBNET " + network_number + "\n");
         writer.write("} # END SHARED-NETWORK " + name + "\n");
       }
     catch (IOException ex)
@@ -5197,7 +5209,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
-   * This method writes out DHCP info for a single system to the new dhcpd file.
+   * <p>This method writes out DHCP info for a single system to the
+   * new dhcpd file.</p>
+   *
+   * <p>As a side effect, this method collects information in the
+   * GASHBuilderTask.customOptions Set for use by the other DHCP
+   * writer methods.</p>
    *
    * @param object An object from the Ganymede system object base
    * @param writer The destination for this system line
@@ -5213,7 +5230,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     StringDBField macField = null;
     String macAddress = null;
 
-    HashMap options = new HashMap();
+    HashMap<String, dhcp_entry> options = new HashMap<String, dhcp_entry>();
 
     StringBuilder buffer = new StringBuilder();
 
@@ -5229,12 +5246,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     interfaceObj = getObject(interfaceInvids.get(0));
 
-    ipField = (IPDBField) interfaceObj.getField(interfaceSchema.ADDRESS);
+    ipField = interfaceObj.getIPField(interfaceSchema.ADDRESS);
     ipAddress = ipField.getEncodingString();
 
     if (interfaceObj.isDefined(interfaceSchema.ETHERNETINFO))
       {
-        macField = (StringDBField) interfaceObj.getField(interfaceSchema.ETHERNETINFO);
+        macField = interfaceObj.getStringField(interfaceSchema.ETHERNETINFO);
         macAddress = macField.getEncodingString();
 
         if (macAddress.equals("00:00:00:00:00:00"))
@@ -5354,26 +5371,22 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
-   * This method writes out the DHCP option definitions to be
-   * contained within a global, shared network, or host record in the
-   * generated DHCP file.
+   * <p>This method writes out the DHCP option definitions to be
+   * contained within a global, shared network, subnet, or host record
+   * in the generated DHCP file.</p>
    */
 
-  private void writeDHCPOptionList(HashMap options, DBObject object, Writer writer, String tabs)
+  private void writeDHCPOptionList(HashMap<String, dhcp_entry> options, DBObject object, Writer writer, String tabs)
   {
-    Iterator values = options.values().iterator();
-
     result.setLength(0);
 
     // first make sure we've declared any site-option-space that
     // we'll need to use
 
-    HashSet spaces = new HashSet();
+    HashSet<String> spaces = new HashSet<String>();
 
-    while (values.hasNext())
+    for (dhcp_entry entry: options.values())
       {
-        dhcp_entry entry = (dhcp_entry) values.next();
-
         if (entry.builtin)
           {
             continue;
@@ -5401,14 +5414,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     // second make sure that we've forced any mandatory options
 
-    HashSet forcedOptions = new HashSet();
+    HashSet<dhcp_entry> forcedOptions = new HashSet<dhcp_entry>();
 
-    values = options.values().iterator();
-
-    while (values.hasNext())
+    for (dhcp_entry entry: options.values())
       {
-        dhcp_entry entry = (dhcp_entry) values.next();
-
         if (entry.forced)
           {
             forcedOptions.add(entry);
@@ -5420,12 +5429,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         StringBuilder hexOptionCodes = new StringBuilder();
         StringBuilder concatPrefix = new StringBuilder();
 
-        values = forcedOptions.iterator();
-
-        while (values.hasNext())
+        for (dhcp_entry entry: forcedOptions)
           {
-            dhcp_entry entry = (dhcp_entry) values.next();
-
             if (entry.forced && entry.code != 0)
               {
                 if (hexOptionCodes.length() == 0)
@@ -5465,12 +5470,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     // third, let's write out the actual options for this host
 
-    values = options.values().iterator();
-
-    while (values.hasNext())
+    for (dhcp_entry entry: options.values())
       {
-        dhcp_entry entry = (dhcp_entry) values.next();
-
         int length = 0;
 
         result.append(tabs);
@@ -5527,7 +5528,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     return "\"" + in + "\"";
   }
 
-  private void findDHCPOptions(HashMap resultMap, Vector entryInvids)
+  private void findDHCPOptions(HashMap<String, dhcp_entry> resultMap, Vector entryInvids)
   {
     if (entryInvids == null)
       {

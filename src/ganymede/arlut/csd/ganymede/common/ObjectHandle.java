@@ -6,17 +6,19 @@
    used in the QueryResult class to keep things organized, and
    on the client to keep track of the status of objects on the
    server.
-   
+
    Created: 6 February 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2014
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -49,6 +51,11 @@
 
 package arlut.csd.ganymede.common;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 import arlut.csd.JDataComponent.listHandle;
 
 /*------------------------------------------------------------------------------
@@ -58,25 +65,46 @@ import arlut.csd.JDataComponent.listHandle;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class is used to group information about objects.  It is
- * used in the {@link arlut.csd.ganymede.common.QueryResult QueryResult}
- * class to keep things organized, and on the client to keep
- * track of the status of objects on the server.</p>
+ * <p>This immutable class is used to hold serializable label, Invid
+ * and object status information.</p>
  *
- * @version $Id$
- * @author Jonathan Abbey
+ * <p>ObjectHandles are collected in {@link
+ * arlut.csd.ganymede.common.QueryResult QueryResults}, which are
+ * returned by certain query operations in {@link
+ * arlut.csd.ganymede.server.DBQueryEngine} and by the choices()
+ * method in the {@link arlut.csd.ganymede.server.StringDBField} and
+ * {@link arlut.csd.ganymede.server.InvidDBField} classes.</p>
+ *
+ * <p>Because QueryResult is also used to return string choices from
+ * the StringDBField.choices() method, ObjectHandles may have null
+ * Invids, in which case they are just used for transporting
+ * Strings.</p>
  */
 
-public class ObjectHandle implements Cloneable {
+public class ObjectHandle implements Cloneable, Externalizable {
 
-  String label;
-  Invid invid;
-  boolean editable = false;
-  boolean inactive, expirationSet, removalSet;
-
-  listHandle lHandle = null;
+  private boolean externalizing;
+  private String label;
+  private Invid invid;
+  private boolean editable = false;
+  private boolean inactive = false;
+  private boolean expirationSet = false;
+  private boolean removalSet = false;
 
   /* -- */
+
+  /**
+   * Default no-arg constructor for Externalization
+   *
+   * When this constructor is called, readExternal() can be called to
+   * load state into this object.  After readExternal() returns, no
+   * further modifications to this object can be made.
+   */
+
+  public ObjectHandle()
+  {
+    this.externalizing = true;
+  }
 
   public ObjectHandle(String label, Invid invid,
                       boolean inactive,
@@ -90,6 +118,23 @@ public class ObjectHandle implements Cloneable {
     this.expirationSet = expirationSet;
     this.removalSet = removalSet;
     this.editable = editable;
+    this.externalizing = false;
+  }
+
+  /**
+   * Relabel copy constructor
+   */
+
+  public ObjectHandle(ObjectHandle original,
+                      String newLabel)
+  {
+    this.label = newLabel;
+    this.invid = original.invid;
+    this.inactive = original.inactive;
+    this.expirationSet = original.expirationSet;
+    this.removalSet = original.removalSet;
+    this.editable = original.editable;
+    this.externalizing = false;
   }
 
   public Object clone()
@@ -110,35 +155,9 @@ public class ObjectHandle implements Cloneable {
     return label;
   }
 
-  public final void setLabel(String label)
-  {
-    this.label = label;
-
-    if (lHandle != null)
-      {
-        lHandle.setLabel(label);
-      }
-  }
-
   public final Invid getInvid()
   {
     return invid;
-  }
-
-  /**
-   *
-   * Various GUI components use listHandles.
-   *
-   */
-
-  public final listHandle getListHandle()
-  {
-    if (lHandle == null)
-      {
-        lHandle = new listHandle(label, invid);
-      }
-
-    return lHandle;
   }
 
   public final boolean isInactive()
@@ -161,31 +180,92 @@ public class ObjectHandle implements Cloneable {
     return editable;
   }
 
-  public final void setEditable(boolean editable)
+  /**
+   * Various GUI components use listHandles.
+   */
+
+  public final listHandle getListHandle()
   {
-    this.editable = editable;
+    return new listHandle(label, invid);
   }
 
-  public void setExpirationSet(boolean expirationSet)
+  // externalization methods
+
+  public void writeExternal(ObjectOutput out) throws IOException
   {
-    this.expirationSet = expirationSet;
+    byte status = 0;
+
+    if (this.inactive)
+      {
+        status += 1;
+      }
+
+    if (this.expirationSet)
+      {
+        status += 2;
+      }
+
+    if (this.removalSet)
+      {
+        status += 4;
+      }
+
+    if (this.editable)
+      {
+        status += 8;
+      }
+
+    if (this.invid == null)
+      {
+        status += 16;
+      }
+
+    out.writeByte(status);
+    out.writeUTF(this.label);
+
+    if (this.invid != null)
+      {
+        this.invid.writeExternal(out);
+      }
   }
 
-  public void setInactive(boolean isInactive)
+  public void readExternal(ObjectInput in) throws IOException
   {
-    this.inactive = isInactive;
-  }
+    if (!this.externalizing)
+      {
+        throw new RuntimeException("Invalid double de-externalization");
+      }
 
-  public void setRemovalSet(boolean removalSet)
-  {
-    this.removalSet = removalSet;
+    try
+      {
+        byte status = in.readByte();
+
+        this.inactive = (status & 1) != 0;
+        this.expirationSet = (status & 2) != 0;
+        this.removalSet = (status & 4) != 0;
+        this.editable = (status & 8) != 0;
+
+        this.label = in.readUTF();
+
+        if ((status & 16) != 0)
+          {
+            this.invid = null;
+            return;
+          }
+
+        Invid anInvid = new Invid();
+        anInvid.readExternal(in);
+        this.invid = anInvid.intern();
+      }
+    finally
+      {
+        this.externalizing = false;
+      }
   }
 
   /**
-   *
    * toString() is not finalized, in case we get
    * wacky with subclassing.
-   *
    */
 
   public String toString()
@@ -199,7 +279,7 @@ public class ObjectHandle implements Cloneable {
 
     tmpBuf.append(label);
     tmpBuf.append(": ");
-    
+
     if (editable)
       {
         tmpBuf.append("editable :");
@@ -209,7 +289,7 @@ public class ObjectHandle implements Cloneable {
       {
         tmpBuf.append("inactive :");
       }
-    
+
     if (expirationSet)
       {
         tmpBuf.append("expiration set :");

@@ -565,6 +565,12 @@ public class jcrypt
       return(out);
    }
 
+   private static final String genSalt()
+   {
+     return new String(new char[] {SALTCHARS.charAt((int) randgen.nextFloat() * SALTCHARS.length()),
+                                   SALTCHARS.charAt((int) randgen.nextFloat() * SALTCHARS.length())});
+   }
+
    public static final String crypt(String original)
    {
      return crypt("", original);
@@ -577,15 +583,9 @@ public class jcrypt
          System.err.println("crypting..");
        }
 
-     while (salt.length() < 2)
+     if (salt == null || salt.length() < 2)
        {
-         int index = (int) (randgen.nextFloat() * SALTCHARS.length());
-         salt += SALTCHARS.substring(index, index+1);
-
-         if (debug)
-           {
-             System.err.println("looping..");
-           }
+         salt = genSalt();
        }
 
      if (debug)

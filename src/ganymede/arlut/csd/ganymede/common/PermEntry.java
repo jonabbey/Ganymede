@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -52,6 +52,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import arlut.csd.Util.TranslationService;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                        PermEntry
@@ -59,23 +61,31 @@ import java.io.IOException;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Serializable and immutable permissions entry object, used to
+ * <p>Serializable and immutable permissions entry object, used to
  * store and transmit permissions for a specific {@link
  * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} and {@link
- * arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}.</P>
+ * arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}.</p>
  *
- * <P>Used in conjunction with
+ * <p>Used in conjunction with
  * {@link arlut.csd.ganymede.server.PermissionMatrixDBField PermissionMatrixDBField}
  * and {@link arlut.csd.ganymede.common.PermMatrix PermMatrix} to handle Permissions
- * in a Role object in the Ganymede server.</P>
+ * in a Role object in the Ganymede server.</p>
  */
 
-public class PermEntry implements java.io.Serializable {
+public final class PermEntry implements java.io.Serializable {
 
-  static private PermEntry[] permObs;
+  /**
+   * TranslationService object for handling string localization in
+   * the Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.common.PermEntry");
+
+  static private final PermEntry[] permObs;
   static public final PermEntry fullPerms;
   static public final PermEntry noPerms;
   static public final PermEntry viewPerms;
+  static public final PermEntry createPerms;
 
   static
     {
@@ -101,9 +111,10 @@ public class PermEntry implements java.io.Serializable {
       fullPerms = permObs[15];
       noPerms = permObs[0];
       viewPerms = permObs[1];
+      createPerms = permObs[4]; // f,f,t,f
     }
 
-  static final long serialVersionUID = 1595596943430809895L;
+  static final long serialVersionUID = 1867526089374473743L;
 
   public static void main(String argv[])
   {
@@ -171,11 +182,14 @@ public class PermEntry implements java.io.Serializable {
 
     entrySize = in.readShort();
 
-    // we'll only worry about entrySize if we add perm bools later
+    // We use entrySize to support being able to compatibly add extra
+    // perm bits to PermEntry.
 
     visible = in.readBoolean();
     editable = in.readBoolean();
     create = in.readBoolean();
+
+    // We added the delete bit after the above three
 
     if (entrySize >= 4)
       {
@@ -191,18 +205,18 @@ public class PermEntry implements java.io.Serializable {
 
   // ---
 
-  private boolean visible;
-  private boolean editable;
-  private boolean create;
-  private boolean delete;
+  private final boolean visible;
+  private final boolean editable;
+  private final boolean create;
+  private final boolean delete;
 
-  // transient fields are initialized to 0 or false when objects
-  // are deserialized, so we can use indexSet to differentiate
-  // between index being zero because we have no permissions and
-  // index being zero because of deserialization
+  // initialize our transient fields when we're deserialized on the
+  // client.  we'll use indexSet to differentiate between index being
+  // zero because we have no permissions and index being zero because
+  // of deserialization
 
-  private transient byte index;
-  private transient boolean indexSet;
+  private transient byte index = 0;
+  private transient boolean indexSet = false;
 
   /* -- */
 
@@ -215,11 +229,6 @@ public class PermEntry implements java.io.Serializable {
 
     calcIndex();
     indexSet = true;
-  }
-
-  public PermEntry(DataInput in) throws IOException
-  {
-    receive(in);
   }
 
   public PermEntry(PermEntry orig)
@@ -269,38 +278,6 @@ public class PermEntry implements java.io.Serializable {
     out.writeBoolean(editable);
     out.writeBoolean(create);
     out.writeBoolean(delete);
-  }
-
-  /**
-   * <p>Private so only static method on PermEntry can call this to
-   * modify the PermEntry's internal state.</p>
-   */
-
-  private void receive(DataInput in) throws IOException
-  {
-    short entrySize;
-
-    /* -- */
-
-    entrySize = in.readShort();
-
-    // we'll only worry about entrySize if we add perm bools later
-
-    visible = in.readBoolean();
-    editable = in.readBoolean();
-    create = in.readBoolean();
-
-    if (entrySize >= 4)
-      {
-        delete = in.readBoolean();
-      }
-    else
-      {
-        delete = false;
-      }
-
-    calcIndex();
-    indexSet = true;
   }
 
   /**
@@ -414,42 +391,50 @@ public class PermEntry implements java.io.Serializable {
 
     if (visible && (p == null || !p.visible))
       {
-        addString(result, "+ visible");
+        // "+visible"
+        addString(result, ts.l("difference.addVisible"));
       }
 
     if (p != null && p.visible && !visible)
       {
-        addString(result, "- visible");
+        // "-visible"
+        addString(result, ts.l("difference.remVisible"));
       }
 
     if (editable && (p == null || !p.editable))
       {
-        addString(result, "+ editable");
+        // "+editable"
+        addString(result, ts.l("difference.addEditable"));
       }
 
     if (p != null && p.editable && !editable)
       {
-        addString(result, "- editable");
+        // "-editable"
+        addString(result, ts.l("difference.remEditable"));
       }
 
     if (create && (p == null || !p.create))
       {
-        addString(result, "+ create");
+        // "+create"
+        addString(result, ts.l("difference.addCreate"));
       }
 
     if (p != null && p.create && !create)
       {
-        addString(result, "- create");
+        // "-create"
+        addString(result, ts.l("difference.remCreate"));
       }
 
     if (delete && (p == null || !p.delete))
       {
-        addString(result, "+ delete");
+        // "+delete"
+        addString(result, ts.l("difference.addDelete"));
       }
 
     if (p != null && p.delete && !delete)
       {
-        addString(result, "- delete");
+        // "-delete"
+        addString(result, ts.l("difference.remDelete"));
       }
 
     return result.toString();
@@ -477,25 +462,32 @@ public class PermEntry implements java.io.Serializable {
 
     if (visible)
       {
-        result.append("visible ");
+        // "visible"
+        result.append(ts.l("toString.visible"));
+        result.append(" ");
       }
 
     if (editable)
       {
-        result.append("editable ");
+        // "editable"
+        result.append(ts.l("toString.editable"));
+        result.append(" ");
       }
 
     if (create)
       {
-        result.append("create ");
+        // "create"
+        result.append(ts.l("toString.create"));
+        result.append(" ");
       }
 
     if (delete)
       {
-        result.append("delete ");
+        // "delete"
+        result.append(ts.l("toString.delete"));
       }
 
-    return result.toString();
+    return result.toString().trim();
   }
 
   public String getXMLCode()
@@ -525,7 +517,7 @@ public class PermEntry implements java.io.Serializable {
     return result.toString();
   }
 
-  private synchronized void calcIndex()
+  private void calcIndex()
   {
     index = 0;
 

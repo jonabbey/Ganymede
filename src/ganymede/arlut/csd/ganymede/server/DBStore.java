@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -67,8 +67,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -98,45 +100,50 @@ import com.jclark.xml.output.UTF8XMLWriter;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>DBStore is the main Ganymede database class. DBStore is responsible for
- * actually handling the Ganymede database, and manages
- * database loads and dumps, locking (in conjunction with
- * {@link arlut.csd.ganymede.server.DBSession DBSession} and
- * {@link arlut.csd.ganymede.server.DBLock DBLock}),
- * the {@link arlut.csd.ganymede.server.DBJournal journal}, and schema dumping.</p>
+ * <p>DBStore is the main Ganymede database class. DBStore is
+ * responsible for actually handling the Ganymede database, and
+ * manages database loads and dumps, locking (in conjunction with
+ * {@link arlut.csd.ganymede.server.DBSession DBSession} and {@link
+ * arlut.csd.ganymede.server.DBLock DBLock}), the {@link
+ * arlut.csd.ganymede.server.DBJournal journal}, and schema
+ * dumping.</p>
  *
  * <p>The DBStore class holds the server's namespace and schema
- * dictionaries, in the form of a collection of
- * {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} and {@link
+ * dictionaries, in the form of a collection of {@link
+ * arlut.csd.ganymede.server.DBNameSpace DBNameSpace} and {@link
  * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects.  Each
  * DBObjectBase contains schema information for an object type,
  * including field definitions for all fields that may be stored in
  * objects of that type.</p>
  *
  * <p>In addition to holding schema information, each DBObjectBase
- * contains an {@link arlut.csd.ganymede.common.Invid Invid}-keyed hash of
- * {@link arlut.csd.ganymede.server.DBObject DBObject}'s of that type in
- * memory after the database loading is complete at start-up.  Changes
- * made to the DBStore are done in {@link arlut.csd.ganymede.server.DBEditSet
- * transactional contexts} using DBSession, which is responsible for
- * initiating journal changes when individual transactions are
- * committed to the database.  Periodically, the Ganymede server's
- * {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler} task
+ * contains an {@link arlut.csd.ganymede.common.Invid Invid}-keyed
+ * hash of {@link arlut.csd.ganymede.server.DBObject DBObject}'s of
+ * that type in memory after the database loading is complete at
+ * start-up.  Changes made to the DBStore are done in {@link
+ * arlut.csd.ganymede.server.DBEditSet transactional contexts} using
+ * DBSession, which is responsible for initiating journal changes when
+ * individual transactions are committed to the database.
+ * Periodically, the Ganymede server's {@link
+ * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler} task
  * engine will schedule a full {@link
  * arlut.csd.ganymede.server.DBStore#dump(java.lang.String,boolean,boolean)
  * dump} to consolidate the journal and update the on-disk database
  * file.  The server will also do a dump when the server's admin
- * console {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}
- * interface initiates a server shutdown.</p>
+ * console {@link arlut.csd.ganymede.server.GanymedeAdmin
+ * GanymedeAdmin} interface initiates a server shutdown.</p>
  *
- * <p>DBStore was originally written with the intent of being able to serve as
- * a stand-alone in-process transactional object storage system, but in practice, DBStore
- * is now thoroughly integrated with the rest of the Ganymede server, and particularly
- * with {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}.  Various
- * component classes ({@link arlut.csd.ganymede.server.DBSession DBSession},
- * {@link arlut.csd.ganymede.server.DBObject DBObject}, and
- * {@link arlut.csd.ganymede.server.DBField DBField}), assume that there is usually
- * an associated GanymedeSession to be consulted for permissions and the like.</p>
+ * <p>DBStore was originally written with the intent of being able to
+ * serve as a stand-alone in-process transactional object storage
+ * system, but in practice, DBStore is now thoroughly integrated with
+ * the rest of the Ganymede server, and particularly with {@link
+ * arlut.csd.ganymede.server.GanymedeSession GanymedeSession}.
+ * Various component classes ({@link
+ * arlut.csd.ganymede.server.DBSession DBSession}, {@link
+ * arlut.csd.ganymede.server.DBObject DBObject}, and {@link
+ * arlut.csd.ganymede.server.DBField DBField}), assume that there is
+ * usually an associated GanymedeSession to be consulted for
+ * permissions and the like.</p>
  *
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
@@ -182,7 +189,8 @@ public final class DBStore implements JythonMap {
    * the Ganymede server.
    */
 
-  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBStore");
+  static final TranslationService ts =
+    TranslationService.getTranslationService("arlut.csd.ganymede.server.DBStore");
 
   /**
    * Translated string for normal operation.
@@ -191,7 +199,8 @@ public final class DBStore implements JythonMap {
    * admin console.
    */
 
-  public static final String normal_state = ts.l("init.okaystate"); // "Normal Operation"
+  // "Normal Operation"
+  public static final String normal_state = ts.l("init.okaystate");
 
   /**
    * Monotonically increasing transaction number.
@@ -207,19 +216,29 @@ public final class DBStore implements JythonMap {
   private Object transactionNumberLock = new Object();
 
   /**
-   * <p>Convenience function to find and return objects from the database
-   * without having to go through the GanymedeSession and DBSession layers.</p>
+   * An unmodifiable List of DBObjectBases that need to be locked by
+   * {@link arlut.csd.ganymede.server.DBPermissionManager
+   * DBPermissionManager} when doing permissions gathering.
+   */
+
+  private List<DBObjectBase> permObjectBases;
+
+  /**
+   * <p>Convenience function to find and return objects from the
+   * database without having to go through the GanymedeSession and
+   * DBSession layers.</p>
    *
-   * <p>This method provides a direct reference to an object in the DBStore,
-   * without exporting it for remote RMI reference and without doing any
-   * permissions setting.</p>
+   * <p>This method provides a direct reference to an object in the
+   * DBStore, without exporting it for remote RMI reference and
+   * without doing any permissions setting.</p>
    */
 
   public static DBObject viewDBObject(Invid invid)
   {
     if (DBStore.db == null)
       {
-        throw new IllegalStateException(ts.l("global.notinit")); // "DBStore not initialized"
+        // "DBStore not initialized"
+        throw new IllegalStateException(ts.l("global.notinit"));
       }
 
     DBObjectBase base;
@@ -243,7 +262,8 @@ public final class DBStore implements JythonMap {
   {
     if (DBStore.db != null)
       {
-        throw new IllegalStateException(ts.l("setDBSingleton.exception")); // "DBStore already created"
+        // "DBStore already created"
+        throw new IllegalStateException(ts.l("setDBSingleton.exception"));
       }
 
     DBStore.db = store;
@@ -257,10 +277,10 @@ public final class DBStore implements JythonMap {
    */
 
   /**
-   * hash mapping object type to DBObjectBase's
+   * Mapping of short object types to objectBases.
    */
 
-  Hashtable<Short,DBObjectBase> objectBases;
+  Map<Short,DBObjectBase> objectBases;
 
   /**
    * Tracks invids which point to specific objects via asymmetric
@@ -274,7 +294,7 @@ public final class DBStore implements JythonMap {
    * DBNameSpaces} registered in this DBStore.
    */
 
-  Vector<DBNameSpace> nameSpaces;
+  List<DBNameSpace> nameSpaces;
 
   /**
    * if true, {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
@@ -346,9 +366,9 @@ public final class DBStore implements JythonMap {
   {
     debug = Ganymede.debug;
 
-    objectBases = new Hashtable<Short, DBObjectBase>(20); // default
+    objectBases = new HashMap<Short, DBObjectBase>(20); // default
     aSymLinkTracker = new DBLinkTracker();
-    nameSpaces = new Vector<DBNameSpace>();
+    nameSpaces = new ArrayList<DBNameSpace>();
 
     try
       {
@@ -471,7 +491,7 @@ public final class DBStore implements JythonMap {
 
     loading = true;
 
-    nameSpaces.removeAllElements();
+    nameSpaces.clear();
 
     try
       {
@@ -551,7 +571,7 @@ public final class DBStore implements JythonMap {
 
         for (int i = 0; i < namespaceCount; i++)
           {
-            nameSpaces.addElement(new DBNameSpace(in));
+            nameSpaces.add(new DBNameSpace(in));
           }
 
         // "DBStore.load(): loading category definitions"
@@ -801,7 +821,6 @@ public final class DBStore implements JythonMap {
 
     short namespaceCount;
     DBDumpLock lock = null;
-    DBNameSpace ns;
 
     /* -- */
 
@@ -881,9 +900,8 @@ public final class DBStore implements JythonMap {
         namespaceCount = (short) nameSpaces.size();
         out.writeShort(namespaceCount);
 
-        for (int i = 0; i < namespaceCount; i++)
+        for (DBNameSpace ns: nameSpaces)
           {
-            ns = (DBNameSpace) nameSpaces.elementAt(i);
             ns.emit(out);
           }
 
@@ -1004,8 +1022,8 @@ public final class DBStore implements JythonMap {
    * an unfiltered dump.
    *
    * @param includeHistory If true, the historical fields (creation
-   * date & info, last modification date & info) will be included in
-   * the xml stream.
+   * date &amp; info, last modification date &amp; info) will be
+   * included in the xml stream.
    *
    * @see arlut.csd.ganymede.server.DBEditSet
    * @see arlut.csd.ganymede.server.DBJournal
@@ -1055,8 +1073,8 @@ public final class DBStore implements JythonMap {
    * an unfiltered dump.
    *
    * @param includeHistory If true, the historical fields (creation
-   * date & info, last modification date & info) will be included in
-   * the xml stream.
+   * date &amp; info, last modification date &amp; info) will be
+   * included in the xml stream.
    *
    * @param includeOid If true, the objects written out to the xml
    * stream will include an "oid" attribute which contains the precise
@@ -1066,7 +1084,8 @@ public final class DBStore implements JythonMap {
    * @see arlut.csd.ganymede.server.DBJournal
    */
 
-  public synchronized void dumpXML(OutputStream outStream, boolean dumpDataObjects, boolean dumpSchema, String syncChannel,
+  public synchronized void dumpXML(OutputStream outStream, boolean dumpDataObjects,
+                                   boolean dumpSchema, String syncChannel,
                                    boolean includeHistory, boolean includeOid) throws IOException
   {
     XMLDumpContext xmlOut = null;
@@ -1267,13 +1286,13 @@ public final class DBStore implements JythonMap {
   }
 
   /**
-   * Returns a vector of Strings, the names of the bases currently
-   * defined in this DBStore.
+   * Returns an immutable List of Strings, the names of the bases
+   * currently defined in this DBStore.
    */
 
-  public Vector<String> getBaseNameList()
+  public List<String> getBaseNameList()
   {
-    Vector<String> result = new Vector<String>();
+    List<String> result = new ArrayList<String>();
 
     /* -- */
 
@@ -1285,38 +1304,38 @@ public final class DBStore implements JythonMap {
           }
       }
 
-    return result;
+    return Collections.unmodifiableList(result);
   }
 
   /**
-   * <p>Returns a Vector copy of the {@link
+   * Returns an immutable List copy of the {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} currently
-   * defined in this DBStore.</p>
+   * defined in this DBStore.
    */
 
-  public Vector<DBObjectBase> getBases()
+  public List<DBObjectBase> getBases()
   {
-    Vector<DBObjectBase> result;
+    List<DBObjectBase> result;
 
     synchronized (objectBases)
       {
-        result = new Vector<DBObjectBase>(objectBases.values());
+        result = new ArrayList<DBObjectBase>(objectBases.values());
       }
 
-    return result;
+    return Collections.unmodifiableList(result);
   }
 
   /**
-   * <p>Returns a directly iterable Collection view of the {@link
-   * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} currently
-   * defined in this DBStore.</p>
+   * <p>Returns an immutable directly iterable Collection view of the
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases}
+   * currently defined in this DBStore.</p>
    *
    * <p>No copy is made, this is a direct view.</p>
    */
 
   public Collection<DBObjectBase> bases()
   {
-    return objectBases.values();
+    return Collections.unmodifiableCollection(objectBases.values());
   }
 
   /**
@@ -1361,6 +1380,44 @@ public final class DBStore implements JythonMap {
       }
 
     return null;
+  }
+
+  /**
+   * Returns an immutable List of valid DBObjectBase objects that need
+   * to be locked by {@link
+   * arlut.csd.ganymede.server.DBPermissionManager
+   * DBPermissionManager} when it gathers permissions in {@link
+   * arlut.csd.ganymede.server.DBPermissionManager#updatePerms()}
+   */
+
+  public List<DBObjectBase> getPermBases()
+  {
+    synchronized (objectBases)
+      {
+        if (permObjectBases != null)
+          {
+            return permObjectBases;
+          }
+
+        List<DBObjectBase> basesToLock = (List<DBObjectBase>) new ArrayList();
+
+        basesToLock.add(getObjectBase(SchemaConstants.OwnerBase));
+        basesToLock.add(getObjectBase(SchemaConstants.RoleBase));
+        basesToLock.add(getObjectBase(SchemaConstants.PersonaBase));
+
+        permObjectBases = Collections.unmodifiableList(basesToLock);
+
+        return permObjectBases;
+      }
+  }
+
+  /**
+   * Performs book-keeping when a schema edit is committed.
+   */
+
+  public void finishSchemaEditCommit()
+  {
+    this.permObjectBases = null;
   }
 
   /**
@@ -1470,7 +1527,7 @@ public final class DBStore implements JythonMap {
       {
         for (DBNameSpace namespace: nameSpaces)
           {
-            if (namespace.getName().equals(name))
+            if (namespace.getName().equalsIgnoreCase(name))
               {
                 return namespace;
               }
@@ -1597,22 +1654,22 @@ public final class DBStore implements JythonMap {
         rootCategory.addNodeAfter(adminCategory, null);
 
         ns = new DBNameSpace("ownerbase", true);
-        nameSpaces.addElement(ns);
+        nameSpaces.add(ns);
 
         ns = new DBNameSpace("username", true);
-        nameSpaces.addElement(ns);
+        nameSpaces.add(ns);
 
         ns = new DBNameSpace("rolespace", true);
-        nameSpaces.addElement(ns);
+        nameSpaces.add(ns);
 
         ns = new DBNameSpace("persona", true);
-        nameSpaces.addElement(ns);
+        nameSpaces.add(ns);
 
         ns = new DBNameSpace("eventtoken", true);
-        nameSpaces.addElement(ns);
+        nameSpaces.add(ns);
 
         ns = new DBNameSpace("buildertask", true);
-        nameSpaces.addElement(ns);
+        nameSpaces.add(ns);
 
         DBBaseCategory permCategory = new DBBaseCategory(this, "Permissions", adminCategory);
         adminCategory.addNodeAfter(permCategory, null);
@@ -1672,10 +1729,6 @@ public final class DBStore implements JythonMap {
         */
 
         b.setLabelField(SchemaConstants.OwnerNameField);
-
-        // link in the class we specified
-
-        b.createHook();
 
         // and link in the base to this DBStore
 
@@ -1772,10 +1825,6 @@ public final class DBStore implements JythonMap {
 
         b.setLabelField(SchemaConstants.PersonaLabelField);
 
-        // link in the class we specified
-
-        b.createHook();
-
         // and link in the base to this DBStore
 
         setBase(b);
@@ -1829,10 +1878,6 @@ public final class DBStore implements JythonMap {
         b.addFieldToEnd(bf);
 
         b.setLabelField(SchemaConstants.RoleName);
-
-        // link in the class we specified
-
-        b.createHook();
 
         // and link in the base to this DBStore
 
@@ -1905,10 +1950,6 @@ public final class DBStore implements JythonMap {
         b.addFieldToEnd(bf);
 
         b.setLabelField(SchemaConstants.EventToken);
-
-        // link in the class we specified
-
-        b.createHook();
 
         // and link in the base to this DBStore
 
@@ -1996,10 +2037,6 @@ public final class DBStore implements JythonMap {
         // set the label field
 
         b.setLabelField(SchemaConstants.ObjectEventLabel);
-
-        // link in the class we specified
-
-        b.createHook();
 
         // and link in the base to this DBStore
 
@@ -2120,10 +2157,6 @@ public final class DBStore implements JythonMap {
 
         b.setLabelField(SchemaConstants.TaskName);
 
-        // link in the class we specified
-
-        b.createHook();
-
         // and record the base
 
         setBase(b);
@@ -2200,10 +2233,6 @@ public final class DBStore implements JythonMap {
 
         b.setLabelField(SchemaConstants.SyncChannelName);
 
-        // link in the class we specified
-
-        b.createHook();
-
         // and record the base
 
         setBase(b);
@@ -2247,7 +2276,7 @@ public final class DBStore implements JythonMap {
             // that doesn't have it, it must be old indeed!
 
             DBNameSpace ns = new DBNameSpace("buildertask", true);
-            nameSpaces.addElement(ns);
+            nameSpaces.add(ns);
           }
 
         if (getObjectBase(SchemaConstants.SyncChannelBase) == null)
@@ -2327,10 +2356,6 @@ public final class DBStore implements JythonMap {
 
             b.setLabelField(SchemaConstants.SyncChannelName);
 
-            // link in the class we specified
-
-            b.createHook();
-
             setBase(b);
           }
         else
@@ -2342,7 +2367,7 @@ public final class DBStore implements JythonMap {
             // note that we redefined the SyncChannel type to have
             // these fields in DBStore version 2.11.
 
-            DBObjectBase syncBase = (DBObjectBase) getObjectBase(SchemaConstants.SyncChannelBase);
+            DBObjectBase syncBase = getObjectBase(SchemaConstants.SyncChannelBase);
             syncBase.setEditingMode(DBObjectBase.EditingMode.LOADING);
 
             try
@@ -2392,7 +2417,7 @@ public final class DBStore implements JythonMap {
 
         // now make sure that the Task base has the TaskOptionStrings field
 
-        DBObjectBase taskBase = (DBObjectBase) getObjectBase(SchemaConstants.TaskBase);
+        DBObjectBase taskBase = getObjectBase(SchemaConstants.TaskBase);
 
         if (taskBase.getField(SchemaConstants.TaskOptionStrings) == null)
           {
@@ -2409,7 +2434,7 @@ public final class DBStore implements JythonMap {
 
         // make sure that the ObjectEvent type has the new hidden label field
 
-        DBObjectBase objectEventBase = (DBObjectBase) getObjectBase(SchemaConstants.ObjectEventBase);
+        DBObjectBase objectEventBase = getObjectBase(SchemaConstants.ObjectEventBase);
 
         if (objectEventBase.getField(SchemaConstants.ObjectEventLabel) == null)
           {
@@ -2431,7 +2456,7 @@ public final class DBStore implements JythonMap {
         // somehow did not get namespace constrained on the task name
         // field
 
-        bf = (DBObjectBaseField) taskBase.getField(SchemaConstants.TaskName);
+        bf = taskBase.getField(SchemaConstants.TaskName);
 
         if (bf.getNameSpace() == null)
           {
@@ -2447,12 +2472,12 @@ public final class DBStore implements JythonMap {
   }
 
   // debug routine
+
   /**
-   *
    * This is a convenience method used by server-side code to send
    * debug output to stderr and to any attached admin consoles.
-   *
    */
+
   static public void debug(String string)
   {
     if (debug)
@@ -2482,7 +2507,7 @@ public final class DBStore implements JythonMap {
           }
         else
           {
-            DBObjectBaseField labelFieldDef = (DBObjectBaseField) base.getField(base.getLabelField());
+            DBObjectBaseField labelFieldDef = base.getField(base.getLabelField());
 
             if (labelFieldDef.getNameSpace() == null)
               {
@@ -2522,7 +2547,7 @@ public final class DBStore implements JythonMap {
 
     /* -- */
 
-    // manually insert the root (supergash) admin object
+    // create a 'supergash' session to work with
 
     try
       {
@@ -2553,7 +2578,7 @@ public final class DBStore implements JythonMap {
 
             eObj = (DBEditObject) retVal.getObject();
 
-            s = (StringDBField) eObj.getField("Name");
+            s = eObj.getStringField("Name");
             s.setValueLocal(Ganymede.rootname);
           }
 
@@ -2574,12 +2599,12 @@ public final class DBStore implements JythonMap {
 
             // set the user visible name
 
-            s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
+            s =  eObj.getStringField(SchemaConstants.PersonaNameField);
             s.setValueLocal(Ganymede.rootname);
 
             // check to make sure the invisible label field was properly set
 
-            s = (StringDBField) eObj.getField(SchemaConstants.PersonaLabelField);
+            s = eObj.getStringField(SchemaConstants.PersonaLabelField);
 
             if (!s.getValueString().equals(Ganymede.rootname))
               {
@@ -2589,13 +2614,13 @@ public final class DBStore implements JythonMap {
                 s.setValueLocal(Ganymede.rootname);
               }
 
-            p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
+            p = eObj.getPassField(SchemaConstants.PersonaPasswordField);
             p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
 
-            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
+            b = eObj.getBooleanField(SchemaConstants.PersonaAdminConsole);
             b.setValueLocal(Boolean.TRUE);
 
-            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminPower);
+            b = eObj.getBooleanField(SchemaConstants.PersonaAdminPower);
             b.setValueLocal(Boolean.TRUE);
           }
         else
@@ -2609,20 +2634,20 @@ public final class DBStore implements JythonMap {
 
             if (Ganymede.rootname != null && !Ganymede.rootname.equals(""))
               {
-                s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
+                s = eObj.getStringField(SchemaConstants.PersonaNameField);
                 s.setValueLocal(Ganymede.rootname);
               }
 
             if (Ganymede.resetadmin)
               {
-                p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
+                p = eObj.getPassField(SchemaConstants.PersonaPasswordField);
                 p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
               }
 
-            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
+            b = eObj.getBooleanField(SchemaConstants.PersonaAdminConsole);
             b.setValueLocal(Boolean.TRUE);
 
-            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminPower);
+            b = eObj.getBooleanField(SchemaConstants.PersonaAdminPower);
             b.setValueLocal(Boolean.TRUE);
           }
 
@@ -2630,7 +2655,7 @@ public final class DBStore implements JythonMap {
 
         eObj = session.editDBObject(supergash);
 
-        i = (InvidDBField) eObj.getField(SchemaConstants.PersonaGroupsField);
+        i = eObj.getInvidField(SchemaConstants.PersonaGroupsField);
 
         if (!i.containsElement(supergashOwner))
           {
@@ -2659,12 +2684,12 @@ public final class DBStore implements JythonMap {
 
             eObj = (DBEditObject) retVal.getObject();
 
-            s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
+            s = eObj.getStringField(SchemaConstants.PersonaNameField);
             s.setValueLocal(Ganymede.monitornameProperty);
 
             // check our autonomic functioning
 
-            s = (StringDBField) eObj.getField(SchemaConstants.PersonaLabelField);
+            s = eObj.getStringField(SchemaConstants.PersonaLabelField);
 
             if (!s.getValueString().equals(Ganymede.monitornameProperty))
               {
@@ -2676,7 +2701,7 @@ public final class DBStore implements JythonMap {
 
             //      s.setValueLocal(Ganymede.monitornameProperty);
 
-            p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
+            p = eObj.getPassField(SchemaConstants.PersonaPasswordField);
 
             if (Ganymede.defaultmonitorpassProperty != null)
               {
@@ -2687,10 +2712,10 @@ public final class DBStore implements JythonMap {
                 throw new NullPointerException("monitor password property not loaded, can't initialize monitor account");
               }
 
-            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
+            b = eObj.getBooleanField(SchemaConstants.PersonaAdminConsole);
             b.setValueLocal(Boolean.TRUE);
 
-            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminPower);
+            b = eObj.getBooleanField(SchemaConstants.PersonaAdminPower);
             b.setValueLocal(Boolean.FALSE);
           }
 
@@ -2709,12 +2734,12 @@ public final class DBStore implements JythonMap {
 
             eObj = (DBEditObject) retVal.getObject();
 
-            s = (StringDBField) eObj.getField(SchemaConstants.RoleName);
+            s = eObj.getStringField(SchemaConstants.RoleName);
             s.setValueLocal("Default");
 
             // what can users do with objects they own?  Includes users themselves
 
-            pm = (PermissionMatrixDBField) eObj.getField(SchemaConstants.RoleMatrix);
+            pm = eObj.getPermField(SchemaConstants.RoleMatrix);
 
             // view self, nothing else
 

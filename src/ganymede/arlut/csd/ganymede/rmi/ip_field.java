@@ -9,11 +9,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2004
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -61,28 +63,29 @@ import java.rmi.RemoteException;
 public interface ip_field extends db_field {
 
   /**
-   * Returns true if this field is permitted to hold IPv6 addresses.
+   * <p>Returns true if this field is permitted to hold IPv6
+   * addresses.</p>
    */
 
   boolean v6Allowed() throws RemoteException;
-  
+
   /**
-   * Returns true if the (scalar) value stored in this IP field is an
-   * IPV6 address
+   * <p>Returns true if the (scalar) value stored in this IP field is
+   * an IPV6 address.</p>
    */
 
   boolean isIPV6() throws RemoteException;
 
   /**
-   * Returns true if the (scalar) value stored in this IP field is an
-   * IPV6 address
+   * <p>Returns true if the (scalar) value stored in this IP field is
+   * an IPV6 address.</p>
    */
 
   boolean isIPV4() throws RemoteException;
 
   /**
-   * Returns true if the value stored in the given element of this IP
-   * field is an IPV6 address.
+   * <p>Returns true if the value stored in the given element of this
+   * IP field is an IPV6 address.</p>
    *
    * @param index Array index for the value to be checked
    */
@@ -90,8 +93,8 @@ public interface ip_field extends db_field {
   boolean isIPV6(short index) throws RemoteException;
 
   /**
-   * Returns true if the value stored in the given element of this IP
-   * field is an IPV4 address.
+   * <p>Returns true if the value stored in the given element of this
+   * IP field is an IPV4 address.</p>
    *
    * @param index Array index for the value to be checked
    */

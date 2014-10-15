@@ -12,8 +12,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -52,6 +54,8 @@ import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
@@ -61,6 +65,7 @@ import java.util.Vector;
 import javax.swing.ComboBoxEditor;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.MutableComboBoxModel;
@@ -83,7 +88,7 @@ import arlut.csd.Util.TranslationService;
  * @author Jonathan Abbey
  */
 
-public class JInvidChooser extends JPanelCombo implements ActionListener, ItemListener {
+public class JInvidChooser extends JPanelCombo implements ActionListener, ItemListener, FocusListener {
 
   private final static boolean debug = false;
 
@@ -148,6 +153,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
     // "View"
     view = new JButton(ts.l("global.view_button"));
     view.addActionListener(this);
+    view.addFocusListener(this);
 
     editor = new JInvidChooserFieldEditor(this);
     getCombo().setEditor(editor);
@@ -192,10 +198,10 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   /**
    * <p>Set the allowNone bit.</p>
    *
-   * <p>If allowNone is true, then &lt;none&gt; will remain as a
-   * choice in the chooser.  If it is false, &lt;none&gt; will only be
-   * included in the beginning if nothing is set; it will be removed
-   * as soon as anything is chosen.</p>
+   * @param allow If true, then &lt;none&gt; will remain as a choice
+   * in the chooser.  If false, &lt;none&gt; will only be included in
+   * the beginning if nothing is set; it will be removed as soon as
+   * anything is chosen.
    */
 
   public void setAllowNone(boolean allow)
@@ -293,8 +299,13 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   }
 
   /**
-   * This method is used to change the dynamically label of an object in this
-   * JInvidChooser.
+   * <p>This method is used to change the dynamic label of an object in
+   * this JInvidChooser.</p>
+   *
+   * @param invid The Invid of the object that we're being told to
+   * change.
+   * @param newLabel The new label to be displayed for the provided
+   * invid.
    */
 
   public void relabelObject(Invid invid, String newLabel)
@@ -385,7 +396,31 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
       }
   }
 
-  private final void  showErrorMessage(String message) {
+  public void focusLost(FocusEvent e)
+  {
+    if (debug)
+      {
+        System.out.println("StringSelector: focusLost");
+      }
+  }
+
+  public void focusGained(FocusEvent e)
+  {
+    if (debug)
+      {
+        System.out.println("focusGained");
+      }
+
+    JComponent parent = (JComponent) this.getParent();
+
+    if (parent != null)
+      {
+        parent.scrollRectToVisible(this.getBounds());
+      }
+  }
+
+  private final void showErrorMessage(String message)
+  {
     cp.getgclient().showErrorMessage(message);
   }
 }
@@ -423,9 +458,11 @@ class JInvidChooserFieldEditor extends KeyAdapter implements ComboBoxEditor, Act
   {
     this.chooser = chooser;
     this.box = chooser.getCombo();
+    this.box.addFocusListener(chooser);
     theField = new JTextField();
     theField.addKeyListener(this);
     theField.addActionListener(this);
+    theField.addFocusListener(chooser);
   }
 
   public void setItem(Object anObject)
@@ -475,14 +512,15 @@ class JInvidChooserFieldEditor extends KeyAdapter implements ComboBoxEditor, Act
   }
 
   /**
-   * <p>Tap into the text field's key release to see if
-   * we can complete the user's selection.  Note that
-   * we are doing this without synchronizing on the text
-   * field's own user interface.. to do this properly, we might
-   * ought to be doing this with a document model on the text
-   * field, but this works ok.  Since we're keying on key release,
-   * we can expect to be called after the text field has processed
-   * the key press.</p>
+   * <p>Tap into the text field's key release to see if we can
+   * complete the user's selection.  Note that we are doing this
+   * without synchronizing on the text field's own user interface.. to
+   * do this properly, we might ought to be doing this with a document
+   * model on the text field, but this works ok.  Since we're keying
+   * on key release, we can expect to be called after the text field
+   * has processed the key press.</p>
+   *
+   * @param ke The key release event that we're going to react to
    */
 
   public void keyReleased(KeyEvent ke)
@@ -636,8 +674,10 @@ class JInvidChooserFieldEditor extends KeyAdapter implements ComboBoxEditor, Act
   }
 
   /**
-   * Handle the user hitting return in the editable area.. if they hit return
-   * without a reasonable value, revert the combo.
+   * <p>Handle the user hitting return in the editable area.. if they
+   * hit return without a reasonable value, revert the combo.</p>
+   *
+   * @param e The ActionEvent propagated from our text editable area
    */
 
   public void actionPerformed(ActionEvent e)

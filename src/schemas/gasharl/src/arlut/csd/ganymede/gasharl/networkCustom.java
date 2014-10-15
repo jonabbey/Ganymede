@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -126,7 +126,7 @@ public class networkCustom extends DBEditObject {
 
     if (fieldid == networkSchema.NETNUMBER)
       {
-        DBField allocField = (DBField) object.getField(networkSchema.ALLOCRANGE);
+        DBField allocField = object.getField(networkSchema.ALLOCRANGE);
 
         if (allocField == null || !allocField.isDefined())
           {
@@ -139,7 +139,7 @@ public class networkCustom extends DBEditObject {
 
     if (fieldid == networkSchema.ALLOCRANGE)
       {
-        DBField netnumField = (DBField) object.getField(networkSchema.NETNUMBER);
+        DBField netnumField = object.getField(networkSchema.NETNUMBER);
 
         if (netnumField == null || !netnumField.isDefined())
           {
@@ -362,7 +362,7 @@ public class networkCustom extends DBEditObject {
             return name;
           }
 
-        iField = (InvidDBField) object.getField((short) 0); // containing object, the system
+        iField = object.getInvidField((short) 0); // containing object, the system
         tmpInvid = iField.value();
 
         if (editset != null)
@@ -384,5 +384,61 @@ public class networkCustom extends DBEditObject {
       {
         return super.lookupLabel(object);
       }
+  }
+
+  /**
+   * <p>Provides a hook that can be used to approve, disapprove,
+   * and/or transform any values to be set in any field in this
+   * object.</p>
+   *
+   * <p>verifyNewValue can be used to canonicalize a
+   * submitted value.  The verifyNewValue method may call
+   * {@link arlut.csd.ganymede.common.ReturnVal#setTransformedValueObject(java.lang.Object, arlut.csd.ganymede.common.Invid, short) setTransformedValue()}
+   * on the ReturnVal returned in order to substitute a new value for
+   * the provided value prior to any other processing on the server.</p>
+   *
+   * <p>This method is called before any NameSpace checking is done, before the
+   * {@link arlut.csd.ganymede.server.DBEditObject#wizardHook(arlut.csd.ganymede.server.DBField,int,java.lang.Object,java.lang.Object) wizardHook()}
+   * method, and before the appropriate
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeSetValue(arlut.csd.ganymede.server.DBField, Object) finalizeSetValue()},
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeSetElement(arlut.csd.ganymede.server.DBField, int, Object) finalizeSetElement()},
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeAddElement(arlut.csd.ganymede.server.DBField, java.lang.Object) finalizeAddElement()},
+   * or {@link arlut.csd.ganymede.server.DBEditObject#finalizeAddElements(arlut.csd.ganymede.server.DBField, java.util.Vector) finalizeAddElements()}
+   * method is called.</p>
+   *
+   * @param field The DBField contained within this object whose value
+   * is being changed
+   * @param value The value that is being proposed to go into field.
+   *
+   * @return A ReturnVal indicating success or failure.  May be simply
+   * 'null' to indicate success if no feedback need be provided.  If
+   * {@link arlut.csd.ganymede.common.ReturnVal#hasTransformedValue() hasTransformedValue()}
+   * returns true when callled on the returned ReturnVal, the value
+   * returned by {@link arlut.csd.ganymede.common.ReturnVal#getTransformedValueObject() getTransformedValueObject()}
+   * will be used for all further processing in the server, and will
+   * be the value actually saved in the DBStore.
+   */
+
+  public ReturnVal verifyNewValue(DBField field, Object value)
+  {
+    if (field.getID() == networkSchema.ALLOCRANGE)
+      {
+        if (value != null && !"".equals(value))
+          {
+            try
+              {
+                IPv4Range test = new IPv4Range((String) value);
+              }
+            catch (IllegalArgumentException ex)
+              {
+                return Ganymede.createErrorDialog("Invalid network allocation range",
+                                                  ex.getMessage());
+              }
+          }
+
+        return null;
+      }
+
+    return null;
   }
 }

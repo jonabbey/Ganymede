@@ -52,6 +52,7 @@ package arlut.csd.Util;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
@@ -412,25 +413,20 @@ public class VectorUtils {
 
   public static String vectorString(Collection vec, String separator)
   {
-    if (vec == null)
+    if (vec == null || vec.size() == 0)
       {
         return "";
       }
 
     StringBuilder temp = new StringBuilder();
+    Iterator x = vec.iterator();
 
-    boolean first = true;
+    temp.append(x.next());
 
-    for (Object elem: vec)
+    while (x.hasNext())
       {
-        if (!first)
-          {
-            temp.append(separator);
-          }
-
-        temp.append(elem);
-
-        first = false;
+        temp.append(separator);
+        temp.append(x.next());
       }
 
     return temp.toString();

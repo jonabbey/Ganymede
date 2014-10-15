@@ -3,16 +3,16 @@
    ownerTab.java
 
    This class manages the owner tab in the Ganymede client.
-   
+
    Created: 21 June 2005
 
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2005
+
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Contact information
@@ -91,7 +91,7 @@ public class ownerTab extends clientTab {
     try
       {
         contentPane.getVerticalScrollBar().setUnitIncrement(15);
-        invf = (invid_field) parent.getObject().getField(SchemaConstants.OwnerListField);
+        invf = parent.getObject().getInvidField(SchemaConstants.OwnerListField);
         owner_panel = new ownerPanel(invf, parent.isEditable() && invf.isEditable(), parent);
         contentPane.setViewportView(owner_panel);
       }

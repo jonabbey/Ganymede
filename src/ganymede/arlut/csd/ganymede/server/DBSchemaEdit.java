@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -125,6 +125,20 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBSchemaEdit");
+
+  /**
+   * <p>We'll set this to true if the schema has been edited since the
+   * server started.</p>
+   *
+   * <p>FieldOptionDBField checks this to see if it needs to clean out
+   * obsolete values.</p>
+   *
+   * <p>It's a minor optimization, and we'll never bother setting this
+   * back to false even after all the FieldOptionDBFields in the
+   * system have cleaned out obsolete values.</p>
+   */
+
+  static boolean schemaEditedSinceStartup = false;
 
   // ---
 
@@ -357,7 +371,17 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   public Base[] getBases(boolean embedded)
   {
-    return (Base[]) this.getDBBases(embedded);
+    // In RMI (at least in Java 8), we can't just cast an array of a
+    // concrete type and then expect the RMI system to properly create
+    // proxies on the client side.  We have to actually create an
+    // array of the RMI interface type and return that directly.
+
+    DBObjectBase[] bases = this.getDBBases(embedded);
+    Base[] result = new Base[bases.length];
+
+    System.arraycopy(bases, 0, result, 0, bases.length);
+
+    return result;
   }
 
   /**
@@ -432,7 +456,17 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   public Base[] getBases()
   {
-    return (Base[]) this.getDBBases();
+    // In RMI (at least in Java 8), we can't just cast an array of a
+    // concrete type and then expect the RMI system to properly create
+    // proxies on the client side.  We have to actually create an
+    // array of the RMI interface type and return that directly.
+
+    DBObjectBase[] bases = this.getDBBases();
+    Base[] result = new Base[bases.length];
+
+    System.arraycopy(bases, 0, result, 0, bases.length);
+
+    return result;
   }
 
   /**
@@ -464,7 +498,7 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
-  public Base getBase(short id)
+  public DBObjectBase getBase(short id)
   {
     return newBases.get(Short.valueOf(id));
   }
@@ -476,13 +510,13 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
-  public synchronized Base getBase(String baseName)
+  public synchronized DBObjectBase getBase(String baseName)
   {
     for (DBObjectBase base: newBases.values())
       {
         if (base.getName().equalsIgnoreCase(baseName))
           {
-            return (Base) base;
+            return base;
           }
       }
 
@@ -499,7 +533,7 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
-  public synchronized Base createNewBase(Category category, boolean embedded, boolean lowRange)
+  public synchronized DBObjectBase createNewBase(Category category, boolean embedded, boolean lowRange)
   {
     short id;
 
@@ -540,7 +574,7 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
    * itself.
    */
 
-  public synchronized Base createNewBase(Category category, boolean embedded, short id)
+  public synchronized DBObjectBase createNewBase(Category category, boolean embedded, short id)
   {
     DBObjectBase base;
     DBBaseCategory localCat = null;
@@ -654,7 +688,7 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     /* -- */
 
-    base = (DBObjectBase) getBase(baseName);
+    base = getBase(baseName);
 
     if (base == null)
       {
@@ -804,7 +838,7 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     for (index = 0; index < store.nameSpaces.size(); index++)
       {
-        ns = (DBNameSpace) store.nameSpaces.elementAt(index);
+        ns = store.nameSpaces.get(index);
 
         if (ns.getName().equals(name))
           {
@@ -842,7 +876,7 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
           }
       }
 
-    store.nameSpaces.removeElementAt(index);
+    store.nameSpaces.remove(index);
 
     return null;
   }
@@ -870,11 +904,11 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
           {
             DBObjectBase base = obIt.next();
 
-            Vector fieldDefs = base.getFields();
+            Vector<DBObjectBaseField> fieldDefs = base.getFields();
 
             for (int i = 0; ok_to_delete && i < fieldDefs.size(); i++)
               {
-                DBObjectBaseField fieldDef = (DBObjectBaseField) fieldDefs.elementAt(i);
+                DBObjectBaseField fieldDef = fieldDefs.get(i);
 
                 if (fieldDef.getNameSpace() == space)
                   {
@@ -960,6 +994,7 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
         store.objectBases = newBases;
         rootCategory.clearEditor();
         store.rootCategory = rootCategory;
+        store.finishSchemaEditCommit();
       }
 
     // update the serialized representation of the
@@ -1023,6 +1058,8 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
     // GanymedeSession isn't keeping any references to the old
     // DBObjectBase / DBObjectBaseField definitions.
 
+    DBSchemaEdit.schemaEditedSinceStartup = true;
+
     GanymedeAdmin.setState(DBStore.normal_state); // "Normal Operation"
 
     Ganymede.debug("DBSchemaEdit: Re-enabling logins.");
@@ -1073,8 +1110,8 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
       {
         unexportNameSpaces();
 
-        // restore the namespace vector
-        store.nameSpaces.setSize(0);
+        // restore the namespace list
+        store.nameSpaces.clear();
         store.nameSpaces = oldNameSpaces;
 
         for (DBNameSpace ns: store.nameSpaces)

@@ -4,17 +4,19 @@
 
    This class stores a read-only matrix of option strings, organized
    by object type and field id's.
-   
+
    Created: 25 January 2005
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -63,30 +65,31 @@ import arlut.csd.ganymede.server.FieldOptionDBField;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Serializable field option matrix object, used to handle
- * field options for a SyncRunner.</P>
+ * <p>Serializable field option matrix object, used to handle
+ * field options for a SyncRunner.</p>
  *
- * <P>This class stores a read-only Hashtable of Strings, organized by
- * object type and field id's.</P>
+ * <p>This class stores a read-only Hashtable of Strings, organized by
+ * object type and field id's.</p>
  *
- * <P>The keys to the Hashtable are Strings that are encoded by the
+ * <p>The keys to the Hashtable are Strings that are encoded by the
  * static matrixEntry() methods defined in this class.  I probably
  * could have used some sort of class object for the key, but then I
  * would have had to define a key() of similar complexity to the
  * matrixEntry() and decode methods anyway, as well as some sort of
- * on-disk representation for the Ganymede.db file.</P>
+ * on-disk representation for the Ganymede.db file.</p>
  *
- * <P>Here's some examples of the key encoding algorithm:</P>
+ * <p>Here's some examples of the key encoding algorithm:</p>
  *
- * <UL>
- * <LI><CODE>3::/CODE> - Object type 3, option for object itself</LI>
- * <LI><CODE>3:10</CODE> - Object type 3, option for field 10</LI>
- * </UL>
+ * <ul>
+ * <li><code>3::</code> - Object type 3, option for object itself</li>
+ * <li><code>3:10</code> - Object type 3, option for field 10</li>
+ * </ul>
  *
- * <P>FieldOptionMatrix is used on the client in the Field Option dialog,
+ * <p>FieldOptionMatrix is used on the client in the Field Option dialog,
  * and on the server in both
  * {@link arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}
- * and {@link arlut.csd.ganymede.server.SyncRunner SyncRunner}.</P> */
+ * and {@link arlut.csd.ganymede.server.SyncRunner SyncRunner}.</p>
+ */
 
 public class FieldOptionMatrix implements java.io.Serializable {
 
@@ -121,11 +124,11 @@ public class FieldOptionMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Returns a SyncPrefEnum representing this FieldOptionMatrix's 
-   * option on the field &lt;fieldID&gt; in base &lt;baseID&gt;</P>
+   * <p>Returns a SyncPrefEnum representing this FieldOptionMatrix's
+   * option on the field &lt;fieldID&gt; in base &lt;baseID&gt;</p>
    *
-   * <P>If there is no entry in this FieldOptionMatrix for the given
-   * field, getOption() will return null.</P>
+   * <p>If there is no entry in this FieldOptionMatrix for the given
+   * field, getOption() will return null.</p>
    */
 
   public SyncPrefEnum getOption(short baseID, short fieldID)
@@ -134,8 +137,8 @@ public class FieldOptionMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Returns a SyncPrefeEnum representing this FieldOptionMatrix's 
-   * option on the base &lt;baseID&gt;</P>
+   * <p>Returns a SyncPrefeEnum representing this FieldOptionMatrix's
+   * option on the base &lt;baseID&gt;</p>
    */
 
   public SyncPrefEnum getOption(short baseID)
@@ -144,8 +147,8 @@ public class FieldOptionMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Returns a SyncPrefEnum representing this FieldOptionMatrix's 
-   * option on the field &lt;field&gt; in base &lt;base&gt;</P>
+   * <p>Returns a SyncPrefEnum representing this FieldOptionMatrix's
+   * option on the field &lt;field&gt; in base &lt;base&gt;</p>
    */
 
   public SyncPrefEnum getOption(Base base, BaseField field)
@@ -161,8 +164,8 @@ public class FieldOptionMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Returns a SyncPrefEnum representing this FieldOptionMatrix's 
-   * option on the base &lt;base&gt;</P>
+   * <p>Returns a SyncPrefEnum representing this FieldOptionMatrix's
+   * option on the base &lt;base&gt;</p>
    */
 
   public SyncPrefEnum getOption(Base base)
@@ -178,11 +181,11 @@ public class FieldOptionMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Private method to generate a key for use in
-   * our internal Hashtable, used to encode the 
+   * <p>Private method to generate a key for use in
+   * our internal Hashtable, used to encode the
    * option for a given {@link arlut.csd.ganymede.server.DBObjectBase
    * DBObjectBase} and {@link arlut.csd.ganymede.server.DBObjectBaseField
-   * DBObjectBaseField}.</P>
+   * DBObjectBaseField}.</p>
    */
 
   private String matrixEntry(short baseID, short fieldID)
@@ -191,21 +194,21 @@ public class FieldOptionMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Private method to generate a key for use in
+   * <p>Private method to generate a key for use in
    * our internal Hashtable, used to encode the
    * option for a given {@link arlut.csd.ganymede.server.DBObjectBase
-   * DBObjectBase}.</P>
+   * DBObjectBase}.</p>
    */
-  
+
   private String matrixEntry(short baseID)
   {
     return (baseID + "::");
   }
 
   /**
-   * <P>Returns true if the given String encodes the identity of
+   * <p>Returns true if the given String encodes the identity of
    * a {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} and
-   * not a field within a DBObjectBase.</P>
+   * not a field within a DBObjectBase.</p>
    */
 
   private boolean isBase(String matrixEntry)
@@ -214,8 +217,8 @@ public class FieldOptionMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Private helper method used to decode a hash key generated
-   * by the matrixEntry() methods.</P>
+   * <p>Private helper method used to decode a hash key generated
+   * by the matrixEntry() methods.</p>
    *
    * @return Returns the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * object id encoded by the given String.
@@ -241,14 +244,14 @@ public class FieldOptionMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Private helper method used to decode a hash key generated
-   * by the matrixEntry() methods.</P>
+   * <p>Private helper method used to decode a hash key generated
+   * by the matrixEntry() methods.</p>
    *
    * @return Returns the
    * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}
    * object id encoded by the given String.
    */
-  
+
   private short entryField(String matrixKey)
   {
     if (matrixKey.indexOf(':') == -1)
@@ -274,9 +277,9 @@ public class FieldOptionMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Private helper method used to generate a matrixEntry() encoded String
+   * <p>Private helper method used to generate a matrixEntry() encoded String
    * for a single  {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} from
-   * a matrixEntry() encoded String that also includes a field specification.</P>
+   * a matrixEntry() encoded String that also includes a field specification.</p>
    */
 
   private String baseEntry(String matrixKey)
@@ -292,7 +295,7 @@ public class FieldOptionMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Debugging output</P>
+   * <p>Debugging output</p>
    */
 
   public String toString()

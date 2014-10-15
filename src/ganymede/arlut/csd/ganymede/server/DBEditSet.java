@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -131,9 +131,10 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * <p>If a DBEditSet commit() operation fails catastrophically, or if
  * {@link arlut.csd.ganymede.server.DBEditSet#abort() abort()} is
  * called, all DBEditObjects created or checked out during the course
- * of the transaction will be discarded, all DBNameSpace values
- * allocated will be relinquished, and any logging information for the
- * abandoned transaction will be forgotten.</p>
+ * of the transaction will be discarded, all {@link
+ * arlut.csd.ganymede.server.DBNameSpace DBNameSpace} values allocated
+ * will be relinquished, and any logging information for the abandoned
+ * transaction will be forgotten.</p>
  *
  * <p>As if all that wasn't enough, the DBEditSet class also maintains
  * a stack of {@link arlut.csd.ganymede.server.DBCheckPoint
@@ -144,11 +145,13 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * linked operations within a transaction cannot all be completed.</p>
  *
  * <p>Finally, note that the DBEditSet class does not actually track
- * namespace value allocations.. instead, the DBNameSpace class is
+ * namespace value allocations.. instead, the {@link
+ * arlut.csd.ganymede.server.DBNameSpace DBNameSpace} class is
  * responsible for recording a list of values allocated by each active
- * DBEditSet.  When a DBEditSet commits or releases, all DBNameSpace
- * objects in the server are informed of this, whereupon they do their
- * own cleanup.</p>
+ * DBEditSet.  When a DBEditSet commits or releases, all {@link
+ * arlut.csd.ganymede.server.DBNameSpace DBNameSpace} objects in the
+ * server are informed of this, whereupon they do their own
+ * cleanup.</p>
  */
 
 public final class DBEditSet {
@@ -216,7 +219,7 @@ public final class DBEditSet {
    * to keep track of check points performed during the course of this transaction.
    */
 
-  private NamedStack checkpoints = new NamedStack();
+  private NamedStack<DBCheckPoint> checkpoints = new NamedStack<DBCheckPoint>();
 
   /**
    * <p>The writelock acquired during the course of a commit attempt.  We keep
@@ -755,7 +758,7 @@ public final class DBEditSet {
 
     // see if we can find the checkpoint
 
-    point = (DBCheckPoint) checkpoints.pop(name);
+    point = checkpoints.pop(name);
 
     if (point == null)
       {
@@ -796,16 +799,16 @@ public final class DBEditSet {
   }
 
   /**
-   * <p>This brings this transaction back to the state it was
-   * at at the time of the matching checkPoint() call.  Any
-   * objects that were checked out in care of this transaction
-   * since the checkPoint() will be checked back into the
-   * database and made available for other transactions to
-   * access.  All namespace changes made by this transaction
-   * will likewise be rolled back to their state at the
-   * checkpoint.</p>
+   * <p>This brings this transaction back to the state it was at at
+   * the time of the matching checkPoint() call.  Any objects that
+   * were checked out in care of this transaction since the
+   * checkPoint() will be checked back into the database and made
+   * available for other transactions to access.  All namespace
+   * changes made by this transaction will likewise be rolled back to
+   * their state at the checkpoint.</p>
    *
    * @param name An identifier for the checkpoint to be rolled back to.
+   * @return true if the rollback could be performed, false otherwise
    */
 
   public synchronized boolean rollback(String name)
@@ -822,14 +825,17 @@ public final class DBEditSet {
 
         this.mustAbort = true;
 
-        try
+        if (false)
           {
-            // "rollback() called in non-interactive transaction"
-            throw new RuntimeException(ts.l("rollback.non_interactive"));
-          }
-        catch (RuntimeException ex)
-          {
-            Ganymede.logError(ex);
+            try
+              {
+                // "rollback() called in non-interactive transaction"
+                throw new RuntimeException(ts.l("rollback.non_interactive"));
+              }
+            catch (RuntimeException ex)
+              {
+                Ganymede.logError(ex);
+              }
           }
 
         return false;
@@ -1134,15 +1140,15 @@ public final class DBEditSet {
    * This method may block indefinitely, waiting on other transactions
    * which are in the process of modifying the DBStore hashes.</p>
    *
-   * <p>Returns a Vector of DBObjectBases that we have locked if we
+   * <p>Returns a List of DBObjectBases that we have locked if we
    * succeed.</p>
    *
    * <p>Throws a CommitNonFatalException if we can't get the lock.</p>
    */
 
-  private final Vector<DBObjectBase> commit_lockBases() throws CommitNonFatalException
+  private final List<DBObjectBase> commit_lockBases() throws CommitNonFatalException
   {
-    Vector<DBObjectBase> baseSet = new Vector<DBObjectBase>();
+    List<DBObjectBase> baseSet = new ArrayList<DBObjectBase>();
 
     /* -- */
 
@@ -1168,7 +1174,7 @@ public final class DBEditSet {
       {
         wLock = session.openWriteLock(baseSet); // wait for write lock *synchronized*
       }
-    catch (InterruptedException ex)
+   catch (InterruptedException ex)
       {
         Ganymede.debug(ts.l("commit_lockBases.interrupted", String.valueOf(session.getKey())));
 
@@ -1347,13 +1353,13 @@ public final class DBEditSet {
     // otherwise, we always insist on the label field being present.
     // We'll check that up front.
 
-    DBField labelField = eObj.retrieveField(eObj.getLabelFieldID());
+    DBField labelField = eObj.getField(eObj.getLabelFieldID());
 
     if (labelField == null || !labelField.isDefined())
       {
         // the label field is missing.  look it up.
 
-        DBObjectBaseField fieldDef = (DBObjectBaseField) eObj.getBase().getField(eObj.getLabelFieldID());
+        DBObjectBaseField fieldDef = eObj.getBase().getField(eObj.getLabelFieldID());
 
         missingFields.add(fieldDef.getName());
       }
@@ -1451,7 +1457,7 @@ public final class DBEditSet {
 
             if (!eObj.isEmbedded())
               {
-                df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
+                df = eObj.getDateField(SchemaConstants.CreationDateField);
 
                 // If we're processing an XML transaction and the XML
                 // transaction already specified a creation date (the
@@ -1471,7 +1477,7 @@ public final class DBEditSet {
 
                 // ditto for the creator info field.
 
-                sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
+                sf = eObj.getStringField(SchemaConstants.CreatorField);
 
                 if (!allowXMLHistoryOverride || !sf.isDefined())
                   {
@@ -1485,13 +1491,13 @@ public final class DBEditSet {
 
             if (!eObj.isEmbedded())
               {
-                df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
+                df = eObj.getDateField(SchemaConstants.ModificationDateField);
                 if (!allowXMLHistoryOverride || !df.isDefined())
                   {
                     df.value = modDate;
                   }
 
-                sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
+                sf = eObj.getStringField(SchemaConstants.ModifierField);
                 if (!allowXMLHistoryOverride || !sf.isDefined())
                   {
                     sf.value = result;
@@ -2154,7 +2160,7 @@ public final class DBEditSet {
                     continue;
                   }
 
-                DBField origField = (DBField) origObj.getField(fieldDef.getID());
+                DBField origField = origObj.getField(fieldDef.getID());
 
                 if (origField != null && origField.isDefined())
                   {
@@ -2355,7 +2361,7 @@ public final class DBEditSet {
 
         base.put(new DBObject(eObj));
 
-        // (note that we can't use a no-sync put above, since
+        // note that we can't use a no-sync put above, since
         // we don't prevent asynchronous viewDBObject().
 
         if (getGSession() != null)
@@ -2381,7 +2387,7 @@ public final class DBEditSet {
 
         base.remove(eObj.getID());
 
-        // (note that we can't use a no-sync remove above, since
+        // note that we can't use a no-sync remove above, since
         // we don't prevent asynchronous viewDBObject().
 
         session.GSession.checkIn(); // *synchronized*
@@ -2478,7 +2484,7 @@ public final class DBEditSet {
       {
         if (wLock != null)
           {
-            if (wLock.inEstablish)
+            if (wLock.isEstablishing())
               {
                 return false;
               }

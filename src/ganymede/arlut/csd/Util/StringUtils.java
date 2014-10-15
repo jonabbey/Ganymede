@@ -159,8 +159,8 @@ public class StringUtils {
    * no characters not contained within legalChars, containsOnly() will
    * return true, otherwise it will return false.</p>
    *
-   * <p>Note that containsOnly will always return true if inputString is
-   * null.</p>
+   * <p>Note that containsOnly will always return true if inputString
+   * is null or empty.</p>
    */
 
   public static boolean containsOnly(String inputString, String legalChars)
@@ -180,6 +180,39 @@ public class StringUtils {
         char c = inputString.charAt(i);
 
         if (legalChars.indexOf(c) == -1)
+          {
+            return false;
+          }
+      }
+
+    return true;
+  }
+
+  /**
+   * <p>Returns true if inputString contains each and every character
+   * in searchChars.</p>
+   *
+   * <p>Note that containsAll will always return true if searchChars
+   * is null or empty.</p>
+   */
+
+  public static boolean containsAll(String inputString, String searchChars)
+  {
+    if (searchChars == null || searchChars.length() == 0)
+      {
+        return true;
+      }
+
+    if (inputString == null || inputString.length() == 0)
+      {
+        return false;
+      }
+
+    for (int i = 0; i < searchChars.length(); i++)
+      {
+        char c = searchChars.charAt(i);
+
+        if (inputString.indexOf(c) == -1)
           {
             return false;
           }
@@ -358,36 +391,9 @@ public class StringUtils {
 
   public static String[] split(String inputString, String splitString)
   {
-    int index;
-    int count = StringUtils.count(inputString, splitString);
-    int upperBound = inputString.length();
-    String results[] = new String[count+1];
+    Pattern splitPat = Pattern.compile(Pattern.quote(splitString));
 
-    /* -- */
-
-    index = 0;
-    count = 0;
-
-    while (index < upperBound)
-      {
-        int nextIndex = inputString.indexOf(splitString, index);
-
-        if (nextIndex == -1)
-          {
-            results[count++] = inputString.substring(index);
-            return results;
-          }
-        else
-          {
-            results[count++] = inputString.substring(index, nextIndex);
-          }
-
-        index = nextIndex + splitString.length();
-      }
-
-    // we should never get here
-
-    return results;
+    return splitPat.split(inputString, -1);
   }
 
   /**
@@ -743,6 +749,29 @@ public class StringUtils {
           }
       }
 
+    results = StringUtils.split("...", ".");
+
+    if (results.length == 4)
+      {
+        System.out.println("Pass split test 1");
+      }
+    else
+      {
+        System.out.println("Fail split test 1");
+      }
+
+    for (int i = 0; i < results.length; i++)
+      {
+        if (results[i] == null)
+          {
+            System.out.println("Fail split test 2 [" + i + "]");
+          }
+        else
+          {
+            System.out.println("Pass split test 2 [" + i + "]");
+          }
+      }
+
     System.out.println("\n-------------------- containsOnly() Tests --------------------\n");
 
 
@@ -780,6 +809,53 @@ public class StringUtils {
     else
       {
         System.out.println("Fail test 4");
+      }
+
+    System.out.println("\n-------------------- containsAll() Tests --------------------\n");
+
+    if (StringUtils.containsAll("test", null))
+      {
+        System.out.println("Pass test 5");
+      }
+    else
+      {
+        System.out.println("Fail test 5");
+      }
+
+    if (StringUtils.containsAll("test", ""))
+      {
+        System.out.println("Pass test 6");
+      }
+    else
+      {
+        System.out.println("Fail test 6");
+      }
+
+    if (StringUtils.containsAll("test", "t"))
+      {
+        System.out.println("Pass test 7");
+      }
+    else
+      {
+        System.out.println("Fail test 7");
+      }
+
+    if (StringUtils.containsAll("test", "tset"))
+      {
+        System.out.println("Pass test 8");
+      }
+    else
+      {
+        System.out.println("Fail test 8");
+      }
+
+    if (!StringUtils.containsAll("test", "test!"))
+      {
+        System.out.println("Pass test 9");
+      }
+    else
+      {
+        System.out.println("Fail test 9");
       }
   }
 }

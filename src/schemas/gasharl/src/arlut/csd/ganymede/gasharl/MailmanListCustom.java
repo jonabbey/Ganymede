@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -328,7 +328,7 @@ public class MailmanListCustom extends DBEditObject implements SchemaConstants, 
     ReturnVal retVal = new ReturnVal(true, true);
     StringDBField stringfield;
 
-    stringfield = (StringDBField) getField(ALIASES);
+    stringfield = getStringField(ALIASES);
 
     boolean succeed = false;
 

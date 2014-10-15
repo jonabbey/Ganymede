@@ -2,12 +2,7 @@
 
    Invid.java
 
-   Non-remote object;  used as local on client and server,
-   passed as value object.
-
-   Invid's are intended to be immutable once created.
-
-   Data type for invid objects;
+   Final immutable object pointer type for the Ganymede system.
 
    Created: 11 April 1996
 
@@ -17,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -53,8 +48,11 @@
 
 package arlut.csd.ganymede.common;
 
-import java.io.DataInput;
+import java.io.Externalizable;
 import java.io.DataOutput;
+import java.io.DataInput;
+import java.io.ObjectOutput;
+import java.io.ObjectInput;
 import java.io.IOException;
 
 /*------------------------------------------------------------------------------
@@ -70,19 +68,18 @@ import java.io.IOException;
  * Because of these properties, the Invid can be used as a persistent
  * object pointer type.</p>
  *
- * <p>Invid's are used extensively in the server to track pointer
- * relationships between objects.  Invid's are also used by the client
+ * <p>Invids are used extensively in the server to track pointer
+ * relationships between objects.  Invids are also used by the client
  * to identify objects to be viewed, edited, deleted, etc.  Basically
  * whenever any code in Ganymede deals with a reference to an object,
- * it is done through the use of Invid's.</p>
+ * it is done through the use of Invids.</p>
  *
  * @see arlut.csd.ganymede.server.InvidDBField
  * @see arlut.csd.ganymede.rmi.Session
  */
 
-public final class Invid implements java.io.Serializable {
+public final class Invid implements java.io.Externalizable {
 
-  static final long serialVersionUID = 5357151693275369893L;
   static private InvidAllocator allocator = null;
   static private int counter = 0;
   static private int reuseCounter = 0;
@@ -103,9 +100,9 @@ public final class Invid implements java.io.Serializable {
    * possibly pre-existing Invid object, given a short/int
    * combination.</p>
    *
-   * <p>The purpose of this allocator is to allow the Ganymede server to
-   * re-use previously created Invids in the server to minimize memory
-   * usage, in a fashion similar to the Java language's
+   * <p>The purpose of this allocator is to allow the Ganymede server
+   * to re-use previously created Invids in the server to minimize
+   * memory usage, in a fashion similar to the Java language's
    * java.lang.String.intern() scheme.</p>
    */
 
@@ -115,8 +112,8 @@ public final class Invid implements java.io.Serializable {
   }
 
   /**
-   * Receive Factory method for Invid's.  Can do caching/object reuse if
-   * an {@link arlut.csd.ganymede.common.InvidAllocator} has been set.
+   * Factory method for Invids.  Can do caching/object reuse if an
+   * {@link arlut.csd.ganymede.common.InvidAllocator} has been set.
    */
 
   static final public Invid createInvid(short type, int num)
@@ -128,24 +125,12 @@ public final class Invid implements java.io.Serializable {
       }
     else
       {
-        Invid newInvid = new Invid(type, num);
-        Invid internedInvid = newInvid.intern();
-
-        if (newInvid == internedInvid)
-          {
-            counter++;          // we're the initial creation of this invid
-          }
-        else
-          {
-            reuseCounter++;
-          }
-
-        return internedInvid;
+        return new Invid(type, num).intern();
       }
   }
 
   /**
-   * Receive Factory method for Invid's.  Can do caching/object reuse
+   * Receive Factory method for Invids.  Can do caching/object reuse
    * if an {@link arlut.csd.ganymede.common.InvidAllocator} has been
    * set.
    */
@@ -156,9 +141,9 @@ public final class Invid implements java.io.Serializable {
   }
 
   /**
-   * Factory method for Invid's.  String should be a pair of colon
-   * separated numbers, in the form 5:134 where the first number is
-   * the short type and the second is the int object number. Can do
+   * String Factory method for Invids.  String should be a pair of
+   * colon separated numbers, in the form 5:134 where the first number
+   * is the short type and the second is the int object number. Can do
    * efficient memory re-use if an {@link
    * arlut.csd.ganymede.common.InvidAllocator} has been set.
    */
@@ -166,12 +151,11 @@ public final class Invid implements java.io.Serializable {
   static final public Invid createInvid(String string)
   {
     String first = string.substring(0, string.indexOf(':'));
-    String last = string.substring(string.indexOf(':')+1);
+    String last = string.substring(string.indexOf(':') + 1);
 
     try
       {
-        return createInvid(Short.valueOf(first).shortValue(),
-                           Integer.valueOf(last).intValue());
+        return createInvid(Short.parseShort(first), Integer.parseInt(last));
       }
     catch (NumberFormatException ex)
       {
@@ -191,15 +175,23 @@ public final class Invid implements java.io.Serializable {
 
   // ---
 
-  private final short type;
-  private final int num;
+  private short type;
+  private int num;
   private transient boolean interned = false;
 
   // constructor
 
   /**
-   * Private constructor.  Use the static createInvid methods to
-   * create Invids, please.
+   * Default no-arg public constructor for externalization
+   */
+
+  public Invid()
+  {
+  }
+
+  /**
+   * Private constructor.  Use the static createInvid factory methods
+   * to create Invids, please.
    */
 
   private Invid(short type, int num)
@@ -262,7 +254,7 @@ public final class Invid implements java.io.Serializable {
    * <p>As with java.lang.String, Invids are immutable objects that we
    * may be able to usefully pool for object re-use.  The result of an
    * intern method is a single immutable Invid that will be reused by
-   * all other Invid's that point to the same object in the Ganymede
+   * all other Invids that point to the same object in the Ganymede
    * server (if you're calling intern() on the server, that is.)</p>
    *
    * <p>If an Invid Allocator has not been set with setAllocator(),
@@ -282,29 +274,25 @@ public final class Invid implements java.io.Serializable {
    * redundant copy.</p>
    */
 
-  public Invid intern()
+  public synchronized Invid intern()
   {
     if (interned || allocator == null)
       {
         return this;
       }
-    else
-      {
-        Invid result = allocator.findInvid(this);
 
-        if (result == null)
-          {
-            counter++;
-            allocator.storeInvid(this);
-            this.interned = true;
-            return this;
-          }
-        else
-          {
-            reuseCounter++;
-            return result;
-          }
+    Invid result = allocator.findInvid(this);
+
+    if (result != null)
+      {
+        reuseCounter++;
+        return result;
       }
+
+    counter++;
+    allocator.storeInvid(this);
+    this.interned = true;
+    return this;
   }
 
   // pull the values
@@ -324,10 +312,27 @@ public final class Invid implements java.io.Serializable {
     return this.interned;
   }
 
+  // externalization methods
+
+  public void writeExternal(ObjectOutput out) throws IOException
+  {
+    out.writeShort(this.type);
+    out.writeInt(this.num);
+  }
+
+  public void readExternal(ObjectInput in) throws IOException
+  {
+    if (this.interned)
+      {
+        throw new RuntimeException("Can't change interned invid.");
+      }
+
+    this.type = in.readShort();
+    this.num = in.readInt();
+  }
+
   /**
-   *
-   * Method to write this Invid out to a stream.
-   *
+   * <p>Method to write this Invid out to a stream.</p>
    */
 
   public void emit(DataOutput out) throws IOException

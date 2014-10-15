@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -73,7 +73,7 @@ import arlut.csd.Util.TranslationService;
  *
  * <p>Example:</p>
  *
- * <code><blockquote><pre>
+ * <pre>
  * DialogRsrc r = new DialogRsrc(frame, "Simple dialog", "Give us some information:");
  * r.addString("Name:");
  * r.addBoolean("Married:");
@@ -85,7 +85,7 @@ import arlut.csd.Util.TranslationService;
  * } else {
  *     //process hashtable...
  * }
- * </pre></blockquote></code>
+ * </pre>
  */
 
 public class DialogRsrc {

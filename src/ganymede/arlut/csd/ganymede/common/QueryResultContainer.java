@@ -1,7 +1,7 @@
 /*
 
    QueryResultContainer.java
- 
+
    This class presents a List-interface on top of a query result set.
 
    Created: 16 September 2004
@@ -9,11 +9,13 @@
    Module By: Deepak Giridharagopal, deepak@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2014
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -59,11 +61,13 @@ import java.util.Vector;
 import java.util.Map;
 
 /**
- * This class presents a List-interface on top of a query result set.
- *  
- * Each item in the list can be either an Object array, or a Map,
- * depending on how the user has contructed this container.
+ * <p>This class presents a List-interface on top of a query result
+ * set.</p>
+ *
+ * <p>Each item in the list can be either an Object array, or a Map,
+ * depending on how the user has contructed this container.</p>
  */
+
 public class QueryResultContainer implements List, Serializable {
   static final long serialVersionUID = -8277390343373928867L;
 
@@ -71,14 +75,16 @@ public class QueryResultContainer implements List, Serializable {
    * An ordered list of headers that correspond to each column in this result
    * set.
    */
+
   List headers = null;
-  
+
   /**
    * An ordered list of Shorts that correspond to the DBField ID's of each
    * column in this result set.
    */
+
   List types = null;
-  
+
   /**
    * A list of Object[]. This represents the actual result set. The list of
    * rows is sorted in the order each row was added to the result set via
@@ -88,13 +94,15 @@ public class QueryResultContainer implements List, Serializable {
    * value. A StringDBField column, for example, will yield String objects while
    * a NumericDBField will yield an Integer.
    */
+
   List rows = null;
-  
+
   /**
    * An ordered list of ObjectHandles that correspond to the DBObject
    * represented in each row of the result set. There is one handle per
    * row.
    */
+
   List handles = null;
 
   /**
@@ -102,43 +110,47 @@ public class QueryResultContainer implements List, Serializable {
    * object referenced in the result set. This list has the same order of the
    * rows of the result set.
    */
+
   transient Vector labelList = null;
-   
+
    /**
    * Optimization structure that speeds up obtaining a list of invids for each
    * object referenced in the result set. This list has the same order of the
    * rows of the result set.
-   */ 
+   */
+
   transient Vector invidList = null;
-  
+
   /**
    * Optimization structure that speeds up obtaining an Invid given a DBObject's
    * label. This is not a general-purpose lookup method, as it only applies to
    * DBObjects referenced by this result set.
-   * 
+   *
    * FIXME: There is an outstanding bug here. Using a Hash for this purpose
    * assumes that there is a 1-to-1 mapping between labels and the DBObjects
    * they represent. However, it's possible to have multiple DBObjects with the
    * same Invids. In other words, the size of the keyset (or value set) of the
    * hash may be smaller than the number of rows.
    */
+
   transient Map labelHash = null;
-  
+
   /**
    * Optimization structure that speeds up obtaining an object's label given that
    * DBObject's invid. This is not a general-purpose lookup method, as it only
    * applies to DBObjects referenced by this result set.
    */
+
   transient Map invidHash = null;
 
   /*
    * These are constants used to define the type of the rows in the result set.
    */
-  
+
   public static final int ARRAYROWS = 0;
   public static final int MAPROWS = 1;
-  int rowType = ARRAYROWS;  
-  
+  int rowType = ARRAYROWS;
+
   public QueryResultContainer()
   {
     handles = new Vector();
@@ -148,29 +160,31 @@ public class QueryResultContainer implements List, Serializable {
   }
 
   /**
-   * The rowType specifies what composition the result set has. It can either
-   * be a List of array objects (where each array represents one row of the
-   * result set and the array elements are ordered corresponding to the order
-   * of this container's header fields) or it can be a List of Maps (where each
-   * Map represents one row of the result set and the Map's keys are the headers
-   * defined for this container).
-   * 
+   * <p>The rowType specifies what composition the result set has. It
+   * can either be a List of array objects (where each array
+   * represents one row of the result set and the array elements are
+   * ordered corresponding to the order of this container's header
+   * fields) or it can be a List of Maps (where each Map represents
+   * one row of the result set and the Map's keys are the headers
+   * defined for this container).</p>
+   *
    * @param rowType Either QueryResultContainer.ARRAYROWS or QueryResultContainer.MAPROWS
    */
-  
+
   public QueryResultContainer(int rowType)
   {
     this();
     this.rowType = rowType;
   }
-  
+
   /**
-   * Adds a field header to this query result. Field headers are used to map
-   * column numbers in the result set to column identifiers; the first field
-   * header added using this method will be the name of column 0, the second
-   * will be the name of column 1, etc.
+   * <p>Adds a field header to this query result. Field headers are
+   * used to map column numbers in the result set to column
+   * identifiers; the first field header added using this method will
+   * be the name of column 0, the second will be the name of column 1,
+   * etc.</p>
    */
-   
+
   public synchronized void addField(String fieldName, Short fieldID)
   {
     headers.add(fieldName);
@@ -178,11 +192,9 @@ public class QueryResultContainer implements List, Serializable {
   }
 
   /**
-   *
-   * This method is used to add an object's information to
+   * <p>This method is used to add an object's information to
    * the QueryResult's set of objects that matched the original
-   * query.
-   *
+   * query.</p>
    */
 
   public void addRow(Invid invid, String label, Object[] row, boolean editable)
@@ -191,26 +203,21 @@ public class QueryResultContainer implements List, Serializable {
   }
 
   /**
-   *
-   * This method is used to add an object's information to
+   * <p>This method is used to add an object's information to
    * the QueryResult's set of objects that matched the original
-   * query.
-   *
+   * query.</p>
    */
 
   public void addRow(ObjectHandle handle, Object[] row)
   {
-    addRow(handle.invid, handle.label, row, handle.inactive,
-           handle.expirationSet, handle.removalSet,
-           handle.editable);
+    addRow(handle.getInvid(), handle.getLabel(), row, handle.isInactive(),
+           handle.isExpirationSet(), handle.isRemovalSet(),
+           handle.isEditable());
   }
 
   /**
-   *
-   * This method is used to add an object's information to
-   * the QueryResult's set of objects that matched the original
-   * query.
-   *
+   * <p>This method is used to add an object's information to the
+   * QueryResult's set of objects that matched the original query.</p>
    */
 
   public synchronized void addRow(Invid invid, String label,
@@ -243,22 +250,21 @@ public class QueryResultContainer implements List, Serializable {
       {
         rows.add(convertArrayRowToMapRow(row));
       }
-    else 
+    else
       {
         rows.add(row);
       }
   }
 
   /**
+   * <p>This method is used by arlut.csd.ganymede.client.objectList to
+   * get access to the raw and sorted vector of ObjectHandle's
+   * post-serialization.</p>
    *
-   * This method is used by arlut.csd.ganymede.client.objectList to
-   * get access to the raw and sorted vector of ObjectHandle's post-serialization.<br><br>
-   *
-   * Note that this method does not clone our handles vector, we'll just
-   * assume that whatever the objectList class on the client does to this
-   * vector, we're not going to disturb anyone else who will be looking
-   * at the handle list on this query result object. 
-   *
+   * <p>Note that this method does not clone our handles vector, we'll
+   * just assume that whatever the objectList class on the client does
+   * to this vector, we're not going to disturb anyone else who will
+   * be looking at the handle list on this query result object.</p>
    */
 
   public synchronized List getHandles()
@@ -269,7 +275,7 @@ public class QueryResultContainer implements List, Serializable {
   /**
    * Grab the Invid of the object represented in the given row of the
    * result set.
-   * 
+   *
    * @param row
    * @return handle to the object
    */
@@ -283,7 +289,7 @@ public class QueryResultContainer implements List, Serializable {
    * Grab the list of Invids that are contained in this result set.
    * The invids returned are in the same order that they were added
    * to this result set.
-   * 
+   *
    * @return list of Invids
    */
 
@@ -299,9 +305,9 @@ public class QueryResultContainer implements List, Serializable {
 
   /**
    * Grab a list of the labels of each object contained in this result set.
-   * The labels returned are in the same order their corresponding objects were 
+   * The labels returned are in the same order their corresponding objects were
    * added to this result set.
-   * 
+   *
    * @return list of Invids
    */
 
@@ -318,11 +324,11 @@ public class QueryResultContainer implements List, Serializable {
   /**
    * Grabs the label for the object represented in the given row of the result
    * set.
-   * 
+   *
    * @param row
    * @return handle to the label
    */
-  
+
   public synchronized String getLabel(int row)
   {
     return ((ObjectHandle) handles.get(row)).getLabel();
@@ -347,12 +353,12 @@ public class QueryResultContainer implements List, Serializable {
       {
         rebuildTransients();
       }
-    
+
     return invidHash.containsKey(invid);
   }
 
   /**
-   * Returns boolean showing if the result set contains an object with the 
+   * Returns boolean showing if the result set contains an object with the
    * given label.
    */
 
@@ -362,7 +368,7 @@ public class QueryResultContainer implements List, Serializable {
       {
         rebuildTransients();
       }
-    
+
     return labelHash.containsKey(label);
   }
 
@@ -413,10 +419,11 @@ public class QueryResultContainer implements List, Serializable {
    * {@link arlut.csd.ganymede.common.QueryResultContainer
    * getTypes()}.</p>
    */
-  
+
   public synchronized Vector getFieldRow(int rowNumber)
   {
     Object[] row;
+
     if (rowType == MAPROWS)
       {
         row = convertMapRowToArrayRow((Map) rows.get(rowNumber));
@@ -425,16 +432,19 @@ public class QueryResultContainer implements List, Serializable {
       {
         row = (Object[]) rows.get(rowNumber);
       }
+
     return new Vector(Arrays.asList(row));
   }
 
   /**
    * <p>This method can be called on the client to obtain an Object
    * encoding the result value for the <i>col</i>th field in the
-   * <i>row</i>th object.</p>  These Objects may be a {@link java.lang.Double Double}
-   * for Float fields, an {@link java.lang.Integer Integer} for Numeric fields,
-   * a {@link java.util.Date Date} for Date fields, or a String for other
-   * fields.</p>
+   * <i>row</i>th object.</p>
+   *
+   * <p>These Objects may be a {@link java.lang.Double Double} for
+   * Float fields, an {@link java.lang.Integer Integer} for Numeric
+   * fields, a {@link java.util.Date Date} for Date fields, or a
+   * String for other fields.</p>
    */
 
   public synchronized Object getResult(int row, int col)
@@ -460,13 +470,12 @@ public class QueryResultContainer implements List, Serializable {
   {
     return rows.size();
   }
-  
+
   /**
    * Used to rebuild any ancillary data-structures that aren't preserved during
    * serialization/deserialization.
-   * 
    */
-  
+
   private synchronized void rebuildTransients()
   {
     invidList = new Vector(handles.size());
@@ -490,7 +499,7 @@ public class QueryResultContainer implements List, Serializable {
   /**
    * Takes a row as represented in a result set with row type ARRAYROWS and
    * converts it to one that matches the row type MAPROWS.
-   * 
+   *
    * @param row
    * @return newRow
    */
@@ -506,11 +515,11 @@ public class QueryResultContainer implements List, Serializable {
       }
     return newRow;
   }
-  
+
   /**
    * Takes a row as represented in a result set with row type MAPROWS and
    * converts it to one that matches the row type ARRAYROWS.
-   * 
+   *
    * @param row
    * @return newRow
    */
@@ -526,14 +535,15 @@ public class QueryResultContainer implements List, Serializable {
       }
     return newRow;
   }
-  
+
   /**
    * Changes this result set from using rows of one type to rows of another.
    * This method will preserve the existing row/header ordering.
-   * 
+   *
    * @param newRowType This should be either MAPROWS or ARRAYROWS, which are
    * both constants defined in this class.
    */
+
   public synchronized void changeRowType(int newRowType)
   {
     /* If we're not really changing anything, then bail out */
@@ -545,7 +555,7 @@ public class QueryResultContainer implements List, Serializable {
       {
         rowType = newRowType;
       }
-    
+
     Object row;
     for (int i=0; i<handles.size(); i++)
       {
@@ -563,210 +573,244 @@ public class QueryResultContainer implements List, Serializable {
 
   /* ------------------------------------------------------------------------
    * This is the start of the List interface implementation
-   * 
+   *
    */
-  
-  /* This is a no-op since a DumpResult is immutable.
-   * 
+
+  /**
+   * This is a no-op since a QueryResultContainer is immutable.
+   *
    * @see java.util.List#add(int, java.lang.Object)
    */
+
   public void add(int index, Object element)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* This is a no-op since a DumpResult is immutable.
-   * 
+
+  /**
+   * This is a no-op since a QueryResultContainer is immutable.
+   *
    * @see java.util.Collection#add(java.lang.Object)
    */
+
   public boolean add(Object o)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* This is a no-op since DumpResult is immutable.
-   * 
+
+  /**
+   * This is a no-op since QueryResultContainer is immutable.
+   *
    * @see java.util.Collection#addAll(java.util.Collection)
    */
+
   public boolean addAll(Collection c)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* This is a no-op since DumpResult is immutable.
-   * 
+
+  /**
+   * This is a no-op since QueryResultContainer is immutable.
+   *
    * @see java.util.List#addAll(int, java.util.Collection)
    */
+
   public boolean addAll(int index, Collection c)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* This is a no-op since DumpResult is immutable.
-   * 
+
+  /**
+   * This is a no-op since QueryResultContainer is immutable.
+   *
    * @see java.util.Collection#clear()
    */
+
   public void clear()
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* 
+
+  /**
    * @see java.util.Collection#contains(java.lang.Object)
    */
+
   public synchronized boolean contains(Object o)
   {
     return rows.contains(o);
   }
-  
-  /* 
+
+  /**
    * @see java.util.Collection#containsAll(java.util.Collection)
    */
+
   public synchronized boolean containsAll(Collection c)
   {
     return rows.containsAll(c);
   }
-  
-  /* 
+
+  /**
    * @see java.util.List#get(int)
    */
+
   public synchronized Object get(int index)
   {
     return rows.get(index);
   }
-  
-  /* 
+
+  /**
    * @see java.util.List#indexOf(java.lang.Object)
    */
+
   public synchronized int indexOf(Object o)
   {
     return rows.indexOf(o);
   }
-  
-  /* 
+
+  /**
    * @see java.util.Collection#isEmpty()
    */
+
   public synchronized boolean isEmpty()
   {
     return rows.isEmpty();
   }
-  
-  /* 
+
+  /**
    * @see java.util.Collection#iterator()
    */
+
   public synchronized Iterator iterator()
   {
     return rows.iterator();
   }
-  
-  /* 
+
+  /**
    * @see java.util.List#lastIndexOf(java.lang.Object)
    */
+
   public synchronized int lastIndexOf(Object o)
   {
     return rows.lastIndexOf(o);
   }
-  
-  /* 
+
+  /**
    * @see java.util.List#listIterator()
    */
+
   public synchronized ListIterator listIterator()
   {
     return rows.listIterator();
   }
-  
-  /* 
+
+  /**
    * @see java.util.List#listIterator(int)
    */
+
   public synchronized ListIterator listIterator(int index)
   {
     return rows.listIterator(index);
   }
-  
-  /* This is a no-op since DumpResult is immutable.
-   * 
+
+  /**
+   * This is a no-op since QueryResultContainer is immutable.
+   *
    * @see java.util.List#remove(int)
    */
+
   public Object remove(int index)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* This is a no-op since DumpResult is immutable.
+
+  /**
+   * This is a no-op since QueryResultContainer is immutable.
    *
    * @see java.util.Collection#remove(java.lang.Object)
    */
+
   public boolean remove(Object o)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* This is a no-op since DumpResult is immutable.
-   * 
+
+  /**
+   * This is a no-op since QueryResultContainer is immutable.
+   *
    * @see java.util.Collection#removeAll(java.util.Collection)
    */
+
   public boolean removeAll(Collection c)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* This is a no-op since DumpResult is immutable.
-   * 
+
+  /**
+   * This is a no-op since QueryResultContainer is immutable.
+   *
    * @see java.util.Collection#retainAll(java.util.Collection)
    */
+
   public boolean retainAll(Collection c)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* This is a no-op since DumpResult is immutable.
-   * 
+
+  /**
+   * This is a no-op since QueryResultContainer is immutable.
+   *
    * @see java.util.List#set(int, java.lang.Object)
    */
+
   public Object set(int index, Object element)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* 
+
+  /**
    * @see java.util.Collection#size()
    */
+
   public synchronized int size()
   {
     return rows.size();
   }
-  
-  /* 
+
+  /**
    * @see java.util.List#subList(int, int)
    */
+
   public synchronized List subList(int fromIndex, int toIndex)
   {
     return rows.subList(fromIndex, toIndex);
   }
-  
-  /* 
+
+  /**
    * @see java.util.Collection#toArray()
    */
+
   public synchronized Object[] toArray()
   {
     return rows.toArray();
   }
-  
-  /* 
+
+  /**
    * @see java.util.Collection#toArray(java.lang.Object[])
    */
+
   public synchronized Object[] toArray(Object[] a)
   {
     return rows.toArray(a);
   }
 
-  /*
+  /**
    * @see java.lang.Object#toString()
    */
+
   public String toString()
   {
     StringBuilder result = new StringBuilder();
-    
+
     for (Iterator iter = headers.iterator(); iter.hasNext();)
       {
         result.append((String) iter.next() + ":\t");
@@ -791,7 +835,7 @@ public class QueryResultContainer implements List, Serializable {
           }
         result.append("\n");
       }
-    
+
     return result.toString();
   }
 }

@@ -1129,10 +1129,11 @@ public class PasswordDBField extends DBField implements pass_field {
   /**
    * <p>Standard {@link arlut.csd.ganymede.rmi.db_field db_field}
    * method to retrieve the value of this field.  Because we are
-   * holding sensitive password information, this method always throws
-   * an IllegalAccessException.. we don't want to make password values
-   * available to a remote client under any circumstances.</p>
+   * holding sensitive password information, this method always
+   * returns null. We don't want to make password values available to
+   * a remote client under any circumstances.</p>
    *
+   * @return null
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
@@ -1142,14 +1143,14 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * <po>Returns an Object carrying the value held in this field.</p>
+   * <p>This is intended to be used within the Ganymede server, it
+   * bypasses the permissions checking that getValues() does.</p>
    *
-   * <p>This is intended to be used within the Ganymede server, it bypasses
-   * the permissions checking that getValues() does.</p>
+   * <p>Note that this method will always return null, as you need to
+   * use the special Password-specific value accessors to get access
+   * to the password information in crypted or non-crypted form.</p>
    *
-   * <p>Note that this method will always return null, as you need to use
-   * the special Password-specific value accessors to get access to the
-   * password information in crypted or non-crypted form.</p>
+   * @return null
    */
 
   @Override public Object getValueLocal()
@@ -1912,7 +1913,9 @@ public class PasswordDBField extends DBField implements pass_field {
           }
       }
 
-    // call finalizeSetValue to allow for chained reactions
+    // call finalizeSetValue to allow for chained reactions, even
+    // though we're not doing a traditional setValue and we're not
+    // passing the new password to finalizeSetValue for approval.
 
     // we'll still retain our first retVal so that we can return
     // advisory-only messages that the wizardHook generated, even if
@@ -2031,7 +2034,9 @@ public class PasswordDBField extends DBField implements pass_field {
           }
       }
 
-    // call finalizeSetValue to allow for chained reactions
+    // call finalizeSetValue to allow for chained reactions, even
+    // though we're not doing a traditional setValue and we're not
+    // passing the new password to finalizeSetValue for approval.
 
     retVal = ReturnVal.merge(retVal, ((DBEditObject) this.owner).finalizeSetValue(this, null));
 
@@ -2149,7 +2154,9 @@ public class PasswordDBField extends DBField implements pass_field {
           }
       }
 
-    // call finalizeSetValue to allow for chained reactions
+    // call finalizeSetValue to allow for chained reactions, even
+    // though we're not doing a traditional setValue and we're not
+    // passing the new password to finalizeSetValue for approval.
 
     retVal = ReturnVal.merge(retVal, ((DBEditObject) this.owner).finalizeSetValue(this, null));
 
@@ -2269,7 +2276,9 @@ public class PasswordDBField extends DBField implements pass_field {
           }
       }
 
-    // call finalizeSetValue to allow for chained reactions
+    // call finalizeSetValue to allow for chained reactions, even
+    // though we're not doing a traditional setValue and we're not
+    // passing the new password to finalizeSetValue for approval.
 
     retVal = ReturnVal.merge(retVal, ((DBEditObject) this.owner).finalizeSetValue(this, null));
 
@@ -2381,7 +2390,9 @@ public class PasswordDBField extends DBField implements pass_field {
           }
       }
 
-    // call finalizeSetValue to allow for chained reactions
+    // call finalizeSetValue to allow for chained reactions, even
+    // though we're not doing a traditional setValue and we're not
+    // passing the new password to finalizeSetValue for approval.
 
     retVal = ReturnVal.merge(retVal, ((DBEditObject) this.owner).finalizeSetValue(this, null));
 
@@ -2508,7 +2519,9 @@ public class PasswordDBField extends DBField implements pass_field {
           }
       }
 
-    // call finalizeSetValue to allow for chained reactions
+    // call finalizeSetValue to allow for chained reactions, even
+    // though we're not doing a traditional setValue and we're not
+    // passing the new password to finalizeSetValue for approval.
 
     retVal = ReturnVal.merge(retVal, ((DBEditObject) this.owner).finalizeSetValue(this, null));
 
@@ -2637,14 +2650,17 @@ public class PasswordDBField extends DBField implements pass_field {
                                           ts.l("setShaUnixCryptPass.error_text"));
       }
 
-    if (!Sha256Crypt.verifyHashTextFormat(hashText) && !Sha512Crypt.verifyHashTextFormat(hashText))
+    if (hashText != null)
       {
-        // "Server: Error in PasswordDBField.setShaUnixCryptPass()"
-        // "The hash text passed to setShaUnixCryptPass(), "{0}", is
-        // not a well-formed, SHA Unix Crypt hash text"
-        return Ganymede.createErrorDialog(this.getGSession(),
-                                          ts.l("setShaUnixCryptPass.error_title"),
-                                          ts.l("setShaUnixCryptPass.format_error", this.getName()));
+        if (!Sha256Crypt.verifyHashTextFormat(hashText) && !Sha512Crypt.verifyHashTextFormat(hashText))
+          {
+            // "Server: Error in PasswordDBField.setShaUnixCryptPass()"
+            // "The hash text passed to setShaUnixCryptPass(), "{0}", is
+            // not a well-formed, SHA Unix Crypt hash text"
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("setShaUnixCryptPass.error_title"),
+                                              ts.l("setShaUnixCryptPass.format_error", this.getName()));
+          }
       }
 
     eObj = (DBEditObject) this.owner;
@@ -2663,7 +2679,9 @@ public class PasswordDBField extends DBField implements pass_field {
           }
       }
 
-    // call finalizeSetValue to allow for chained reactions
+    // call finalizeSetValue to allow for chained reactions, even
+    // though we're not doing a traditional setValue and we're not
+    // passing the new password to finalizeSetValue for approval.
 
     retVal = ReturnVal.merge(retVal, ((DBEditObject) this.owner).finalizeSetValue(this, null));
 
@@ -2674,7 +2692,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
         clear_stored();
 
-        if ((hashText == null) || (hashText.equals("")))
+        if (hashText == null || hashText.equals(""))
           {
             shaUnixCrypt = null;
           }
@@ -2800,7 +2818,9 @@ public class PasswordDBField extends DBField implements pass_field {
           }
       }
 
-    // call finalizeSetValue to allow for chained reactions
+    // call finalizeSetValue to allow for chained reactions, even
+    // though we're not doing a traditional setValue and we're not
+    // passing the new password to finalizeSetValue for approval.
 
     retVal = ReturnVal.merge(retVal, ((DBEditObject) this.owner).finalizeSetValue(this, null));
 
@@ -2811,7 +2831,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
         clear_stored();
 
-        if ((hashText == null) || (hashText.equals("")))
+        if (hashText == null || hashText.equals(""))
           {
             bCryptPass = null;
           }
@@ -2830,7 +2850,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * hashes really match the same password, so caveat emptor.  If any of
    * these hashes are null or empty string, those hashes will be cleared.</p>
    *
-   * </p>Calling this method will clear the password's stored plaintext,
+   * <p>Calling this method will clear the password's stored plaintext,
    * if any.</p>
    *
    * <p>This method is intended to be called via the {@link

@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -71,8 +71,8 @@ import arlut.csd.ganymede.server.taskMonitor;
  * addition to being used by the server's task scheduler to organize
  * and track registered tasks, vectors of serialized scheduleHandle
  * objects are passed to the Ganymede admin console's {@link
- * arlut.csd.ganymede.admin#changeTasks(java.util.Vector) changeTasks}
- * method.</p>
+ * arlut.csd.ganymede.admin.GASHAdminDispatch#changeTasks(java.lang.Object[])
+ * changeTasks} method.</p>
  *
  * <p>Within the Ganymede server, scheduleHandle objects are held
  * within the GanymedeScheduler to track the status of each registered
@@ -450,7 +450,7 @@ public class scheduleHandle implements java.io.Serializable {
 
     this.scheduler = scheduler;
     this.lastTime = null;
-    this.startTime = time;
+    this.startTime = time != null ? new Date(time.getTime()) : null;
     this.task = task;
     this.name = name;
     this.tasktype = tasktype;

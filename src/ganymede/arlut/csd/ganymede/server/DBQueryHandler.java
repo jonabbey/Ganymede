@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -54,6 +54,7 @@ import java.util.Vector;
 
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.IPAddress;
 import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.QueryAndNode;
 import arlut.csd.ganymede.common.QueryDeRefNode;
@@ -183,11 +184,11 @@ public class DBQueryHandler {
               {
                 if (n.fieldname != null)
                   {
-                    invidField = (InvidDBField) obj.getField(n.fieldname);
+                    invidField = obj.getInvidField(n.fieldname);
                   }
                 else if (n.fieldId != -1)
                   {
-                    invidField = (InvidDBField) obj.getField(n.fieldId);
+                    invidField = obj.getInvidField(n.fieldId);
                   }
                 else
                   {
@@ -306,11 +307,11 @@ public class DBQueryHandler {
 
                 if (n.fieldname != null)
                   {
-                    field = (DBField) obj.getField(n.fieldname);
+                    field = obj.getField(n.fieldname);
                   }
                 else
                   {
-                    field = (DBField) obj.getField(n.fieldId);
+                    field = obj.getField(n.fieldId);
                   }
 
                 if ((field != null) && (field.isDefined()))
@@ -591,8 +592,8 @@ public class DBQueryHandler {
             // we're looking at to Strings for the compare.
 
             if (n.value instanceof String &&
-                (((value != null) && value instanceof Byte[]) ||
-                ((values != null) && (values.size() > 0) && (values.get(0) instanceof Byte[]))))
+                (((value != null) && value instanceof IPAddress) ||
+                ((values != null) && (values.size() > 0) && (values.get(0) instanceof IPAddress))))
               {
                 String
                   s1 = null,
@@ -608,16 +609,7 @@ public class DBQueryHandler {
                 if (n.arrayOp == QueryDataNode.NONE)
                   {
                     s1 = (String) n.value;
-                    Byte[] ipBytes = (Byte[]) value;
-
-                    if (ipBytes.length == 4)
-                      {
-                        s2 = IPDBField.genIPV4string(ipBytes);
-                      }
-                    else if (ipBytes.length == 16)
-                      {
-                        s2 = IPDBField.genIPV6string(ipBytes);
-                      }
+                    s2 = ((IPAddress) value).toString();
 
                     if (debug)
                       {
@@ -639,16 +631,7 @@ public class DBQueryHandler {
 
                     for (int i = 0; i < values.size(); i++)
                       {
-                        Byte[] ipBytes = (Byte[]) values.get(i);
-
-                        if (ipBytes.length == 4)
-                          {
-                            s2 = IPDBField.genIPV4string(ipBytes);
-                          }
-                        else if (ipBytes.length == 16)
-                          {
-                            s2 = IPDBField.genIPV6string(ipBytes);
-                          }
+                        s2 = ((IPAddress) values.get(i)).toString();
 
                         if (compareString(n, s1, s2))
                           {
@@ -663,15 +646,15 @@ public class DBQueryHandler {
               }
 
             // i.p. address can be arrays.. note that the client's
-            // query box will pass us a true array of Bytes for
-            // equality, starts with, or ends with tests.  if the user
-            // is attempting a regexp match, the parameter will be a
+            // query box will pass us an IPAddress for equality,
+            // starts with, or ends with tests.  if the user is
+            // attempting a regexp match, the parameter will be a
             // String.
 
-            if (n.value instanceof Byte[])
+            if (n.value instanceof IPAddress)
               {
-                Byte[] fBytes;
-                Byte[] oBytes;
+                byte[] fBytes;
+                byte[] oBytes;
 
                 /* -- */
 
@@ -679,8 +662,8 @@ public class DBQueryHandler {
 
                 if (n.arrayOp == QueryDataNode.NONE)
                   {
-                    fBytes = (Byte[]) value;
-                    oBytes = (Byte[]) n.value;
+                    fBytes = ((IPAddress) value).getBytes();
+                    oBytes = ((IPAddress) n.value).getBytes();
 
                     if (n.comparator == QueryDataNode.EQUALS)
                       {
@@ -703,7 +686,7 @@ public class DBQueryHandler {
                   {
                     if (n.comparator == n.EQUALS)
                       {
-                        oBytes = (Byte[]) n.value;
+                        oBytes = ((IPAddress) n.value).getBytes();
 
                         switch (n.arrayOp)
                           {
@@ -711,7 +694,7 @@ public class DBQueryHandler {
 
                             for (int i = 0; i < values.size(); i++)
                               {
-                                if (compareIPs(oBytes, ((Byte[]) values.get(i))))
+                                if (compareIPs(oBytes, ((IPAddress) values.get(i)).getBytes()))
                                   {
                                     return true;
                                   }
@@ -1094,7 +1077,7 @@ public class DBQueryHandler {
    * method is used to compare two IP address values for equality.
    */
 
-  private static boolean compareIPs(Byte[] param1, Byte[] param2)
+  private static boolean compareIPs(byte[] param1, byte[] param2)
   {
     if (param1.length != param2.length)
       {
@@ -1104,7 +1087,7 @@ public class DBQueryHandler {
       {
         for (int i = 0; i < param1.length; i++)
           {
-            if (param1[i].byteValue() != param2[i].byteValue())
+            if (param1[i] != param2[i])
               {
                 return false;
               }
@@ -1121,9 +1104,9 @@ public class DBQueryHandler {
    * @return Returns true if param1 begins with param2.
    */
 
-  private static boolean ipBeginsWith(Byte[] param1, Byte[] param2)
+  private static boolean ipBeginsWith(byte[] param1, byte[] param2)
   {
-    Byte[] prefix = ipAddrNoPad(param2);
+    byte[] prefix = ipAddrNoPad(param2);
 
     /* -- */
 
@@ -1135,7 +1118,7 @@ public class DBQueryHandler {
       {
         for (int i = 0; i < prefix.length; i++)
           {
-            if (prefix[i].byteValue() != param1[i].byteValue())
+            if (prefix[i] != param1[i])
               {
                 return false;
               }
@@ -1152,9 +1135,9 @@ public class DBQueryHandler {
    * @return Returns true if param1 ends with param2.
    */
 
-  private static boolean ipEndsWith(Byte[] param1, Byte[] param2)
+  private static boolean ipEndsWith(byte[] param1, byte[] param2)
   {
-    Byte[] suffix = ipAddrNoPad(param2);
+    byte[] suffix = ipAddrNoPad(param2);
 
     /* -- */
 
@@ -1168,7 +1151,7 @@ public class DBQueryHandler {
              j >= 0;
              i--, j--)
           {
-            if (suffix[j].byteValue() != param1[i].byteValue())
+            if (suffix[j] != param1[i])
               {
                 return false;
               }
@@ -1186,19 +1169,19 @@ public class DBQueryHandler {
    * 129.116.</p>
    *
    * <p>Note that, like all Ganymede code dealing with IP addresses,
-   * Ganymede is using the u2s() and s2u() methods here to handle
-   * encoded unsigned values in the Java signed byte/Byte
-   * type/object.</p>
+   * Ganymede is using the IPAddress.s2u() method here to convert the
+   * signed numeric encoding in an IPAddress byte to an unsigned 0-255
+   * value.</p>
    */
 
-  private static Byte[] ipAddrNoPad(Byte[] ipaddr)
+  private static byte[] ipAddrNoPad(byte[] ipaddr)
   {
     int i = ipaddr.length;
 
     for (; i > 0 &&
-           (s2u(ipaddr[i-1].byteValue()) == 0); i--);
+           (IPAddress.s2u(ipaddr[i-1]) == 0); i--);
 
-    Byte[] result = new Byte[i];
+    byte[] result = new byte[i];
 
     for (i = 0; i < result.length; i++)
       {
@@ -1207,30 +1190,4 @@ public class DBQueryHandler {
 
     return result;
   }
-
-  /**
-   * <p>This method maps an int value between 0 and 255 inclusive to a
-   * legal signed byte value.</p>
-   */
-
-  private final static byte u2s(int x)
-  {
-    if ((x < 0) || (x > 255))
-      {
-        throw new IllegalArgumentException("Out of range: " + x);
-      }
-
-    return (byte) (x - 128);
-  }
-
-  /**
-   * <p>This method maps a u2s-encoded signed byte value to an int
-   * value between 0 and 255 inclusive.</p>
-   */
-
-  private final static short s2u(byte b)
-  {
-    return (short) (b + 128);
-  }
-
 }

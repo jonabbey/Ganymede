@@ -8,11 +8,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2014
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -50,6 +52,7 @@ import java.util.Enumeration;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 
+import arlut.csd.ganymede.common.IPAddress;
 import arlut.csd.Util.StringUtils;
 
 /*------------------------------------------------------------------------------
@@ -59,17 +62,19 @@ import arlut.csd.Util.StringUtils;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class is used to store and manipulate a definition for a sequence
- * of IPv4 addresses, with support for conversion to/from a textual format,
- * for generating an enumeration of addresses in the IPv4Range, and more.</p>
+ * <p>This class is used to store and manipulate a definition for a
+ * sequence of IPv4 addresses, with support for conversion to/from a
+ * textual format, for generating an enumeration of addresses in the
+ * IPv4Range, and more.</p>
  *
- * <p>This class supports continuous and discontinuous IP range specification
- * using a string that comprises multiple lines, each of which has four
- * dot-separated octets which may either be simple numeric values, or
- * a range of values, with the start and stop point for the range separated
- * by a dash and surrounded by brackets.  The iteration across the range
- * implemented by the getElements() Enumeration will vary across the least
- * significant byte of ranged stanzas first.</p>
+ * <p>This class supports continuous and discontinuous IP range
+ * specification using a string that comprises multiple lines, each of
+ * which has four dot-separated octets which may either be simple
+ * numeric values, or a range of values, with the start and stop point
+ * for the range separated by a dash and surrounded by brackets.  The
+ * iteration across the range implemented by the getElements()
+ * Enumeration will vary across the least significant byte of ranged
+ * stanzas first.</p>
  *
  * <p>In other words, the following examples would be legal:</p>
  *
@@ -90,6 +95,17 @@ import arlut.csd.Util.StringUtils;
 
 public class IPv4Range {
 
+  /**
+   * <p>An array of arrays of byte arrays.</p>
+   *
+   * <p>The individual signed Java bytes are encoded using the
+   * IPAddress u2s() method.</p>
+   *
+   * <p>Note that u2s() encoding bytes can be compared for greater
+   * than or less than, and subtracting them from each other will
+   * result in the proper distance between them.</p>
+   */
+
   private byte[][][] range = null;
 
   /* -- */
@@ -104,13 +120,13 @@ public class IPv4Range {
 
     for (int i = 0; i < initRange.length; i++)
       {
-	for (int j = 0; j < 4; j++)
-	  {
-	    for (int k = 0; k < 2; k++)
-	      {
-		range[i][j][k] = initRange[i][j][k];
-	      }
-	  }
+        for (int j = 0; j < 4; j++)
+          {
+            for (int k = 0; k < 2; k++)
+              {
+                range[i][j][k] = initRange[i][j][k];
+              }
+          }
       }
   }
 
@@ -120,19 +136,21 @@ public class IPv4Range {
 
     for (int i = 0; i < 4; i++)
       {
-	for (int j = 0; j < 2; j++)
-	  {
-	    range[0][i][j] = initRange[i][j];
-	  }
+        for (int j = 0; j < 2; j++)
+          {
+            range[0][i][j] = initRange[i][j];
+          }
       }
   }
 
-  public IPv4Range(byte[] networkNumber)
+  public IPv4Range(IPAddress networkNumber)
   {
-    if (networkNumber.length != 4)
+    if (!networkNumber.isIPv4())
       {
-	throw new IllegalArgumentException("Bad number of bytes");
+        throw new IllegalArgumentException("Bad number of bytes");
       }
+
+    byte[] netBytes = networkNumber.getBytes();
 
     range = new byte[1][4][2];
 
@@ -140,62 +158,24 @@ public class IPv4Range {
 
     for (int i = 3; i >= 0; i--)
       {
-	range[0][i][0] = networkNumber[i];
-	range[0][i][1] = networkNumber[i];
+        range[0][i][0] = netBytes[i];
+        range[0][i][1] = netBytes[i];
 
-	if (hostPortion)
-	  {
-	    if (range[0][i][0] == u2s(0))
-	      {
-		range[0][i][0] = u2s(1);
-		range[0][i][1] = u2s(254);
-	      }
-	    else
-	      {
-		hostPortion = false;
-	      }
-	  }
+        if (hostPortion)
+          {
+            if (range[0][i][0] == IPAddress.u2s(0))
+              {
+                range[0][i][0] = IPAddress.u2s(1);
+                range[0][i][1] = IPAddress.u2s(254);
+              }
+            else
+              {
+                hostPortion = false;
+              }
+          }
       }
   }
 
-  /**
-   * <p>This version of the constructor takes an unsigned-encoded
-   * 4 Byte array holding an IP network number in which all trailing
-   * zero Bytes are assumed to be able to vary across the range
-   * 1-254.</p>
-   */
-
-  public IPv4Range(Byte[] networkNumber)
-  {
-    if (networkNumber.length != 4)
-      {
-	throw new IllegalArgumentException("Bad number of bytes");
-      }
-
-    range = new byte[1][4][2];
-
-    boolean hostPortion = true;
-
-    for (int i = 3; i >= 0; i--)
-      {
-	range[0][i][0] = networkNumber[i].byteValue();
-	range[0][i][1] = networkNumber[i].byteValue();
-
-	if (hostPortion)
-	  {
-	    if (range[0][i][0] == u2s(0))
-	      {
-		range[0][i][0] = u2s(1);
-		range[0][i][1] = u2s(254);
-	      }
-	    else
-	      {
-		hostPortion = false;
-	      }
-	  }
-      }
-  }
-  
   public IPv4Range(String initValue)
   {
     this.setRange(initValue);
@@ -205,20 +185,20 @@ public class IPv4Range {
   {
     if (range == null)
       {
-	return null;
+        return null;
       }
 
     byte[][][] _range = new byte[range.length][4][2];
 
     for (int i = 0; i < range.length; i++)
       {
-	for (int j = 0; j < 4; j++)
-	  {
-	    for (int k = 0; k < 2; k++)
-	      {
-		_range[i][j][k] = range[i][j][k];
-	      }
-	  }
+        for (int j = 0; j < 4; j++)
+          {
+            for (int k = 0; k < 2; k++)
+              {
+                _range[i][j][k] = range[i][j][k];
+              }
+          }
       }
 
     return _range;
@@ -240,75 +220,87 @@ public class IPv4Range {
 
     for (int i = 0; i < lines.length; i++)
       {
-	String octets[] = StringUtils.split(lines[i], ".");
+        String octets[] = StringUtils.split(lines[i], ".");
 
-	if (octets.length != 4)
-	  {
-	    throw new IllegalArgumentException("Error, line '" + lines[i] +
-					       "' does not contain four dot-separated byte specifiers");
-	  }
+        if (octets.length != 4)
+          {
+            throw new IllegalArgumentException("Error, line '" + lines[i] +
+                                               "' does not contain four dot-separated byte specifiers");
+          }
 
-	for (int j = 0; j < octets.length; j++)
-	  {
-	    if (!StringUtils.containsOnly(octets[j], "0123456789[-]"))
-	      {
-		throw new IllegalArgumentException("Error, line '" + lines[i] +
-						   "' contains invalid characters in byte " + j);
-	      }
+        for (int j = 0; j < octets.length; j++)
+          {
+            if (octets[j].length() == 0)
+              {
+                throw new IllegalArgumentException("Error, line '" + lines[i] +
+                                                   "' has an empty string in byte " + j);
+              }
 
-	    if (octets[j].indexOf("[") == -1 && octets[j].indexOf("]") == -1 && octets[j].indexOf("-") == -1)
-	      {
-		// simple fixed value
+            if (!StringUtils.containsOnly(octets[j], "0123456789[-]"))
+              {
+                throw new IllegalArgumentException("Error, line '" + lines[i] +
+                                                   "' contains invalid characters in byte " + j);
+              }
 
-		int val = Integer.parseInt(octets[j]);
+            if (StringUtils.containsOnly(octets[j], "0123456789"))
+              {
+                // simple fixed value
 
-		if (val > 255)
-		  {
-		    throw new IllegalArgumentException("Error, line '" + lines[i] + "' byte " + j + " is out of range.");
-		  }
+                int val = Integer.parseInt(octets[j]);
 
-		_range[i][j][0] = u2s(val);
-		_range[i][j][1] = _range[i][j][0];
-	      }
-	    else
-	      {
-		// assume a bracketed byte range
+                if (val > 255)
+                  {
+                    throw new IllegalArgumentException("Error, line '" + lines[i] + "' byte " + j + " is out of range.");
+                  }
 
-		if (!(octets[j].charAt(0) == '[' && octets[j].charAt(octets[j].length()-1) == ']'))
-		  {
-		    throw new IllegalArgumentException("Error, line '" + lines[i] +
-						       "' contains a formatting error in byte " + j);
-		  }
+                _range[i][j][0] = IPAddress.u2s(val);
+                _range[i][j][1] = _range[i][j][0];
 
-		String strippedString = octets[j].substring(1, octets[j].length()-1);
+                continue;
+              }
 
-		String endpoints[] = StringUtils.split(strippedString, "-");
+            if (StringUtils.containsAll(octets[j], "[-]"))
+              {
+                if (!(octets[j].charAt(0) == '[' && octets[j].charAt(octets[j].length()-1) == ']'))
+                  {
+                    throw new IllegalArgumentException("Error, line '" + lines[i] +
+                                                       "' contains a formatting error in byte " + j);
+                  }
 
-		if (endpoints.length != 2)
-		  {
-		    throw new IllegalArgumentException("Error, line '" + lines[i] + 
-						       "' contains a formatting error in byte " + j);
-		  }
+                String strippedString = octets[j].substring(1, octets[j].length()-1);
 
-		for (int k = 0; k < endpoints.length; k++)
-		  {
-		    int val = Integer.parseInt(endpoints[k]);
+                String endpoints[] = StringUtils.split(strippedString, "-");
 
-		    if (val > 255)
-		      {
-			throw new IllegalArgumentException("Error, line '" + lines[i] + 
-							   "' contains a range error in byte " + j);
-		      }
+                if (endpoints.length != 2)
+                  {
+                    throw new IllegalArgumentException("Error, line '" + lines[i] +
+                                                       "' contains a formatting error in byte " + j);
+                  }
 
-		    _range[i][j][k] = u2s(val);
-		  }
-	      }
-	  }
+                for (int k = 0; k < endpoints.length; k++)
+                  {
+                    int val = Integer.parseInt(endpoints[k]);
+
+                    if (val > 255)
+                      {
+                        throw new IllegalArgumentException("Error, line '" + lines[i] +
+                                                           "' contains a range error in byte " + j);
+                      }
+
+                    _range[i][j][k] = IPAddress.u2s(val);
+                  }
+
+                continue;
+              }
+
+            throw new IllegalArgumentException("Error, line '" + lines[i] +
+                                               "' contains an invalid element in byte " + j);
+          }
       }
 
     if (!sanityCheck(_range))
       {
-	throw new IllegalArgumentException("Error, overlapping entries");
+        throw new IllegalArgumentException("Error, overlapping entries");
       }
 
     range = _range;
@@ -323,30 +315,30 @@ public class IPv4Range {
   {
     if (range == null)
       {
-	return 0;
+        return 0;
       }
 
     int count = 0;
 
     for (int i = 0; i < range.length; i++)
       {
-	int stanzaCount = 1;
+        int stanzaCount = 1;
 
-	for (int j = 0; j < 4; j++)
-	  {
-	    if (range[i][j][0] < range[i][j][1])
-	      {
-		stanzaCount *= ((range[i][j][1] - range[i][j][0]) + 1);
-	      }
-	    else if (range[i][j][0] > range[i][j][1])
-	      {
-		stanzaCount *= ((range[i][j][0] - range[i][j][1]) + 1);
-	      }
-	  }
+        for (int j = 0; j < 4; j++)
+          {
+            if (range[i][j][0] < range[i][j][1])
+              {
+                stanzaCount *= ((range[i][j][1] - range[i][j][0]) + 1);
+              }
+            else if (range[i][j][0] > range[i][j][1])
+              {
+                stanzaCount *= ((range[i][j][0] - range[i][j][1]) + 1);
+              }
+          }
 
-	count += stanzaCount;
+        count += stanzaCount;
       }
-   
+
     return count;
   }
 
@@ -358,31 +350,31 @@ public class IPv4Range {
 
     for (int i = 0; i < range.length; i++)
       {
-	if (i > 0)
-	  {
-	    result.append("\n");
-	  }
+        if (i > 0)
+          {
+            result.append("\n");
+          }
 
-	for (int j = 0; j < 4; j++)
-	  {
-	    if (j > 0)
-	      {
-		result.append(".");
-	      }
+        for (int j = 0; j < 4; j++)
+          {
+            if (j > 0)
+              {
+                result.append(".");
+              }
 
-	    if (range[i][j][0] == range[i][j][1])
-	      {
-		result.append(s2u(range[i][j][0]));
-	      }
-	    else
-	      {
-		result.append("[");
-		result.append(s2u(range[i][j][0]));
-		result.append("-");
-		result.append(s2u(range[i][j][1]));
-		result.append("]");
-	      }
-	  }
+            if (range[i][j][0] == range[i][j][1])
+              {
+                result.append(IPAddress.s2u(range[i][j][0]));
+              }
+            else
+              {
+                result.append("[");
+                result.append(IPAddress.s2u(range[i][j][0]));
+                result.append("-");
+                result.append(IPAddress.s2u(range[i][j][1]));
+                result.append("]");
+              }
+          }
       }
 
     return result.toString();
@@ -397,12 +389,8 @@ public class IPv4Range {
    * obtaining the Enumeration will have no effect on the addresses
    * generated by the Enumeration.</p>
    *
-   * <p>The nextElement() method in the returned Enumeration return a Byte[]
-   * array which contains four elements, one for each of the four octets
-   * of an IPv4 address.  The elements hold values in the range -128 to 127,
-   * which are equivalent to the 0 to 255 range for IPv4 octets.  These
-   * numbers can be converted to the appropriate number for IPv4 by adding
-   * 128 to each element.</p>
+   * <p>The nextElement() method in the returned Enumeration return a
+   * IPAddress.</p>
    */
 
   public Enumeration getElements()
@@ -427,12 +415,8 @@ public class IPv4Range {
    * obtaining the Enumeration will have no effect on the addresses
    * generated by the Enumeration.</p>
    *
-   * <p>The nextElement() method in the returned Enumeration return a Byte[]
-   * array which contains four elements, one for each of the four octets
-   * of an IPv4 address.  The elements hold values in the range -128 to 127,
-   * which are equivalent to the 0 to 255 range for IPv4 octets.  These
-   * numbers can be converted to the appropriate number for IPv4 by adding
-   * 128 to each element.</p>
+   * <p>The nextElement() method in the returned Enumeration return an
+   * IPAddress.</p>
    *
    * <p>If start and stop are both -1, a non-constrained Enumeration
    * will be return.  If one but not both of start and stop are
@@ -443,7 +427,7 @@ public class IPv4Range {
   {
     if (start == -1 && stop == -1)
       {
-	return new IPv4RangeEnumerator(this);
+        return new IPv4RangeEnumerator(this);
       }
 
     return new IPv4RangeEnumerator(this, start, stop);
@@ -465,7 +449,7 @@ public class IPv4Range {
    *
    * <p>The nextElement() method in the returned Enumeration returns IPv4Range
    * objects which each contain the equivalent of a single line's worth of
-   * range information, relative to the string specification form used to 
+   * range information, relative to the string specification form used to
    * construct IPv4Range's.</p>
    */
 
@@ -484,12 +468,8 @@ public class IPv4Range {
    * obtaining the Enumeration will have no effect on the addresses
    * generated by the Enumeration.</p>
    *
-   * <p>The nextElement() method in the returned Enumeration returns Byte[]
-   * arrays which contain four elements, one for each of the four octets
-   * of an IPv4 address.  The elements hold values in the range -128 to 127,
-   * which are equivalent to the 0 to 255 range for IPv4 octets.  These
-   * numbers can be converted to the appropriate number for IPv4 by adding
-   * 128 to each element.</p>
+   * <p>The nextElement() method in the returned Enumeration returns
+   * an IPAddress.</p>
    *
    * <p>The fourth and final octet of each Byte array returned by nextElement()
    * will contain a value of -128, representing 0 for the last octet.</p>
@@ -510,21 +490,21 @@ public class IPv4Range {
   {
     synchronized (_range)
       {
-	for (int i = 0; i < range.length; i++)
-	  {
-	    for (int j = 0; j < _range.range.length; j++)
-	      {
-		if (byteOverlap(range[i][0], _range.range[j][0]) &&
-		    byteOverlap(range[i][1], _range.range[j][1]) &&
-		    byteOverlap(range[i][2], _range.range[j][2]) &&
-		    byteOverlap(range[i][3], _range.range[j][3]))
-		  {
-		    return true;
-		  }
-	      }
-	  }
+        for (int i = 0; i < range.length; i++)
+          {
+            for (int j = 0; j < _range.range.length; j++)
+              {
+                if (byteOverlap(range[i][0], _range.range[j][0]) &&
+                    byteOverlap(range[i][1], _range.range[j][1]) &&
+                    byteOverlap(range[i][2], _range.range[j][2]) &&
+                    byteOverlap(range[i][3], _range.range[j][3]))
+                  {
+                    return true;
+                  }
+              }
+          }
       }
-    
+
     return false;
   }
 
@@ -536,7 +516,7 @@ public class IPv4Range {
 
   public boolean matches(String address)
   {
-    return matches(genIPV4bytes(address));
+    return matches(IPAddress.genIPV4bytes(address));
   }
 
   /**
@@ -553,7 +533,7 @@ public class IPv4Range {
 
   public boolean matches(String address, int start, int stop)
   {
-    return matches(genIPV4bytes(address), start, stop);
+    return matches(IPAddress.genIPV4bytes(address), start, stop);
   }
 
   /**
@@ -562,7 +542,18 @@ public class IPv4Range {
    * IPv4Range object, false otherwise.</p>
    */
 
-  public boolean matches(Byte address[])
+  public boolean matches(IPAddress address)
+  {
+    return matches(address.getBytes(), -1, -1);
+  }
+
+  /**
+   * <p>This method returns true if address is a member of
+   * the collection of IPv4 addresses represented by this
+   * IPv4Range object, false otherwise.</p>
+   */
+
+  public boolean matches(byte[] address)
   {
     return matches(address, -1, -1);
   }
@@ -579,32 +570,9 @@ public class IPv4Range {
    * object.</p>
    */
 
-  public boolean matches(Byte address[], int start, int stop)
+  public boolean matches(IPAddress address, int start, int stop)
   {
-    if (address.length != 4)
-      {
-	throw new IllegalArgumentException("bad number of bytes in address");
-      }
-
-    byte temp[] = new byte[4];
-
-    for (int i = 0; i < 4; i++)
-      {
-	temp[i] = address[i].byteValue();
-      }
-
-    return matches(temp, start, stop);
-  }
-
-  /**
-   * <p>This method returns true if address is a member of
-   * the collection of IPv4 addresses represented by this
-   * IPv4Range object, false otherwise.</p>
-   */
-
-  public synchronized boolean matches(byte address[])
-  {
-    return matches(address, -1, -1);
+    return matches(address.getBytes(), start, stop);
   }
 
   /**
@@ -619,21 +587,21 @@ public class IPv4Range {
    * object.</p>
    */
 
-  public synchronized boolean matches(byte address[], int start, int stop)
+  public synchronized boolean matches(byte[] address, int start, int stop)
   {
     if (address.length != 4)
       {
-	throw new IllegalArgumentException("bad number of bytes in address");
+        throw new IllegalArgumentException("bad number of bytes in address");
       }
 
     boolean found = false;
 
     for (int i = 0; !found && i < range.length; i++)
       {
-	if (stanzaMatch(range[i], address, start, stop))
-	  {
-	    found = true;
-	  }
+        if (stanzaMatch(range[i], address, start, stop))
+          {
+            found = true;
+          }
       }
 
     return found;
@@ -654,29 +622,29 @@ public class IPv4Range {
   {
     for (int i = 0; i < 4; i++)
       {
-	if ((address[i] < _range[i][0] && address[i] < _range[i][1]) ||
-	    (address[i] > _range[i][0] && address[i] > _range[i][1]))
-	  {
-	    return false;
-	  }
+        if ((address[i] < _range[i][0] && address[i] < _range[i][1]) ||
+            (address[i] > _range[i][0] && address[i] > _range[i][1]))
+          {
+            return false;
+          }
       }
 
     if (start != -1 || stop != -1)
       {
-	if (start > stop)
-	  {
-	    if (address[4] < stop || address[4] > start)
-	      {
-		return false;
-	      }
-	  }
-	else
-	  {
-	    if (address[4] < start || address[4] > stop)
-	      {
-		return false;
-	      }
-	  }
+        if (start > stop)
+          {
+            if (address[4] < stop || address[4] > start)
+              {
+                return false;
+              }
+          }
+        else
+          {
+            if (address[4] < start || address[4] > stop)
+              {
+                return false;
+              }
+          }
       }
 
     return true;
@@ -694,18 +662,18 @@ public class IPv4Range {
   {
     for (int i = 0; i < _range.length; i++)
       {
-	for (int j = i+1; j < _range.length; j++)
-	  {
-	    if (byteOverlap(_range[i][0], _range[j][0]) &&
-		byteOverlap(_range[i][1], _range[j][1]) &&
-		byteOverlap(_range[i][2], _range[j][2]) &&
-		byteOverlap(_range[i][3], _range[j][3]))
-	      {
-		return false;
-	      }
-	  }
+        for (int j = i+1; j < _range.length; j++)
+          {
+            if (byteOverlap(_range[i][0], _range[j][0]) &&
+                byteOverlap(_range[i][1], _range[j][1]) &&
+                byteOverlap(_range[i][2], _range[j][2]) &&
+                byteOverlap(_range[i][3], _range[j][3]))
+              {
+                return false;
+              }
+          }
       }
-    
+
     return true;
   }
 
@@ -719,23 +687,23 @@ public class IPv4Range {
   {
     if (pair1.length != 2)
       {
-	throw new IllegalArgumentException("pair1 length is wrong: " + pair1.length);
+        throw new IllegalArgumentException("pair1 length is wrong: " + pair1.length);
       }
 
     if (pair2.length != 2)
       {
-	throw new IllegalArgumentException("pair2 length is wrong: " + pair2.length);
+        throw new IllegalArgumentException("pair2 length is wrong: " + pair2.length);
       }
 
     if (pair1[0] == pair1[1])
       {
-	if ((pair2[0] <= pair1[0] && pair2[1] >= pair1[0]) ||
-	    (pair2[0] >= pair1[0] && pair2[1] <= pair1[0]))
-	  {
-	    return true;
-	  }
+        if ((pair2[0] <= pair1[0] && pair2[1] >= pair1[0]) ||
+            (pair2[0] >= pair1[0] && pair2[1] <= pair1[0]))
+          {
+            return true;
+          }
 
-	return false;
+        return false;
       }
 
     int firstLow = 0;
@@ -743,13 +711,13 @@ public class IPv4Range {
 
     if (pair1[0] < pair1[1])
       {
-	firstLow = pair1[0];
-	firstHigh = pair1[1];
+        firstLow = pair1[0];
+        firstHigh = pair1[1];
       }
     else
       {
-	firstLow = pair1[1];
-	firstHigh = pair1[0];
+        firstLow = pair1[1];
+        firstHigh = pair1[0];
       }
 
     int secondLow = 0;
@@ -757,320 +725,31 @@ public class IPv4Range {
 
     if (pair2[0] < pair2[1])
       {
-	secondLow = pair2[0];
-	secondHigh = pair2[1];
+        secondLow = pair2[0];
+        secondHigh = pair2[1];
       }
     else
       {
-	secondLow = pair2[1];
-	secondHigh = pair2[0];
+        secondLow = pair2[1];
+        secondHigh = pair2[0];
       }
 
     if (secondLow <= firstLow && secondHigh >= firstLow)
       {
-	return true;
+        return true;
       }
 
     if (secondLow <= firstHigh && secondHigh >= firstHigh)
       {
-	return true;
+        return true;
       }
 
     if (secondLow >= firstLow && secondHigh <= firstHigh)
       {
-	return true;
+        return true;
       }
 
     return false;
-  }
-
-  /**
-   *
-   * This method maps an int value between 0 and 255 inclusive
-   * to a legal signed byte value.
-   *
-   */
-
-  public final static byte u2s(int x)
-  {
-    if ((x < 0) || (x > 255))
-      {
-	throw new IllegalArgumentException("Out of range: " + x);
-      }
-
-    return (byte) (x - 128);
-  }
-
-  /**
-   *
-   * This method maps a u2s-encoded signed byte value to an
-   * int value between 0 and 255 inclusive.
-   *
-   */
-
-  public final static int s2u(byte b)
-  {
-    return (int) (b + 128);
-  }
-
-  /**
-   *
-   * This method takes an IPv4 string in standard format
-   * and generates an array of 4 bytes that the Ganymede server
-   * can accept.
-   *
-   */
-
-  public static Byte[] genIPV4bytes(String input)
-  {
-    Byte[] result = new Byte[4];
-    Vector octets = new Vector();
-    char[] cAry;
-    int length = 0;
-    int dotCount = 0;
-    StringBuilder temp = new StringBuilder();
-
-    /* -- */
-
-    if (input == null)
-      {
-	throw new IllegalArgumentException("null input");
-      }
-
-    /*
-      The string will be of the form 255.255.255.255,
-      with each dot separated element being a 8 bit octet
-      in decimal form.  Trailing bytes may be excluded, in
-      which case the bytes will be left as 0.
-      */
-
-    // initialize the result array
-
-    for (int i = 0; i < 4; i++)
-      {
-	result[i] = new Byte(u2s(0));
-      }
-
-    input = input.trim();
-
-    if (input.equals(""))
-      {
-	return result;
-      }
-
-    if (!StringUtils.containsOnly(input, "0123456789."))
-      {
-	throw new IllegalArgumentException("bad char in input: " + input);
-      }
-
-    cAry = input.toCharArray();
-
-    for (int i = 0; i < cAry.length; i++)
-      {
-	if (cAry[i] == '.')
-	  {
-	    dotCount++;
-	  }
-      }
-
-    if (dotCount > 3)
-      {
-	throw new IllegalArgumentException("too many dots for an IPv4 address: " + input);
-      }
-
-    while (length < cAry.length)
-      {
-	temp.setLength(0);
-
-	while ((length < cAry.length) && (cAry[length] != '.'))
-	  {
-	    temp.append(cAry[length++]);
-	  }
-
-	length++;		// skip the .
-
-	octets.addElement(temp.toString());
-      }
-
-    for (int i = 0; i < octets.size(); i++)
-      {
-	result[i] = new Byte(u2s(Integer.parseInt((String) octets.elementAt(i))));
-      }
-
-    return result;
-  }
-
-  /**
-   *
-   * This method generates a standard string representation
-   * of an IPv4 address from an array of 4 octets.
-   *
-   *
-   */
-
-  public static String genIPV4string(Byte[] octets)
-  {
-    StringBuilder result = new StringBuilder();
-    Short absoctets[];
-
-    /* -- */
-
-    if (octets.length != 4)
-      {
-	throw new IllegalArgumentException("bad number of octets.");
-      }
-
-    absoctets = new Short[octets.length];
-
-    for (int i = 0; i < octets.length; i++)
-      {
-	absoctets[i] = Short.valueOf((short) (octets[i].shortValue() + 128)); // don't want negative values
-      }
-
-    result.append(absoctets[0].toString());
-    result.append(".");
-    result.append(absoctets[1].toString());
-    result.append(".");
-    result.append(absoctets[2].toString());
-    result.append(".");
-    result.append(absoctets[3].toString());
-    
-    return result.toString();
-  }
-
-  public static void main(String argv[])
-  {
-    /*
-    System.out.println("IPv4Range debug test suite");
-    System.out.println("--------------------\n");
-
-    String x = "10.8.[100-95].[1-25]\n10.7.[12-15].[99-70]\n129.116.224.14";
-
-    IPv4Range range = new IPv4Range(x);
-
-    Enumeration en = range.getSubRanges();
-
-    while (en.hasMoreElements())
-      {
-	IPv4Range range2 = (IPv4Range) en.nextElement();
-
-	System.out.println("Range:\n" + range2 + 
-			   "\nSize:\n" + range2.getSize() + "\n");
-
-
-	Enumeration enum2 = range2.getElements();
-
-	while (enum2.hasMoreElements())
-	  {
-	    Byte[] address = (Byte[]) enum2.nextElement();
-
-	    System.out.println(genIPV4string(address));
-
-	    if (!range.matches(address))
-	      {
-		System.out.println("*Error, mismatch!");
-	      }
-	  }
-
-	System.out.println("\n--------------------\n");
-      }
-
-    System.out.println("\nRestricted range test 1\n---------------");
-
-    enum = range.getElements(10, 15);
-
-    while (enum.hasMoreElements())
-      {
-	Byte[] address = (Byte[]) enum.nextElement();
-	
-	System.out.println(genIPV4string(address));
-	
-	if (!range.matches(address))
-	  {
-	    System.out.println("*Error, mismatch!");
-	  }
-      }
-
-    System.out.println("\nRestricted range test 2\n---------------");
-
-    enum = range.getElements(80, 75);
-
-    while (enum.hasMoreElements())
-      {
-	Byte[] address = (Byte[]) enum.nextElement();
-	
-	System.out.println(genIPV4string(address));
-	
-	if (!range.matches(address))
-	  {
-	    System.out.println("*Error, mismatch!");
-	  }
-      }
-
-    System.out.println("\n--------------------\n");
-
-    if (!range.matches("129.116.224.14") || !range.matches("10.7.13.91"))
-      {
-	System.out.println("matches() failure to recognize ok val");
-      }
-
-    if (range.matches("129.116.224.13") || range.matches("11.7.13.91"))
-      {
-	System.out.println("matches() failure to reject bad val");
-      }
-
-    System.out.println("\nClassC Enum Test\n---------------");
-
-    enum = range.getClassCEnum();
-
-    while (enum.hasMoreElements())
-      {
-	Byte[] address = (Byte[]) enum.nextElement();
-
-	System.out.println(genIPV4string(address));
-      }
-
-    System.out.println("\nNetwork Number Test\n---------------");
-
-    byte[] tmpAddress = new byte[4];
-
-    tmpAddress[0] = u2s(10);
-    tmpAddress[1] = u2s(3);
-    tmpAddress[2] = u2s(1);
-    tmpAddress[3] = u2s(0);
-
-    range = new IPv4Range(tmpAddress);
-
-    enum = range.getElements();
-
-    while (enum.hasMoreElements())
-      {
-	Byte[] address = (Byte[]) enum.nextElement();
-	
-	System.out.println(genIPV4string(address));
-	
-	if (!range.matches(address))
-	  {
-	    System.out.println("*Error, mismatch!");
-	  }
-      }
-
-    System.out.println("\nRestricted range test 3\n---------------");
-
-    enum = range.getElements(0,75);
-
-    while (enum.hasMoreElements())
-      {
-	Byte[] address = (Byte[]) enum.nextElement();
-	
-	System.out.println(genIPV4string(address));
-	
-	if (!range.matches(address))
-	  {
-	    System.out.println("*Error, mismatch!");
-	  }
-      }
-    */
   }
 }
 
@@ -1081,18 +760,35 @@ public class IPv4Range {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class handles enumerating across a range of IP addresses specified
- * in an {@arlut.csd.ganymede.gasharl.IPv4Range IPv4Range} object.  An
- * IPv4RangeEnumerator is created as a snapshot of the state of an IPv4Range object,
- * and may be iterated over even if the source IPv4Range object is modified
- * after it has been created.</P>
+ * <p>This class handles enumerating across a range of IP addresses
+ * specified in an {@arlut.csd.ganymede.gasharl.IPv4Range IPv4Range}
+ * object.  An IPv4RangeEnumerator is created as a snapshot of the
+ * state of an IPv4Range object, and may be iterated over even if the
+ * source IPv4Range object is modified after it has been created.</p>
  */
 
 final class IPv4RangeEnumerator implements Enumeration {
 
+  /**
+   * <p>An array of arrays of byte arrays.</p>
+   *
+   * <p>The individual signed Java bytes are encoded using the
+   * IPAddress u2s() method.</p>
+   *
+   * <p>Note that u2s() encoding bytes can be compared for greater
+   * than or less than, and subtracting them from each other will
+   * result in the proper distance between them.</p>
+   */
+
   private byte[][][] range = null;
 
   private int line = 0;
+
+  /**
+   * <p>An array of directions, each int will be either 1 for an
+   * ascending range, 0 for no change, or -1 for a descending
+   * range.</p>
+   */
 
   private int index[] = new int[4];
 
@@ -1102,12 +798,12 @@ final class IPv4RangeEnumerator implements Enumeration {
   {
     if (start < 0 || start > 255)
       {
-	throw new IllegalArgumentException("start out of range:" + start);
+        throw new IllegalArgumentException("start out of range:" + start);
       }
 
     if (stop < 0 || stop > 255)
       {
-	throw new IllegalArgumentException("stop out of range:" + stop);
+        throw new IllegalArgumentException("stop out of range:" + stop);
       }
 
     byte[][][] tmpRange = v4Range.getByteArray();
@@ -1115,91 +811,91 @@ final class IPv4RangeEnumerator implements Enumeration {
 
     for (int i = 0; i < tmpRange.length; i++)
       {
-	int firstIndex = s2u(tmpRange[i][3][0]);
-	int lastIndex = s2u(tmpRange[i][3][1]);
+        int firstIndex = IPAddress.s2u(tmpRange[i][3][0]);
+        int lastIndex = IPAddress.s2u(tmpRange[i][3][1]);
 
-	if (firstIndex < lastIndex)
-	  {
-	    if ((start < firstIndex && stop < firstIndex) ||
-		(start > lastIndex && stop > lastIndex))
-	      {
-		tmpRange[i] = null;
+        if (firstIndex < lastIndex)
+          {
+            if ((start < firstIndex && stop < firstIndex) ||
+                (start > lastIndex && stop > lastIndex))
+              {
+                tmpRange[i] = null;
 
-		continue;
-	      }
+                continue;
+              }
 
-	    if (start > firstIndex && start < lastIndex)
-	      {
-		tmpRange[i][3][0] = u2s(start);
-	      }
-	    
-	    if (stop < lastIndex && stop > firstIndex)
-	      {
-		tmpRange[i][3][1] = u2s(stop);
-	      }
+            if (start > firstIndex && start < lastIndex)
+              {
+                tmpRange[i][3][0] = IPAddress.u2s(start);
+              }
 
-	    rowCount++;
-	  }
-	else if (firstIndex > lastIndex)
-	  {
-	    if ((start > firstIndex && stop > firstIndex) ||
-		(start < lastIndex && stop < lastIndex))
-	      {
-		tmpRange[i] = null;
+            if (stop < lastIndex && stop > firstIndex)
+              {
+                tmpRange[i][3][1] = IPAddress.u2s(stop);
+              }
 
-		continue;
-	      }
+            rowCount++;
+          }
+        else if (firstIndex > lastIndex)
+          {
+            if ((start > firstIndex && stop > firstIndex) ||
+                (start < lastIndex && stop < lastIndex))
+              {
+                tmpRange[i] = null;
 
-	    if (start < firstIndex && start > lastIndex)
-	      {
-		tmpRange[i][3][0] = u2s(start);
-	      }
-	    
-	    if (stop > lastIndex && stop < firstIndex)
-	      {
-		tmpRange[i][3][1] = u2s(stop);
-	      }
+                continue;
+              }
 
-	    rowCount++;
-	  }
-	else if (firstIndex == lastIndex)
-	  {
-	    if ((start < firstIndex && stop < firstIndex) ||
-		(start > firstIndex && stop > firstIndex))
-	      {
-		tmpRange[i] = null;
-		
-		continue;
-	      }
+            if (start < firstIndex && start > lastIndex)
+              {
+                tmpRange[i][3][0] = IPAddress.u2s(start);
+              }
 
-	    rowCount++;
-	  }
+            if (stop > lastIndex && stop < firstIndex)
+              {
+                tmpRange[i][3][1] = IPAddress.u2s(stop);
+              }
+
+            rowCount++;
+          }
+        else if (firstIndex == lastIndex)
+          {
+            if ((start < firstIndex && stop < firstIndex) ||
+                (start > firstIndex && stop > firstIndex))
+              {
+                tmpRange[i] = null;
+
+                continue;
+              }
+
+            rowCount++;
+          }
       }
 
     range = new byte[rowCount][4][2];
 
     for (int i = 0, sourceIndex = 0; i < rowCount; i++, sourceIndex++)
       {
-	while (tmpRange[sourceIndex] == null)
-	  {
-	    sourceIndex++;
-	  }
+        while (tmpRange[sourceIndex] == null)
+          {
+            sourceIndex++;
+          }
 
-	for (int j = 0; j < 4; j++)
-	  {
-	    range[i][j][0] = tmpRange[sourceIndex][j][0];
-	    range[i][j][1] = tmpRange[sourceIndex][j][1];
-	  }
+        for (int j = 0; j < 4; j++)
+          {
+            range[i][j][0] = tmpRange[sourceIndex][j][0];
+            range[i][j][1] = tmpRange[sourceIndex][j][1];
+          }
       }
   }
 
   IPv4RangeEnumerator(IPv4Range v4Range)
   {
     range = v4Range.getByteArray();
-    
+
     for (int i = 0; i < 4; i++)
       {
-	index[i] = 0;
+        index[i] = 0;
       }
   }
 
@@ -1207,26 +903,24 @@ final class IPv4RangeEnumerator implements Enumeration {
   {
     return line < range.length;
   }
-  
-  public synchronized Object nextElement() 
+
+  public synchronized Object nextElement()
   {
-    Byte[] address;
-
-    /* -- */
-
     if (line >= range.length)
       {
-	throw new NoSuchElementException("IPv4RangeEnumerator");
+        throw new NoSuchElementException("IPv4RangeEnumerator");
       }
 
     // create the next address to return
 
-    address = new Byte[4];
+    byte[] bytes = new byte[4];
 
     for (int i = 0; i < 4; i++)
       {
-	address[i] = new Byte((byte) (range[line][i][0] + index[i]));
+        bytes[i] = (byte) (range[line][i][0] + index[i]);
       }
+
+    IPAddress address = new IPAddress(bytes);
 
     // now update our range index variables to find the set of
     // offsets for the next address in our sequence
@@ -1235,75 +929,46 @@ final class IPv4RangeEnumerator implements Enumeration {
 
     for (int i = 3; !incremented && i >= 0; i--)
       {
-	if (range[line][i][1] > range[line][i][0])
-	  {
-	    index[i]++;
+        if (range[line][i][1] > range[line][i][0])
+          {
+            index[i]++;
 
-	    if (index[i] > (range[line][i][1] - range[line][i][0]))
-	      {
-		for (int j = i; j < 4; j++)
-		  {
-		    index[j] = 0;
-		  }
-	      }
-	    else
-	      {
-		incremented = true;
-	      }
-	  }
-	else if (range[line][i][1] < range[line][i][0])
-	  {
-	    index[i]--;
+            if (index[i] > (range[line][i][1] - range[line][i][0]))
+              {
+                for (int j = i; j < 4; j++)
+                  {
+                    index[j] = 0;
+                  }
+              }
+            else
+              {
+                incremented = true;
+              }
+          }
+        else if (range[line][i][1] < range[line][i][0])
+          {
+            index[i]--;
 
-	    if (index[i] < (range[line][i][1] - range[line][i][0]))
-	      {
-		for (int j = i; j < 4; j++)
-		  {
-		    index[j] = 0;
-		  }
-	      }
-	    else
-	      {
-		incremented = true;
-	      }
-	  }
+            if (index[i] < (range[line][i][1] - range[line][i][0]))
+              {
+                for (int j = i; j < 4; j++)
+                  {
+                    index[j] = 0;
+                  }
+              }
+            else
+              {
+                incremented = true;
+              }
+          }
       }
 
     if (!incremented)
       {
-	line++;
+        line++;
       }
 
     return address;
-  }
-
-  /**
-   *
-   * This method maps an int value between 0 and 255 inclusive
-   * to a legal signed byte value.
-   *
-   */
-
-  public final static byte u2s(int x)
-  {
-    if ((x < 0) || (x > 255))
-      {
-	throw new IllegalArgumentException("Out of range: " + x);
-      }
-
-    return (byte) (x - 128);
-  }
-
-  /**
-   *
-   * This method maps a u2s-encoded signed byte value to an
-   * int value between 0 and 255 inclusive.
-   *
-   */
-
-  public final static int s2u(byte b)
-  {
-    return (int) (b + 128);
   }
 }
 
@@ -1314,19 +979,30 @@ final class IPv4RangeEnumerator implements Enumeration {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class handles enumerating across a set of IPv4Range subsets specified
- * in an {@arlut.csd.ganymede.gasharl.IPv4Range IPv4Range} object.  An
- * IPv4SubRangeEnumerator is created as a snapshot of the state of an IPv4Range object,
- * and may be iterated over even if the source IPv4Range object is modified
- * after it has been created.</P>
+ * <p>This class handles enumerating across a set of IPv4Range subsets
+ * specified in an {@arlut.csd.ganymede.gasharl.IPv4Range IPv4Range}
+ * object.  An IPv4SubRangeEnumerator is created as a snapshot of the
+ * state of an IPv4Range object, and may be iterated over even if the
+ * source IPv4Range object is modified after it has been created.</p>
  *
- * <p>The nextElement() method in IPv4SubRangeEnumerator returns IPv4Range
- * objects which each contain the equivalent of a single line's worth of
- * range information, relative to the string specification form used to 
- * construct IPv4Range's.</p>
+ * <p>The nextElement() method in IPv4SubRangeEnumerator returns
+ * IPv4Range objects which each contain the equivalent of a single
+ * line's worth of range information, relative to the string
+ * specification form used to construct IPv4Range's.</p>
  */
 
 final class IPv4SubRangeEnumerator implements Enumeration {
+
+  /**
+   * <p>An array of arrays of byte arrays.</p>
+   *
+   * <p>The individual signed Java bytes are encoded using the
+   * IPAddress u2s() method.</p>
+   *
+   * <p>Note that u2s() encoding bytes can be compared for greater
+   * than or less than, and subtracting them from each other will
+   * result in the proper distance between them.</p>
+   */
 
   private byte[][][] range = null;
 
@@ -1343,12 +1019,12 @@ final class IPv4SubRangeEnumerator implements Enumeration {
   {
     return line < range.length;
   }
-  
-  public synchronized Object nextElement() 
+
+  public synchronized Object nextElement()
   {
     if (line >= range.length)
       {
-	throw new NoSuchElementException("IPv4SubRangeEnumerator");
+        throw new NoSuchElementException("IPv4SubRangeEnumerator");
       }
 
     return new IPv4Range(range[line++]);
@@ -1362,28 +1038,47 @@ final class IPv4SubRangeEnumerator implements Enumeration {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class handles enumerating across a set of Class C sized (three octet prefix)
- * subsets specified in an {@arlut.csd.ganymede.gasharl.IPv4Range IPv4Range} object.  An
- * IPv4ClassCEnumerator is created as a snapshot of the state of an IPv4Range object,
- * and may be iterated over even if the source IPv4Range object is modified
- * after it has been created.</P>
+ * <p>This class handles enumerating across a set of Class C sized
+ * (three octet prefix) subsets specified in an
+ * {@arlut.csd.ganymede.gasharl.IPv4Range IPv4Range} object.  An
+ * IPv4ClassCEnumerator is created as a snapshot of the state of an
+ * IPv4Range object, and may be iterated over even if the source
+ * IPv4Range object is modified after it has been created.</p>
  *
  * <p>The nextElement() method in IPv4ClassCEnumerator returns Byte[]
  * arrays which contain four elements, one for each of the four octets
- * of an IPv4 address.  The elements hold values in the range -128 to 127,
- * which are equivalent to the 0 to 255 range for IPv4 octets.  These
- * numbers can be converted to the appropriate number for IPv4 by adding
- * 128 to each element.</p>
+ * of an IPv4 address.  The elements hold values in the range -128 to
+ * 127, which are equivalent to the 0 to 255 range for IPv4 octets.
+ * These numbers can be converted to the appropriate number for IPv4
+ * by adding 128 to each element.</p>
  *
- * <p>The fourth and final octet of each Byte array returned by nextElement()
- * will contain a value of -128, representing 0 for the last octet.</p>
+ * <p>The fourth and final octet of each Byte array returned by
+ * nextElement() will contain a value of -128, representing 0 for the
+ * last octet.</p>
  */
 
 final class IPv4ClassCEnumerator implements Enumeration {
 
+  /**
+   * <p>An array of arrays of byte arrays.</p>
+   *
+   * <p>The individual signed Java bytes are encoded using the
+   * IPAddress u2s() method.</p>
+   *
+   * <p>Note that u2s() encoding bytes can be compared for greater
+   * than or less than, and subtracting them from each other will
+   * result in the proper distance between them.</p>
+   */
+
   private byte[][][] range = null;
 
   private int line = 0;
+
+  /**
+   * <p>An array of directions, each int will be either 1 for an
+   * ascending range, 0 for no change, or -1 for a descending
+   * range.</p>
+   */
 
   private int index[] = new int[3];
 
@@ -1395,7 +1090,7 @@ final class IPv4ClassCEnumerator implements Enumeration {
 
     for (int i = 0; i < 3; i++)
       {
-	index[i] = 0;
+        index[i] = 0;
       }
   }
 
@@ -1403,28 +1098,26 @@ final class IPv4ClassCEnumerator implements Enumeration {
   {
     return line < range.length;
   }
-  
-  public synchronized Object nextElement() 
+
+  public synchronized Object nextElement()
   {
-    Byte[] address;
-
-    /* -- */
-
     if (line >= range.length)
       {
-	throw new NoSuchElementException("IPv4ClassCEnumerator");
+        throw new NoSuchElementException("IPv4ClassCEnumerator");
       }
 
     // create the next Class C-sized subnet to return
 
-    address = new Byte[4];
+    byte[] bytes = new byte[4];
 
     for (int i = 0; i < 3; i++)
       {
-	address[i] = new Byte((byte) (range[line][i][0] + index[i]));
+        bytes[i] = (byte) (range[line][i][0] + index[i]);
       }
 
-    address[3] = new Byte((byte) -128);
+    bytes[3] = IPAddress.u2s(0);
+
+    IPAddress address = new IPAddress(bytes);
 
     // now update our range index variables to find the set of
     // offsets for the next address in our sequence
@@ -1433,43 +1126,43 @@ final class IPv4ClassCEnumerator implements Enumeration {
 
     for (int i = 2; !incremented && i >= 0; i--)
       {
-	if (range[line][i][1] > range[line][i][0])
-	  {
-	    index[i]++;
+        if (range[line][i][1] > range[line][i][0])
+          {
+            index[i]++;
 
-	    if (index[i] > (range[line][i][1] - range[line][i][0]))
-	      {
-		for (int j = i; j < 3; j++)
-		  {
-		    index[j] = 0;
-		  }
-	      }
-	    else
-	      {
-		incremented = true;
-	      }
-	  }
-	else if (range[line][i][1] < range[line][i][0])
-	  {
-	    index[i]--;
+            if (index[i] > (range[line][i][1] - range[line][i][0]))
+              {
+                for (int j = i; j < 3; j++)
+                  {
+                    index[j] = 0;
+                  }
+              }
+            else
+              {
+                incremented = true;
+              }
+          }
+        else if (range[line][i][1] < range[line][i][0])
+          {
+            index[i]--;
 
-	    if (index[i] < (range[line][i][1] - range[line][i][0]))
-	      {
-		for (int j = i; j < 3; j++)
-		  {
-		    index[j] = 0;
-		  }
-	      }
-	    else
-	      {
-		incremented = true;
-	      }
-	  }
+            if (index[i] < (range[line][i][1] - range[line][i][0]))
+              {
+                for (int j = i; j < 3; j++)
+                  {
+                    index[j] = 0;
+                  }
+              }
+            else
+              {
+                incremented = true;
+              }
+          }
       }
 
     if (!incremented)
       {
-	line++;
+        line++;
       }
 
     return address;

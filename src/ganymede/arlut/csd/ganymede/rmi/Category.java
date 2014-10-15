@@ -3,17 +3,19 @@
    Category.java
 
    Remote interface to a DBBaseCategory object.
-   
+
    Created: 11 August 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -58,23 +60,22 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * Client side interface definition for the Ganymede DBBaseCategory class.  This
- * interface allows the client to manipulate a category's relationships.
- *
+ * <p>Client side interface definition for the Ganymede DBBaseCategory
+ * class.  This interface allows the client to manipulate a category's
+ * relationships.</p>
  */
 
 public interface Category extends Remote {
 
   /**
-   * Returns the name of this category.
+   * @return The name of this category.
    */
 
   public String getName() throws RemoteException;
 
   /**
-   * Returns the full path to this category, with levels
-   * in the hierarchy separated by '/'s.
+   * @return The full path to this category, with levels in the
+   * hierarchy separated by '/'s.
    */
 
   public String getPath() throws RemoteException;
@@ -82,34 +83,36 @@ public interface Category extends Remote {
   /**
    * Sets the name of this node.  The name must not include a '/'
    * character, but all other characters are acceptable.
+   *
+   * @param newName The new name for this node
    */
 
   public boolean setName(String newName) throws RemoteException;
 
   /**
-   * This method returns the category that this
-   * category node belongs to.  If this is the DBStore's
-   * root category, this will return null.
+   * @return the category that this category node belongs to.  null if
+   * this is the DBStore's root category.
    */
 
   public Category getCategory() throws RemoteException;
 
   /**
-   * Returns child nodes
+   * @return child nodes
    */
 
   public Vector getNodes() throws RemoteException;
 
   /**
-   * Returns a subcategory of name <name>.
+   * @param name The name of the child node to return
+   * @return A subcategory of this Category.
    */
 
   public CategoryNode getNode(String name) throws RemoteException;
 
   /**
-   * This method is used to place a Category Node under us.  The node
-   * will be placed according to the node's displayOrder value, if resort
-   * and/or adjustNodes are true.
+   * <p>This method is used to place a Category Node under us.  The
+   * node will be placed according to the node's displayOrder value,
+   * if resort and/or adjustNodes are true.</p>
    *
    * @param node Node to place under this category
    * @param previousNodeName The name of the node to place node after,
@@ -119,9 +122,10 @@ public interface Category extends Remote {
   public void addNodeAfter(CategoryNode node, String previousNodeName) throws RemoteException;
 
   /**
-   * <p>This method is used to place a Category Node under us.  This method
-   * adds a new node into this category, before nextNodeName if nextNodeName
-   * is not null, or at the beginning of the category if it is.</p>
+   * <p>This method is used to place a Category Node under us.  This
+   * method adds a new node into this category, before nextNodeName if
+   * nextNodeName is not null, or at the beginning of the category if
+   * it is.</p>
    *
    * @param node Node to place under this category
    * @param nextNodeName the name of the node that the new node is to be added before,
@@ -131,8 +135,9 @@ public interface Category extends Remote {
   public void addNodeBefore(CategoryNode node, String nextNodeName) throws RemoteException;
 
   /**
-   * This method can be used to move a Category from another Category to this Category,
-   * or to move a Category around within this Category.
+   * <p>This method can be used to move a Category from another
+   * Category to this Category, or to move a Category around within
+   * this Category.</p>
    *
    * @param catPath the fully specified path of the node to be moved
    * @param previousNodeName The name of the node to place node after,
@@ -166,18 +171,18 @@ public interface Category extends Remote {
   public void removeNode(String name) throws RemoteException;
 
   /**
-   * This creates a new subcategory under this category,
-   * with displayOrder after the last item currently in the
-   * category.  This method should only be called when
-   * there are no nodes left to be added to the category
-   * with prefixed displayOrder values.
+   * <p>This creates a new subcategory under this category, with
+   * displayOrder after the last item currently in the category.  This
+   * method should only be called when there are no nodes left to be
+   * added to the category with prefixed displayOrder values.</p>
+   *
+   * @return A new Category that has been placed under this Category.
    */
 
   public Category newSubCategory() throws RemoteException;
 
   /**
-   * This method returns true if this
-   * is a subcategory of cat.
+   * @return True if this is a subcategory of cat.
    */
 
   public boolean isUnder(Category cat) throws RemoteException;

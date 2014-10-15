@@ -32,6 +32,7 @@
     <namespace name="dhcp_option_entry" case-sensitive="false"/>
     <namespace name="dhcp_option_type" case-sensitive="false"/>
     <namespace name="dhcp_network" case-sensitive="false"/>
+    <namespace name="dhcp_subnet" case-sensitive="false"/>
     <namespace name="smailusers" case-sensitive="false"/>
     <namespace name="ExchangeStore" case-sensitive="false"/>
     <namespace name="portalou" case-sensitive="false"/>
@@ -1429,6 +1430,33 @@ if the client does not explicitly request it.</comment>
               <typedef type="string">
                 <maxlength val="64"/>
                 <namespace val="dhcp_network"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Options" id="259">
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="DHCP_Option_Value"/>
+                <embedded/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Subnets" id="271">
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="DHCP_Subnet"/>
+                <embedded/>
+              </typedef>
+            </fielddef>
+          </tab>
+        </objectdef>
+        <objectdef name="DHCP_Subnet" id="284">
+          <label fieldid="256"/>
+          <classdef name="arlut.csd.ganymede.gasharl.dhcpSubnetCustom" optionString=""/>
+          <embedded/>
+          <tab name="General">
+            <fielddef name="Name" id="256">
+              <typedef type="string">
+                <maxlength val="64"/>
+                <namespace val="dhcp_subnet"/>
               </typedef>
             </fielddef>
             <fielddef name="Network_Number" id="257">

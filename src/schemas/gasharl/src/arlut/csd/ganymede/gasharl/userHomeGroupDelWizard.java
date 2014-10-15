@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -363,7 +363,7 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
         state = DONE;   // let the wizardHook know to go ahead and pass
                                 // this operation through now
 
-        InvidDBField invF = (InvidDBField) userObject.getField(GROUPLIST);
+        InvidDBField invF = userObject.getInvidField(GROUPLIST);
 
         // note that this deleteElement() operation will pass
         // through userObject.wizardHook().  wizardHook will see that we are

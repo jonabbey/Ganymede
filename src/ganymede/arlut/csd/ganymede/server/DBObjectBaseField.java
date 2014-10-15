@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996 - 2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -92,10 +92,10 @@ import arlut.csd.ganymede.rmi.BaseField;
  * appropriate.</p>
  *
  * <p>Each {@link arlut.csd.ganymede.server.DBField DBField} held in
- * the server's database holds a reference to a DBObjectBaseField, and
- * the DBField's methods will consult the DBObjectBaseField during
- * run-time to make decisions based on specified constraints defined
- * in the DBObjectBaseField.</p>
+ * the server's database knows how to lookup its controlling
+ * DBObjectBaseField, and the DBField's methods will consult the
+ * DBObjectBaseField during run-time to make decisions based on
+ * specified constraints defined in the DBObjectBaseField.</p>
  *
  * <p>The Ganymede schema editor uses the {@link
  * arlut.csd.ganymede.rmi.BaseField BaseField} remote interface to
@@ -125,7 +125,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * Object type definition for the database object class we are member of
    */
 
-  private DBObjectBase base;
+  private final DBObjectBase base;
 
   /**
    * name of this field
@@ -500,11 +500,21 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
+   * Returns true if any commits have been made to this DBObjectBase
+   * more recently than the comparison date.
+   */
+
+  public boolean changedSince(Date comparison)
+  {
+    return lastChange.after(comparison);
+  }
+
+  /**
    * Clears the editor reference from this DBObjectBaseField when
    * schema editing is completed and updates the saved FieldTemplate.
    */
 
-  public void clearEditor()
+  public synchronized void clearEditor()
   {
     this.editor = null;
     this.inUseCache = null;
@@ -1273,7 +1283,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
                 if (targetObjectBase != null)
                   {
-                    DBObjectBaseField targetFieldDef = (DBObjectBaseField) targetObjectBase.getField(targetField);
+                    DBObjectBaseField targetFieldDef = targetObjectBase.getField(targetField);
 
                     if (targetFieldDef != null)
                       {
@@ -2897,7 +2907,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * system fields present in all objects.</p>
    */
 
-  public boolean isBuiltIn()
+  public synchronized boolean isBuiltIn()
   {
     return this.getID() < 100;
   }
@@ -2909,7 +2919,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isRemovable()
+  public synchronized boolean isRemovable()
   {
     return !isSystemField();
   }
@@ -2922,7 +2932,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isVisible()
+  public synchronized boolean isVisible()
   {
     return visibility;
   }
@@ -2937,7 +2947,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public void setVisibility(boolean visibility)
+  public synchronized void setVisibility(boolean visibility)
   {
     securityCheck();
 
@@ -2949,7 +2959,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * isInUseCache.
    */
 
-  public void setIsInUse(Boolean val)
+  public synchronized void setIsInUse(Boolean val)
   {
     inUseCache = val;
   }
@@ -2968,7 +2978,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * if any instances of this field exist.
    */
 
-  private boolean isInUse()
+  private synchronized boolean isInUse()
   {
     switch (base.getEditingMode())
       {
@@ -2980,7 +2990,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (inUseCache == null)
       {
-        inUseCache = Boolean.valueOf(((DBObjectBase) this.getBase()).fieldInUse(this));
+        inUseCache = Boolean.valueOf(this.getBase().fieldInUse(this));
       }
 
     return inUseCache.booleanValue();
@@ -2992,7 +3002,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public Base getBase()
+  public synchronized DBObjectBase getBase()
   {
     return base;
   }
@@ -3002,7 +3012,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * for this field.</p>
    */
 
-  public FieldTemplate getTemplate()
+  public synchronized FieldTemplate getTemplate()
   {
     if (template == null)
       {
@@ -3018,7 +3028,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public String getName()
+  public synchronized String getName()
   {
     return field_name;
   }
@@ -3030,7 +3040,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public ReturnVal setName(String name)
+  public synchronized ReturnVal setName(String name)
   {
     return setName(name, false);
   }
@@ -3084,7 +3094,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                                           ts.l("setName.invalid_ganymede_name", name));
       }
 
-    DBObjectBaseField otherField = (DBObjectBaseField) ((DBObjectBase) getBase()).getField(name);
+    DBObjectBaseField otherField = getBase().getField(name);
 
     if (otherField != null)
       {
@@ -3126,7 +3136,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public String getTabName()
+  public synchronized String getTabName()
   {
     return tabName;
   }
@@ -3160,7 +3170,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public String getComment()
+  public synchronized String getComment()
   {
     return comment;
   }
@@ -3211,7 +3221,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public short getType()
+  public synchronized short getType()
   {
     return field_type;
   }
@@ -3288,7 +3298,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isBoolean()
+  public synchronized boolean isBoolean()
   {
     return (field_type == BOOLEAN);
   }
@@ -3299,7 +3309,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isNumeric()
+  public synchronized boolean isNumeric()
   {
     return (field_type == NUMERIC);
   }
@@ -3310,7 +3320,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isFloat()
+  public synchronized boolean isFloat()
   {
     return (field_type == FLOAT);
   }
@@ -3321,7 +3331,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isFieldOptions()
+  public synchronized boolean isFieldOptions()
   {
     return (field_type == FIELDOPTIONS);
   }
@@ -3332,7 +3342,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isDate()
+  public synchronized boolean isDate()
   {
     return (field_type == DATE);
   }
@@ -3343,7 +3353,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isString()
+  public synchronized boolean isString()
   {
     return (field_type == STRING);
   }
@@ -3354,7 +3364,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isInvid()
+  public synchronized boolean isInvid()
   {
     return (field_type == INVID);
   }
@@ -3365,7 +3375,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isPermMatrix()
+  public synchronized boolean isPermMatrix()
   {
     return (field_type == PERMISSIONMATRIX);
   }
@@ -3376,7 +3386,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isPassword()
+  public synchronized boolean isPassword()
   {
     return (field_type == PASSWORD);
   }
@@ -3387,7 +3397,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isIP()
+  public synchronized boolean isIP()
   {
     return (field_type == IP);
   }
@@ -3398,7 +3408,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isArray()
+  public synchronized boolean isArray()
   {
     return array;
   }
@@ -3467,7 +3477,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public short getID()
+  public synchronized short getID()
   {
     return field_code;
   }
@@ -3479,7 +3489,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * definition.</p>
    */
 
-  public ReturnVal setID(short id)
+  public synchronized ReturnVal setID(short id)
   {
     securityCheck();
 
@@ -3539,7 +3549,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public short getMaxArraySize()
+  public synchronized short getMaxArraySize()
   {
     if (!array)
       {
@@ -3602,7 +3612,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isLabeled()
+  public synchronized boolean isLabeled()
   {
     if (!isBoolean())
       {
@@ -3650,7 +3660,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public String getTrueLabel()
+  public synchronized String getTrueLabel()
   {
     if (isLabeled())
       {
@@ -3701,7 +3711,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public String getFalseLabel()
+  public synchronized String getFalseLabel()
   {
     if (isLabeled())
       {
@@ -3757,7 +3767,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public short getMinLength()
+  public synchronized short getMinLength()
   {
     if (!isString() && !isPassword())
       {
@@ -3820,7 +3830,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public short getMaxLength()
+  public synchronized short getMaxLength()
   {
     if (!isString() && !isPassword())
       {
@@ -3883,7 +3893,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public String getOKChars()
+  public synchronized String getOKChars()
   {
     if (!isString() && !isPassword())
       {
@@ -3948,7 +3958,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public String getBadChars()
+  public synchronized String getBadChars()
   {
     if (!isString() && !isPassword())
       {
@@ -4012,7 +4022,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isMultiLine()
+  public synchronized boolean isMultiLine()
   {
     if (!isString())
       {
@@ -4057,7 +4067,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * we set the regexp through a regexp string via setRegexpPat().
    */
 
-  public java.util.regex.Pattern getRegexp()
+  public synchronized java.util.regex.Pattern getRegexp()
   {
     return this.regexp;
   }
@@ -4072,7 +4082,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public String getRegexpPat()
+  public synchronized String getRegexpPat()
   {
     if (!isString())
       {
@@ -4092,7 +4102,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public String getRegexpDesc()
+  public synchronized String getRegexpDesc()
   {
     if (!isString())
       {
@@ -4202,7 +4212,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * field is associated with.</p>
    */
 
-  public DBNameSpace getNameSpace()
+  public synchronized DBNameSpace getNameSpace()
   {
     // several pieces of code have already been written to expect a null
     // value for a field's namespace if none is defined, regardless of
@@ -4217,7 +4227,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public String getNameSpaceLabel()
+  public synchronized String getNameSpaceLabel()
   {
     // several pieces of code have already been written to expect a null
     // value for a field's namespace if none is defined, regardless of
@@ -4254,14 +4264,15 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     if (!isString() && !isNumeric() && !isIP())
       {
         // "Can''t set a namespace constraint on this kind of field ({0}): {1}"
-        throw new IllegalStateException(ts.l("setNameSpace.bad_type", this.getTypeDesc(), this.toString()));
+        throw new IllegalStateException(ts.l("setNameSpace.bad_type",
+                                             this.getTypeDesc(),
+                                             this.toString()));
       }
-
-    // if we are not loading, don't allow a built-in universal field
-    // to be messed with
 
     if (isEditingProtectedBuiltInField())
       {
+        // "DBObjectBaseField: Schema Editing Error"
+        // "Can''t edit system field: {0}"
         return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
                                           ts.l("global.system_field", this.toString()));
       }
@@ -4319,20 +4330,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
         // this field is associated with a namespace.
 
-        Enumeration values;
-        DBNameSpace oldNamespace, tmpNS;
+        DBNameSpace oldNamespace = namespace;
 
-        /* -- */
-
-        oldNamespace = namespace;
-
-        values = base.getStore().nameSpaces.elements();
         namespace = null;
 
-        while (values.hasMoreElements() && (namespace == null))
+        for (DBNameSpace tmpNS: base.getStore().nameSpaces)
           {
-            tmpNS = (DBNameSpace) values.nextElement();
-
             if (tmpNS.getName().equalsIgnoreCase(nameSpaceId))
               {
                 namespace = tmpNS;
@@ -4366,7 +4369,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
                 for (DBObject obj: base.getObjects())
                   {
-                    lastFieldTried = (DBField) obj.getField(getID());
+                    lastFieldTried = obj.getField(getID());
 
                     if (lastFieldTried == null)
                       {
@@ -4433,7 +4436,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isEditInPlace()
+  public synchronized boolean isEditInPlace()
   {
     return editInPlace;
   }
@@ -4448,7 +4451,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public ReturnVal setEditInPlace(boolean b)
+  public synchronized ReturnVal setEditInPlace(boolean b)
   {
     securityCheck();
 
@@ -4504,7 +4507,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isTargetRestricted()
+  public synchronized boolean isTargetRestricted()
   {
     if (!isInvid())
       {
@@ -4527,7 +4530,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public short getTargetBase()
+  public synchronized short getTargetBase()
   {
     if (!isInvid())
       {
@@ -4590,7 +4593,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
         if (editor != null)
           {
-            DBObjectBase b = (DBObjectBase) editor.getBase(val);
+            DBObjectBase b = editor.getBase(val);
 
             if (b == null)
               {
@@ -4664,7 +4667,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
         // loading / initialization logic never uses names to
         // reference bases.
 
-        DBObjectBase b = (DBObjectBase) editor.getBase(baseName);
+        DBObjectBase b = editor.getBase(baseName);
 
         if (b == null)
           {
@@ -4698,7 +4701,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       }
     else
       {
-        DBObjectBase b = (DBObjectBase) base.getStore().getObjectBase(baseName);
+        DBObjectBase b = base.getStore().getObjectBase(baseName);
 
         // we're loading here.. i don't expect the DBStore
         // initializeSchema() method to actually use base names, but
@@ -4722,7 +4725,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isSymmetric()
+  public synchronized boolean isSymmetric()
   {
     if (!isInvid())
       {
@@ -4743,7 +4746,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public short getTargetField()
+  public synchronized short getTargetField()
   {
     if (!isInvid())
       {
@@ -4816,7 +4819,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
         if (editor != null)
           {
-            DBObjectBase b = (DBObjectBase) editor.getBase(allowedTarget);
+            DBObjectBase b = editor.getBase(allowedTarget);
 
             // we're looking up the object that we have pre-selected.. we
             // should always set a target object before trying to set a
@@ -4830,7 +4833,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                                                        this.toString()));
               }
 
-            DBObjectBaseField bF = b.getFieldDef(val);
+            DBObjectBaseField bF = b.getField(val);
 
             if (bF == null)
               {
@@ -4911,7 +4914,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     // look for fieldName in the base currently specified in
     // allowedTarget
 
-    if (allowedTarget == -1 && fieldName != null && !fieldName.equals(""))
+    if (allowedTarget == -1)
       {
         // "Can''t set target field on a non-symmetric invid field {0} to {1}"
         return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
@@ -4921,7 +4924,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     // The schema loading and initializing logic doesn't use field
     // names, so we know editor should be defined
 
-    b = (DBObjectBase) editor.getBase(allowedTarget);
+    b = editor.getBase(allowedTarget);
 
     try
       {
@@ -4983,7 +4986,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isCracklibChecked()
+  public synchronized boolean isCracklibChecked()
   {
     return cracklib_check;
   }
@@ -4996,7 +4999,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean hasCracklibCheckException()
+  public synchronized boolean hasCracklibCheckException()
   {
     return cracklib_supergash_exception;
   }
@@ -5017,7 +5020,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public ReturnVal setCracklibChecked(boolean use_cracklib, boolean supergash_exception)
+  public synchronized ReturnVal setCracklibChecked(boolean use_cracklib, boolean supergash_exception)
   {
     securityCheck();
 
@@ -5048,7 +5051,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isHistoryChecked()
+  public synchronized boolean isHistoryChecked()
   {
     return history_check;
   }
@@ -5061,7 +5064,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean hasHistoryCheckException()
+  public synchronized boolean hasHistoryCheckException()
   {
     return history_supergash_exception;
   }
@@ -5073,7 +5076,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public int getHistoryDepth()
+  public synchronized int getHistoryDepth()
   {
     return history_depth;
   }
@@ -5098,7 +5101,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public ReturnVal setHistoryChecked(boolean use_history, boolean supergash_exception, int depth)
+  public synchronized ReturnVal setHistoryChecked(boolean use_history, boolean supergash_exception, int depth)
   {
     securityCheck();
 
@@ -5131,7 +5134,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isCrypted()
+  public synchronized boolean isCrypted()
   {
     return crypted;
   }
@@ -5150,7 +5153,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public ReturnVal setCrypted(boolean b)
+  public synchronized ReturnVal setCrypted(boolean b)
   {
     securityCheck();
 
@@ -5172,7 +5175,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isMD5Crypted()
+  public synchronized boolean isMD5Crypted()
   {
     return md5crypted;
   }
@@ -5192,7 +5195,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public ReturnVal setMD5Crypted(boolean b)
+  public synchronized ReturnVal setMD5Crypted(boolean b)
   {
     securityCheck();
 
@@ -5214,7 +5217,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isApacheMD5Crypted()
+  public synchronized boolean isApacheMD5Crypted()
   {
     return apachemd5crypted;
   }
@@ -5234,7 +5237,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public ReturnVal setApacheMD5Crypted(boolean b)
+  public synchronized ReturnVal setApacheMD5Crypted(boolean b)
   {
     securityCheck();
 
@@ -5259,7 +5262,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isWinHashed()
+  public synchronized boolean isWinHashed()
   {
     return winHashed;
   }
@@ -5277,7 +5280,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public ReturnVal setWinHashed(boolean b)
+  public synchronized ReturnVal setWinHashed(boolean b)
   {
     securityCheck();
 
@@ -5301,7 +5304,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isSSHAHashed()
+  public synchronized boolean isSSHAHashed()
   {
     return sshaHashed;
   }
@@ -5319,7 +5322,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public ReturnVal setSSHAHashed(boolean b)
+  public synchronized ReturnVal setSSHAHashed(boolean b)
   {
     securityCheck();
 
@@ -5343,7 +5346,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isBCrypted()
+  public synchronized boolean isBCrypted()
   {
     return bCrypted;
   }
@@ -5361,7 +5364,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public ReturnVal setBCrypted(boolean b)
+  public synchronized ReturnVal setBCrypted(boolean b)
   {
     securityCheck();
 
@@ -5384,7 +5387,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public int getBCryptRounds()
+  public synchronized int getBCryptRounds()
   {
     return bCryptRounds;
   }
@@ -5401,7 +5404,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public ReturnVal setBCryptRounds(int n)
+  public synchronized ReturnVal setBCryptRounds(int n)
   {
     securityCheck();
 
@@ -5442,7 +5445,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isShaUnixCrypted()
+  public synchronized boolean isShaUnixCrypted()
   {
     return shaUnixCrypted;
   }
@@ -5461,7 +5464,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public ReturnVal setShaUnixCrypted(boolean b)
+  public synchronized ReturnVal setShaUnixCrypted(boolean b)
   {
     securityCheck();
 
@@ -5484,7 +5487,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isShaUnixCrypted512()
+  public synchronized boolean isShaUnixCrypted512()
   {
     return useShaUnixCrypted512;
   }
@@ -5501,7 +5504,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public ReturnVal setShaUnixCrypted512(boolean b)
+  public synchronized ReturnVal setShaUnixCrypted512(boolean b)
   {
     securityCheck();
 
@@ -5530,7 +5533,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public int getShaUnixCryptRounds()
+  public synchronized int getShaUnixCryptRounds()
   {
     return shaUnixCryptRounds;
   }
@@ -5548,7 +5551,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public ReturnVal setShaUnixCryptRounds(int n)
+  public synchronized ReturnVal setShaUnixCryptRounds(int n)
   {
     securityCheck();
 
@@ -5584,7 +5587,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public boolean isPlainText()
+  public synchronized boolean isPlainText()
   {
     return storePlaintext;
   }
@@ -5603,7 +5606,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public ReturnVal setPlainText(boolean b)
+  public synchronized ReturnVal setPlainText(boolean b)
   {
     securityCheck();
 
@@ -5631,7 +5634,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * the same time.
    */
 
-  private boolean isLoading()
+  private synchronized boolean isLoading()
   {
     return base.getStore().isLoading();
   }
@@ -5648,7 +5651,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * the same time.
    */
 
-  private boolean isEditing()
+  private synchronized boolean isEditing()
   {
     switch (base.getEditingMode())
       {
@@ -5675,7 +5678,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * so much.
    */
 
-  private boolean isEditingProtectedBuiltInField()
+  private synchronized boolean isEditingProtectedBuiltInField()
   {
     switch (base.getEditingMode())
       {
@@ -5712,7 +5715,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * Task, etc.)
    */
 
-  private boolean isEditingProtectedGanymedeDefinedField()
+  private synchronized boolean isEditingProtectedGanymedeDefinedField()
   {
     switch (base.getEditingMode())
       {
@@ -5745,7 +5748,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * schema.
    */
 
-  private void securityCheck()
+  private synchronized void securityCheck()
   {
     if (!isLoading() && !isEditing())
       {
@@ -5759,7 +5762,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * a system field
    */
 
-  private boolean isSystemField()
+  private synchronized boolean isSystemField()
   {
     if (getID() <= SchemaConstants.FinalSystemField)
       {
@@ -5913,7 +5916,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public String getTypeDesc()
+  public synchronized String getTypeDesc()
   {
     String result;
 
@@ -5976,7 +5979,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   // misc object and interface methods
 
-  public String toString()
+  public synchronized String toString()
   {
     return base.getName() + ":" + field_name;
   }
@@ -5986,7 +5989,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * a Short, suitable for use in a hash.</p>
    */
 
-  public Short getKey()
+  public synchronized Short getKey()
   {
     return Short.valueOf(field_code);
   }
@@ -5995,7 +5998,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * We support hashCode based on field id number, not on value.
    */
 
-  public int hashCode()
+  public synchronized int hashCode()
   {
     return field_code;
   }
@@ -6004,7 +6007,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * We support equals based on field id number, not on value.
    */
 
-  public boolean equals(Object o)
+  public synchronized boolean equals(Object o)
   {
     if (o instanceof DBObjectBaseField)
       {
@@ -6023,7 +6026,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * autoboxing), or another DBObjectBaseField.
    */
 
-  public int compareTo(Object o)
+  public synchronized int compareTo(Object o)
   {
     if (o instanceof Number)
       {

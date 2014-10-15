@@ -13,8 +13,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996 - 2011
+   Copyright (C) 1996-2014
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -140,168 +142,168 @@ public class PasswordClient implements ClientListener {
 
     if (debug)
       {
-	System.out.println(" logging into server");
+        System.out.println(" logging into server");
       }
 
     try
       {
-	client.connect();
+        client.connect();
       }
     catch (Exception ex)
       {
         // "Connection to Ganymede server failed: {0}"
-	error(ts.l("changePassword.connection_fail", ex.getMessage()));
-	return false;
+        error(ts.l("changePassword.connection_fail", ex.getMessage()));
+        return false;
       }
 
     try
       {
-	// First we need a referrence to a Session object.  This is
-	// accomplished through the ClientBase's login method.
+        // First we need a referrence to a Session object.  This is
+        // accomplished through the ClientBase's login method.
 
-	session = client.login(username, oldPassword);
+        session = client.login(username, oldPassword);
 
-	// If the username/password combination doesn't match, then
-	// the session object will be null.  For the purposes of this
-	// client, it is suficient to just return false and require
-	// the user to rerun the password client if the session is null.
+        // If the username/password combination doesn't match, then
+        // the session object will be null.  For the purposes of this
+        // client, it is suficient to just return false and require
+        // the user to rerun the password client if the session is null.
 
-	if (session == null)
-	  {
-	    if (debug)
-	      {
-		System.out.println(" logged in, looking for :" + username + ":");
-	      }
+        if (session == null)
+          {
+            if (debug)
+              {
+                System.out.println(" logged in, looking for :" + username + ":");
+              }
 
             // "Wrong password."
-	    error(ts.l("changePassword.wrong_pass"));
-	    return false;
-	  }
+            error(ts.l("changePassword.wrong_pass"));
+            return false;
+          }
 
-	// Now that we have a session object, we need to open a
-	// transaction.  All changes must be made with an open
-	// tranaction.
+        // Now that we have a session object, we need to open a
+        // transaction.  All changes must be made with an open
+        // tranaction.
 
-	session.openTransaction("PasswordClient");
+        session.openTransaction("PasswordClient");
 
-	// In order to change the password, we must first get a handle
-	// on the user object.  This is accomplished through the
-	// server's Query engine.
+        // In order to change the password, we must first get a handle
+        // on the user object.  This is accomplished through the
+        // server's Query engine.
 
-	QueryResult results = session.query(new Query(SchemaConstants.UserBase,
-						      new QueryDataNode(SchemaConstants.UserUserName,
-									QueryDataNode.EQUALS, username)));
+        QueryResult results = session.query(new Query(SchemaConstants.UserBase,
+                                                      new QueryDataNode(SchemaConstants.UserUserName,
+                                                                        QueryDataNode.EQUALS, username)));
 
-	if (results == null)
-	  {
-	    // "No user {0} found, can''t change password."
-	    System.out.println(ts.l("changePassword.no_such_user", username));
+        if (results == null)
+          {
+            // "No user {0} found, can''t change password."
+            System.out.println(ts.l("changePassword.no_such_user", username));
 
-	    return false;
-	  }
-	else if (results.size() != 1)
-	  {
-	    System.out.println("Error, found multiple matching user records.. can't happen?");
+            return false;
+          }
+        else if (results.size() != 1)
+          {
+            System.out.println("Error, found multiple matching user records.. can't happen?");
 
-	    return false;
-	  }
+            return false;
+          }
 
-	if (debug)
-	  {
-	    System.out.println("Changing password");
-	  }
+        if (debug)
+          {
+            System.out.println("Changing password");
+          }
 
-	// Invid's are id numbers for objects, the basic way to
-	// referrencing objects in the server.
+        // Invid's are id numbers for objects, the basic way to
+        // referrencing objects in the server.
 
-	Invid invid = results.getInvid(0);
+        Invid invid = results.getInvid(0);
 
-	// To edit the object, we must check out the user through
-	// the Session object.
+        // To edit the object, we must check out the user through
+        // the Session object.
 
-	ReturnVal retVal = session.edit_db_object(invid);
-	db_object user = (db_object) retVal.getObject();
+        ReturnVal retVal = session.edit_db_object(invid);
+        db_object user = (db_object) retVal.getObject();
 
-	// If edit_db_object returns a null object, it usually
-	// means someone else is editing the object.  It could
-	// also mean that the user doesn't have sufficient
-	// permission to edit the object.
+        // If edit_db_object returns a null object, it usually
+        // means someone else is editing the object.  It could
+        // also mean that the user doesn't have sufficient
+        // permission to edit the object.
 
-	if (user == null)
-	  {
-	    // "Could not get handle on user object.  Someone else might be editing it."
-	    error(ts.l("changePassword.locked"));
-	    session.abortTransaction();
-	    return false;
-	  }
+        if (user == null)
+          {
+            // "Could not get handle on user object.  Someone else might be editing it."
+            error(ts.l("changePassword.locked"));
+            session.abortTransaction();
+            return false;
+          }
 
-	// pass_field is a subclass of db_field, which represents
-	// the fields in each object.  We need a referrence to the
-	// user's password field, so we can change it.
+        // pass_field is a subclass of db_field, which represents
+        // the fields in each object.  We need a referrence to the
+        // user's password field, so we can change it.
 
-	pass_field pass = (pass_field)user.getField(SchemaConstants.UserPassword);
+        pass_field pass = user.getPassField(SchemaConstants.UserPassword);
 
-	// Changes to objects on the server return a ReturnVal.
-	// ReturnVal contains information about the change just
-	// made, including a list of fields that may have changed
-	// as a result of this change, or dialogs prompting the
-	// user for more information.
+        // Changes to objects on the server return a ReturnVal.
+        // ReturnVal contains information about the change just
+        // made, including a list of fields that may have changed
+        // as a result of this change, or dialogs prompting the
+        // user for more information.
 
-	// For the purposes of this application, we don't care
-	// about the extra stuff in ReturnVal; we only want to
-	// know if the password change worked or not.
+        // For the purposes of this application, we don't care
+        // about the extra stuff in ReturnVal; we only want to
+        // know if the password change worked or not.
 
-	ReturnVal returnValue = pass.setPlainTextPass(newPassword);
+        ReturnVal returnValue = pass.setPlainTextPass(newPassword);
 
-	if (!ReturnVal.didSucceed(returnValue))
-	  {
-	    if (debug)
-	      {
-		error("It didn't work.");
-	      }
+        if (!ReturnVal.didSucceed(returnValue))
+          {
+            if (debug)
+              {
+                error("It didn't work.");
+              }
 
-	    String resultText = returnValue.getDialogText();
+            String resultText = returnValue.getDialogText();
 
-	    if (resultText != null && !resultText.equals(""))
-	      {
-		System.err.println(resultText);
-	      }
+            if (resultText != null && !resultText.equals(""))
+              {
+                System.err.println(resultText);
+              }
 
-	    return false;
-	  }
+            return false;
+          }
 
-	// After making changes to the database, the session changes
-	// must be committed.  This also returns a ReturnVal.
+        // After making changes to the database, the session changes
+        // must be committed.  This also returns a ReturnVal.
 
-	ReturnVal rv = session.commitTransaction();
+        ReturnVal rv = session.commitTransaction();
 
-	if (ReturnVal.didSucceed(rv))
-	  {
-	    if (debug)
-	      {
-		System.out.println("It worked.");
-	      }
+        if (ReturnVal.didSucceed(rv))
+          {
+            if (debug)
+              {
+                System.out.println("It worked.");
+              }
 
-	    return true;
-	  }
-	else
-	  {
-	    error("Error commiting transaction, password change failed.");
-	  }
+            return true;
+          }
+        else
+          {
+            error("Error commiting transaction, password change failed.");
+          }
       }
     catch (RemoteException ex)
       {
-	error("Caught remote exception in authenticate: " + ex);
+        error("Caught remote exception in authenticate: " + ex);
       }
     finally
       {
-	try
-	  {
-	    client.disconnect();
-	  }
-	catch (RemoteException ex)
-	  {
-	  }
+        try
+          {
+            client.disconnect();
+          }
+        catch (RemoteException ex)
+          {
+          }
       }
 
     return false;
@@ -375,8 +377,8 @@ public class PasswordClient implements ClientListener {
       {
         // "Wrong number of command line parameters: required parameters are <properties> <user>"
 
-	System.err.println(ts.l("main.args_error"));
-	System.exit(0);
+        System.err.println(ts.l("main.args_error"));
+        System.exit(0);
       }
 
     // Get the server URL
@@ -393,69 +395,69 @@ public class PasswordClient implements ClientListener {
 
     try
       {
-	client = new PasswordClient(url);
+        client = new PasswordClient(url);
       }
     catch (Exception ex)
       {
-	ex.printStackTrace();
-	throw new RuntimeException("Couldn't connect to authentication server.. " +
-				   ex.getMessage());
+        ex.printStackTrace();
+        throw new RuntimeException("Couldn't connect to authentication server.. " +
+                                   ex.getMessage());
       }
 
     try
       {
-	// get old password, new password
+        // get old password, new password
 
-	Console cons = System.console();
-	PrintWriter out = cons.writer();
+        Console cons = System.console();
+        PrintWriter out = cons.writer();
 
-	String oldPassword = null;
-	String newPassword = null;
-	String verifyPassword = null;
+        String oldPassword = null;
+        String newPassword = null;
+        String verifyPassword = null;
 
-	// Get the old password
+        // Get the old password
 
-	// "Old password:"
-	oldPassword = new String(cons.readPassword("%s ", ts.l("main.old_pass_prompt")));
+        // "Old password:"
+        oldPassword = new String(cons.readPassword("%s ", ts.l("main.old_pass_prompt")));
 
-	// Get the new password.  Loop until the password is entered
-	// correctly twice.
+        // Get the new password.  Loop until the password is entered
+        // correctly twice.
 
-	do
-	  {
-	    // "New password:"
-	    newPassword = new String(cons.readPassword("%s ", ts.l("main.new_pass_prompt")));
+        do
+          {
+            // "New password:"
+            newPassword = new String(cons.readPassword("%s ", ts.l("main.new_pass_prompt")));
 
-	    // "Verify:"
-	    verifyPassword = new String(cons.readPassword("%s ", ts.l("main.verify_prompt")));
+            // "Verify:"
+            verifyPassword = new String(cons.readPassword("%s ", ts.l("main.verify_prompt")));
 
-	    if (verifyPassword.equals(newPassword))
-	      {
-		break;
-	      }
+            if (verifyPassword.equals(newPassword))
+              {
+                break;
+              }
 
-	    // "Passwords do not match.  Try again."
-	    out.println(ts.l("main.no_match"));
-	  } while (true);
+            // "Passwords do not match.  Try again."
+            out.println(ts.l("main.no_match"));
+          } while (true);
 
-	// Now change the password with the passwordClient.
+        // Now change the password with the passwordClient.
 
-	boolean success = client.changePassword(argv[1], oldPassword, newPassword);
+        boolean success = client.changePassword(argv[1], oldPassword, newPassword);
 
-	if (success)
-	  {
-	    // "Successfully changed password."
-	    out.println(ts.l("main.success"));
-	  }
-	else
-	  {
-	    // "Password change failed."
-	    out.println(ts.l("main.fail"));
-	  }
+        if (success)
+          {
+            // "Successfully changed password."
+            out.println(ts.l("main.success"));
+          }
+        else
+          {
+            // "Password change failed."
+            out.println(ts.l("main.fail"));
+          }
       }
     finally
       {
-	System.exit(0);
+        System.exit(0);
       }
   }
 
@@ -476,26 +478,26 @@ public class PasswordClient implements ClientListener {
 
     try
       {
-	bis = new BufferedInputStream(new FileInputStream(filename));
+        bis = new BufferedInputStream(new FileInputStream(filename));
 
-	props.load(bis);
+        props.load(bis);
       }
     catch (IOException ex)
       {
-	return false;
+        return false;
       }
     finally
       {
-	if (bis != null)
-	  {
-	    try
-	      {
-		bis.close();
-	      }
-	    catch (IOException e)
-	      {
-	      }
-	  }
+        if (bis != null)
+          {
+            try
+              {
+                bis.close();
+              }
+            catch (IOException e)
+              {
+              }
+          }
       }
 
     serverhost = props.getProperty("ganymede.serverhost");
@@ -506,26 +508,26 @@ public class PasswordClient implements ClientListener {
 
     if (registryPort != null)
       {
-	try
-	  {
-	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
-	  }
-	catch (NumberFormatException ex)
-	  {
+        try
+          {
+            registryPortProperty = java.lang.Integer.parseInt(registryPort);
+          }
+        catch (NumberFormatException ex)
+          {
             // Couldn''t get a valid registry port number from the ganymede.properties file: {0}
-	    System.err.println(ts.l("loadProperties.bad_port_property", registryPort));
-	  }
+            System.err.println(ts.l("loadProperties.bad_port_property", registryPort));
+          }
       }
 
     if (serverhost == null)
       {
         // "Couldn''t get the server host property."
-	System.err.println(ts.l("loadProperties.bad_host_property"));
-	success = false;
+        System.err.println(ts.l("loadProperties.bad_host_property"));
+        success = false;
       }
     else
       {
-	url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
+        url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
       }
 
     return success;

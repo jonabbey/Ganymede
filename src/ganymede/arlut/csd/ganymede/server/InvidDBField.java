@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -54,7 +54,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.Enumeration;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
@@ -439,7 +438,7 @@ public final class InvidDBField extends DBField implements invid_field {
             // object that we are writing out
             //
 
-            DBEditObject hook = this.owner.getBase().getObjectHook();
+            DBEditObject hook = this.owner.getHook();
             String extras[] = hook.getForeignSyncKeys(invid, this.owner,
                                                       target, xmlOut.getSyncChannelName(),
                                                       xmlOut.isBeforeStateDumping());
@@ -472,7 +471,7 @@ public final class InvidDBField extends DBField implements invid_field {
             // object that we are targeting
             //
 
-            hook = target.getBase().getObjectHook();
+            hook = target.getHook();
             extras = hook.getMyExtraInvidAttributes(target,
                                                     xmlOut.getSyncChannelName(),
                                                     xmlOut.isBeforeStateDumping());
@@ -553,7 +552,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * <p>This method avoids checking permissions because it is used on
    * the server side only and because it is involved in the {@link
    * arlut.csd.ganymede.server.DBObject#getLabel() getLabel()} logic
-   * for {@link arlut.csd.ganymede.server.DBObject DBObject}<./p>
+   * for {@link arlut.csd.ganymede.server.DBObject DBObject}</p>
    *
    * <p>If this method checked permissions and the getPerm() method
    * failed for some reason and tried to report the failure using
@@ -578,13 +577,13 @@ public final class InvidDBField extends DBField implements invid_field {
 
     // now do the work
 
+    if (value == null)
+      {
+        return "";
+      }
+
     if (!isVector())
       {
-        if (value == null)
-          {
-            return "null";
-          }
-
         Invid localInvid = (Invid) this.value();
 
         // XXX note: we don't use our owner's lookupLabel() method
@@ -720,7 +719,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
   @Override public synchronized String getDiffString(DBField orig)
   {
-    StringBuilder result = new StringBuilder();
     InvidDBField origI;
     GanymedeSession gsession = null;
 
@@ -734,7 +732,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (orig == this)
       {
-        return "";
+        return null;
       }
 
     origI = (InvidDBField) orig;
@@ -761,6 +759,8 @@ public final class InvidDBField extends DBField implements invid_field {
           }
         else
           {
+            StringBuilder result = new StringBuilder();
+
             if (deleted.size() != 0)
               {
                 StringBuilder deleteString = new StringBuilder();
@@ -806,18 +806,16 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-        if (origI.value().equals(this.value()))
+        if (origI.value.equals(this.value))
           {
             return null;
           }
         else
           {
             // "\tOld: {0}\n\tNew:{1}\n"
-            result.append(ts.l("getDiffString.scalar",
-                               getRemoteLabel(gsession, origI.value(), true),
-                               getRemoteLabel(gsession, this.value(), false)));
-
-            return result.toString();
+            return ts.l("getDiffString.scalar",
+                        getRemoteLabel(gsession, origI.value(), true),
+                        getRemoteLabel(gsession, this.value(), false));
           }
       }
   }
@@ -873,7 +871,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     try
       {
-        remoteField = (InvidDBField) remobj.getField(targetField);
+        remoteField = remobj.getInvidField(targetField);
       }
     catch (ClassCastException ex)
       {
@@ -1104,7 +1102,7 @@ public final class InvidDBField extends DBField implements invid_field {
           {
             if (anonymous || getGSession().getPermManager().getPerm(remobj).isEditable())
               {
-                oldRef = (DBEditObject) session.editDBObject(oldRemote);
+                oldRef = session.editDBObject(oldRemote);
               }
             else
               {
@@ -1183,29 +1181,17 @@ public final class InvidDBField extends DBField implements invid_field {
 
         try
           {
-            oldRefField = (InvidDBField) oldRef.getField(targetField);
+            oldRefField = oldRef.getInvidField(targetField);
           }
         catch (ClassCastException ex)
           {
-            try
-              {
-                // "InvidDBField.bind(): Couldn''t unlink from old reference"
-                // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-                return Ganymede.createErrorDialog(this.getGSession(),
-                                                  ts.l("bind.no_unlink_sub"),
-                                                  ts.l("bind.schema_error",
-                                                       oldRef.getField(targetField).getName(),
-                                                       oldRef.getLabel()));
-              }
-            catch (RemoteException rx)
-              {
-                // "InvidDBField.bind(): Couldn''t unlink from old reference"
-                // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-                return Ganymede.createErrorDialog(this.getGSession(),
-                                                  ts.l("bind.no_unlink_sub"),
-                                                  ts.l("bind.schema_error",
-                                                       Integer.toString(targetField), oldRef.getLabel()));
-              }
+            // "InvidDBField.bind(): Couldn''t unlink from old reference"
+            // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("bind.no_unlink_sub"),
+                                              ts.l("bind.schema_error",
+                                                   oldRef.getField(targetField).getName(),
+                                                   oldRef.getLabel()));
           }
 
         if (oldRefField == null)
@@ -1287,7 +1273,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
         if (anonymous2 || getGSession().getPermManager().getPerm(remobj).isEditable())
           {
-            newRef = (DBEditObject) session.editDBObject(newRemote);
+            newRef = session.editDBObject(newRemote);
           }
         else
           {
@@ -1358,7 +1344,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     try
       {
-        newRefField = (InvidDBField) newRef.getField(targetField);
+        newRefField = newRef.getInvidField(targetField);
 
         if (newRefField == null)
           {
@@ -1371,22 +1357,11 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     catch (ClassCastException ex)
       {
-        try
-          {
-            // "InvidDBField.bind(): Couldn''t link to new reference"
-            // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-            return Ganymede.createErrorDialog(this.getGSession(),
-                                              ts.l("bind.no_new_link_sub"),
-                                              ts.l("bind.schema_error", newRef.getField(targetField).getName(), newRef.getLabel()));
-          }
-        catch (RemoteException rx)
-          {
-            // "InvidDBField.bind(): Couldn''t link to new reference"
-            // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-            return Ganymede.createErrorDialog(this.getGSession(),
-                                              ts.l("bind.no_new_link_sub"),
-                                              ts.l("bind.schema_error", Integer.toString(targetField), newRef.getLabel()));
-          }
+        // "InvidDBField.bind(): Couldn''t link to new reference"
+        // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("bind.no_new_link_sub"),
+                                          ts.l("bind.schema_error", newRef.getField(targetField).getName(), newRef.getLabel()));
       }
 
     // okay, at this point we should have oldRefField pointing to the
@@ -1550,7 +1525,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
         if (anonymous || getGSession().getPermManager().getPerm(remobj).isEditable())
           {
-            oldRef = (DBEditObject) session.editDBObject(remote);
+            oldRef = session.editDBObject(remote);
 
             // if we couldn't checkout the old object for editing, despite
             // having permissions, we need to see why.
@@ -1617,7 +1592,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     try
       {
-        oldRefField = (InvidDBField) oldRef.getField(targetField);
+        oldRefField = oldRef.getInvidField(targetField);
       }
     catch (ClassCastException ex)
       {
@@ -2108,11 +2083,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
                 try
                   {
-                    backField = (InvidDBField) target.getField(targetField);
+                    backField = target.getInvidField(targetField);
                   }
                 catch (ClassCastException ex)
                   {
-                    String fieldName = ((DBField) target.getField(targetField)).getName();
+                    String fieldName = target.getField(targetField).getName();
 
                     // "*** InvidDBField.test(): schema error!  back-reference field not an invid field!!\n\t>{0}:{1}, referenced from {2}:{3}"
                     Ganymede.debug(ts.l("test.bad_symmetry", target.getLabel(), fieldName, objectName, getName()));
@@ -2214,11 +2189,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
                 try
                   {
-                    backField = (InvidDBField) target.getField(targetField);
+                    backField = target.getInvidField(targetField);
                   }
                 catch (ClassCastException ex)
                   {
-                    String fieldName = ((DBField) target.getField(targetField)).getName();
+                    String fieldName = target.getField(targetField).getName();
 
                     Ganymede.debug(ts.l("test.bad_symmetry",  target.getLabel(), fieldName, objectName, getName()));
                     return false;
@@ -2829,7 +2804,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // type and in identity.  if partialSuccessOk, we won't complain
     // unless none of the submitted values are acceptable
 
-    StringBuilder errorBuf = new StringBuilder();
+    StringBuilder errorBuf = null;
 
     for (Invid remote: newValues)
       {
@@ -2845,7 +2820,11 @@ public final class InvidDBField extends DBField implements invid_field {
               {
                 if (retVal.getDialog() != null)
                   {
-                    if (errorBuf.length() != 0)
+                    if (errorBuf == null)
+                      {
+                        errorBuf = new StringBuilder();
+                      }
+                    else if (errorBuf.length() != 0)
                       {
                         errorBuf.append("\n\n");
                       }
@@ -2909,7 +2888,11 @@ public final class InvidDBField extends DBField implements invid_field {
               {
                 if (newRetVal.getDialog() != null)
                   {
-                    if (errorBuf.length() != 0)
+                    if (errorBuf == null)
+                      {
+                        errorBuf = new StringBuilder();
+                      }
+                    else if (errorBuf.length() != 0)
                       {
                         errorBuf.append("\n\n");
                       }
@@ -2973,7 +2956,11 @@ public final class InvidDBField extends DBField implements invid_field {
                   {
                     if (newRetVal.getDialog() != null)
                       {
-                        if (errorBuf.length() != 0)
+                        if (errorBuf == null)
+                          {
+                            errorBuf = new StringBuilder();
+                          }
+                        else if (errorBuf.length() != 0)
                           {
                             errorBuf.append("\n\n");
                           }
@@ -3038,7 +3025,11 @@ public final class InvidDBField extends DBField implements invid_field {
                   {
                     if (newRetVal.getDialog() != null)
                       {
-                        if (errorBuf.length() != 0)
+                        if (errorBuf == null)
+                          {
+                            errorBuf = new StringBuilder();
+                          }
+                        else if (errorBuf.length() != 0)
                           {
                             errorBuf.append("\n\n");
                           }
@@ -3082,7 +3073,7 @@ public final class InvidDBField extends DBField implements invid_field {
         // therefore have partialSuccessOk set), encode a description
         // of what happened to go along with the success code.
 
-        if (errorBuf.length() != 0)
+        if (errorBuf != null && errorBuf.length() != 0)
           {
             retVal = ReturnVal.merge(retVal, ReturnVal.success()); // force non-null retVal
 
@@ -3119,7 +3110,6 @@ public final class InvidDBField extends DBField implements invid_field {
           }
       }
   }
-
 
   /**
    * <p>Creates and adds a new embedded object in this
@@ -3410,7 +3400,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     DBObjectBase targetBase = getTargetBaseDef();
 
-    return (DBObjectBaseField) targetBase.getField(getTargetField());
+    return targetBase.getField(getTargetField());
   }
 
   /**
@@ -3798,7 +3788,7 @@ public final class InvidDBField extends DBField implements invid_field {
                   }
                 else
                   {
-                    label = this.owner.getBase().getObjectHook().lookupLabel(object);
+                    label = this.owner.getHook().lookupLabel(object);
                   }
               }
           }
@@ -3849,8 +3839,7 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
-   * Returns a StringBuffer encoded list of acceptable invid values
-   * for this field.
+   * Returns a list of acceptable invid values for this field.
    *
    * @see arlut.csd.ganymede.rmi.invid_field
    */
@@ -3861,8 +3850,11 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
-   * Returns a StringBuffer encoded list of acceptable invid values
-   * for this field.
+   * <p>Returns a possibly filtered list of acceptable invid values
+   * for this field.</p>
+   *
+   * @param applyFilter If true, the results returned will be filtered
+   * by the GanymedeSession's owner filter query.
    *
    * @see arlut.csd.ganymede.rmi.invid_field
    */

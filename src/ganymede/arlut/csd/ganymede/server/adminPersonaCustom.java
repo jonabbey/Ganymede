@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -314,7 +314,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
   {
     if (descrip == null)
       {
-        StringDBField nameField = (StringDBField) getField(SchemaConstants.PersonaNameField);
+        StringDBField nameField = getStringField(SchemaConstants.PersonaNameField);
 
         if (nameField != null)
           {
@@ -324,7 +324,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if ((userInvid == null) && (newName == null))
       {
-        InvidDBField assocUserField = (InvidDBField) getField(SchemaConstants.PersonaAssocUser);
+        InvidDBField assocUserField = getInvidField(SchemaConstants.PersonaAssocUser);
 
         if (assocUserField != null)
           {

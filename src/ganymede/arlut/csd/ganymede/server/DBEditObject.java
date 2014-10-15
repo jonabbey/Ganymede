@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -127,8 +126,9 @@ import arlut.csd.Util.TranslationService;
  * Reflection API rather than being able to call methods on a
  * instance of the appropriate DBEditObject subclass.</p>
  *
- * <p>See the DBEditObject subclassing guide for more information generally on
- * DBEditObject customization.</p>
+ * <p>See the <a href="../../../../../customization/index.html"
+ * target="_top">DBEditObject subclassing guide</a> for more
+ * information generally on DBEditObject customization.</p>
  *
  * <p><b>IMPORTANT PROGRAMMING NOTE!</b>: It is critical that
  * synchronized methods in DBEditObject and in subclasses thereof do not
@@ -297,7 +297,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
         short id = fieldDef.getID();
-        DBField originalField = original.retrieveField(id);
+        DBField originalField = original.getField(id);
         DBField copyField;
 
         if (originalField != null)
@@ -334,7 +334,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * return null.
    */
 
-  public final DBObject getOriginal()
+  @Override public final DBObject getOriginal()
   {
     return original;
   }
@@ -362,6 +362,15 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   public final boolean isDeleting()
   {
     return deleting;
+  }
+
+  /**
+   * We'll use DBObject's identity-based equals
+   */
+
+  @Override public boolean equals(Object param)
+  {
+    return super.equals(param);
   }
 
   /**
@@ -489,7 +498,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   @Override public final ReturnVal setFieldValue(short fieldID, Object value) throws GanyPermissionsException
   {
-    DBField field = retrieveField(fieldID);
+    DBField field = getField(fieldID);
 
     /* -- */
 
@@ -517,7 +526,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public final ReturnVal setFieldValueLocal(short fieldID, Object value)
   {
-    DBField field = retrieveField(fieldID);
+    DBField field = getField(fieldID);
 
     /* -- */
 
@@ -1573,7 +1582,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
       {
         if (canCloneField(session, origObj, origField))
           {
-            newField = retrieveField(origField.getID());
+            newField = getField(origField.getID());
 
             // if we already initialized this field when we were
             // constructed, don't copy over a value onto this field.
@@ -1850,20 +1859,36 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * <p>This method provides a hook that can be used to check any values
-   * to be set in any field in this object.  Subclasses of
-   * DBEditObject should override this method, implementing basically
-   * a large switch statement to check for any given field whether the
-   * submitted value is acceptable given the current state of the
+   * <p>Provides a hook that can be used to approve, disapprove,
+   * and/or transform any values to be set in any field in this
    * object.</p>
    *
-   * <p>Question: what synchronization issues are going to be needed
-   * between DBEditObject and DBField to insure that we can have
-   * a reliable verifyNewValue method here?</p>
+   * <p>verifyNewValue can be used to canonicalize a
+   * submitted value.  The verifyNewValue method may call
+   * {@link arlut.csd.ganymede.common.ReturnVal#setTransformedValueObject(java.lang.Object, arlut.csd.ganymede.common.Invid, short) setTransformedValue()}
+   * on the ReturnVal returned in order to substitute a new value for
+   * the provided value prior to any other processing on the server.</p>
    *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
+   * <p>This method is called before any NameSpace checking is done, before the
+   * {@link arlut.csd.ganymede.server.DBEditObject#wizardHook(arlut.csd.ganymede.server.DBField,int,java.lang.Object,java.lang.Object) wizardHook()}
+   * method, and before the appropriate
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeSetValue(arlut.csd.ganymede.server.DBField, Object) finalizeSetValue()},
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeSetElement(arlut.csd.ganymede.server.DBField, int, Object) finalizeSetElement()},
+   * {@link arlut.csd.ganymede.server.DBEditObject#finalizeAddElement(arlut.csd.ganymede.server.DBField, java.lang.Object) finalizeAddElement()},
+   * or {@link arlut.csd.ganymede.server.DBEditObject#finalizeAddElements(arlut.csd.ganymede.server.DBField, java.util.Vector) finalizeAddElements()}
+   * method is called.</p>
+   *
+   * @param field The DBField contained within this object whose value
+   * is being changed
+   * @param value The value that is being proposed to go into field.
+   *
+   * @return A ReturnVal indicating success or failure.  May be simply
+   * 'null' to indicate success if no feedback need be provided.  If
+   * {@link arlut.csd.ganymede.common.ReturnVal#hasTransformedValue() hasTransformedValue()}
+   * returns true when callled on the returned ReturnVal, the value
+   * returned by {@link arlut.csd.ganymede.common.ReturnVal#getTransformedValueObject() getTransformedValueObject()}
+   * will be used for all further processing in the server, and will
+   * be the value actually saved in the DBStore.
    */
 
   public ReturnVal verifyNewValue(DBField field, Object value)
@@ -2162,7 +2187,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public QueryResult obtainChoiceList(String fieldName) throws NotLoggedInException
   {
-    return obtainChoiceList((DBField) getField(fieldName));
+    return obtainChoiceList(getField(fieldName));
   }
 
   /**
@@ -2182,7 +2207,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public QueryResult obtainChoiceList(short fieldID) throws NotLoggedInException
   {
-    return obtainChoiceList((DBField) getField(fieldID));
+    return obtainChoiceList(getField(fieldID));
   }
 
   /**
@@ -2887,7 +2912,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
         // ok, we've cleared all fields but field 0.. clear that to finish up.
 
-        DBField field = retrieveField((short) 0);
+        DBField field = getField((short) 0);
 
         if (field != null)
           {
@@ -3161,26 +3186,15 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
         try
           {
-            oldRefField = (InvidDBField) oldRef.getField(targetField);
+            oldRefField = oldRef.getInvidField(targetField);
           }
         catch (ClassCastException ex)
           {
-            try
-              {
-                // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
-                // "Your operation could not succeed due to an error in the server''s custom schema code.  Target field {0} in object {1} is not an Invid field."
-                return Ganymede.createErrorDialog(this.getGSession(),
-                                                  ts.l("clearBackLink.badUnlink"),
-                                                  ts.l("clearBackLink.badTarget", oldRef.getField(targetField).getName(), oldRef.getLabel()));
-              }
-            catch (RemoteException rx)
-              {
-                // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
-                // "Your operation could not succeed due to an error in the server''s custom schema code.  Target field {0} in object {1} is not an Invid field."
-                return Ganymede.createErrorDialog(this.getGSession(),
-                                                  ts.l("clearBackLink.badUnlink"),
-                                                  ts.l("clearBackLink.badTarget", Short.valueOf(targetField), oldRef.getLabel()));
-              }
+            // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
+            // "Your operation could not succeed due to an error in the server''s custom schema code.  Target field {0} in object {1} is not an Invid field."
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("clearBackLink.badUnlink"),
+                                              ts.l("clearBackLink.badTarget", oldRef.getField(targetField).getName(), oldRef.getLabel()));
           }
 
         if (oldRefField == null)
@@ -3330,7 +3344,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
         if (original != null)
           {
-            ReturnVal retVal2 = original.objectBase.getObjectHook().consistencyCheck(original);
+            ReturnVal retVal2 = consistencyCheck(original);
 
             if (!ReturnVal.didSucceed(retVal2))
               {
@@ -3558,13 +3572,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * restore its state.</p>
    */
 
-  synchronized final void rollback(Hashtable<Short, Object> ckpoint)
+  synchronized final void rollback(Map<Short, Object> ckpoint)
   {
-    for (Short key: ckpoint.keySet())
+    for (Map.Entry<Short, Object> entry: ckpoint.entrySet())
       {
-        DBField field = retrieveField(key.shortValue());
-
-        Object value = ckpoint.get(key);
+        DBField field = getField(entry.getKey().shortValue());
+        Object value = entry.getValue();
 
         // again, we use a reference to ourselves as a
         // hackish way of representing null in the
@@ -3624,8 +3637,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInDisplayOrder())
       {
-        DBField myField = (DBField) this.getField(fieldDef.getID());
-        DBField origField = (DBField) original.getField(fieldDef.getID());
+        DBField myField = this.getField(fieldDef.getID());
+        DBField origField = original.getField(fieldDef.getID());
 
         if (origField == null)
           {
@@ -3668,8 +3681,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInDisplayOrder())
       {
-        DBField myField = (DBField) this.getField(fieldDef.getID());
-        DBField origField = (DBField) original.getField(fieldDef.getID());
+        DBField myField = this.getField(fieldDef.getID());
+        DBField origField = original.getField(fieldDef.getID());
 
         if (myField == null || !myField.isDefined())
           {
@@ -3732,17 +3745,17 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * entries.</p>
    *
    * <p>The second purpose of this method is to generate entries in
-   * the changedFieldDefs map, listing those DBObjectBaseFields for
+   * the changedFieldDefs Set, listing those DBObjectBaseFields for
    * which we have observed a value change when comparing this
    * object's state with its original.  We do this as part of the diff
    * algorithm because the original DBField definition only provided
    * one method to compare two fields for differences, and that is the
    * getDiffString() method.  Since we're calling that here anyway,
    * recording the definition of fields that we know changed is an
-   * extremely cheap win.  The changedFieldDefs Hashtable is used in
-   * the DBEditSet class to update time stamps in the
-   * DBObjectBaseFields, so that builder tasks can tell whether they
-   * have been run since any of a given field have been changed in a given
+   * extremely cheap win.  The changedFieldDefs Set is used in the
+   * DBEditSet class to update time stamps in the DBObjectBaseFields,
+   * so that builder tasks can tell whether they have been run since
+   * any of a given field have been changed in a given
    * DBObjectBase.</p>
    *
    * @param changedFieldDefs If not null, this parameter will be a Set
@@ -3755,11 +3768,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   public final synchronized String diff(Set<DBObjectBaseField> changedFieldDefs)
   {
     boolean diffFound = false;
-    StringBuilder result = new StringBuilder();
     DBField origField, currentField;
-    StringBuilder added = new StringBuilder();
-    StringBuilder deleted = new StringBuilder();
-    StringBuilder changed = new StringBuilder();
+    StringBuilder added = null;
+    StringBuilder deleted = null;
+    StringBuilder changed = null;
 
     /* -- */
 
@@ -3814,10 +3826,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
           }
         else
           {
-            origField = (DBField) original.getField(fieldDef.getID());
+            origField = original.getField(fieldDef.getID());
           }
 
-        currentField = (DBField) this.getField(fieldDef.getID());
+        currentField = this.getField(fieldDef.getID());
 
         if ((origField == null || !origField.isDefined()) &&
             (currentField == null || !currentField.isDefined()))
@@ -3831,6 +3843,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
             if (changedFieldDefs != null)
               {
                 changedFieldDefs.add(fieldDef);
+              }
+
+            if (added == null)
+              {
+                added = new StringBuilder();
               }
 
             if (okToLogField(currentField))
@@ -3859,6 +3876,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
             if (changedFieldDefs != null)
               {
                 changedFieldDefs.add(fieldDef);
+              }
+
+            if (deleted == null)
+              {
+                deleted = new StringBuilder();
               }
 
             if (okToLogField(origField))
@@ -3891,6 +3913,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
                     changedFieldDefs.add(fieldDef);
                   }
 
+                if (changed == null)
+                  {
+                    changed = new StringBuilder();
+                  }
+
                 if (okToLogField(currentField) && okToLogField(origField))
                   {
                     changed.append(fieldDef.getName());
@@ -3917,19 +3944,21 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (diffFound)
       {
-        if (added.length() > 0)
+        StringBuilder result = new StringBuilder();
+
+        if (added != null && added.length() > 0)
           {
             // "Fields Added:\n\n{0}\n"
             result.append(ts.l("diff.added", added));
           }
 
-        if (changed.length() > 0)
+        if (changed != null && changed.length() > 0)
           {
             // "Fields Changed:\n\n{0}\n"
             result.append(ts.l("diff.changed", changed));
           }
 
-        if (deleted.length() > 0)
+        if (deleted != null && deleted.length() > 0)
           {
             // "Fields Deleted:\n\n{0}\n"
             result.append(ts.l("diff.deleted", deleted));

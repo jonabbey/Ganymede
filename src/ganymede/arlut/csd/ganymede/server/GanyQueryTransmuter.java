@@ -15,7 +15,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -80,7 +80,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /*------------------------------------------------------------------------------
@@ -104,9 +107,9 @@ import java.util.HashMap;
 
 public final class GanyQueryTransmuter {
 
-  private static HashMap op_scalar_mapping;
-  private static HashMap op_vector_mapping;
-  private static HashMap validity_mapping;
+  private static Map<String, Byte> op_scalar_mapping;
+  private static Map<String, Byte> op_vector_mapping;
+  private static Map<Integer, String[]> validity_mapping;
 
   /**
    * TranslationService object for handling string localization in the Ganymede
@@ -131,6 +134,7 @@ public final class GanyQueryTransmuter {
     op_scalar_mapping.put("starts", Byte.valueOf(QueryDataNode.STARTSWITH));
     op_scalar_mapping.put("ends", Byte.valueOf(QueryDataNode.ENDSWITH));
     op_scalar_mapping.put("defined", Byte.valueOf(QueryDataNode.DEFINED));
+    op_scalar_mapping = Collections.unmodifiableMap(op_scalar_mapping);
 
     // initialize op_vector_mapping
 
@@ -140,6 +144,7 @@ public final class GanyQueryTransmuter {
     op_vector_mapping.put("len>", Byte.valueOf(QueryDataNode.LENGTHGR));
     op_vector_mapping.put("len>=", Byte.valueOf(QueryDataNode.LENGTHGREQ));
     op_vector_mapping.put("len==", Byte.valueOf(QueryDataNode.LENGTHEQ));
+    op_vector_mapping = Collections.unmodifiableMap(op_vector_mapping);
 
     validity_mapping = new HashMap();
     validity_mapping.put(Integer.valueOf(FieldType.DATE), new String[] {"<", ">", "<=", ">=", "==", "defined"});
@@ -152,12 +157,13 @@ public final class GanyQueryTransmuter {
     validity_mapping.put(Integer.valueOf(FieldType.PASSWORD), new String[] {"defined"});
     validity_mapping.put(Integer.valueOf(FieldType.PERMISSIONMATRIX), new String[] {"defined"});
     validity_mapping.put(Integer.valueOf(FieldType.FIELDOPTIONS), new String[] {"defined"});
+    validity_mapping = Collections.unmodifiableMap(validity_mapping);
   }
 
   // ---
 
   DBObjectBase objectBase = null;
-  ArrayList selectFields = null;
+  List<DBObjectBaseField> selectFields = null;
   boolean editableFilter = false;
   String myQueryString = null;
   CommonTree myQueryTree = null;
@@ -211,7 +217,7 @@ public final class GanyQueryTransmuter {
       {
         for (int i = 0; i < selectFields.size(); i ++)
           {
-            DBObjectBaseField field = (DBObjectBaseField) selectFields.get(i);
+            DBObjectBaseField field = selectFields.get(i);
             query.addField(field.getID());
           }
       }
@@ -316,7 +322,7 @@ public final class GanyQueryTransmuter {
     return this.objectBase;
   }
 
-  private ArrayList parse_select_tree(Tree ast) throws GanyParseException
+  private List<DBObjectBaseField> parse_select_tree(Tree ast) throws GanyParseException
   {
     if (ast.getChildCount() == 0)
       {
@@ -328,7 +334,7 @@ public final class GanyQueryTransmuter {
         return null;            // "select object from", also no field list.
       }
 
-    ArrayList selectFields = new ArrayList();
+    List<DBObjectBaseField> selectFields = new ArrayList<DBObjectBaseField>();
 
     for (int i = 0; i < ast.getChildCount(); i++)
       {
@@ -338,7 +344,7 @@ public final class GanyQueryTransmuter {
 
         field_name = field_name.replace('_', ' ');
 
-        DBObjectBaseField field = (DBObjectBaseField) objectBase.getField(field_name);
+        DBObjectBaseField field = objectBase.getField(field_name);
 
         if (field == null)
           {
@@ -394,7 +400,7 @@ public final class GanyQueryTransmuter {
 
         if (base != null)
           {
-            field = (DBObjectBaseField) base.getField(field_name);
+            field = base.getField(field_name);
 
             if (field == null)
               {
@@ -450,7 +456,7 @@ public final class GanyQueryTransmuter {
           }
         else
           {
-            field = (DBObjectBaseField) base.getField(field_name);
+            field = base.getField(field_name);
 
             if (field == null)
               {

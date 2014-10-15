@@ -102,7 +102,7 @@ import java.util.ResourceBundle;
  * @author Jonathan Abbey
  */
 
-public class TranslationService {
+public final class TranslationService {
 
   /**
    * <p>This is a factory method for creating TranslationService
@@ -143,12 +143,12 @@ public class TranslationService {
 
   // ---
 
-  ResourceBundle bundle = null;
-  Locale ourLocale = null;
-  MessageFormat formatter = null;
-  String lastPattern = null;
-  String resourceName;
-  int wordWrapCols=0;
+  private ResourceBundle bundle = null;
+  private Locale ourLocale = null;
+  private MessageFormat formatter = null;
+  private String lastPattern = null;
+  private String resourceName;
+  private int wordWrapCols=0;
 
   /* -- */
 
@@ -177,8 +177,20 @@ public class TranslationService {
       }
 
     this.resourceName = resourceName;
+  }
 
-    bundle = ResourceBundle.getBundle(resourceName, ourLocale);
+  /**
+   * <p>Private helper to handle lazy-loading of the resource bundle.</p>
+   */
+
+  private synchronized ResourceBundle getBundle()
+  {
+    if (this.bundle == null)
+      {
+        this.bundle = ResourceBundle.getBundle(resourceName, ourLocale);
+      }
+
+    return this.bundle;
   }
 
   /**
@@ -223,7 +235,7 @@ public class TranslationService {
 
     try
       {
-        pattern = bundle.getString(key);
+        pattern = getBundle().getString(key);
       }
     catch (MissingResourceException ex)
       {
@@ -256,7 +268,7 @@ public class TranslationService {
 
     try
       {
-        pattern = bundle.getString(key);
+        pattern = getBundle().getString(key);
       }
     catch (MissingResourceException ex)
       {
@@ -297,7 +309,7 @@ public class TranslationService {
 
     try
       {
-        pattern = bundle.getString(key);
+        pattern = getBundle().getString(key);
       }
     catch (MissingResourceException ex)
       {
@@ -316,7 +328,8 @@ public class TranslationService {
   {
     String result = null;
 
-    // we have to synchronize to protect the formatter object
+    // we have to synchronize to protect the formatter and lastPattern
+    // objects from concurrent use
 
     synchronized (this)
       {

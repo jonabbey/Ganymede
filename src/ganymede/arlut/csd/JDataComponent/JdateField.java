@@ -11,8 +11,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -60,6 +62,7 @@ import java.util.Date;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
@@ -334,6 +337,12 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
   public void focusGained(FocusEvent e)
   {
+    JComponent parent = (JComponent) this.getParent();
+
+    if (parent != null)
+      {
+        parent.scrollRectToVisible(this.getBounds());
+      }
   }
 
   /**

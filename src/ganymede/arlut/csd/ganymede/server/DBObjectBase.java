@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -65,7 +65,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -170,7 +170,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   static final int GROWTHSPACE = 250;
 
-  private static Hashtable upgradeClassMap = null;
+  private static HashMap<String, String> upgradeClassMap = null;
 
   public static void setDebug(boolean val)
   {
@@ -214,7 +214,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (upgradeClassMap == null)
       {
-        upgradeClassMap = new Hashtable();
+        upgradeClassMap = new HashMap<String, String>();
         upgradeClassMap.put("arlut.csd.ganymede.eventCustom", "arlut.csd.ganymede.server.eventCustom");
         upgradeClassMap.put("arlut.csd.ganymede.objectEventCustom", "arlut.csd.ganymede.server.objectEventCustom");
         upgradeClassMap.put("arlut.csd.ganymede.ownerCustom", "arlut.csd.ganymede.server.ownerCustom");
@@ -276,7 +276,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * within.</p>
    */
 
-  private DBStore store;
+  final private DBStore store;
 
   /**
    * <p>Name of this object type</p>
@@ -827,7 +827,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
 
         if (upgradeClassMap.containsKey(classname))
           {
-            String newclassname = (String) upgradeClassMap.get(classname);
+            String newclassname = upgradeClassMap.get(classname);
 
             if (debug)
               {
@@ -1217,7 +1217,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
     Integer _idInt;
     DBObjectBaseField newField;
     GHashtable nameTable = new GHashtable(true); // case insensitive
-    Hashtable idTable = new Hashtable();
+    HashMap<Integer, XMLItem> idTable = new HashMap<Integer, XMLItem>();
     String _classStr = null;
     String _classOptionStr = null;
     Integer _labelInt = null;
@@ -1343,7 +1343,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
                                                   ts.l("setXML.dupfieldname", root.getTreeString(), _fieldNameStr));
               }
 
-            DBObjectBaseField _field = getFieldDef(_fieldNameStr);
+            DBObjectBaseField _field = getField(_fieldNameStr);
 
             if (_field != null && _field.isBuiltIn())
               {
@@ -1391,7 +1391,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     for (Integer _fieldID: (Vector<Integer>) VectorUtils.difference(fieldsInBase, fieldsInXML))
       {
-        DBObjectBaseField _field = getFieldDef(_fieldID.shortValue());
+        DBObjectBaseField _field = getField(_fieldID.shortValue());
 
         // "\t\tDeleting field {0}"
         err.println(ts.l("setXML.deleting", _field.getName()));
@@ -1454,7 +1454,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
           }
         else if (item.matches("fielddef"))
           {
-            newField = getFieldDef(item.getAttrInt("id").shortValue());
+            newField = getField(item.getAttrInt("id").shortValue());
 
             if (newField == null)
               {
@@ -1587,7 +1587,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     for (Integer _fieldID: fieldsInXML)
       {
-        DBObjectBaseField _field = getFieldDef(_fieldID.shortValue());
+        DBObjectBaseField _field = getField(_fieldID.shortValue());
 
         if (_field == null)
           {
@@ -1761,7 +1761,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * overridden methods for DBEditObject subclasses.</p>
    */
 
-  DBEditObject createHook() throws RemoteException
+  private DBEditObject createHook() throws RemoteException
   {
     if (classdef == null)
       {
@@ -2186,7 +2186,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * @see arlut.csd.ganymede.rmi.Base
    */
 
-  public String getName()
+  public synchronized String getName()
   {
     return object_name;
   }
@@ -2196,7 +2196,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * Guaranteed to be unique in the Ganymede server.
    */
 
-  public String getPath()
+  public synchronized String getPath()
   {
     if (category == null)
       {
@@ -2277,7 +2277,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * @see arlut.csd.ganymede.rmi.Base
    */
 
-  public String getClassName()
+  public synchronized String getClassName()
   {
     return classname;
   }
@@ -2288,7 +2288,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * classOptionString} for more details.</p>
    */
 
-  public String getClassOptionString()
+  public synchronized String getClassOptionString()
   {
     return classOptionString;
   }
@@ -2433,7 +2433,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Returns the class definition for this object type</p>
    */
 
-  public Class getClassDef()
+  public synchronized Class getClassDef()
   {
     return classdef;
   }
@@ -2452,7 +2452,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     securityCheck();
 
-    DBObjectBaseField oldField = getFieldDef(fieldName);
+    DBObjectBaseField oldField = getField(fieldName);
 
     if (oldField == null)
       {
@@ -2468,7 +2468,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
         return null;
       }
 
-    DBObjectBaseField prevField = getFieldDef(previousFieldName);
+    DBObjectBaseField prevField = getField(previousFieldName);
 
     if (prevField == null || !customFields.contains(prevField))
       {
@@ -2497,7 +2497,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     securityCheck();
 
-    DBObjectBaseField oldField = getFieldDef(fieldName);
+    DBObjectBaseField oldField = getField(fieldName);
 
     if (oldField == null)
       {
@@ -2513,7 +2513,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
         return null;
       }
 
-    DBObjectBaseField nextField = getFieldDef(nextFieldName);
+    DBObjectBaseField nextField = getField(nextFieldName);
 
     if (nextField == null || !customFields.contains(nextField))
       {
@@ -2557,7 +2557,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * @see arlut.csd.ganymede.rmi.Base
    */
 
-  public short getTypeID()
+  public synchronized short getTypeID()
   {
     return type_code;
   }
@@ -2621,7 +2621,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
         return null;
       }
 
-    return getFieldDef(label_id);
+    return getField(label_id);
   }
 
   /**
@@ -2643,7 +2643,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
         return null;
       }
 
-    fieldDef = getFieldDef(label_id);
+    fieldDef = getField(label_id);
 
     if (fieldDef == null)
       {
@@ -2745,36 +2745,6 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * <p>As getField(), but returns DBObjectBaseField rather than the
-   * BaseField interface.</p>
-   *
-   * <p>This is a server-side only method.</p>
-   *
-   * @see arlut.csd.ganymede.rmi.BaseField
-   * @see arlut.csd.ganymede.rmi.Base
-   */
-
-  public DBObjectBaseField getFieldDef(short id)
-  {
-    return fieldTable.get(id);
-  }
-
-  /**
-   * <p>As getField(), but returns DBObjectBaseField rather than the
-   * BaseField interface.</p>
-   *
-   * <p>This is a server-side only method.</p>
-   *
-   * @see arlut.csd.ganymede.rmi.BaseField
-   * @see arlut.csd.ganymede.rmi.Base
-   */
-
-  public DBObjectBaseField getFieldDef(Short id)
-  {
-    return fieldTable.get(id.shortValue());
-  }
-
-  /**
    * <p>Returns the field definition for the field matching id, or
    * null if no match found.</p>
    *
@@ -2782,7 +2752,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * @see arlut.csd.ganymede.rmi.Base
    */
 
-  public BaseField getField(short id)
+  public DBObjectBaseField getField(short id)
   {
     return fieldTable.get(id);
   }
@@ -2792,24 +2762,9 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * null if no match found.</p>
    */
 
-  public BaseField getField(Short id)
+  public DBObjectBaseField getField(Short id)
   {
     return fieldTable.get(id.shortValue());
-  }
-
-  /**
-   * <p>As getField(), but returns DBObjectBaseField rather than the
-   * BaseField interface.</p>
-   *
-   * <p>This is a server-side only method.</p>
-   *
-   * @see arlut.csd.ganymede.rmi.BaseField
-   * @see arlut.csd.ganymede.rmi.Base
-   */
-
-  public DBObjectBaseField getFieldDef(String name)
-  {
-    return fieldTable.get(name);
   }
 
   /**
@@ -2820,7 +2775,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * @see arlut.csd.ganymede.rmi.Base
    */
 
-  public synchronized BaseField getField(String name)
+  public synchronized DBObjectBaseField getField(String name)
   {
     return fieldTable.get(name);
   }
@@ -2839,7 +2794,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     securityCheck();
 
-    DBObjectBaseField bF = getFieldDef(fieldName);
+    DBObjectBaseField bF = getField(fieldName);
 
     if (bF == null)
       {
@@ -2873,7 +2828,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     securityCheck();
 
-    DBObjectBaseField bF = getFieldDef(fieldID);
+    DBObjectBaseField bF = getField(fieldID);
 
     if (bF == null)
       {
@@ -3018,7 +2973,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
                                           ts.l("deleteField.fieldused", getName(), fieldName));
       }
 
-    field = getFieldDef(fieldName);
+    field = getField(fieldName);
 
     if (field == null)
       {
@@ -3081,7 +3036,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public boolean fieldInUse(String fieldName)
   {
-    DBObjectBaseField fieldDef = getFieldDef(fieldName);
+    DBObjectBaseField fieldDef = getField(fieldName);
 
     if (fieldDef == null)
       {
@@ -3337,7 +3292,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
         return Ganymede.createErrorDialog(ts.l("checkSchemaState.nolabel", this.getName()));
       }
 
-    DBObjectBaseField labelFieldDef = getFieldDef(label_id);
+    DBObjectBaseField labelFieldDef = getField(label_id);
 
     if (labelFieldDef.getNameSpace() == null)
       {
@@ -3490,6 +3445,16 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
   public Date getTimeStamp()
   {
     return new Date(lastChange.getTime());
+  }
+
+  /**
+   * Returns true if any commits have been made to this DBObjectBase
+   * more recently than the comparison date.
+   */
+
+  public boolean changedSince(Date comparison)
+  {
+    return lastChange.after(comparison);
   }
 
   //
@@ -4147,7 +4112,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
             return null;
           }
 
-        DBNameSpace namespace = getFieldDef(labelFieldName).getNameSpace();
+        DBNameSpace namespace = getField(labelFieldName).getNameSpace();
 
         if (namespace == null)
           {

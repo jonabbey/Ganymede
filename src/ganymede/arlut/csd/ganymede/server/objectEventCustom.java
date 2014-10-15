@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -80,11 +80,11 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
    * names to choose from.
    */
 
-  static QueryResult eventNames = null;
+  static private QueryResult eventNames = null;
 
   static
   {
-    eventNames = new QueryResult(true);
+    eventNames = new QueryResult();
 
     eventNames.addRow(null, "objectcreated", false);
     eventNames.addRow(null, "objectchanged", false);
@@ -137,6 +137,15 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   public objectEventCustom(DBObject original, DBEditSet editset) throws RemoteException
   {
     super(original, editset);
+  }
+
+  /**
+   * We'll use DBObject's identity-based equals
+   */
+
+  @Override public boolean equals(Object param)
+  {
+    return super.equals(param);
   }
 
   /**
@@ -201,13 +210,11 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
       {
         if (objectTypeList == null)
           {
-            Vector list = Ganymede.db.getBaseNameList();
+            objectTypeList = new QueryResult();
 
-            objectTypeList = new QueryResult(true);
-
-            for (int i = 0; i < list.size(); i++)
+            for (String elem: Ganymede.db.getBaseNameList())
               {
-                objectTypeList.addRow(null, (String) list.elementAt(i), false);
+                objectTypeList.addRow(null, elem, false);
               }
           }
 
@@ -216,7 +223,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == SchemaConstants.ObjectEventToken)
       {
-        return eventNames;
+        return eventNames.getCopy();
       }
 
     return super.obtainChoiceList(field);

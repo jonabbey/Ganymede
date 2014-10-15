@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -48,6 +48,7 @@
 
 package arlut.csd.ganymede.gasharl;
 
+import java.util.HashSet;
 import java.util.Vector;
 
 import arlut.csd.ganymede.common.Invid;
@@ -84,9 +85,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
   // ---
 
   /**
-   *
    * Customization Constructor
-   *
    */
 
   public mapEntryCustom(DBObjectBase objectBase)
@@ -95,9 +94,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
   }
 
   /**
-   *
    * Create new object constructor
-   *
    */
 
   public mapEntryCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
@@ -106,10 +103,8 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
   }
 
   /**
-   *
    * Check-out constructor, used by DBObject.createShadow()
    * to pull out an object for editing.
-   *
    */
 
   public mapEntryCustom(DBObject original, DBEditSet editset)
@@ -147,7 +142,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
         return null;
       }
 
-    DBField field = (DBField) object.getField(fieldid);
+    DBField field = object.getField(fieldid);
 
     if (field == null)
       {
@@ -252,7 +247,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
         return super.obtainChoiceList(field);
       }
 
-    InvidDBField invf = (InvidDBField) getField(mapEntrySchema.MAP);
+    InvidDBField invf = getInvidField(mapEntrySchema.MAP);
 
     if (invf.getValueString().equals("auto.home.default"))
       {
@@ -267,17 +262,12 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
     // first, get the list of map entries contained in this
     // object.
 
-    Vector<Invid> mapsToSkip = new Vector<Invid>();
-    DBObject entry;
-    Invid mapInvid;
+    HashSet<Invid> mapsToSkip = new HashSet<Invid>();
 
-    Vector<Invid> entries = getSiblingInvids();
-
-    for (int i = 0; i < entries.size(); i++)
+    for (Invid sibling: getSiblingInvids())
       {
-        entry = getDBSession().viewDBObject(entries.get(i));
-
-        mapInvid = (Invid) entry.getFieldValueLocal(mapEntrySchema.MAP);
+        DBObject entry = getDBSession().viewDBObject(sibling);
+        Invid mapInvid = (Invid) entry.getFieldValueLocal(mapEntrySchema.MAP);
 
         mapsToSkip.add(mapInvid);
       }
@@ -289,7 +279,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 
     for (int i = 0; i < baseList.size(); i++)
       {
-        mapInvid = baseList.getInvid(i);
+        Invid mapInvid = baseList.getInvid(i);
 
         if (!mapsToSkip.contains(mapInvid))
           {
@@ -420,7 +410,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
         return null;            // by default, we just ok whatever
       }
 
-    InvidDBField invf = (InvidDBField) getField(mapEntrySchema.MAP);
+    InvidDBField invf = getInvidField(mapEntrySchema.MAP);
 
     // if we aren't deleting this entry, reject any attempt to unlink
     // us from auto.home.default, if we are linked there.
@@ -442,9 +432,8 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
     // our list of rescan preferences to the client.
 
     ReturnVal result = new ReturnVal(true, true);
-    Vector<Invid> entries = getSiblingInvids();
 
-    for (Invid sibling: entries)
+    for (Invid sibling: getSiblingInvids())
       {
         result.addRescanField(sibling, mapEntrySchema.MAP);
       }
@@ -470,15 +459,29 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
     InvidDBField field, field2;
     StringBuilder buff = new StringBuilder();
 
-    /* -- */
+    /*
+      Okay, here's the deal.  For automounter map entries contained in
+      user objects, our XML_Label is comprised of the name of the
+      containing user / the name of the map that this entry defines a
+      membership in.
+
+      For display in the client, the user information is not helpful,
+      because that's already evident in the client because the entry
+      is embedded in a user object.  So we're generating a synthetic
+      "map name/volume name" label for display in the client.
+
+      Note that this can't actually be the unique XML_Label for this
+      entry, because many users may have automounter map entries with
+      the same map name and volume name, and labels need to be unique.
+    */
 
     if ((object == null) || (object.getTypeID() != getTypeID()))
       {
         return null;
       }
 
-    field = (InvidDBField) object.getField(MAP); // map name
-    field2 = (InvidDBField) object.getField(VOLUME); // volume
+    field = object.getInvidField(MAP); // map name
+    field2 = object.getInvidField(VOLUME); // volume
 
     try
       {
@@ -533,17 +536,73 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 
   private Vector<Invid> getSiblingInvids()
   {
-    Vector<Invid> result;
-    Invid userInvid = (Invid) getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
-    DBObject user = getDBSession().viewDBObject(userInvid);
-
-    result = (Vector<Invid>) user.getFieldValuesLocal(userSchema.VOLUMES);
-
-    // we are not our own sibling.
-
-    result.remove(getInvid());
+    Vector<Invid> result = (Vector<Invid>) getParentObj().getFieldValuesLocal(userSchema.VOLUMES);
+    result.remove(getInvid());  // we are not our own sibling.
 
     return result;
+  }
+
+  /**
+   * <p>This method allows the DBEditObject to have executive approval
+   * of any scalar set operation, and to take any special actions in
+   * reaction to the set.  When a scalar field has its value set, it
+   * will call its owners finalizeSetValue() method, passing itself as
+   * the &lt;field&gt; parameter, and passing the new value to be
+   * approved as the &lt;value&gt; parameter.  A Ganymede customizer
+   * who creates custom subclasses of the DBEditObject class can
+   * override the finalizeSetValue() method and write his own logic
+   * to examine any change and either approve or reject the change.</p>
+   *
+   * <p>A custom finalizeSetValue() method will typically need to
+   * examine the field parameter to see which field is being changed,
+   * and then do the appropriate checking based on the value
+   * parameter.  The finalizeSetValue() method can call the normal
+   * this.getFieldValueLocal() type calls to examine the current state
+   * of the object, if such information is necessary to make
+   * appropriate decisions.</p>
+   *
+   * <p>If finalizeSetValue() returns null or a ReturnVal object with
+   * a positive success value, the DBField that called us is
+   * guaranteed to proceed to make the change to its value.  If this
+   * method returns a non-success code in its ReturnVal, as with the
+   * result of a call to Ganymede.createErrorDialog(), the DBField
+   * that called us will not make the change, and the field will be
+   * left unchanged.  Any error dialog returned from finalizeSetValue()
+   * will be passed to the user.</p>
+   *
+   * <p>The DBField that called us will take care of all standard
+   * checks on the operation (including a call to our own
+   * verifyNewValue() method before calling this method.  Under normal
+   * circumstances, we won't need to do anything here.
+   * finalizeSetValue() is useful when you need to do unusually
+   * involved checks, and for when you want a chance to trigger other
+   * changes in response to a particular field's value being
+   * changed.</p>
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
+   */
+
+  @Override public ReturnVal finalizeSetValue(DBField field, Object value)
+  {
+    // if either of our displayed values are changed, tell the client
+    // to rescan the field that contains us in our parent, to refresh
+    // the label
+
+    switch (field.getID())
+      {
+      case mapEntrySchema.MAP:
+      case mapEntrySchema.VOLUME:
+        return ReturnVal.success().addRescanField(this.getParentInvid(), userSchema.VOLUMES);
+
+      default:
+        // we may be setting the containing invid, in which case we
+        // can't call getParentInvid() because the containing invid
+        // hasn't been set yet. ;-)
+
+        return null;
+      }
   }
 
   String getMapName()
