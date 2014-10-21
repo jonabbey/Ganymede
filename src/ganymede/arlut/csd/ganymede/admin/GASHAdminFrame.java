@@ -1313,7 +1313,6 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     for (String line: lines)
       {
-
         if (line.matches(".*committed transaction.*"))
           {
             appendLogText(line + "\n", Color.white, Color.blue);
