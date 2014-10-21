@@ -1313,7 +1313,16 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     for (String line: lines)
       {
-        if (line.matches(".*\\[.\\d\\].*"))
+
+        // On a commit transaction, color this link in logs blue background instead.
+        // James - Updating Oct 2014
+        if (line.matches("committed transaction"))  // CORRECT TEXT TODO
+          {
+
+            appendLogText(line + "\n", Color.white, Color.blue);
+
+          }
+        else if (line.matches(".*\\[.\\d\\].*"))
           {
             String date = line.substring(0, line.indexOf('['));
             String count = line.substring(line.indexOf('[') + 1, line.indexOf(']')).trim();
