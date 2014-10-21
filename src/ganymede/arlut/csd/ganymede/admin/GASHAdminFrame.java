@@ -1314,13 +1314,9 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     for (String line: lines)
       {
 
-        // On a commit transaction, color this link in logs blue background instead.
-        // James - Updating Oct 2014
-        if (line.matches("committed transaction"))  // CORRECT TEXT TODO
+        if (line.matches(".*committed transaction.*"))
           {
-
             appendLogText(line + "\n", Color.white, Color.blue);
-
           }
         else if (line.matches(".*\\[.\\d\\].*"))
           {
