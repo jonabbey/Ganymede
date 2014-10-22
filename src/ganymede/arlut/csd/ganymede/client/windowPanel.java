@@ -59,6 +59,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.rmi.RemoteException;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -217,7 +218,9 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     removeAllMI,
     toggleToolBarMI;
 
-  Image backGroundImg;
+  Image backgroundImg;
+
+  boolean backgroundExists;
 
   /* -- */
 
@@ -229,13 +232,16 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   public windowPanel(gclient gc, JMenu windowMenu)
   {
-    try {
-      backGroundImg = PackageResources.getImageResource(this, "ganymedepic.jpg", getClass());
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-
-
+    try
+      {
+        File f = new File("ganymedepic.jpg");
+        backgroundExists = f.exists();
+        backgroundImg = PackageResources.getImageResource(this, "ganymedepic.jpg", getClass());
+      }
+    catch (Exception ex)
+      {
+        ex.printStackTrace();
+      }
 
     setDesktopManager(new clientDesktopMgr());
 
@@ -290,15 +296,19 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     Graphics2D g2d = (Graphics2D)grphcs;
 
     // Scale the image to fit the size of the Panel
-    double mw = backGroundImg.getWidth(null);
-    double mh = backGroundImg.getHeight(null);
+    double mw = backgroundImg.getWidth(null);
+    double mh = backgroundImg.getHeight(null);
     double sw = getWidth() / mw;
     double sh = getHeight() / mh;
 
     // Scale up, draw image, then scale back to normal.
     g2d.scale(sw, sw);
+
     // Draw image here if you wish to have a different background.
-    //g2d.drawImage(backGroundImg, 0, 0, this);
+    if (backgroundExists)
+      {
+        g2d.drawImage(backgroundImg, 0, 0, this);
+      }
     g2d.scale(1/sw, 1/sw);
   }
 
