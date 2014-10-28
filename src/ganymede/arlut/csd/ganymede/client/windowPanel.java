@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -220,8 +220,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   Image backgroundImg;
 
-  boolean backgroundExists;
-
   /* -- */
 
   /**
@@ -234,13 +232,11 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   {
     try
       {
-        File f = new File("ganymedepic.jpg");
-        backgroundExists = f.exists();
         backgroundImg = PackageResources.getImageResource(this, "ganymedepic.jpg", getClass());
       }
     catch (Exception ex)
       {
-        ex.printStackTrace();
+        backgroundImg = null;
       }
 
     setDesktopManager(new clientDesktopMgr());
@@ -285,33 +281,46 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     setBackground(ClientColor.background);
   }
 
+  /**
+   * Overridden to paint a custom background in the windowPanel, if
+   * we have one.
+   */
 
-  // A specialized layered pane to be used with JInternalFrames
-  // Shows a custom background image now - James July 2013
   @Override protected void paintComponent(Graphics grphcs)
   {
-    // Do not call super paint function, to remove the blue nimbus ray traced background.
+    super.paintComponent(grphcs);
+    return;
 
-    // REF: http://www.java-forums.org/advanced-java/20761-loading-image-into-jdesktoppane-background.html
-    Graphics2D g2d = (Graphics2D)grphcs;
+    /*
 
-    // Scale the image to fit the size of the Panel
-    double mw = backgroundImg.getWidth(null);
-    double mh = backgroundImg.getHeight(null);
-    double sw = getWidth() / mw;
-    double sh = getHeight() / mh;
-
-    // Scale up, draw image, then scale back to normal.
-    g2d.scale(sw, sw);
-
-    // Draw image here if you wish to have a different background.
-    if (backgroundExists)
+      if (backgroundImg != null)
       {
-        g2d.drawImage(backgroundImg, 0, 0, this);
-      }
-    g2d.scale(1/sw, 1/sw);
-  }
+      super.paintComponent(grphcs);
 
+      return;
+      }
+
+      // REF: http://www.java-forums.org/advanced-java/20761-loading-image-into-jdesktoppane-background.html
+
+      Graphics2D g2d = (Graphics2D) grphcs;
+
+      double mw = backgroundImg.getWidth(null);
+      double mh = backgroundImg.getHeight(null);
+      double sw = getWidth() / mw;
+      double sh = getHeight() / mh;
+
+      g2d.scale(sw, sw);
+
+      try
+      {
+      g2d.drawImage(backgroundImg, 0, 0, this);
+      }
+      finally
+      {
+        g2d.scale(1/sw, 1/sw);
+        }
+    */
+  }
 
   /**
    * Get the parent gclient
