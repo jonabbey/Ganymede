@@ -56,6 +56,7 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.image.ImageObserver;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -219,6 +220,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     toggleToolBarMI;
 
   Image backgroundImg;
+  int bi_height = 0;
+  int bi_width = 0;
 
   /* -- */
 
@@ -232,12 +235,15 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   {
     try
       {
-        backgroundImg = PackageResources.getImageResource(this, "ganymedepic.jpg", getClass());
+        backgroundImg = PackageResources.getImageResource(this, "logo.png", getClass());
       }
     catch (Exception ex)
       {
         backgroundImg = null;
       }
+
+    this.bi_height = backgroundImg.getWidth(new myIO());
+    this.bi_width = backgroundImg.getWidth(new myIO());
 
     setDesktopManager(new clientDesktopMgr());
 
@@ -289,37 +295,17 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   @Override protected void paintComponent(Graphics grphcs)
   {
     super.paintComponent(grphcs);
-    return;
 
-    /*
-
-      if (backgroundImg != null)
+    if (this.backgroundImg == null || this.bi_height < 1 || this.bi_width < 1)
       {
-      super.paintComponent(grphcs);
-
-      return;
+        return;
       }
 
-      // REF: http://www.java-forums.org/advanced-java/20761-loading-image-into-jdesktoppane-background.html
+    // REF: http://www.java-forums.org/advanced-java/20761-loading-image-into-jdesktoppane-background.html
 
-      Graphics2D g2d = (Graphics2D) grphcs;
+    Graphics2D g2d = (Graphics2D) grphcs;
 
-      double mw = backgroundImg.getWidth(null);
-      double mh = backgroundImg.getHeight(null);
-      double sw = getWidth() / mw;
-      double sh = getHeight() / mh;
-
-      g2d.scale(sw, sw);
-
-      try
-      {
-      g2d.drawImage(backgroundImg, 0, 0, this);
-      }
-      finally
-      {
-        g2d.scale(1/sw, 1/sw);
-        }
-    */
+    g2d.drawImage(backgroundImg, this.getWidth() - bi_width - 5, 5, this);
   }
 
   /**
@@ -1522,4 +1508,27 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   public void internalFrameDeactivated(InternalFrameEvent e) {}
   public void internalFrameOpened(InternalFrameEvent e) {}
   public void internalFrameIconified(InternalFrameEvent e) {}
+
+  class myIO implements ImageObserver {
+
+    public myIO()
+    {
+    }
+
+    /**
+     * <p>This method is called when information about an image which
+     * was previously requested using an asynchronous interface
+     * becomes available.</p>
+     */
+
+    public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height)
+    {
+      bi_height = height;
+      bi_width = width;
+
+      // return false if we need to get more info
+
+      return bi_height < 1 || bi_width < 1;
+    }
+  }
 }
