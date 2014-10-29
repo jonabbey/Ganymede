@@ -1436,7 +1436,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   // Event handlers
 
-  public void actionPerformed(ActionEvent e)
+  @Override public void actionPerformed(ActionEvent e)
   {
     if (e.getSource() instanceof JMenuItem)
       {
@@ -1462,7 +1462,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   // This is for the beans, when a JInternalFrame closes
 
-  public void internalFrameClosed(InternalFrameEvent event)
+  @Override public void internalFrameClosed(InternalFrameEvent event)
   {
     String oldTitle = ((JInternalFrame)event.getSource()).getTitle();
 
@@ -1483,9 +1483,9 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       }
   }
 
-  public void internalFrameDeiconified(InternalFrameEvent e) {}
+  @Override public void internalFrameDeiconified(InternalFrameEvent e) {}
 
-  public void internalFrameClosing(InternalFrameEvent e)
+  @Override public void internalFrameClosing(InternalFrameEvent e)
   {
     // For some reason, I'm seeing internalFrameClosing() called on
     // gResultTable when the user clicks on the close icon, but
@@ -1504,10 +1504,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       }
   }
 
-  public void internalFrameActivated(InternalFrameEvent e) {}
-  public void internalFrameDeactivated(InternalFrameEvent e) {}
-  public void internalFrameOpened(InternalFrameEvent e) {}
-  public void internalFrameIconified(InternalFrameEvent e) {}
+  @Override public void internalFrameActivated(InternalFrameEvent e) {}
+  @Override public void internalFrameDeactivated(InternalFrameEvent e) {}
+  @Override public void internalFrameOpened(InternalFrameEvent e) {}
+  @Override public void internalFrameIconified(InternalFrameEvent e) {}
 
   class myIO implements ImageObserver {
 
@@ -1521,7 +1521,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
      * becomes available.</p>
      */
 
-    public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height)
+    @Override public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height)
     {
       bi_height = height;
       bi_width = width;
