@@ -2,7 +2,8 @@
 
    containerPanel.java
 
-   This is the container for all the information in a field.  Used in window Panels.
+   This graphical component manages the display and editing of all
+   fields in a given object tab.  Used in window Panels.
 
    Created:  11 August 1997
 
@@ -12,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2013
+   Copyright (C) 1996-2014
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -129,7 +130,8 @@ import arlut.csd.ganymede.rmi.field_option_field;
 /**
  * <p>One of the basic building blocks of the ganymede client, a
  * containerPanel is a GUI panel which allows the user to view and/or
- * edit all the custom fields for an object in the Ganymede database.</p>
+ * edit all the custom fields for an object tab in the Ganymede
+ * database.</p>
  *
  * <p>Each containerPanel displays a single {@link
  * arlut.csd.ganymede.rmi.db_object db_object}, and allows the user to
